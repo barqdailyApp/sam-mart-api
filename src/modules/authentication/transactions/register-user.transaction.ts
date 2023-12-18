@@ -11,8 +11,7 @@ import { StorageManager } from 'src/integration/storage/storage.manager';
 
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
-import { Customer } from 'src/infrastructure/entities/customer/customer.entity';
-import { Biker } from 'src/infrastructure/entities/biker/biker.entity';
+
 
 @Injectable()
 export class RegisterUserTransaction extends BaseTransaction<
@@ -68,15 +67,6 @@ export class RegisterUserTransaction extends BaseTransaction<
       // save user
       const savedUser = await context.save(User, user);
 
-      // create customer 
-      if(savedUser.roles.includes(Role.CLIENT))
-      {
-      await context.save(Customer, new Customer({user_id:savedUser.id}));
-      }
-      else if (savedUser.roles.includes(Role.BIKER)){
-        await context.save(Biker, new Biker({user_id:savedUser.id,latitude:24.616745,longitude:46.745423}));
-
-      }
 
 
       // return user

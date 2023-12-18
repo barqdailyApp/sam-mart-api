@@ -8,7 +8,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CoreModule } from './core/core.module';
 import { FileModule } from './modules/file/file.module';
-import { VariableModule } from './variable/variable.module';
+
 
 @Module({
   imports: [
@@ -18,7 +18,7 @@ import { VariableModule } from './variable/variable.module';
     IntegrationModule,      // !Global
     UserModule,             // !Global
     AuthenticationModule,   // !Global
-    FileModule, VariableModule,             // !Global
+    FileModule,           // !Global
   ],
   controllers: [AppController],
   providers: [AppService],
