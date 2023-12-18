@@ -1,6 +1,5 @@
 import { plainToInstance } from 'class-transformer';
 import { toUrl } from 'src/core/helpers/file.helper';
-import { Points } from 'src/infrastructure/entities/points/point.entity';
 import { User } from 'src/infrastructure/entities/user/user.entity';
 import { Double } from 'typeorm';
 
@@ -12,7 +11,6 @@ export class UserInfoResponse {
   phone: string;
   notification_is_active: boolean;
   email: string;
-  points: Points[];
 
 
   
@@ -33,7 +31,6 @@ export class UserInfoResponse {
         this.avatar = toUrl(this.avatar);
       }
     }
-    this.points = partial.points;
   }
 }
 

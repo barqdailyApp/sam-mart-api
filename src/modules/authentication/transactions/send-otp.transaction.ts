@@ -10,7 +10,6 @@ import { SendOtpRequest } from '../dto/requests/send-otp.dto';
 import { RegisterUserTransaction } from './register-user.transaction';
 import { RegisterRequest } from '../dto/requests/register.dto';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
-import { SmsService } from 'src/modules/sms/sms.service';
 
 @Injectable()
 export class SendOtpTransaction extends BaseTransaction<
@@ -20,7 +19,6 @@ export class SendOtpTransaction extends BaseTransaction<
   constructor(
     dataSource: DataSource,
     @Inject(ConfigService) private readonly _config: ConfigService,
-    @Inject(SmsService) private readonly smsService: SmsService,
   ) {
     super(dataSource);
   }
@@ -47,7 +45,6 @@ export class SendOtpTransaction extends BaseTransaction<
 
       await context.save(Otp, otp);
 
-      await this.smsService.sendSMS(req.username, `Your code is ${code}`);
       return code.toString();
     } catch (error) {
       throw new BadRequestException('message.invalid_credentials');
