@@ -23,7 +23,8 @@ import { I18nResponse } from 'src/core/helpers/i18n.helper';
 
 @Controller('country')
 export class CountryController {
-  constructor(private readonly countryService: CountryService,@Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,) {}
+  constructor(private readonly countryService: CountryService,
+    @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,) {}
 
   @Post('create-country')
   async create(@Body() createCountryRequest: CreateCountryRequest): Promise<Country> {
@@ -36,8 +37,8 @@ export class CountryController {
     const countryResponse = plainToClass(CountryResponse, country);
     return this._i18nResponse.entity(countryResponse);
   }
-  @Get('all-country')
-  async allCountry(): Promise<Country[]> {
+  @Get('all-countries')
+  async allCountries(): Promise<Country[]> {
     const countries = await  this.countryService.findAll();
     const countriesResponse = countries.map((country) => plainToClass(CountryResponse, country));
     return this._i18nResponse.entity(countriesResponse);

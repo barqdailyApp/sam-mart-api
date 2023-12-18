@@ -29,7 +29,9 @@ export class WorkingArea extends AuditableEntity {
   @Column({ type: 'float', precision: 11, scale: 6 })
   longitude: number;
 
-  @ManyToOne(() => City, (city) => city.WorkingAreas)
+  @ManyToOne(() => City, (city) => city.WorkingAreas,{
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'city_id' })
   city: City;
 

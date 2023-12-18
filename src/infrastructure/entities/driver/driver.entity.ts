@@ -7,21 +7,27 @@ import { vehicle_types } from 'src/infrastructure/data/enums/vehicle_type.enum';
 
 @Entity()
 export class Driver extends AuditableEntity {
-  @OneToOne(() => User)
+  @OneToOne(() => User,{
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'user_id' })
   user: User;
 
   @Column()
   user_id:string;
 
-  @ManyToOne(() => Country, (country) => country.drivers)
+  @ManyToOne(() => Country, (country) => country.drivers,{
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'country_id' })
   country: Country;
 
   @Column()
   country_id: string;
 
-  @ManyToOne(() => Region, (region) => region.drivers)
+  @ManyToOne(() => Region, (region) => region.drivers,{
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'region_id' })
   region: Region;
 

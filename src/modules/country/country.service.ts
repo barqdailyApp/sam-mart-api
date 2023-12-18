@@ -16,8 +16,8 @@ export class CountryService {
     const newCountry = this.countryRepository.create(createCountryRequest);
     return await this.countryRepository.save(newCountry);
   }
-  async single(id: string): Promise<Country> {
-    const country = await this.countryRepository.findOne({ where: { id } });
+  async single(country_id: string): Promise<Country> {
+    const country = await this.countryRepository.findOne({ where: { id: country_id } });
     if (!country) {
       throw new NotFoundException('country_not_found');
     }
@@ -27,12 +27,12 @@ export class CountryService {
     return await this.countryRepository.find();
   }
 
-  async update(id: string, updateCountryRequest: UpdateCountryRequest): Promise<void> {
-    await this.single(id);
-    await this.countryRepository.update({ id }, updateCountryRequest);
+  async update(country_id: string, updateCountryRequest: UpdateCountryRequest): Promise<void> {
+    await this.single(country_id);
+    await this.countryRepository.update({ id: country_id }, updateCountryRequest);
   }
-  async delete(id: string): Promise<void> {
-    await this.single(id);
-    await this.countryRepository.delete({ id });
+  async delete(country_id: string): Promise<void> {
+    await this.single(country_id);
+    await this.countryRepository.delete({ id: country_id });
   }
 }
