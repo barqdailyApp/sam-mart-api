@@ -42,7 +42,7 @@ export class User extends AuditableEntity {
   birth_date: Date;
 
   @Column({default : true})
-  allow_notification:bool;
+  allow_notification: boolean;
 
   @Column({ type: 'set', enum: Role, default: [Role.CLIENT] })
   roles: Role[];
