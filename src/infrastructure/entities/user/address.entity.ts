@@ -13,8 +13,6 @@ import {
 
 @Entity('addresses')
 export class Address extends OwnedEntity {
-
-
   // address name e.g. home, work, etc.
   @Column({ length: 100 })
   name: string;
@@ -22,14 +20,6 @@ export class Address extends OwnedEntity {
   // address
   @Column({ length: 500 })
   address: string;
-
-  // phone
-  @Column({ length: 20, nullable: true })
-  phone: string;
-
-  // details
-  @Column({ length: 250, nullable: true })
-  details: string;
 
   // geometry column
   @Column({
@@ -49,11 +39,6 @@ export class Address extends OwnedEntity {
 
   @Column({ default: false })
   is_favorite: boolean;
-
-  @Column({ nullable: true })
-  last_used_at: Date;
-
-
 
   constructor(partial?: Partial<Address>) {
     super();
