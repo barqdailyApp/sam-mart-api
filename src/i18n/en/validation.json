@@ -1,0 +1,8 @@
+{
+    "not_found": "Record was not found",
+    "is_string": "{field} must be string",
+    "latitude": "invalid value for latitude",
+    "longitude": "invalid value for longitude",
+    "phone_exists":"phone already exists",
+    "not_near":"you are not near the address"
+}
