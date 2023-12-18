@@ -5,6 +5,7 @@ import { UserModule } from './user/user.module';
 import { AuthenticationModule } from './authentication/authentication.module';
 import { CountryModule } from './country/country.module';
 import { CityModule } from './city/city.module';
+import { RegionModule } from './region/region.module';
 
 
 @Module({
@@ -13,7 +14,8 @@ import { CityModule } from './city/city.module';
         UserModule,
         AuthenticationModule,
         CountryModule,
-        CityModule
+        CityModule,
+        RegionModule
     ],
     exports: [
 
