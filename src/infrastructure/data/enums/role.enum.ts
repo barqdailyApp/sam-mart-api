@@ -8,5 +8,5 @@
 export enum Role {
   ADMIN = 'ADMIN',
   CLIENT = 'CLIENT',
-  BIKER = 'BIKER'
+  DRIVER = 'DRIVER'
 }

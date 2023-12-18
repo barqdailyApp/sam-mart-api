@@ -67,7 +67,7 @@ export class VerifyOtpTransaction extends BaseTransaction<
       // delete otp
       await this.otpsRepo.remove(otp);
 
-      const payload = { username: user.user_name, sub: user.id };
+      const payload = { username: user.username, sub: user.id };
       return {
         ...user,
         access_token: this.jwtService.sign(

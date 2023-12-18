@@ -9,6 +9,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import JWTSetup from 'src/core/setups/jwt.setup';
 import { VerifyPhoneTransaction } from './transactions/edit-phone.transaction';
 import { DeleteAccountTransaction } from './transactions/delete-account.transaction';
+import { RegisterDriverTransaction } from './transactions/register-driver.transaction';
 
 @Global()
 @Module({
@@ -21,12 +22,14 @@ import { DeleteAccountTransaction } from './transactions/delete-account.transact
     providers: [
         AuthenticationService,
         RegisterUserTransaction,
+        RegisterDriverTransaction,
         SendOtpTransaction,
         VerifyOtpTransaction,
         JwtService,
         JwtStrategy,
         VerifyPhoneTransaction,
-        DeleteAccountTransaction
+        DeleteAccountTransaction,
+
     ],
     exports: [
         AuthenticationService,

@@ -14,12 +14,16 @@ import { VerifyOtpTransaction } from './transactions/verify-otp.transaction';
 import { jwtSignOptions } from 'src/core/setups/jwt.setup';
 import { VerifyPhoneTransaction } from './transactions/edit-phone.transaction';
 import { DeleteAccountTransaction } from './transactions/delete-account.transaction';
+import { RegisterDriverTransaction } from './transactions/register-driver.transaction';
+import { DriverRegisterRequest } from './dto/requests/driver-register.dto';
 
 @Injectable()
 export class AuthenticationService {
   constructor(
     @Inject(UserService) private readonly userService: UserService,
     @Inject(RegisterUserTransaction) private readonly registerUserTransaction: RegisterUserTransaction,
+    @Inject(RegisterDriverTransaction) private readonly registerDriverTransaction: RegisterDriverTransaction,
+
     @Inject(SendOtpTransaction) private readonly sendOtpTransaction: SendOtpTransaction,
     @Inject(VerifyOtpTransaction) private readonly verifyOtpTransaction: VerifyOtpTransaction,
     @Inject(VerifyPhoneTransaction) private readonly verifyPhoneTransaction: VerifyPhoneTransaction,
@@ -62,6 +66,11 @@ export class AuthenticationService {
     return user;
   }
 
+  async driverRegister(req: DriverRegisterRequest) {
+    const user = await this.registerDriverTransaction.run(req);
+    
+    return user;
+  }
   async sendOtp(req: SendOtpRequest) {
     return await this.sendOtpTransaction.run(req);
   }

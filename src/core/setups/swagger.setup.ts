@@ -2,6 +2,7 @@ import { INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AuthenticationModule } from 'src/modules/authentication/authentication.module';
+import { CountryModule } from 'src/modules/country/country.module';
 import { UserModule } from 'src/modules/user/user.module';
 
 
@@ -26,7 +27,8 @@ export default (app: INestApplication, config: ConfigService) => {
   const publicDocument = SwaggerModule.createDocument(app, publicConfig, {
     include: [
       UserModule,
-      AuthenticationModule
+      AuthenticationModule,
+      CountryModule
     ],
     operationIdFactory,
   });

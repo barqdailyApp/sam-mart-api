@@ -25,8 +25,6 @@ export class UsersSeeder implements Seeder {
 
     // create super admin
     const admin = new User({
-      first_name: 'admin',
-      account: '00000000',
       username: 'Admin',
       password,
       email: 'super@app.com',
@@ -41,8 +39,6 @@ export class UsersSeeder implements Seeder {
     // create client
     const client = new User({
       id: 'client',
-      first_name: 'John Doe',
-      account: '00000001',
       username: '+966555554444',
       phone: '+966555554444',
       phone_verified_at: new Date(),
@@ -54,8 +50,6 @@ export class UsersSeeder implements Seeder {
     // create client reciever
     const client_ = new User({
       id: 'client_',
-      first_name: 'Jack Row',
-      account: '00000002',
       username: '+966555553333',
       phone: '+966555553333',
       phone_verified_at: new Date(),
@@ -67,13 +61,11 @@ export class UsersSeeder implements Seeder {
     // create driver reciever
     const biker = new User({
       id: 'biker',
-      first_name: 'Biker',
-      account: '00000003',
       username: '+966555551111',
       phone: '+966555551111',
       phone_verified_at: new Date(),
       avatar: 'https://i.pravatar.cc/150?img=2',
-      roles: [Role.BIKER],
+  roles: [Role.DRIVER],
       gender: Gender.MALE,
     });
 

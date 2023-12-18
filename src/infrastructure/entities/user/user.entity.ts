@@ -15,7 +15,7 @@ import { Language } from 'src/infrastructure/data/enums/language.enum';
 @Entity()
 export class User extends AuditableEntity {
   @Column({ length: 100, unique: true })
-  user_name: string;
+  username: string;
 
   @Column({ nullable: true, length: 60 })
   password: string;
