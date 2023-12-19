@@ -2,17 +2,24 @@ import { Injectable } from '@nestjs/common';
 import * as sharp from 'sharp';
 import { getFileExtension } from 'src/core/helpers/file.helper';
 
-
 @Injectable()
 export class ImageManager {
-  async resize(file: Partial<Express.Multer.File>, meta?: ResizeImageOptions): Promise<Buffer> {
+  async resize(
+    file: Partial<Express.Multer.File>,
+    meta?: ResizeImageOptions,
+  ): Promise<Buffer> {
+
+
     try {
-      const image = sharp(file.buffer)
-        .resize(meta.size.width, meta.size.height, { ...meta.options });
+      const image = sharp(file.buffer).resize(
+        meta.size.width,
+        meta.size.height,
+        { ...meta.options },
+      );
 
       let format: ImageFormat;
 
-      switch (getFileExtension(file)) {
+      switch (getFileExtension(file).toLowerCase()) {
         case 'jpg':
           format = 'jpg';
           break;
@@ -37,10 +44,10 @@ export class ImageManager {
 }
 
 export interface ResizeImageOptions {
-  size: { width?: number, height?: number };
+  size: { width?: number; height?: number };
   options: sharp.ResizeOptions;
   imageOptions?: {
     quality?: number;
     type?: ImageFormat;
-  }
+  };
 }
