@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { Country } from '../country/country.entity';
 import { WorkingArea } from '../working-area/working-area.entity';
+import { Region } from '../region/region.entity';
 
 @Entity()
 export class City extends AuditableEntity {
@@ -27,8 +28,9 @@ export class City extends AuditableEntity {
   @Column()
   country_id: string;
 
-  @OneToMany(() => WorkingArea, (workingArea) => workingArea.city,{
-    onDelete: 'CASCADE',
-  })
+  @OneToMany(() => WorkingArea, (workingArea) => workingArea.city)
   WorkingAreas: WorkingArea[];
+
+  @OneToMany(() => Region, (region) => region.city)
+  regions: Region[];
 }

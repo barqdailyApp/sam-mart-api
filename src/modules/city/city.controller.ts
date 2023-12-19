@@ -9,6 +9,8 @@ import {
   Put,
   Delete,
   Inject,
+  ClassSerializerInterceptor,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags, ApiHeader } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';

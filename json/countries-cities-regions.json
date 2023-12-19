@@ -1,0 +1,188 @@
+[
+    {
+        "name_ar": "اليمن",
+        "name_en": "Yemen",
+        "cities": [
+            {
+                "name_ar": "صنعاء",
+                "name_en": "Sana'a",
+                "regions": [
+                    {
+                        "name_ar": "الصابين",
+                        "name_en": "Al-Sabeen"
+                    },
+                    {
+                        "name_ar": "الوحدة",
+                        "name_en": "Al-Wahdah"
+                    },
+                    {
+                        "name_ar": "بئر العزاب",
+                        "name_en": "Bir Al-Azab"
+                    }
+                ]
+            },
+            {
+                "name_ar": "عدن",
+                "name_en": "Aden",
+                "regions": [
+                    {
+                        "name_ar": "خورمكسر",
+                        "name_en": "Khormaksar"
+                    },
+                    {
+                        "name_ar": "المنصورة",
+                        "name_en": "Al-Mansoura"
+                    },
+                    {
+                        "name_ar": "الكريتر",
+                        "name_en": "Crater"
+                    }
+                ]
+            },
+            {
+                "name_ar": "تعز",
+                "name_en": "Taiz",
+                "regions": [
+                    {
+                        "name_ar": "المظفر",
+                        "name_en": "Al-Mudhaffar"
+                    },
+                    {
+                        "name_ar": "القاهرة",
+                        "name_en": "Al-Qahirah"
+                    },
+                    {
+                        "name_ar": "المعافر",
+                        "name_en": "Al-Ma'afer"
+                    }
+                ]
+            },
+            {
+                "name_ar": "الحديدة",
+                "name_en": "Al Hudaydah",
+                "regions": [
+                    {
+                        "name_ar": "الحوطة",
+                        "name_en": "Al-Hawtah"
+                    },
+                    {
+                        "name_ar": "المنظر",
+                        "name_en": "Al-Mansour"
+                    },
+                    {
+                        "name_ar": "الصيادين",
+                        "name_en": "Al-Sayyadin"
+                    }
+                ]
+            },
+            {
+                "name_ar": "إب",
+                "name_en": "Ibb",
+                "regions": [
+                    {
+                        "name_ar": "السلسلة",
+                        "name_en": "Al-Salsal"
+                    },
+                    {
+                        "name_ar": "الحرة",
+                        "name_en": "Al-Harah"
+                    },
+                    {
+                        "name_ar": "المحبس",
+                        "name_en": "Al-Mahbis"
+                    }
+                ]
+            },
+            {
+                "name_ar": "المكلا",
+                "name_en": "Al Mukalla",
+                "regions": [
+                    {
+                        "name_ar": "الشيخ عثمان",
+                        "name_en": "Al-Sheikh Othman"
+                    },
+                    {
+                        "name_ar": "القلعة",
+                        "name_en": "Al-Qal'a"
+                    },
+                    {
+                        "name_ar": "ريان",
+                        "name_en": "Rayan"
+                    }
+                ]
+            },
+            {
+                "name_ar": "ذمار",
+                "name_en": "Dhamar",
+                "regions": [
+                    {
+                        "name_ar": "المحطة",
+                        "name_en": "Al-Mahatta"
+                    },
+                    {
+                        "name_ar": "التعاون",
+                        "name_en": "Al-Taawun"
+                    },
+                    {
+                        "name_ar": "المنشأة",
+                        "name_en": "Al-Manshah"
+                    }
+                ]
+            },
+            {
+                "name_ar": "البيضاء",
+                "name_en": "Al Bayda",
+                "regions": [
+                    {
+                        "name_ar": "القصر",
+                        "name_en": "Al-Qasr"
+                    },
+                    {
+                        "name_ar": "السلام",
+                        "name_en": "Al-Salam"
+                    },
+                    {
+                        "name_ar": "الظهر",
+                        "name_en": "Al-Dhahr"
+                    }
+                ]
+            },
+            {
+                "name_ar": "مأرب",
+                "name_en": "Marib",
+                "regions": [
+                    {
+                        "name_ar": "الريان",
+                        "name_en": "Al-Rayyan"
+                    },
+                    {
+                        "name_ar": "الشهبان",
+                        "name_en": "Al-Shahban"
+                    },
+                    {
+                        "name_ar": "الجوبة",
+                        "name_en": "Al-Jubah"
+                    }
+                ]
+            },
+            {
+                "name_ar": "سيئون",
+                "name_en": "Sayun",
+                "regions": [
+                    {
+                        "name_ar": "القلعة",
+                        "name_en": "Al-Qal'a"
+                    },
+                    {
+                        "name_ar": "القاهرة",
+                        "name_en": "Al-Qahirah"
+                    },
+                    {
+                        "name_ar": "السلام",
+                        "name_en": "Al-Salam"
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -19,14 +19,26 @@ export class RegionService {
   async single(region_id: string): Promise<Region> {
     const region = await this.regionRepository.findOne({
       where: { id: region_id },
+      relations: {
+        city: {
+          country: true,
+        },
+      },
     });
     if (!region) {
       throw new NotFoundException('region_not_found');
     }
     return region;
   }
-  async findAll(): Promise<Region[]> {
-    return await this.regionRepository.find();
+  async allRegionsCity(city_id: string): Promise<Region[]> {
+    return await this.regionRepository.find({
+      where: { city_id: city_id },
+      relations: {
+        city: {
+          country: true,
+        },
+      },
+    });
   }
 
   async update(

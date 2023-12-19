@@ -40,7 +40,6 @@ export class DriverRegisterRequest {
   @IsString()
   birth_date: string;
 
-
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
@@ -51,16 +50,16 @@ export class DriverRegisterRequest {
   @IsString()
   region_id: string;
 
-  @ApiProperty()
+  @ApiProperty({ nullable: true, required: false })
   @IsNotEmpty()
   @IsString()
   address: string;
 
-  @ApiProperty({type: 'double precision',})
+  @ApiProperty({ type: 'double precision', nullable: true, required: false })
   @IsNotEmpty()
   latitude: number;
 
-  @ApiProperty({type: 'double precision',})
+  @ApiProperty({ type: 'double precision', nullable: true, required: false  })
   @IsNotEmpty()
   longitude: number;
 
@@ -69,16 +68,14 @@ export class DriverRegisterRequest {
   @IsString()
   id_card_number: string;
 
-
   @ApiProperty({ type: 'file' })
   id_card_image: Express.Multer.File;
-
 
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
   license_number: string;
-  
+
   @ApiProperty({ type: 'file' })
   license_image: Express.Multer.File;
 
@@ -91,8 +88,10 @@ export class DriverRegisterRequest {
   @IsNotEmpty()
   @IsString()
   vehicle_model: string;
-  
-  @ApiProperty({enum: [vehicle_types.SADAN, vehicle_types.TRUCK,vehicle_types.VAN]})
+
+  @ApiProperty({
+    enum: [vehicle_types.SADAN, vehicle_types.TRUCK, vehicle_types.VAN],
+  })
   @IsNotEmpty()
   @IsEnum(vehicle_types)
   vehicle_type: vehicle_types;

@@ -42,9 +42,9 @@ export class RegionController {
     const regionResponse = plainToClass(RegionResponse, region);
     return this._i18nResponse.entity(regionResponse);
   }
-  @Get('all-regions')
-  async allRegions(): Promise<RegionResponse[]> {
-    const regions = await this.regionService.findAll();
+  @Get(':city_id/all-regions')
+  async allRegions(@Param('city_id') id: string): Promise<RegionResponse[]> {
+    const regions = await this.regionService.allRegionsCity(id);
     const regionsResponse = regions.map((region) =>
       plainToClass(RegionResponse, region),
     );

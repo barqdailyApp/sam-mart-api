@@ -38,20 +38,21 @@ export class Driver extends AuditableEntity {
   is_verified:boolean;
 
 
-  @Column({ length: 500 })
+  @Column({ length: 500 ,nullable: true, })
   address: string;
 
   @Column({
     type: 'geometry',
     spatialFeatureType: 'Point',
     srid: 4326,
+    nullable: true,
   })
   location: string;
 
-  @Column({ type: 'float', precision: 10, scale: 6 })
+  @Column({ type: 'float', precision: 10, scale: 6,nullable: true, })
   latitude: number;
 
-  @Column({ type: 'float', precision: 11, scale: 6 })
+  @Column({ type: 'float', precision: 11, scale: 6,nullable: true, })
   longitude: number;
 
   @Column()
