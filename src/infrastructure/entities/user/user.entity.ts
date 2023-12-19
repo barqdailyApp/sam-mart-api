@@ -39,7 +39,7 @@ export class User extends AuditableEntity {
   gender: Gender;
 
   @Column()
-  birth_date: Date;
+  birth_date: string;
 
   @Column({default : true})
   allow_notification: boolean;

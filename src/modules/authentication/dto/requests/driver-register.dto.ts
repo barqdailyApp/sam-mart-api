@@ -31,10 +31,15 @@ export class DriverRegisterRequest {
   @ApiProperty({ type: 'file' })
   avatarFile: Express.Multer.File;
 
-  @ApiProperty({ default: Role.CLIENT, enum: [Role.CLIENT, Role.DRIVER] })
+  @ApiProperty({
+    type: String,
+    format: 'date',
+    example: '1990-01-01',
+  })
   @IsNotEmpty()
-  @IsEnum(Role)
-  role: Role;
+  @IsString()
+  birth_date: string;
+
 
   @ApiProperty()
   @IsNotEmpty()
@@ -51,14 +56,12 @@ export class DriverRegisterRequest {
   @IsString()
   address: string;
 
-  @ApiProperty()
+  @ApiProperty({type: 'double precision',})
   @IsNotEmpty()
-  @IsNumber()
   latitude: number;
 
-  @ApiProperty()
+  @ApiProperty({type: 'double precision',})
   @IsNotEmpty()
-  @IsNumber()
   longitude: number;
 
   @ApiProperty()
@@ -66,20 +69,18 @@ export class DriverRegisterRequest {
   @IsString()
   id_card_number: string;
 
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
-  id_card_image: string;
+
+  @ApiProperty({ type: 'file' })
+  id_card_image: Express.Multer.File;
+
 
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
   license_number: string;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
-  license_image: string;
+  
+  @ApiProperty({ type: 'file' })
+  license_image: Express.Multer.File;
 
   @ApiProperty()
   @IsNotEmpty()

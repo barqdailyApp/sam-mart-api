@@ -34,7 +34,7 @@ export class Driver extends AuditableEntity {
   @Column()
   region_id: string;
 
-  @Column()
+  @Column({ default: false })
   is_verified:boolean;
 
 

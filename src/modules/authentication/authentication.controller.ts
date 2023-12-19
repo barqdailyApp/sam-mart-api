@@ -6,10 +6,14 @@ import {
   Inject,
   Post,
   UploadedFile,
+  UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  FileFieldsInterceptor,
+  FileInterceptor,
+} from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 import { ActionResponse } from 'src/core/base/responses/action.response';
@@ -25,6 +29,7 @@ import { RegisterResponse } from './dto/responses/register.response';
 import { UserInfoResponse } from '../user/dto/responses/profile.response';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
+import { DriverRegisterRequest } from './dto/requests/driver-register.dto';
 
 @ApiTags(Router.Auth.ApiTag)
 @Controller(Router.Auth.Base)
@@ -56,7 +61,40 @@ export class AuthenticationController {
     avatarFile: Express.Multer.File,
   ): Promise<ActionResponse<RegisterResponse>> {
     req.avatarFile = avatarFile;
+    console.log('req.avatarFile', req.avatarFile);
     const user = await this.authService.register(req);
+    const result = plainToInstance(RegisterResponse, user, {
+      excludeExtraneousValues: true,
+    });
+    return new ActionResponse<RegisterResponse>(result, {
+      statusCode: HttpStatus.CREATED,
+    });
+  }
+
+  @UseInterceptors(
+    ClassSerializerInterceptor,
+    FileFieldsInterceptor([
+      { name: 'avatarFile', maxCount: 1 },
+      { name: 'id_card_image', maxCount: 1 },
+      { name: 'license_image', maxCount: 1 },
+    ]),
+  )
+  @ApiConsumes('multipart/form-data')
+  @Post('register-driver')
+  async registerDriver(
+    @Body() req: DriverRegisterRequest,
+    @UploadedFiles()
+    files: {
+      avatarFile: Express.Multer.File;
+      id_card_image: Express.Multer.File;
+      license_image: Express.Multer.File;
+    },
+  ): Promise<ActionResponse<RegisterResponse>> {
+    req.avatarFile = files.avatarFile[0];
+    req.id_card_image = files.id_card_image[0];
+
+    req.license_image = files.license_image[0];
+    const user = await this.authService.driverRegister(req);
     const result = plainToInstance(RegisterResponse, user, {
       excludeExtraneousValues: true,
     });

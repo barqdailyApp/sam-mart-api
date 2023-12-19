@@ -13,6 +13,8 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { DriverRegisterRequest } from '../dto/requests/driver-register.dto';
 import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
+import { RegionService } from 'src/modules/region/region.service';
+import { CountryService } from 'src/modules/country/country.service';
 
 @Injectable()
 export class RegisterDriverTransaction extends BaseTransaction<
@@ -24,6 +26,9 @@ export class RegisterDriverTransaction extends BaseTransaction<
     @Inject(ConfigService) private readonly _config: ConfigService,
     @Inject(StorageManager) private readonly storageManager: StorageManager,
     @Inject(ImageManager) private readonly imageManager: ImageManager,
+    @Inject(RegionService) private readonly regionService: RegionService,
+    @Inject(CountryService) private readonly countryService: CountryService,
+
   ) {
     super(dataSource);
   }
@@ -34,10 +39,41 @@ export class RegisterDriverTransaction extends BaseTransaction<
     context: EntityManager,
   ): Promise<User> {
     try {
-      const { username, email, phone, role } = req;
-      const {
-        avatarFile,
+      //* This Data user needed
+      const { username, email, phone, birth_date, avatarFile } = req;
 
+      //* -------------------- Create User ----------------------------
+      const createUser = context.create(User, {
+        username,
+        email,
+        phone,
+        birth_date,
+      });
+
+      //* encrypt password
+      const randomPassword = randStr(12);
+      createUser.password = await bcrypt.hash(
+        randomPassword + this._config.get('app.key'),
+        10,
+      );
+
+      //* set user role
+      createUser.roles = [Role.DRIVER];
+
+      //* save avatar
+      const pathAvatar = await this.storageManager.store(
+        { buffer: avatarFile.buffer, originalname: avatarFile.originalname },
+        { path: 'avatars' },
+      );
+
+      //* set avatar path
+      createUser.avatar = pathAvatar;
+
+      //* save user
+      const savedUser = await context.save(User, createUser);
+
+      //* This Data driver needed
+      const {
         country_id,
         region_id,
         address,
@@ -51,43 +87,14 @@ export class RegisterDriverTransaction extends BaseTransaction<
         vehicle_model,
         vehicle_type,
       } = req;
-       //* Create User
-      const createUser = context.create(User, {
-        username,
-        email,
-        phone
-        
-      });
 
-      // encrypt password
-      const randomPassword = randStr(12);
-      createUser.password = await bcrypt.hash(
-        randomPassword + this._config.get('app.key'),
-        10,
-      );
+      //* -------------------- Create Driver ----------------------------
 
-      // set user role
-      createUser.roles = [req.role == null ? Role.CLIENT : req.role];
-      // set user avatar
-       const resizedImage = await this.imageManager.resize(req.avatarFile, {
-        size: { width: 300, height: 300 },
-        options: {
-          fit: sharp.fit.cover,
-          position: sharp.strategy.entropy
-        },
-      });
+      //* check country
+      await this.countryService.single(country_id);
 
-      // save image
-      const path = await this.storageManager.store(
-        { buffer: resizedImage, originalname: req.avatarFile.originalname },
-        { path: 'avatars' },
-      );
-
-      // set avatar path
-      createUser.avatar = path;
-
-      // save user
-      const savedUser = await context.save(User, createUser);
+      //* check region
+      await this.regionService.single(region_id);
 
 
       const CreateDriver = context.create(Driver, {
@@ -98,15 +105,36 @@ export class RegisterDriverTransaction extends BaseTransaction<
         latitude,
         longitude,
         id_card_number,
-        id_card_image,
         license_number,
-        license_image,
         vehicle_color,
         vehicle_model,
         vehicle_type,
       });
-      const savedDriver = await context.save(Driver, CreateDriver);
+      //* save IdCardImage
+      const pathIdCardImage = await this.storageManager.store(
+        {
+          buffer: id_card_image.buffer,
+          originalname: id_card_image.originalname,
+        },
+        { path: 'id_card_images' },
+      );
 
+      //* set avatar path
+      CreateDriver.id_card_image = pathIdCardImage;
+
+      //* save licenseImage
+      const pathLicenseImage = await this.storageManager.store(
+        {
+          buffer: license_image.buffer,
+          originalname: license_image.originalname,
+        },
+        { path: 'license_images' },
+      );
+
+      //* set licenseImage path
+      CreateDriver.license_image = pathLicenseImage;
+      const savedDriver = await context.save(Driver, CreateDriver);
+      console.log('savedDriver', savedDriver);
       // return user
       return savedUser;
     } catch (error) {
