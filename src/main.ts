@@ -11,7 +11,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
   app.enableCors();
-  app.use(helmet()); // helmet
+   // helmet
   app.use(compression());
   app.setGlobalPrefix('v1', {
     exclude: [{ path: 'swagger', method: RequestMethod.GET }],
@@ -21,6 +21,7 @@ async function bootstrap() {
   const app_env = config.get('APP_ENV');
 
   if (app_env !== 'production') {
+    app.use(helmet());
     Logger.log(`App running on ${app_env} environment`);
     SwaggerSetup(app, config);
   }
