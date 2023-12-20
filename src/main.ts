@@ -21,10 +21,11 @@ async function bootstrap() {
   const app_env = config.get('APP_ENV');
 
   if (app_env !== 'production') {
-    app.use(helmet());
+   
     Logger.log(`App running on ${app_env} environment`);
     SwaggerSetup(app, config);
   }
+  if(app_env == 'production') app.use(helmet()); //
 
   app.useGlobalPipes(
     new ValidationPipe({
