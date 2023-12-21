@@ -63,7 +63,7 @@ export class RegisterUserTransaction extends BaseTransaction<
       );
       user.username = user.phone;
       // set user role
-      user.roles =  [req.role==null? Role.CLIENT:req.role];
+      user.roles =  [ Role.CLIENT];
       // save user
       const savedUser = await context.save(User, user);
 

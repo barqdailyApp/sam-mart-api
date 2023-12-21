@@ -13,6 +13,10 @@ import {
 
 @Entity('addresses')
 export class Address extends OwnedEntity {
+@ManyToOne(() => User, (user) => user.addresses)
+@JoinColumn()
+  user: User;
+    
   // address name e.g. home, work, etc.
   @Column({ length: 100 })
   name: string;

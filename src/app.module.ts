@@ -8,6 +8,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CoreModule } from './core/core.module';
 import { FileModule } from './modules/file/file.module';
+import { AddressModule } from './modules/address/address.module';
 
 
 @Module({
@@ -19,6 +20,7 @@ import { FileModule } from './modules/file/file.module';
     UserModule,             // !Global
     AuthenticationModule,   // !Global
     FileModule,           // !Global
+    AddressModule
   ],
   controllers: [AppController],
   providers: [AppService],
