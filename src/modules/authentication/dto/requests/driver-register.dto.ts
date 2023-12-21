@@ -50,18 +50,6 @@ export class DriverRegisterRequest {
   @IsString()
   region_id: string;
 
-  @ApiProperty({ nullable: true, required: false })
-  @IsNotEmpty()
-  @IsString()
-  address: string;
-
-  @ApiProperty({ type: 'double precision', nullable: true, required: false })
-  @IsNotEmpty()
-  latitude: number;
-
-  @ApiProperty({ type: 'double precision', nullable: true, required: false  })
-  @IsNotEmpty()
-  longitude: number;
 
   @ApiProperty()
   @IsNotEmpty()

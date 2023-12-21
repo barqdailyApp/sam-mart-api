@@ -21,6 +21,7 @@ import { CreateRegionRequest } from './dto/requests/create-region.request';
 import { Region } from 'src/infrastructure/entities/region/region.entity';
 import { RegionResponse } from './dto/responses/region.response';
 import { UpdateRegionRequest } from './dto/requests/update-region.request';
+import { ActionResponse } from 'src/core/base/responses/action.response';
 @ApiTags('Region')
 @Controller('region')
 export class RegionController {
@@ -32,35 +33,37 @@ export class RegionController {
   @Post('create-region')
   async create(
     @Body() createRegionRequest: CreateRegionRequest,
-  ): Promise<Region> {
-    return await this.regionService.create(createRegionRequest);
+  ){
+    return new ActionResponse( await this.regionService.create(createRegionRequest));
   }
 
   @Get(':region_id/single-region')
-  async single(@Param('region_id') id: string): Promise<RegionResponse> {
+  async single(@Param('region_id') id: string) {
     const region = await this.regionService.single(id);
     const regionResponse = plainToClass(RegionResponse, region);
-    return this._i18nResponse.entity(regionResponse);
+    return new ActionResponse( this._i18nResponse.entity(regionResponse));
   }
   @Get(':city_id/all-regions')
-  async allRegions(@Param('city_id') id: string): Promise<RegionResponse[]> {
+  async allRegions(@Param('city_id') id: string) {
     const regions = await this.regionService.allRegionsCity(id);
     const regionsResponse = regions.map((region) =>
       plainToClass(RegionResponse, region),
     );
-    return this._i18nResponse.entity(regionsResponse);
+    return new ActionResponse(this._i18nResponse.entity(regionsResponse));
   }
 
   @Put(':region_id/update-region')
   async update(
     @Param('region_id') id: string,
     @Body() updateRegionRequest: UpdateRegionRequest,
-  ): Promise<void> {
-    await this.regionService.update(id, updateRegionRequest);
+  ) {
+    return new ActionResponse(
+      await this.regionService.update(id, updateRegionRequest),
+    );
   }
 
   @Delete(':region_id/delete-region')
-  async delete(@Param('region_id') id: string): Promise<void> {
-    await this.regionService.delete(id);
+  async delete(@Param('region_id') id: string) {
+    return new ActionResponse(await this.regionService.delete(id));
   }
 }

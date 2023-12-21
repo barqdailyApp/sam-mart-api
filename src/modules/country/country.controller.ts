@@ -19,41 +19,49 @@ import { UpdateCountryRequest } from './dto/requests/update-country.request';
 import { plainToClass } from 'class-transformer';
 import { CountryResponse } from './dto/responses/country.response';
 import { I18nResponse } from 'src/core/helpers/i18n.helper';
+import { ActionResponse } from 'src/core/base/responses/action.response';
 @ApiTags('Country')
-
 @Controller('country')
 export class CountryController {
-  constructor(private readonly countryService: CountryService,
-    @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,) {}
+  constructor(
+    private readonly countryService: CountryService,
+    @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
+  ) {}
 
   @Post('create-country')
-  async create(@Body() createCountryRequest: CreateCountryRequest): Promise<Country> {
-    return await this.countryService.create(createCountryRequest);
+  async create(@Body() createCountryRequest: CreateCountryRequest) {
+    return new ActionResponse(
+      await this.countryService.create(createCountryRequest),
+    );
   }
 
   @Get(':country_id/single-country')
-  async single(@Param('country_id') id: string): Promise<CountryResponse> {
+  async single(@Param('country_id') id: string) {
     const country = await this.countryService.single(id);
     const countryResponse = plainToClass(CountryResponse, country);
-    return this._i18nResponse.entity(countryResponse);
+    return new ActionResponse(this._i18nResponse.entity(countryResponse));
   }
   @Get('all-countries')
-  async allCountries(): Promise<Country[]> {
-    const countries = await  this.countryService.findAll();
-    const countriesResponse = countries.map((country) => plainToClass(CountryResponse, country));
-    return this._i18nResponse.entity(countriesResponse);
+  async allCountries() {
+    const countries = await this.countryService.findAll();
+    const countriesResponse = countries.map((country) =>
+      plainToClass(CountryResponse, country),
+    );
+    return new ActionResponse(this._i18nResponse.entity(countriesResponse));
   }
 
   @Put(':country_id/update-country')
   async update(
     @Param('country_id') id: string,
     @Body() updateCountryRequest: UpdateCountryRequest,
-  ): Promise<void> {
-    await this.countryService.update(id, updateCountryRequest);
+  ) {
+    return new ActionResponse(
+      await this.countryService.update(id, updateCountryRequest),
+    );
   }
 
   @Delete(':country_id/delete-country')
-  async delete(@Param('country_id') id: string): Promise<void> {
-    await this.countryService.delete(id);
+  async delete(@Param('country_id') id: string) {
+    return new ActionResponse(await this.countryService.delete(id));
   }
 }

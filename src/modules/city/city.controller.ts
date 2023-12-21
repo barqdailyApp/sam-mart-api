@@ -22,6 +22,7 @@ import { CreateCityRequest } from './dto/requests/create-city.request';
 import { CityResponse } from './dto/responses/cityresponse';
 import { City } from 'src/infrastructure/entities/city/city.entity';
 import { UpdateCityRequest } from './dto/requests/update-city.request';
+import { ActionResponse } from 'src/core/base/responses/action.response';
 @ApiTags('City')
 @Controller('city')
 export class CityController {
@@ -37,32 +38,32 @@ export class CityController {
     return await this.cityService.create(country_id, createCityRequest);
   }
   @Get(':country_id/all-cities')
-  async allCities(
-    @Param('country_id') country_id: string,
-  ): Promise<CityResponse[]> {
+  async allCities(@Param('country_id') country_id: string) {
     const cities = await this.cityService.allCitiesCountry(country_id);
     const citiesResponse = cities.map((city) =>
       plainToClass(CityResponse, city),
     );
-    return this._i18nResponse.entity(citiesResponse);
+    return new ActionResponse(this._i18nResponse.entity(citiesResponse));
   }
   @Get(':city_id/single-city')
-  async single(@Param('city_id') id: string): Promise<CityResponse> {
+  async single(@Param('city_id') id: string) {
     const city = await this.cityService.single(id);
     const cityResponse = plainToClass(CityResponse, city);
-    return this._i18nResponse.entity(cityResponse);
+    return new ActionResponse(this._i18nResponse.entity(cityResponse));
   }
 
   @Put(':city_id/update-city')
   async update(
     @Param('city_id') id: string,
     @Body() updateCityRequest: UpdateCityRequest,
-  ): Promise<void> {
-    await this.cityService.update(id, updateCityRequest);
+  ) {
+    return new ActionResponse(
+      await this.cityService.update(id, updateCityRequest),
+    );
   }
 
   @Delete(':city_id/delete-city')
-  async delete(@Param('city_id') id: string): Promise<void> {
-    await this.cityService.delete(id);
+  async delete(@Param('city_id') id: string) {
+    return new ActionResponse(await this.cityService.delete(id));
   }
 }

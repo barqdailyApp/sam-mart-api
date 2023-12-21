@@ -7,6 +7,7 @@ import { AddressModule } from 'src/modules/address/address.module';
 import { AuthenticationModule } from 'src/modules/authentication/authentication.module';
 import { CityModule } from 'src/modules/city/city.module';
 import { CountryModule } from 'src/modules/country/country.module';
+import { DriverModule } from 'src/modules/driver/driver.module';
 import { RegionModule } from 'src/modules/region/region.module';
 import { UserModule } from 'src/modules/user/user.module';
 
@@ -36,7 +37,8 @@ export default (app: INestApplication, config: ConfigService) => {
       AddressModule,
       CountryModule,
       CityModule,
-      RegionModule
+      RegionModule,
+      DriverModule
     ],
     operationIdFactory,
   });

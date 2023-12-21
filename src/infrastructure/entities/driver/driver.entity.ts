@@ -83,11 +83,11 @@ export class Driver extends AuditableEntity {
 
   @BeforeInsert()
   saveLocation() {
-    this.location = `POINT(${this.latitude} ${this.longitude})`;
+    this.location =this.latitude==null?null: `POINT(${this.latitude} ${this.longitude})`;
   }
 
   @BeforeUpdate()
   updateLocation() {
-    this.location = `POINT(${this.latitude} ${this.longitude})`;
+    this.location =this.latitude==null?null: `POINT(${this.latitude} ${this.longitude})`;
   }
 }
