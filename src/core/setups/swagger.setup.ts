@@ -1,6 +1,9 @@
+
 import { INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { AddressModule } from 'src/modules/address/address.module';
+
 import { AuthenticationModule } from 'src/modules/authentication/authentication.module';
 import { CityModule } from 'src/modules/city/city.module';
 import { CountryModule } from 'src/modules/country/country.module';
@@ -31,6 +34,7 @@ export default (app: INestApplication, config: ConfigService) => {
     include: [
       UserModule,
       AuthenticationModule,
+      AddressModule,
       CountryModule,
       CityModule,
       RegionModule,

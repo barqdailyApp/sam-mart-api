@@ -11,6 +11,7 @@ import { randNum } from 'src/core/helpers/cast.helper';
 import { Gender } from 'src/infrastructure/data/enums/gender.enum';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { Language } from 'src/infrastructure/data/enums/language.enum';
+import { Address } from './address.entity';
 
 @Entity()
 export class User extends AuditableEntity {
@@ -46,6 +47,10 @@ export class User extends AuditableEntity {
 
   @Column({ type: 'set', enum: Role, default: [Role.CLIENT] })
   roles: Role[];
+
+
+  @OneToMany(()=>Address,address=>address.user)
+  addresses:Address[]
 
   constructor(partial: Partial<User>) {
     super();
