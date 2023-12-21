@@ -58,4 +58,10 @@ export class UserController {
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
   ) {}
 
+  @Put('allow-notification/:allow_notification')
+  async allowNotification(
+    @Param('allow_notification') allow_notification: boolean,
+  ) {
+    return new ActionResponse( await this._service.allowNotification(allow_notification));
+  }
 }

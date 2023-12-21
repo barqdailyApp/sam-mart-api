@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Region } from 'src/infrastructure/entities/region/region.entity';
 import { CreateRegionRequest } from './dto/requests/create-region.request';
 import { UpdateRegionRequest } from './dto/requests/update-region.request';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
@@ -44,12 +44,12 @@ export class RegionService {
   async update(
     region_id: string,
     updateRegionRequest: UpdateRegionRequest,
-  ): Promise<void> {
+  ): Promise<UpdateResult> {
     await this.single(region_id);
-    await this.regionRepository.update({ id: region_id }, updateRegionRequest);
+   return await this.regionRepository.update({ id: region_id }, updateRegionRequest);
   }
-  async delete(region_id: string): Promise<void> {
+  async delete(region_id: string): Promise<DeleteResult> {
     await this.single(region_id);
-    await this.regionRepository.delete({ id: region_id });
+   return await this.regionRepository.delete({ id: region_id });
   }
 }

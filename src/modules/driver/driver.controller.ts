@@ -6,6 +6,7 @@ import { Driver } from 'typeorm';
 import { DriverResponse } from './response/driver.response';
 import { plainToClass } from 'class-transformer';
 import { UpdateDriverLocationRequest } from './requests/update-driver-location.request';
+import { ActionResponse } from 'src/core/base/responses/action.response';
 @ApiTags('Driver')
 @Controller('driver')
 export class DriverController {
@@ -24,19 +25,22 @@ export class DriverController {
   }
 
   @Get(':driver_id/single-driver')
-  async singleDriver(@Param('driver_id') id: string): Promise<Driver> {
+  async singleDriver(@Param('driver_id') id: string) {
     const driver = await this.driverService.single(id);
     const driverResponse = plainToClass(DriverResponse, driver);
-    return this._i18nResponse.entity(driverResponse);
+    0;
+    return new ActionResponse(this._i18nResponse.entity(driverResponse));
   }
   @Put(':driver_id/location')
   async updateDriverLocation(
     @Param('driver_id') driver_id: string,
     @Body() updateDriverLocationRequest: UpdateDriverLocationRequest,
   ) {
-    await this.driverService.updateDriverLocation(
-      driver_id,
-      updateDriverLocationRequest,
+    return new ActionResponse(
+      await this.driverService.updateDriverLocation(
+        driver_id,
+        updateDriverLocationRequest,
+      ),
     );
   }
 }

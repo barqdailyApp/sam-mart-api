@@ -4,6 +4,7 @@ import { Country } from 'src/infrastructure/entities/country/country.entity';
 import { Repository } from 'typeorm/repository/Repository';
 import { CreateCountryRequest } from './dto/requests/create-country.request';
 import { UpdateCountryRequest } from './dto/requests/update-country.request';
+import { DeleteResult, UpdateResult } from 'typeorm';
 
 @Injectable()
 export class CountryService {
@@ -27,12 +28,12 @@ export class CountryService {
     return await this.countryRepository.find();
   }
 
-  async update(country_id: string, updateCountryRequest: UpdateCountryRequest): Promise<void> {
+  async update(country_id: string, updateCountryRequest: UpdateCountryRequest): Promise<UpdateResult> {
     await this.single(country_id);
-    await this.countryRepository.update({ id: country_id }, updateCountryRequest);
+  return  await this.countryRepository.update({ id: country_id }, updateCountryRequest);
   }
-  async delete(country_id: string): Promise<void> {
+  async delete(country_id: string): Promise<DeleteResult> {
     await this.single(country_id);
-    await this.countryRepository.delete({ id: country_id });
+  return await this.countryRepository.delete({ id: country_id });
   }
 }

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { UpdateDriverLocationRequest } from './requests/update-driver-location.request';
 
 @Injectable()
@@ -24,8 +24,8 @@ export class DriverService {
   async updateDriverLocation(
     driver_id: string,
     updateDriverLocationRequest: UpdateDriverLocationRequest,
-  ): Promise<void> {
-    await this.driverRepository.update(
+  ): Promise<UpdateResult> {
+  return  await this.driverRepository.update(
       { id: driver_id },
       updateDriverLocationRequest,
     );

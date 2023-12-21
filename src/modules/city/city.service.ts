@@ -2,7 +2,7 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { City } from 'src/infrastructure/entities/city/city.entity';
 import { Country } from 'src/infrastructure/entities/country/country.entity';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { CreateCityRequest } from './dto/requests/create-city.request';
 import { UpdateCityRequest } from './dto/requests/update-city.request';
 import { CountryService } from '../country/country.service';
@@ -44,12 +44,12 @@ export class CityService {
   async update(
     city_id: string,
     updateCityRequest: UpdateCityRequest,
-  ): Promise<void> {
+  ): Promise<UpdateResult> {
     await this.single(city_id);
-    await this.cityRepository.update({ id: city_id }, updateCityRequest);
+   return await this.cityRepository.update({ id: city_id }, updateCityRequest);
   }
-  async delete(city_id: string): Promise<void> {
+  async delete(city_id: string): Promise<DeleteResult> {
     await this.single(city_id);
-    await this.cityRepository.delete({ id: city_id });
+    return  await this.cityRepository.delete({ id: city_id });
   }
 }

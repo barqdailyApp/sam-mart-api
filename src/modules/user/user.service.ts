@@ -9,18 +9,21 @@ import { ProfileResponse } from './dto/responses/profile.response';
 import { FileService } from '../file/file.service';
 import { UploadFileRequest } from '../file/dto/requests/upload-file.request';
 
-
 @Injectable({ scope: Scope.REQUEST })
 export class UserService extends BaseService<User> {
   constructor(
-
     @InjectRepository(User) private readonly userRepo: Repository<User>,
-
 
     @Inject(FileService) private _fileService: FileService,
     @Inject(REQUEST) readonly request: Request,
-
   ) {
     super(userRepo);
+  }
+
+  async allowNotification(allow_notification: boolean) {
+    await this.userRepo.update(
+      { id: this.request.user.id },
+      { allow_notification },
+    );
   }
 }
