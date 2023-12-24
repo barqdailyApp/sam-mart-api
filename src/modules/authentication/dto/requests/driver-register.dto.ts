@@ -45,6 +45,12 @@ export class DriverRegisterRequest {
   @IsString()
   country_id: string;
 
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  city_id: string;
+
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
