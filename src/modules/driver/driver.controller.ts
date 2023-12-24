@@ -16,12 +16,12 @@ export class DriverController {
   ) {}
 
   @Get('all-drivers')
-  async allDrivers(): Promise<Driver[]> {
+  async allDrivers(){
     const drivers = await this.driverService.all();
     const driversResponse = drivers.map((driver) =>
       plainToClass(DriverResponse, driver),
     );
-    return this._i18nResponse.entity(driversResponse);
+    return new ActionResponse(this._i18nResponse.entity(driversResponse));
   }
 
   @Get(':driver_id/single-driver')

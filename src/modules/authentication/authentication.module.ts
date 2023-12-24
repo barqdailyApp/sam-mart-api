@@ -12,13 +12,15 @@ import { DeleteAccountTransaction } from './transactions/delete-account.transact
 import { RegisterDriverTransaction } from './transactions/register-driver.transaction';
 import { CountryModule } from '../country/country.module';
 import { RegionModule } from '../region/region.module';
+import { CityModule } from '../city/city.module';
 
 @Global()
 @Module({
     imports: [
         JWTSetup(),
         CountryModule,
-        RegionModule
+        RegionModule,
+        CityModule
     ],
     controllers: [
         AuthenticationController

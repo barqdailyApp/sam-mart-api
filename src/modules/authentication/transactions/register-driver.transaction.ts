@@ -15,6 +15,7 @@ import { DriverRegisterRequest } from '../dto/requests/driver-register.dto';
 import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
 import { RegionService } from 'src/modules/region/region.service';
 import { CountryService } from 'src/modules/country/country.service';
+import { CityService } from 'src/modules/city/city.service';
 
 @Injectable()
 export class RegisterDriverTransaction extends BaseTransaction<
@@ -28,6 +29,7 @@ export class RegisterDriverTransaction extends BaseTransaction<
     @Inject(ImageManager) private readonly imageManager: ImageManager,
     @Inject(RegionService) private readonly regionService: RegionService,
     @Inject(CountryService) private readonly countryService: CountryService,
+    @Inject(CityService) private readonly cityService: CityService,
 
   ) {
     super(dataSource);
@@ -75,6 +77,7 @@ export class RegisterDriverTransaction extends BaseTransaction<
       //* This Data driver needed
       const {
         country_id,
+        city_id,
         region_id,
         id_card_number,
         id_card_image,
@@ -90,13 +93,17 @@ export class RegisterDriverTransaction extends BaseTransaction<
       //* check country
       await this.countryService.single(country_id);
 
+      
+      //* check city
+      await this.cityService.single(city_id);
+
       //* check region
       await this.regionService.single(region_id);
-
 
       const CreateDriver = context.create(Driver, {
         user_id: savedUser.id,
         country_id,
+        city_id,
         region_id,
         id_card_number,
         license_number,
