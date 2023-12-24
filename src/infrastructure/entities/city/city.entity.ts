@@ -10,6 +10,7 @@ import {
 import { Country } from '../country/country.entity';
 import { WorkingArea } from '../working-area/working-area.entity';
 import { Region } from '../region/region.entity';
+import { Driver } from '../driver/driver.entity';
 
 @Entity()
 export class City extends AuditableEntity {
@@ -33,4 +34,7 @@ export class City extends AuditableEntity {
 
   @OneToMany(() => Region, (region) => region.city)
   regions: Region[];
+
+  @OneToMany(() => Driver, (driver) => driver.city)
+  drivers: Driver[]
 }

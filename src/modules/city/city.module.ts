@@ -6,6 +6,7 @@ import { CountryModule } from '../country/country.module';
 @Module({
   controllers: [CityController],
   providers: [CityService],
+  exports :[CityService],
   imports:[CountryModule]
 })
 export class CityModule {}
