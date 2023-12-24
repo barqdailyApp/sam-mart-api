@@ -39,18 +39,18 @@ export class AuthenticationController {
     private readonly authService: AuthenticationService,
   ) {}
 
-  @Post(Router.Auth.Signin)
-  async signin(
-    @Body() req: LoginRequest,
-  ): Promise<ActionResponse<AuthResponse>> {
-    const authData = await this.authService.login(
-      await this.authService.validateUser(req),
-    );
-    const result = plainToInstance(AuthResponse, authData, {
-      excludeExtraneousValues: true,
-    });
-    return new ActionResponse<AuthResponse>(result);
-  }
+  // @Post(Router.Auth.Signin)
+  // async signin(
+  //   @Body() req: LoginRequest,
+  // ): Promise<ActionResponse<AuthResponse>> {
+  //   const authData = await this.authService.login(
+  //     await this.authService.validateUser(req),
+  //   );
+  //   const result = plainToInstance(AuthResponse, authData, {
+  //     excludeExtraneousValues: true,
+  //   });
+  //   return new ActionResponse<AuthResponse>(result);
+  // }
 
   @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('avatarFile'))
   @ApiConsumes('multipart/form-data')
