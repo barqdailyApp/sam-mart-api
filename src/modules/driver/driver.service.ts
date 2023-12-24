@@ -1,13 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
 import { Repository, UpdateResult } from 'typeorm';
 import { UpdateDriverLocationRequest } from './requests/update-driver-location.request';
-
+import { Request } from 'express';
+import { REQUEST } from '@nestjs/core';
 @Injectable()
 export class DriverService {
   constructor(
     @InjectRepository(Driver) private driverRepository: Repository<Driver>,
+    @Inject(REQUEST) private readonly _request: Request,
   ) {}
 
   async single(driver_id: string): Promise<Driver> {
@@ -22,11 +24,10 @@ export class DriverService {
   }
 
   async updateDriverLocation(
-    driver_id: string,
     updateDriverLocationRequest: UpdateDriverLocationRequest,
   ): Promise<UpdateResult> {
-  return  await this.driverRepository.update(
-      { id: driver_id },
+    return await this.driverRepository.update(
+      { user_id: this._request.user.id },
       updateDriverLocationRequest,
     );
   }

@@ -50,10 +50,6 @@ export class Driver extends AuditableEntity {
   @Column({ default: false })
   is_verified:boolean;
 
-
-  @Column({ length: 500 ,nullable: true, })
-  address: string;
-
   @Column({
     type: 'geometry',
     spatialFeatureType: 'Point',
