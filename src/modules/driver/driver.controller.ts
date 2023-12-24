@@ -33,12 +33,10 @@ export class DriverController {
   }
   @Put(':driver_id/location')
   async updateDriverLocation(
-    @Param('driver_id') driver_id: string,
     @Body() updateDriverLocationRequest: UpdateDriverLocationRequest,
   ) {
     return new ActionResponse(
       await this.driverService.updateDriverLocation(
-        driver_id,
         updateDriverLocationRequest,
       ),
     );
