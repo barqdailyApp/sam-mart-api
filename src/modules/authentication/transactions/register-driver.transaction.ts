@@ -30,7 +30,6 @@ export class RegisterDriverTransaction extends BaseTransaction<
     @Inject(RegionService) private readonly regionService: RegionService,
     @Inject(CountryService) private readonly countryService: CountryService,
     @Inject(CityService) private readonly cityService: CityService,
-
   ) {
     super(dataSource);
   }
@@ -63,17 +62,19 @@ export class RegisterDriverTransaction extends BaseTransaction<
       createUser.roles = [Role.DRIVER];
 
       //* save avatar
-      const pathAvatar = await this.storageManager.store(
-        { buffer: avatarFile.buffer, originalname: avatarFile.originalname },
-        { path: 'avatars' },
-      );
+      if (avatarFile) {
+        const pathAvatar = await this.storageManager.store(
+          { buffer: avatarFile.buffer, originalname: avatarFile.originalname },
+          { path: 'avatars' },
+        );
 
-      //* set avatar path
-      createUser.avatar = pathAvatar;
+        //* set avatar path
+        createUser.avatar = pathAvatar;
+      }
 
       //* save user
       const savedUser = await context.save(User, createUser);
-
+      console.log('savedUser', savedUser);
       //* This Data driver needed
       const {
         country_id,
@@ -93,7 +94,6 @@ export class RegisterDriverTransaction extends BaseTransaction<
       //* check country
       await this.countryService.single(country_id);
 
-      
       //* check city
       await this.cityService.single(city_id);
 

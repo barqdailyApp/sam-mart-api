@@ -17,8 +17,8 @@ export class DriverRegisterRequest {
   @IsString()
   username: string;
 
-  @ApiProperty()
-  @IsNotEmpty()
+  @ApiProperty({ nullable: true, required: false })
+  @IsOptional()
   @IsEmail()
   @Unique('User')
   email?: string;
@@ -28,15 +28,13 @@ export class DriverRegisterRequest {
   @Unique('User')
   phone: string;
 
-  @ApiProperty({ type: 'file' })
+  @ApiProperty({ type: 'file', nullable: true, required: false })
+  @IsOptional()
+
   avatarFile: Express.Multer.File;
 
-  @ApiProperty({
-    type: String,
-    format: 'date',
-    example: '1990-01-01',
-  })
-  @IsNotEmpty()
+  @ApiProperty({ nullable: true, required: false })
+  @IsOptional()
   @IsString()
   birth_date: string;
 
@@ -44,7 +42,6 @@ export class DriverRegisterRequest {
   @IsNotEmpty()
   @IsString()
   country_id: string;
-
 
   @ApiProperty()
   @IsNotEmpty()
@@ -55,7 +52,6 @@ export class DriverRegisterRequest {
   @IsNotEmpty()
   @IsString()
   region_id: string;
-
 
   @ApiProperty()
   @IsNotEmpty()
