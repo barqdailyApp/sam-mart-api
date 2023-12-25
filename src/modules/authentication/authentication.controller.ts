@@ -90,7 +90,6 @@ export class AuthenticationController {
       license_image: Express.Multer.File;
     },
   ): Promise<ActionResponse<RegisterResponse>> {
-console.log('files', files.avatarFile);
     if (files.avatarFile) {
       req.avatarFile = files.avatarFile[0];
     }

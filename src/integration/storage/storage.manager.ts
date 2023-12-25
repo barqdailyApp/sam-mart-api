@@ -24,20 +24,15 @@ export class StorageManager {
 
   async store(file: Partial<Express.Multer.File>, options: StoreFileOptions): Promise<string> {
     try {
-      console.log('start store');
-        console.log('file store',file);
-  
+   
       const extension = getFileExtension(file);
       console.log('extension',extension);
 
       const fileName = getFileName(file);
-      console.log('fileName',fileName);
 
       const path = options.path || '';
-      console.log('path',path);
 
       let savePath = `${path}/${fileName}.${extension}`;
-      console.log('savePath',savePath);
 
       // If disk is local, we need to add the root path
       if (!options.disk || options.disk == DriverType.LOCAL)
