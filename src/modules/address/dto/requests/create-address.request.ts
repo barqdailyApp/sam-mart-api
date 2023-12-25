@@ -36,14 +36,7 @@ export class CreateAddressRequest {
   )
   longitude: string;
 
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsPhoneNumber('LY')
-  @IsString()
-  @IsNotEmpty()
-  phone: string;
 
-  @ApiPropertyOptional()
-  @IsOptional()
-  details: string;
+
+
 }

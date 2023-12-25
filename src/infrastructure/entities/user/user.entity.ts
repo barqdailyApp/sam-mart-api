@@ -39,7 +39,7 @@ export class User extends AuditableEntity {
   @Column({ nullable: true, type: 'enum', enum: Gender })
   gender: Gender;
 
-  @Column({ nullable: true })
+  @Column({nullable:true})
   birth_date: string;
 
   @Column({default : true})
