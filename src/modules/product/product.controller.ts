@@ -6,6 +6,7 @@ import {
   Inject,
   Param,
   Post,
+  Put,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
@@ -17,6 +18,8 @@ import { ActionResponse } from 'src/core/base/responses/action.response';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { plainToClass } from 'class-transformer';
 import { ProductResponse } from './dto/response/product.response';
+import { UpdateProductRequest } from './dto/request/update-product.request';
+import { UpdateProductMeasurementRequest } from './dto/request/update-product-measurement.request';
 @ApiTags('Product')
 @Controller('product')
 export class ProductController {
@@ -24,14 +27,34 @@ export class ProductController {
     private readonly productService: ProductService,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
   ) {}
-  @Post('create-Product')
+  @Post('create-product')
   async createProduct(@Body() createProductRequest: CreateProductRequest) {
     const product = await this.productService.create(createProductRequest);
     const productResponse = plainToClass(ProductResponse, product);
 
     return new ActionResponse(this._i18nResponse.entity(productResponse));
   }
-  @Get('all-Products')
+  @Put('update-product')
+  async updateProduct(@Body() updateProductRequest: UpdateProductRequest) {
+    const product = await this.productService.updateProduct(
+      updateProductRequest,
+    );
+    const productResponse = plainToClass(ProductResponse, product);
+
+    return new ActionResponse(this._i18nResponse.entity(productResponse));
+  }
+  @Put('update-product-measurement')
+  async updateProductMeasurement(
+    @Body() updateProductMeasurementRequest: UpdateProductMeasurementRequest,
+  ) {
+    const product = await this.productService.updateProductMeasurement(
+      updateProductMeasurementRequest,
+    );
+    const productResponse = plainToClass(ProductResponse, product);
+    return new ActionResponse(this._i18nResponse.entity(productResponse));
+  }
+
+  @Get('all-products')
   async allProducts() {
     const products = await this.productService.findAll();
     const productsResponse = products.map((product) => {
@@ -39,9 +62,9 @@ export class ProductController {
     });
     return new ActionResponse(this._i18nResponse.entity(productsResponse));
   }
-  @Get('single-Product/:product_id')
+  @Get('single-product/:product_id')
   async singleProduct(@Param('product_id') id: string) {
-    const product = await this.productService.single(id);
+    const product = await this.productService.singleProduct(id);
     const productResponse = plainToClass(ProductResponse, product);
 
     return new ActionResponse(this._i18nResponse.entity(productResponse));
@@ -49,6 +72,24 @@ export class ProductController {
 
   @Delete('delete-Product/:product_id')
   async deleteProduct(@Param('product_id') id: string) {
-    return await this.productService.delete(id);
+    return await this.productService.deleteProduct(id);
+  }
+
+  @Delete('delete-Product-image/:product_id/:image_id')
+  async deleteProductImage(
+    @Param('product_id') product_id: string,
+    @Param('image_id') image_id: string,
+  ) {
+    return await this.productService.deleteProductImage(product_id, image_id);
+  }
+  @Delete('delete-Product-measurement/:product_id/:measurement_id')
+  async deleteProductMeasurement(
+    @Param('product_id') product_id: string,
+    @Param('measurement_id') measurement_id: string,
+  ) {
+    return await this.productService.deleteProductMeasurement(
+      product_id,
+      measurement_id,
+    );
   }
 }

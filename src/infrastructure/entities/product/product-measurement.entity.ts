@@ -6,14 +6,12 @@ import { MeasurementUnit } from './measurement-unit.entity';
 
 @Entity()
 export class ProductMeasurement extends AuditableEntity {
-
-
-
-
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   conversion_factor: number;
 
-  @ManyToOne(() => Product, (product) => product.product_measurements)
+  @ManyToOne(() => Product, (product) => product.product_measurements, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'product_id' })
   product: Product;
 
