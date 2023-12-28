@@ -11,6 +11,11 @@ import { ProductImage } from '../entities/product/product-image.entity';
 import { ProductMeasurement } from '../entities/product/product-measurement.entity';
 import { Product } from '../entities/product/product.entity';
 import { AdditionalService } from '../entities/product/additional-service.entity';
+import { Category } from '../entities/category/category.entity';
+import { Subcategory } from '../entities/category/subcategory.entity';
+import { Section } from '../entities/section/section.entity';
+import { SectionCategory } from '../entities/section/section-category.entity';
+import { CategorySubCategory } from '../entities/category/category-subcategory.entity';
 
 
 export const DB_ENTITIES = [
@@ -26,7 +31,13 @@ export const DB_ENTITIES = [
   MeasurementUnit,
   ProductMeasurement,
   ProductImage,
-  AdditionalService
+  AdditionalService,
+  Category,
+  Subcategory,
+  Section,
+  SectionCategory,
+  CategorySubCategory
+
 ];
 
 export const DB_VIEWS = [];

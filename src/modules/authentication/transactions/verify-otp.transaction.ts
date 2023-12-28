@@ -79,7 +79,7 @@ export class VerifyOtpTransaction extends BaseTransaction<
       throw new BadRequestException(
         this._config.get('app.env') !== 'prod'
           ? error
-          : 'message.invalid_credentials',
+          : 'message.invalid_credentials',  
       );
     }
   }

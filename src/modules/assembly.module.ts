@@ -10,6 +10,8 @@ import { DriverModule } from './driver/driver.module';
 import { ProductModule } from './product/product.module';
 import { MeasurementUnitModule } from './measurement-unit/measurement-unit.module';
 import { AdditionalServiceModule } from './additional-service/additional-service.module';
+import { SectionModule } from './section/section.module';
+import { CategoryModule } from './category/category.module';
 
 
 @Module({
@@ -23,7 +25,9 @@ import { AdditionalServiceModule } from './additional-service/additional-service
         DriverModule,
         ProductModule,
         MeasurementUnitModule,
-        AdditionalServiceModule
+        AdditionalServiceModule,
+        SectionModule,
+        CategoryModule
     ],
     exports: [
 

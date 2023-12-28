@@ -26,4 +26,5 @@ export class UserService extends BaseService<User> {
       { allow_notification },
     );
   }
+  
 }
