@@ -8,5 +8,6 @@
 export enum Role {
   ADMIN = 'ADMIN',
   CLIENT = 'CLIENT',
+  RESTURANT = 'RESTURANT',
   DRIVER = 'DRIVER'
 }
