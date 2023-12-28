@@ -31,8 +31,8 @@ export class SendOtpTransaction extends BaseTransaction<
     try {
       const appEnv = this._config.get('app.env');
       // generate code
-      const code = appEnv === 'local' ? '1234' : randNum(4);
-      // const code = '1234';
+      // const code = appEnv === 'local' ? '1234' : randNum(4);
+      const code = '1234';
 
       // map to otp entity
       const otp = plainToInstance(Otp, { ...req, code });
