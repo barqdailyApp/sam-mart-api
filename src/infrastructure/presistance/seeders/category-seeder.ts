@@ -38,6 +38,7 @@ export class CategorySeeder implements Seeder {
       const sectionCreated = this.section_repo.create({
         name_ar: section.name_ar,
         name_en: section.name_en,
+        logo:section.logo,
         order_by: section.order_by,
         min_order_price:section.min_order_price,
         delivery_price: section.delivery_price,

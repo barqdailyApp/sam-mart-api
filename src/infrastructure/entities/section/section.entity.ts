@@ -13,6 +13,9 @@ export class Section extends BaseEntity {
  @Column()
  name_en:string;
 
+ @Column()
+ logo:string
+
 @Column()
 order_by:number; 
 
