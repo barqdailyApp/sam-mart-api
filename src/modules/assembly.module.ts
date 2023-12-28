@@ -7,6 +7,9 @@ import { CountryModule } from './country/country.module';
 import { CityModule } from './city/city.module';
 import { RegionModule } from './region/region.module';
 import { DriverModule } from './driver/driver.module';
+import { ProductModule } from './product/product.module';
+import { MeasurementUnitModule } from './measurement-unit/measurement-unit.module';
+import { AdditionalServiceModule } from './additional-service/additional-service.module';
 
 
 @Module({
@@ -17,7 +20,10 @@ import { DriverModule } from './driver/driver.module';
         CountryModule,
         CityModule,
         RegionModule,
-        DriverModule
+        DriverModule,
+        ProductModule,
+        MeasurementUnitModule,
+        AdditionalServiceModule
     ],
     exports: [
 
