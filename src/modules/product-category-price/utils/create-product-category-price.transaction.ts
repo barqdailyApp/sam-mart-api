@@ -11,22 +11,21 @@ import { REQUEST } from '@nestjs/core';
 
 import { plainToInstance } from 'class-transformer';
 import { Product } from 'src/infrastructure/entities/product/product.entity';
-import { CreateProductRequest } from '../dto/request/create-product.request';
 import { StorageManager } from 'src/integration/storage/storage.manager';
 import { ImageManager } from 'src/integration/sharp/image.manager';
 import * as sharp from 'sharp';
 import { ProductImage } from 'src/infrastructure/entities/product/product-image.entity';
 import { ProductMeasurement } from 'src/infrastructure/entities/product/product-measurement.entity';
 import { MeasurementUnitService } from 'src/modules/measurement-unit/measurement-unit.service';
-import { CreateProductMeasurementRequest } from '../dto/request/create-product-measurement.request';
-import { UpdateProductRequest } from '../dto/request/update-product.request';
-import { ProductService } from '../product.service';
 import { ensureFilesExists, moveTmpFiles } from 'src/core/helpers/file.helper';
+import { CreateProductCategoryPriceRequest } from '../dto/request/create-product-category-price.request';
+import { ProductService } from 'src/modules/product/product.service';
+import { ProductCategoryPrice } from 'src/infrastructure/entities/product/product-category-price.entity';
 
 @Injectable()
-export class UpdateProductTransaction extends BaseTransaction<
-  UpdateProductRequest,
-  Product
+export class CreateProductCategoryPriceTransaction extends BaseTransaction<
+  CreateProductCategoryPriceRequest,
+  ProductCategoryPrice
 > {
   constructor(
     dataSource: DataSource,
@@ -34,51 +33,38 @@ export class UpdateProductTransaction extends BaseTransaction<
     @Inject(ImageManager) private readonly imageManager: ImageManager,
 
     @Inject(StorageManager) private readonly storageManager: StorageManager,
-    @Inject(MeasurementUnitService)
-    private readonly measurementUnitService: MeasurementUnitService,
   ) {
     super(dataSource);
   }
 
   // the important thing here is to use the manager that we've created in the base class
   protected async execute(
-    query: UpdateProductRequest,
+    query: CreateProductCategoryPriceRequest,
     context: EntityManager,
-  ): Promise<Product> {
+  ): Promise<ProductCategoryPrice> {
     try {
       const {
-        id,
-        description,
-        is_active,
-        is_recovered,
-        name_ar,
-        name_en,
+        product_measurement_id,
+        price,
+        max_order_quantity,
+        min_order_quantity,
       } = query;
-      const product = await context.findOne(Product, { where: { id } });
+      const product = await context.findOne(ProductMeasurement, {
+        where: { id: product_measurement_id },
+      });
 
       if (!product) {
-        throw new NotFoundException('product not found');
+        throw new NotFoundException('product measurement not found');
       }
-      //* convert Dto To Product (Entity)
-      const updateProduct: Product = plainToInstance(Product, {
-        description,
-        is_active,
-        is_recovered,
-        name_ar,
-        name_en,
-      });
 
-      await context.update(Product, id, updateProduct);
-
-      return await context.findOne(Product, {
-        where: { id },
-        relations: {
-          product_images: true,
-          product_measurements: {
-            measurement_unit: true,
-          },
-        },
+      const createProductCategoryPrice = context.create(ProductCategoryPrice, {
+        product_measurement_id,
+        price,
+        min_order_quantity,
+        max_order_quantity,
       });
+      const productCategoryPrice = await context.save(createProductCategoryPrice);
+      return productCategoryPrice;
     } catch (error) {
       throw new BadRequestException(error);
     }

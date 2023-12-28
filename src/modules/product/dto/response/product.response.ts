@@ -15,9 +15,7 @@ export class ProductResponse {
 
   @Expose() readonly description: string;
 
-  @Transform(({ value }) => toUrl(value))
-  @Expose()
-  readonly logo: string;
+
   @Expose() readonly is_active: boolean;
 
   @Expose() readonly is_recovered: boolean;

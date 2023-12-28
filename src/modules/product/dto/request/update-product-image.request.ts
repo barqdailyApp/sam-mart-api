@@ -8,33 +8,27 @@ import {
   IsString,
 } from 'class-validator';
 
-export class UpdateProductMeasurementRequest {
+export class UpdateProductImageRequest {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
   product_id: string;
 
-  
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  product_measurement_unit_id: string;
+  product_image_id: string;
 
-  @ApiProperty({ nullable: true, required: false })
-  @IsOptional()
-  @IsNumber()
-  conversion_factor: number;
-
-  
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()
   @IsString()
-  measurement_unit_id: string;
+  url: string;
+
 
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()
   @Transform(({ value }) => {
     return value === 'true'  || value === true;
   })
-  is_main_unit: boolean;
+  is_logo: boolean;
 }

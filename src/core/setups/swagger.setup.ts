@@ -10,6 +10,7 @@ import { CountryModule } from 'src/modules/country/country.module';
 import { DriverModule } from 'src/modules/driver/driver.module';
 import { FileModule } from 'src/modules/file/file.module';
 import { MeasurementUnitModule } from 'src/modules/measurement-unit/measurement-unit.module';
+import { ProductCategoryPriceModule } from 'src/modules/product-category-price/product-category-price.module';
 import { ProductModule } from 'src/modules/product/product.module';
 import { RegionModule } from 'src/modules/region/region.module';
 import { UserModule } from 'src/modules/user/user.module';
@@ -45,6 +46,7 @@ export default (app: INestApplication, config: ConfigService) => {
       AdditionalServiceModule,
       ProductModule,
       FileModule,
+      ProductCategoryPriceModule
     ],
     operationIdFactory,
   });

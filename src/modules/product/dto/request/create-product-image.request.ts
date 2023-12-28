@@ -8,16 +8,12 @@ import {
   IsString,
 } from 'class-validator';
 
-export class CreateProductMeasurementRequest {
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsNumber()
-  conversion_factor: number;
-
+export class CreateProductImageRequest {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  measurement_unit_id: string;
+  url: string;
+
 
   @ApiProperty({ default: false })
   @IsNotEmpty()
@@ -25,5 +21,5 @@ export class CreateProductMeasurementRequest {
     return value === 'true'  || value === true;
   })
   @IsBoolean()
-  is_main_unit: boolean;
+  is_logo: boolean;
 }

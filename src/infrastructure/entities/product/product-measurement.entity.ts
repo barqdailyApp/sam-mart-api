@@ -3,6 +3,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { ProductImage } from './product-image.entity';
 import { Product } from './product.entity';
 import { MeasurementUnit } from './measurement-unit.entity';
+import { ProductCategoryPrice } from './product-category-price.entity';
 
 @Entity()
 export class ProductMeasurement extends AuditableEntity {
@@ -31,4 +32,10 @@ export class ProductMeasurement extends AuditableEntity {
   //* This is the base unit , the unit that the conversion factor is based on
   @Column({ nullable: true })
   base_unit_id: string;
+
+  @OneToMany(
+    () => ProductCategoryPrice,
+    (productPrice) => productPrice.product_measurement,
+  )
+  product_prices: ProductCategoryPrice[];
 }

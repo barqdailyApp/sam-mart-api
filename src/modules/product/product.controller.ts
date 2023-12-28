@@ -20,6 +20,7 @@ import { plainToClass } from 'class-transformer';
 import { ProductResponse } from './dto/response/product.response';
 import { UpdateProductRequest } from './dto/request/update-product.request';
 import { UpdateProductMeasurementRequest } from './dto/request/update-product-measurement.request';
+import { UpdateProductImageRequest } from './dto/request/update-product-image.request';
 @ApiTags('Product')
 @Controller('product')
 export class ProductController {
@@ -50,6 +51,15 @@ export class ProductController {
     const product = await this.productService.updateProductMeasurement(
       updateProductMeasurementRequest,
     );
+    const productResponse = plainToClass(ProductResponse, product);
+    return new ActionResponse(this._i18nResponse.entity(productResponse));
+  }
+  
+  @Put('update-product-image')
+  async updateProductImage(
+    @Body() updateProductImageRequest: UpdateProductImageRequest,
+  ){
+    const product = await this.productService.updateProductImage(updateProductImageRequest);
     const productResponse = plainToClass(ProductResponse, product);
     return new ActionResponse(this._i18nResponse.entity(productResponse));
   }

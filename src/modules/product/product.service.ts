@@ -10,6 +10,8 @@ import { ProductImage } from 'src/infrastructure/entities/product/product-image.
 import { ProductMeasurement } from 'src/infrastructure/entities/product/product-measurement.entity';
 import { UpdateProductMeasurementTransaction } from './utils/update-product-measurment.transaction';
 import { UpdateProductMeasurementRequest } from './dto/request/update-product-measurement.request';
+import { UpdateProductImageTransaction } from './utils/update-product-image.transaction';
+import { UpdateProductImageRequest } from './dto/request/update-product-image.request';
 
 @Injectable()
 export class ProductService {
@@ -23,11 +25,17 @@ export class ProductService {
 
     @Inject(AddProductTransaction)
     private readonly addProductTransaction: AddProductTransaction,
+
     @Inject(UpdateProductTransaction)
     private readonly updateProductTransaction: UpdateProductTransaction,
 
     @Inject(UpdateProductMeasurementTransaction)
     private readonly updateProductMeasurementTransaction: UpdateProductMeasurementTransaction,
+  
+    @Inject(UpdateProductImageTransaction)
+    private readonly updateProductImageTransaction: UpdateProductImageTransaction,
+
+    
   ) {}
 
   async create(createProductRequest: CreateProductRequest): Promise<Product> {
@@ -45,6 +53,11 @@ export class ProductService {
     return await this.updateProductMeasurementTransaction.run(
       updateProductMeasurementRequest,
     );
+  }
+  async updateProductImage(
+    updateProductImageRequest: UpdateProductImageRequest,
+  ): Promise<Product>{
+    return await this.updateProductImageTransaction.run(updateProductImageRequest);
   }
 
   async findAll(): Promise<Product[]> {

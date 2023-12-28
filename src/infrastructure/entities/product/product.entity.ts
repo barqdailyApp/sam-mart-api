@@ -14,8 +14,6 @@ export class Product extends AuditableEntity {
   @Column({ type: 'longtext' })
   description: string;
 
-  @Column()
-  logo: string;
 
   @Column({ nullable: true })
   order_by: number;

@@ -23,14 +23,11 @@ export class UpdateProductRequest {
   @IsString()
   description: string;
 
-  @ApiProperty({ nullable: true, required: false })
-  @IsOptional()
-  @IsString()
-  logo: string;
+
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()
   @Transform(({ value }) => {
-    return value === 'true';
+    return value === 'true'  || value === true;
   })
   @IsBoolean()
   is_active: boolean;
@@ -38,17 +35,12 @@ export class UpdateProductRequest {
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()
   @Transform(({ value }) => {
-    return value === 'true';
+    return value === 'true'  || value === true;
   })
   @IsBoolean()
   is_recovered: boolean;
 
-  @ApiProperty({
-    required: false,
-    nullable: true,
-  })
-  @IsOptional()
-  product_images: string[];
+
 
   
 }
