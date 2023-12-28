@@ -90,10 +90,14 @@ export class AuthenticationController {
       license_image: Express.Multer.File;
     },
   ): Promise<ActionResponse<RegisterResponse>> {
-    req.avatarFile = files.avatarFile[0];
-    req.id_card_image = files.id_card_image[0];
+    if (files.avatarFile) {
+      req.avatarFile = files.avatarFile[0];
+    }
+    
+      req.id_card_image = files.id_card_image[0];
+      req.license_image = files.license_image[0];
 
-    req.license_image = files.license_image[0];
+    
     const user = await this.authService.driverRegister(req);
     const result = plainToInstance(RegisterResponse, user, {
       excludeExtraneousValues: true,

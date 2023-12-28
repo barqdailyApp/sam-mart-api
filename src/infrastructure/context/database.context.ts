@@ -6,6 +6,11 @@ import { City } from '../entities/city/city.entity';
 import { WorkingArea } from '../entities/working-area/working-area.entity';
 import { Driver } from '../entities/driver/driver.entity';
 import { Region } from '../entities/region/region.entity';
+import { MeasurementUnit } from '../entities/product/measurement-unit.entity';
+import { ProductImage } from '../entities/product/product-image.entity';
+import { ProductMeasurement } from '../entities/product/product-measurement.entity';
+import { Product } from '../entities/product/product.entity';
+import { AdditionalService } from '../entities/product/additional-service.entity';
 import { Category } from '../entities/category/category.entity';
 import { Subcategory } from '../entities/category/subcategory.entity';
 import { Section } from '../entities/section/section.entity';
@@ -22,6 +27,11 @@ export const DB_ENTITIES = [
   WorkingArea,
   Driver,
   Region,
+  Product,
+  MeasurementUnit,
+  ProductMeasurement,
+  ProductImage,
+  AdditionalService,
   Category,
   Subcategory,
   Section,
