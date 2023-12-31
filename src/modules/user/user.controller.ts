@@ -42,14 +42,15 @@ import { UpdateFcmRequest } from './dto/requests/update-fcm.request';
 import { ActionResponse } from 'src/core/base/responses/action.response';
 import { UpdateLanguageRequest } from './dto/requests/update-language.request';
 
+
 @ApiBearerAuth()
-@ApiTags('User')
 @ApiHeader({
   name: 'Accept-Language',
   required: false,
   description: 'Language header: en, ar',
 })
 @UseGuards(JwtAuthGuard, RolesGuard)
+@ApiTags('User')
 @Controller('users')
 export class UserController {
   constructor(

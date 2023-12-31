@@ -57,7 +57,7 @@ export class UpdateProductTransaction extends BaseTransaction<
       const product = await context.findOne(Product, { where: { id } });
 
       if (!product) {
-        throw new NotFoundException('product not found');
+        throw new NotFoundException("message.product_not_found");
       }
       //* convert Dto To Product (Entity)
       const updateProduct: Product = plainToInstance(Product, {

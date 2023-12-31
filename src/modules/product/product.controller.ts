@@ -13,7 +13,7 @@ import {
 import { ProductService } from './product.service';
 import { I18nResponse } from 'src/core/helpers/i18n.helper';
 import { CreateProductRequest } from './dto/request/create-product.request';
-import { ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { ActionResponse } from 'src/core/base/responses/action.response';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { plainToClass } from 'class-transformer';
@@ -21,6 +21,12 @@ import { ProductResponse } from './dto/response/product.response';
 import { UpdateProductRequest } from './dto/request/update-product.request';
 import { UpdateProductMeasurementRequest } from './dto/request/update-product-measurement.request';
 import { UpdateProductImageRequest } from './dto/request/update-product-image.request';
+@ApiBearerAuth()
+@ApiHeader({
+  name: 'Accept-Language',
+  required: false,
+  description: 'Language header: en, ar',
+})
 @ApiTags('Product')
 @Controller('product')
 export class ProductController {

@@ -2,9 +2,15 @@ import { Body, Controller, Get, Post, Put } from '@nestjs/common';
 import { ProductCategoryPriceService } from './product-category-price.service';
 import { ProductCategoryPrice } from 'src/infrastructure/entities/product/product-category-price.entity';
 import { CreateProductCategoryPriceRequest } from './dto/request/create-product-category-price.request';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { ActionResponse } from 'src/core/base/responses/action.response';
 import { UpdateProductCategoryPriceRequest } from './dto/request/update-product-category-price.request';
+@ApiBearerAuth()
+@ApiHeader({
+  name: 'Accept-Language',
+  required: false,
+  description: 'Language header: en, ar',
+})
 @ApiTags('Product-Category-Price')
 @Controller('product-category-price')
 export class ProductCategoryPriceController {

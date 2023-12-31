@@ -22,6 +22,9 @@ export class ProductMeasurement extends AuditableEntity {
   @ManyToOne(
     () => MeasurementUnit,
     (measurementUnits) => measurementUnits.product_measurements,
+    {
+      onDelete: 'CASCADE',
+    },
   )
   @JoinColumn({ name: 'measurement_unit_id' })
   measurement_unit: MeasurementUnit;
@@ -32,6 +35,9 @@ export class ProductMeasurement extends AuditableEntity {
   //* This is the base unit , the unit that the conversion factor is based on
   @Column({ nullable: true })
   base_unit_id: string;
+
+  @Column({ default: false })
+  is_main_unit: boolean;
 
   @OneToMany(
     () => ProductCategoryPrice,

@@ -22,6 +22,13 @@ import { Region } from 'src/infrastructure/entities/region/region.entity';
 import { RegionResponse } from './dto/responses/region.response';
 import { UpdateRegionRequest } from './dto/requests/update-region.request';
 import { ActionResponse } from 'src/core/base/responses/action.response';
+
+@ApiBearerAuth()
+@ApiHeader({
+  name: 'Accept-Language',
+  required: false,
+  description: 'Language header: en, ar',
+})
 @ApiTags('Region')
 @Controller('region')
 export class RegionController {

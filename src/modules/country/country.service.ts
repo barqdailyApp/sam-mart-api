@@ -22,7 +22,7 @@ export class CountryService {
       where: { id: country_id },
     });
     if (!country) {
-      throw new NotFoundException('country_not_found');
+      throw new NotFoundException('message.country_not_found');
     }
     return country;
   }

@@ -26,7 +26,7 @@ import {
 } from 'src/core/helpers/file.helper';
 
 @Injectable()
-export class AddProductTransaction extends BaseTransaction<
+export class CreateProductTransaction extends BaseTransaction<
   CreateProductRequest,
   Product
 > {
@@ -105,11 +105,11 @@ export class AddProductTransaction extends BaseTransaction<
 
       //* There must be a primary unit
       if (!measurements.find((measurement) => measurement.is_main_unit)) {
-        throw new NotFoundException('There must be a primary unit');
+        throw new NotFoundException('message.there_must_be_a_primary_unit');
       }
 
       for (let index = 0; index < measurements.length; index++) {
-        //* Check Measurement Unit
+        //* Check Measurement Units
         await this.measurementUnitService.single(
           measurements[index].measurement_unit_id,
         );

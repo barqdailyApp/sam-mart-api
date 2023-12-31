@@ -54,7 +54,7 @@ export class UpdateProductMeasurementTransaction extends BaseTransaction<
         measurement_unit_id,
       } = query;
 
-      const updateData: any = { conversion_factor };
+      const updateData: any = { conversion_factor, is_main_unit };
 
       //* check if product exist
       const product = await context.findOne(Product, {
@@ -62,7 +62,7 @@ export class UpdateProductMeasurementTransaction extends BaseTransaction<
       });
 
       if (!product) {
-        throw new NotFoundException('product not found');
+        throw new NotFoundException('message.product_not_found');
       }
 
       //* check if product measurement unit exist
@@ -70,7 +70,7 @@ export class UpdateProductMeasurementTransaction extends BaseTransaction<
         where: { id: product_measurement_unit_id },
       });
       if (!productMeasurement) {
-        throw new NotFoundException('Product Measurement not found');
+        throw new NotFoundException('message.measurement_Unit_not_found');
       }
 
       //* check if  measurement unit exist
@@ -79,7 +79,7 @@ export class UpdateProductMeasurementTransaction extends BaseTransaction<
           where: { id: productMeasurement.measurement_unit_id },
         });
         if (!measurementUnit) {
-          throw new NotFoundException('Measurement Unit not found');
+          throw new NotFoundException('message.measurement_Unit_not_found');
         }
         updateData.measurement_unit_id = measurement_unit_id;
       }
@@ -93,7 +93,6 @@ export class UpdateProductMeasurementTransaction extends BaseTransaction<
         }
       }
 
-      console.log('updateData', updateData);
       await context.update(
         ProductMeasurement,
         { id: product_measurement_unit_id },

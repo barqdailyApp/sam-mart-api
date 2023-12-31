@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from 'src/infrastructure/entities/product/product.entity';
 import { DeleteResult, Repository } from 'typeorm';
 import { CreateProductRequest } from './dto/request/create-product.request';
-import { AddProductTransaction } from './utils/add-product.transaction';
+import { CreateProductTransaction } from './utils/create-product.transaction';
 import { UpdateProductRequest } from './dto/request/update-product.request';
 import { UpdateProductTransaction } from './utils/update-product.transaction';
 import { ProductImage } from 'src/infrastructure/entities/product/product-image.entity';
@@ -23,19 +23,17 @@ export class ProductService {
     @InjectRepository(ProductMeasurement)
     private readonly productMeasurementRepository: Repository<ProductMeasurement>,
 
-    @Inject(AddProductTransaction)
-    private readonly addProductTransaction: AddProductTransaction,
+    @Inject(CreateProductTransaction)
+    private readonly addProductTransaction: CreateProductTransaction,
 
     @Inject(UpdateProductTransaction)
     private readonly updateProductTransaction: UpdateProductTransaction,
 
     @Inject(UpdateProductMeasurementTransaction)
     private readonly updateProductMeasurementTransaction: UpdateProductMeasurementTransaction,
-  
+
     @Inject(UpdateProductImageTransaction)
     private readonly updateProductImageTransaction: UpdateProductImageTransaction,
-
-    
   ) {}
 
   async create(createProductRequest: CreateProductRequest): Promise<Product> {
@@ -56,8 +54,10 @@ export class ProductService {
   }
   async updateProductImage(
     updateProductImageRequest: UpdateProductImageRequest,
-  ): Promise<Product>{
-    return await this.updateProductImageTransaction.run(updateProductImageRequest);
+  ): Promise<Product> {
+    return await this.updateProductImageTransaction.run(
+      updateProductImageRequest,
+    );
   }
 
   async findAll(): Promise<Product[]> {
@@ -81,7 +81,7 @@ export class ProductService {
       },
     });
     if (!product) {
-      throw new NotFoundException('Product not found');
+      throw new NotFoundException('message.product_not_found');
     }
     return product;
   }
@@ -95,7 +95,7 @@ export class ProductService {
       where: { id: image_id },
     });
     if (!productImage) {
-      throw new NotFoundException('Product Image not found');
+      throw new NotFoundException('message_product_image_not_found');
     }
     return productImage;
   }

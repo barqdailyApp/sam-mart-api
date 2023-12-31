@@ -55,7 +55,7 @@ export class UpdateProductImageTransaction extends BaseTransaction<
       });
 
       if (!product) {
-        throw new NotFoundException('product not found');
+        throw new NotFoundException("message.product_not_found");
       }
 
       //* check if product image exist
@@ -64,7 +64,7 @@ export class UpdateProductImageTransaction extends BaseTransaction<
       });
 
       if (!productImage) {
-        throw new NotFoundException('product image not found');
+        throw new NotFoundException("product_image_not_found");
       }
 
       if (url) {

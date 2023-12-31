@@ -66,7 +66,7 @@ export class UpdateProductCategoryPriceTransaction extends BaseTransaction<
       });
 
       if (!product) {
-        throw new NotFoundException('product measurement not found');
+        throw new NotFoundException("message.product_measurement_not_found");
       }
 
       await context.update(

@@ -9,6 +9,8 @@ export class ProductMeasurementResponse {
 
   @Expose() readonly product_id: string;
 
+  @Expose() readonly is_main_unit: boolean;
+
   @Transform(({ value }) => plainToClass(MeasurementUnitResponse, value))
   @Expose()
   readonly measurement_unit: MeasurementUnitResponse;
