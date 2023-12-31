@@ -5,6 +5,7 @@ import { AdditionalServiceModule } from 'src/modules/additional-service/addition
 import { AddressModule } from 'src/modules/address/address.module';
 
 import { AuthenticationModule } from 'src/modules/authentication/authentication.module';
+import { CategoryModule } from 'src/modules/category/category.module';
 import { CityModule } from 'src/modules/city/city.module';
 import { CountryModule } from 'src/modules/country/country.module';
 import { DriverModule } from 'src/modules/driver/driver.module';
@@ -13,6 +14,7 @@ import { MeasurementUnitModule } from 'src/modules/measurement-unit/measurement-
 import { ProductCategoryPriceModule } from 'src/modules/product-category-price/product-category-price.module';
 import { ProductModule } from 'src/modules/product/product.module';
 import { RegionModule } from 'src/modules/region/region.module';
+import { SectionModule } from 'src/modules/section/section.module';
 import { UserModule } from 'src/modules/user/user.module';
 
 export default (app: INestApplication, config: ConfigService) => {
@@ -46,6 +48,9 @@ export default (app: INestApplication, config: ConfigService) => {
       AdditionalServiceModule,
       ProductModule,
       FileModule,
+      DriverModule,
+      SectionModule,
+      CategoryModule,
       ProductCategoryPriceModule
     ],
     operationIdFactory,

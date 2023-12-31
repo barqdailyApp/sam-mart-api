@@ -41,6 +41,9 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateFcmRequest } from './dto/requests/update-fcm.request';
 import { ActionResponse } from 'src/core/base/responses/action.response';
 import { UpdateLanguageRequest } from './dto/requests/update-language.request';
+import { Role } from 'src/infrastructure/data/enums/role.enum';
+import { Roles } from '../authentication/guards/roles.decorator';
+
 
 
 @ApiBearerAuth()
@@ -65,4 +68,16 @@ export class UserController {
   ) {
     return new ActionResponse( await this._service.allowNotification(allow_notification));
   }
+
+
+
+ @Roles(Role.ADMIN)
+  @Put('make-resturant')
+async makeResturant(@Body() id:string){
+
+const user= await this._service.findOne(id)
+user.roles.push(Role.RESTURANT)
+return new ActionResponse( await this._service.update(user))
+
+}
 }
