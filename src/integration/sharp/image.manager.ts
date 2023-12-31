@@ -1,9 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import * as sharp from 'sharp';
 import { getFileExtension } from 'src/core/helpers/file.helper';
-
+import * as webp from 'webp-converter'
 @Injectable()
 export class ImageManager {
+
+  async convertToWebp(
+    image: Partial<Express.Multer.File>,
+    
+  ){
+//     const result = webp.cwebp("nodejs_logo.jpg","nodejs_logo.webp","-q 80",logging="-v");
+// result.then((response) => {
+//   console.log(response);
+// });
+  }
   async resize(
     file: Partial<Express.Multer.File>,
     meta?: ResizeImageOptions,

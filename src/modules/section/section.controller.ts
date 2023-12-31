@@ -14,7 +14,12 @@ import {
 import { I18nResponse } from 'src/core/helpers/i18n.helper';
 import { SectionService } from './section.service';
 import { ActionResponse } from 'src/core/base/responses/action.response';
-import { ApiBearerAuth, ApiConsumes, ApiHeader, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiConsumes,
+  ApiHeader,
+  ApiTags,
+} from '@nestjs/swagger';
 import { RolesGuard } from '../authentication/guards/roles.guard';
 import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
 import { plainToInstance } from 'class-transformer';
@@ -25,6 +30,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateSectionRequest } from './dto/requests/create-section.request';
 import { UploadValidator } from 'src/core/validators/upload.validator';
 import { applyQuerySort } from 'src/core/helpers/service-related.helper';
+import { SectionCategoryRequest } from './dto/requests/create-section-category.request';
 
 @ApiHeader({
   name: 'Accept-Language',
@@ -39,9 +45,6 @@ export class SectionController {
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
   ) {}
 
-
-
-
   @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('logo'))
   @ApiConsumes('multipart/form-data')
   @Post()
@@ -50,17 +53,21 @@ export class SectionController {
     @UploadedFile(new UploadValidator().build())
     logo: Express.Multer.File,
   ) {
-    console.log(req)
+    console.log(req);
     req.logo = logo;
-  return new ActionResponse(   await this.sectionService.createSection(req));
-
+    return new ActionResponse(await this.sectionService.createSection(req));
   }
 
-
+  @Post('/category')
+  async addCategoryToSection(@Body() req: SectionCategoryRequest) {
+    return new ActionResponse(
+      await this.sectionService.addCategoryToSection(req),
+    );
+  }
 
   @Get()
   async getSections(@Query() query: PaginatedRequest) {
-    applyQuerySort(query,'order_by=ASC');
+    applyQuerySort(query, 'order_by=ASC');
     return new ActionResponse(
       this._i18nResponse.entity(await this.sectionService.findAll(query)),
     );
