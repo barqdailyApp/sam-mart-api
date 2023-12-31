@@ -102,9 +102,7 @@ export class AuthenticationController {
     const result = plainToInstance(RegisterResponse, user, {
       excludeExtraneousValues: true,
     });
-    return new ActionResponse<RegisterResponse>(result, {
-      statusCode: HttpStatus.CREATED,
-    });
+    return new ActionResponse<RegisterResponse>(result )
   }
 
   @Post(Router.Auth.SendOtp)

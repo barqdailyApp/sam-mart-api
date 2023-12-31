@@ -12,6 +12,7 @@ import { MeasurementUnitModule } from './measurement-unit/measurement-unit.modul
 import { AdditionalServiceModule } from './additional-service/additional-service.module';
 import { SectionModule } from './section/section.module';
 import { CategoryModule } from './category/category.module';
+import { SubcategoryModule } from './subcategory/subcategory.module';
 
 
 @Module({
@@ -27,7 +28,8 @@ import { CategoryModule } from './category/category.module';
         MeasurementUnitModule,
         AdditionalServiceModule,
         SectionModule,
-        CategoryModule
+        CategoryModule,
+        SubcategoryModule
     ],
     exports: [
 
