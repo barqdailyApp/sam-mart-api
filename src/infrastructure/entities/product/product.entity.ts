@@ -15,9 +15,6 @@ export class Product extends AuditableEntity {
   description: string;
 
 
-  @Column({ nullable: true })
-  order_by: number;
-
   @Column({ default: true })
   is_active: boolean;
 

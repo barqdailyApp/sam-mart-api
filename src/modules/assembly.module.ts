@@ -23,7 +23,9 @@ import { ProductCategoryPriceModule } from './product-category-price/product-cat
     DriverModule,
     ProductModule,
     MeasurementUnitModule,
-    AdditionalServiceModule
+    AdditionalServiceModule,
+    CategoryModule,
+    SectionModule
   ],
   exports: [],
   providers: [],
