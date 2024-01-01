@@ -1,6 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { Subcategory } from 'src/infrastructure/entities/category/subcategory.entity';
 import { AdditionalServiceModule } from 'src/modules/additional-service/additional-service.module';
 import { AddressModule } from 'src/modules/address/address.module';
 
@@ -15,6 +16,7 @@ import { ProductCategoryPriceModule } from 'src/modules/product-category-price/p
 import { ProductModule } from 'src/modules/product/product.module';
 import { RegionModule } from 'src/modules/region/region.module';
 import { SectionModule } from 'src/modules/section/section.module';
+import { SubcategoryModule } from 'src/modules/subcategory/subcategory.module';
 import { UserModule } from 'src/modules/user/user.module';
 
 export default (app: INestApplication, config: ConfigService) => {
@@ -51,7 +53,8 @@ export default (app: INestApplication, config: ConfigService) => {
       DriverModule,
       SectionModule,
       CategoryModule,
-      ProductCategoryPriceModule
+      SubcategoryModule,
+      ProductCategoryPriceModule,
     ],
     operationIdFactory,
   });

@@ -1,4 +1,5 @@
 import { Expose } from "class-transformer";
+import { toUrl } from "src/core/helpers/file.helper";
 
 export class CategoryResponse {
     @Expose()
@@ -10,13 +11,14 @@ export class CategoryResponse {
   
     @Expose()
     is_active: boolean;
-
+    @Expose()
+    logo:string
     constructor(data:Partial<CategoryResponse>){
-        console.log(data)
+      
 this.id=data.id
 this.category_id=data.category_id
 this.name=data.name
-
+this.logo= toUrl( data.logo)
 this.is_active=data.is_active
 
     }

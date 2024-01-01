@@ -11,6 +11,7 @@ import { MeasurementUnitModule } from './measurement-unit/measurement-unit.modul
 import { AdditionalServiceModule } from './additional-service/additional-service.module';
 import { SectionModule } from './section/section.module';
 import { CategoryModule } from './category/category.module';
+import { SubcategoryModule } from './subcategory/subcategory.module';
 import { ProductCategoryPriceModule } from './product-category-price/product-category-price.module';
 
 @Module({
@@ -24,8 +25,8 @@ import { ProductCategoryPriceModule } from './product-category-price/product-cat
     ProductModule,
     MeasurementUnitModule,
     AdditionalServiceModule,
+    SectionModule,
     CategoryModule,
-    SectionModule
   ],
   exports: [],
   providers: [],
