@@ -31,6 +31,7 @@ import { CreateSectionRequest } from './dto/requests/create-section.request';
 import { UploadValidator } from 'src/core/validators/upload.validator';
 import { applyQuerySort } from 'src/core/helpers/service-related.helper';
 import { SectionCategoryRequest } from './dto/requests/create-section-category.request';
+import { toUrl } from 'src/core/helpers/file.helper';
 
 @ApiHeader({
   name: 'Accept-Language',
@@ -69,7 +70,12 @@ export class SectionController {
   async getSections(@Query() query: PaginatedRequest) {
     applyQuerySort(query, 'order_by=ASC');
     return new ActionResponse(
-      this._i18nResponse.entity(await this.sectionService.findAll(query)),
+      this._i18nResponse.entity(
+        (await this.sectionService.findAll(query)).map((e) => {
+          e.logo = toUrl(e.logo);
+          return e;
+        }),
+      ),
     );
   }
 

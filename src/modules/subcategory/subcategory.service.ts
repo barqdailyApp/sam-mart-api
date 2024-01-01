@@ -22,6 +22,9 @@ export class SubcategoryService extends BaseService<Subcategory> {
   }
 
 
+
+
+
   async createSubcategory(req: CreateCategoryRequest): Promise<Subcategory> {
     const subcategory = this._repo.create(plainToInstance(Subcategory, req));
     if (req.logo) {
@@ -46,4 +49,7 @@ export class SubcategoryService extends BaseService<Subcategory> {
     await this._repo.save(subcategory);
     return subcategory;
   }
+
+
+  
 }
