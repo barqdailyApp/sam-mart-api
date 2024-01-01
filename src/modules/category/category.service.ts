@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { plainToInstance } from 'class-transformer';
 import { where } from 'sequelize';
@@ -12,12 +12,16 @@ import { Repository } from 'typeorm';
 import { CreateSectionRequest } from '../section/dto/requests/create-section.request';
 import { StorageManager } from 'src/integration/storage/storage.manager';
 import { CreateCategoryRequest } from './dto/requests/create-category-request';
+import { CategorySubcategoryRequest } from './dto/requests/create-category-subcategory-request';
+import { Subcategory } from 'src/infrastructure/entities/category/subcategory.entity';
 
 @Injectable()
 export class CategoryService extends BaseService<Category> {
   constructor(
     @InjectRepository(Category)
     private readonly category_repo: Repository<Category>,
+    @InjectRepository(Subcategory)
+    private readonly subcategory_repo: Repository<Subcategory>,
     @InjectRepository(CategorySubCategory)
     private readonly category_subcategory_repo: Repository<CategorySubCategory>,
     @Inject(StorageManager) private readonly storageManager: StorageManager,
@@ -57,5 +61,17 @@ export class CategoryService extends BaseService<Category> {
     }
     await this._repo.save(category);
     return category;
+  }
+  async addSubcategoryToCategory(req:CategorySubcategoryRequest) {
+    const  category= await this.category_repo.findOne({
+      where: { id: req.category_id },
+      relations: { category_subCategory: true },
+    });
+    if (category.category_subCategory.find((e) => e.subcategory_id === req.subcategory_id)) {
+      throw new BadRequestException('subcategory already exist');
+    }
+    return await this.category_subcategory_repo.save({
+     ...req
+    });
   }
 }
