@@ -2,6 +2,7 @@ import {  Column, Entity, ManyToOne, OneToMany } from "typeorm";
 import { Category } from "./category.entity";
 import { BaseEntity } from "src/infrastructure/base/base.entity";
 import { CategorySubCategory } from "./category-subcategory.entity";
+import { ProductSubCategory } from "../product/product-sub-category.entity";
 
 @Entity()
 export class Subcategory extends BaseEntity {
@@ -15,6 +16,12 @@ export class Subcategory extends BaseEntity {
 
    @OneToMany(() => CategorySubCategory, categorySubCategory => categorySubCategory.subcategory,{onDelete:"CASCADE"})
    category_subCategory: Category
+
+   @OneToMany(() => ProductSubCategory, (productSubCategory) => productSubCategory.sub_category)
+   product_sub_categories: ProductSubCategory[];
+
+   
+ 
 
    constructor(partial?: Partial<Subcategory>) {
      super();

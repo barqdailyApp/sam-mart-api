@@ -27,6 +27,7 @@ import { ProductCategoryPriceModule } from './product-category-price/product-cat
     AdditionalServiceModule,
     SectionModule,
     CategoryModule,
+    ProductCategoryPriceModule
   ],
   exports: [],
   providers: [],

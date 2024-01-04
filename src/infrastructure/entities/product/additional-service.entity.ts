@@ -1,6 +1,6 @@
 import { AuditableEntity } from 'src/infrastructure/base/auditable.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
-import { ProductService } from './product-service.entity';
+import { ProductAdditionalService } from './product-additional-service.entity';
 
 @Entity()
 export class AdditionalService extends AuditableEntity {
@@ -11,8 +11,8 @@ export class AdditionalService extends AuditableEntity {
   name_en: string;
 
   @OneToMany(
-    () => ProductService,
+    () => ProductAdditionalService,
     (productService) => productService.additional_service,
   )
-  product_services: ProductService[];
+  product_services: ProductAdditionalService[];
 }

@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
-export class CreateProductCategoryPriceRequest {
+import { IsNotEmpty, IsString, IsNumber } from 'class-validator';
+
+export class ProductMeasurementRequest {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()

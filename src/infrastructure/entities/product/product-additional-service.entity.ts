@@ -6,10 +6,7 @@ import { ProductCategoryPrice } from './product-category-price.entity';
 import { AdditionalService } from './additional-service.entity';
 
 @Entity()
-export class ProductService extends AuditableEntity {
-  @Column()
-  url: string;
-
+export class ProductAdditionalService extends AuditableEntity {
   @ManyToOne(
     () => ProductCategoryPrice,
     (productCategoryPrice) => productCategoryPrice.product_services,
@@ -23,7 +20,6 @@ export class ProductService extends AuditableEntity {
   @Column()
   product_category_price_id: string;
 
-
   @ManyToOne(
     () => AdditionalService,
     (additionalService) => additionalService.product_services,
@@ -36,7 +32,6 @@ export class ProductService extends AuditableEntity {
 
   @Column()
   additional_service_id: string;
-
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   price: number;

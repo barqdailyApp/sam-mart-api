@@ -43,5 +43,5 @@ export class ProductMeasurement extends AuditableEntity {
     () => ProductCategoryPrice,
     (productPrice) => productPrice.product_measurement,
   )
-  product_prices: ProductCategoryPrice[];
+  product_category_prices: ProductCategoryPrice[];
 }

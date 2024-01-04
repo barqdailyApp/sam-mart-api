@@ -2,6 +2,7 @@ import { AuditableEntity } from 'src/infrastructure/base/auditable.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
 import { ProductImage } from './product-image.entity';
 import { ProductMeasurement } from './product-measurement.entity';
+import { ProductSubCategory } from './product-sub-category.entity';
 
 @Entity()
 export class Product extends AuditableEntity {
@@ -24,6 +25,9 @@ export class Product extends AuditableEntity {
 
   @OneToMany(() => ProductImage, (productImage) => productImage.product)
   product_images: ProductImage[];
+
+  @OneToMany(() => ProductSubCategory, (productSubCategory) => productSubCategory.product)
+  product_sub_categories: ProductSubCategory[];
 
   @OneToMany(
     () => ProductMeasurement,

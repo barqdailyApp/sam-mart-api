@@ -12,6 +12,9 @@ import { UpdateProductMeasurementTransaction } from './utils/update-product-meas
 import { UpdateProductMeasurementRequest } from './dto/request/update-product-measurement.request';
 import { UpdateProductImageTransaction } from './utils/update-product-image.transaction';
 import { UpdateProductImageRequest } from './dto/request/update-product-image.request';
+import { ProductFilter } from './dto/filter/product.filter';
+import { Subcategory } from 'src/infrastructure/entities/category/subcategory.entity';
+import { ProductSubCategory } from 'src/infrastructure/entities/product/product-sub-category.entity';
 
 @Injectable()
 export class ProductService {
@@ -22,7 +25,11 @@ export class ProductService {
     private readonly productImageRepository: Repository<ProductImage>,
     @InjectRepository(ProductMeasurement)
     private readonly productMeasurementRepository: Repository<ProductMeasurement>,
+    @InjectRepository(Subcategory)
+    private subcategory_repo: Repository<Subcategory>,
 
+    @InjectRepository(ProductSubCategory)
+    private productSubCategory_repo: Repository<ProductSubCategory>,
     @Inject(CreateProductTransaction)
     private readonly addProductTransaction: CreateProductTransaction,
 
@@ -60,8 +67,16 @@ export class ProductService {
     );
   }
 
-  async findAll(): Promise<Product[]> {
+  //* Get All Product In App
+  async AllProduct(productFilter: ProductFilter): Promise<Product[]> {
+    const { page, limit } = productFilter;
+
+    const skip = (page - 1) * limit;
+
     return await this.productRepository.find({
+      skip,
+      take: limit,
+
       relations: {
         product_images: true,
         product_measurements: {
@@ -70,12 +85,83 @@ export class ProductService {
       },
     });
   }
-  async singleProduct(product_id: string): Promise<Product> {
-    const product = await this.productRepository.findOne({
-      where: { id: product_id },
+
+  async subCategoryAllProducts(
+    productFilter: ProductFilter,
+    sub_category_id: string,
+  ): Promise<Product[]> {
+    const { page, limit } = productFilter;
+
+    const skip = (page - 1) * limit;
+
+    //* Check if sub category exist
+    const subCategory = await this.subcategory_repo.findOne({
+      where: { id: sub_category_id },
+    });
+    if (!subCategory) {
+      throw new NotFoundException(`Subcategory ID not found`);
+    }
+
+    return await this.productRepository.find({
+      skip,
+      take: limit,
+      where: {
+
+        product_measurements: {
+          product_category_prices: {
+            product_sub_category: {
+              sub_category_id,
+            },
+          },
+        },
+      },
       relations: {
         product_images: true,
         product_measurements: {
+          product_category_prices: {
+            product_services: {
+              additional_service: true,
+            },
+          },
+          measurement_unit: true,
+        },
+      },
+    });
+  }
+
+  async singleProduct(
+    product_id: string,
+    sub_category_id?: string,
+  ): Promise<Product> {
+    //* Check if sub category exist
+    if (sub_category_id) {
+      const subCategory = await this.subcategory_repo.findOne({
+        where: { id: sub_category_id },
+      });
+      if (!subCategory) {
+        throw new NotFoundException(`Subcategory ID not found`);
+      }
+    }
+
+    const product = await this.productRepository.findOne({
+      where: {
+        id: product_id,
+        product_measurements: {
+          product_category_prices: {
+            product_sub_category: {
+              sub_category_id,
+            },
+          },
+        },
+      },
+      relations: {
+        product_images: true,
+        product_measurements: {
+          product_category_prices: {
+            product_services: {
+              additional_service: true,
+            },
+          },
           measurement_unit: true,
         },
       },
@@ -85,7 +171,7 @@ export class ProductService {
     }
     return product;
   }
-  async singleProductImage(
+  private async singleProductImage(
     product_id: string,
     image_id: string,
   ): Promise<ProductImage> {
@@ -99,7 +185,7 @@ export class ProductService {
     }
     return productImage;
   }
-  async SingleProductMeasurement(
+  private async SingleProductMeasurement(
     product_id: string,
     measurement_id: string,
   ): Promise<ProductMeasurement> {

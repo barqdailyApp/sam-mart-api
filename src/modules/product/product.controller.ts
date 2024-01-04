@@ -7,13 +7,21 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { I18nResponse } from 'src/core/helpers/i18n.helper';
 import { CreateProductRequest } from './dto/request/create-product.request';
-import { ApiBearerAuth, ApiConsumes, ApiHeader, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiConsumes,
+  ApiHeader,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ActionResponse } from 'src/core/base/responses/action.response';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { plainToClass } from 'class-transformer';
@@ -21,6 +29,7 @@ import { ProductResponse } from './dto/response/product.response';
 import { UpdateProductRequest } from './dto/request/update-product.request';
 import { UpdateProductMeasurementRequest } from './dto/request/update-product-measurement.request';
 import { UpdateProductImageRequest } from './dto/request/update-product-image.request';
+import { ProductFilter } from './dto/filter/product.filter';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -60,30 +69,60 @@ export class ProductController {
     const productResponse = plainToClass(ProductResponse, product);
     return new ActionResponse(this._i18nResponse.entity(productResponse));
   }
-  
+
   @Put('update-product-image')
   async updateProductImage(
     @Body() updateProductImageRequest: UpdateProductImageRequest,
-  ){
-    const product = await this.productService.updateProductImage(updateProductImageRequest);
+  ) {
+    const product = await this.productService.updateProductImage(
+      updateProductImageRequest,
+    );
     const productResponse = plainToClass(ProductResponse, product);
     return new ActionResponse(this._i18nResponse.entity(productResponse));
   }
 
   @Get('all-products')
-  async allProducts() {
-    const products = await this.productService.findAll();
+  async allProducts(@Query() productFilter: ProductFilter) {
+    const products = await this.productService.AllProduct(productFilter);
     const productsResponse = products.map((product) => {
       return plainToClass(ProductResponse, product);
     });
-    return new ActionResponse(this._i18nResponse.entity(productsResponse));
+    return new ActionResponse(this._i18nResponse.entity(products));
   }
+
+  @Get(':sub_category_id/all-products')
+  async subCategoryAllProducts(
+    @Query() productFilter: ProductFilter,
+    @Param('sub_category_id') sub_category_id: string,
+  ) {
+    const products = await this.productService.subCategoryAllProducts(
+      productFilter,
+      sub_category_id,
+    );
+    const productsResponse = products.map((product) => {
+      return plainToClass(ProductResponse, product);
+    });
+    return new ActionResponse(this._i18nResponse.entity(products));
+  }
+
   @Get('single-product/:product_id')
-  async singleProduct(@Param('product_id') id: string) {
-    const product = await this.productService.singleProduct(id);
+  @ApiParam({ name: 'product_id', required: true, type: String })
+  @ApiQuery({
+    name: 'sub_category_id',
+    required: false,
+    type: String,
+  })
+  async singleProduct(
+    @Param('product_id') id: string,
+    @Query('sub_category_id') sub_category_id?: string,
+  ) {
+    const product = await this.productService.singleProduct(
+      id,
+      sub_category_id,
+    );
     const productResponse = plainToClass(ProductResponse, product);
 
-    return new ActionResponse(this._i18nResponse.entity(productResponse));
+    return new ActionResponse(this._i18nResponse.entity(product));
   }
 
   @Delete('delete-Product/:product_id')
