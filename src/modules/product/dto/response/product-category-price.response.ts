@@ -4,31 +4,21 @@ import { ProductMeasurement } from 'src/infrastructure/entities/product/product-
 import { MeasurementUnitResponse } from 'src/modules/measurement-unit/dto/responses/measurement-unit.response';
 import { ProductMeasurementResponse } from './product-measurement.response';
 import { ProductImagesResponse } from './product-images.response';
+import { ProductAdditionalServiceResponse } from './product-additional-service.response';
 
 @Exclude()
-export class ProductResponse {
-  @Expose() readonly id: string;
-
-  @Expose() readonly name_ar: string;
-
-  @Expose() readonly name_en: string;
-
-  @Expose() readonly description: string;
-
-
-  @Expose() readonly is_active: boolean;
-
-  @Expose() readonly is_recovered: boolean;
-
+export class ProductCategoryPriceResponse {
+  @Expose() readonly product_measurement_id: string;
+  @Expose() readonly product_sub_category_id: string;
+  @Expose() readonly price: number;
+  @Expose() readonly min_order_quantity: number;
+  @Expose() readonly max_order_quantity: number;
   @Expose() readonly created_at: Date;
-
   @Expose() readonly updated_at: Date;
 
-  @Transform(({ value }) => plainToClass(ProductMeasurementResponse, value))
+  @Transform(({ value }) =>
+    plainToClass(ProductAdditionalServiceResponse, value),
+  )
   @Expose()
-  readonly product_measurements: ProductMeasurementResponse;
-
-  @Transform(({ value }) => plainToClass(ProductImagesResponse, value))
-  @Expose()
-  readonly product_images: ProductImagesResponse;
+  readonly product_additional_services: ProductAdditionalServiceResponse[];
 }

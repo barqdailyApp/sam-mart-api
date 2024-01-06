@@ -87,7 +87,7 @@ export class ProductController {
     const productsResponse = products.map((product) => {
       return plainToClass(ProductResponse, product);
     });
-    return new ActionResponse(this._i18nResponse.entity(products));
+    return new ActionResponse(this._i18nResponse.entity(productsResponse));
   }
 
   @Get(':sub_category_id/all-products')
@@ -102,7 +102,7 @@ export class ProductController {
     const productsResponse = products.map((product) => {
       return plainToClass(ProductResponse, product);
     });
-    return new ActionResponse(this._i18nResponse.entity(products));
+    return new ActionResponse(this._i18nResponse.entity(productsResponse));
   }
 
   @Get('single-product/:product_id')
@@ -122,7 +122,7 @@ export class ProductController {
     );
     const productResponse = plainToClass(ProductResponse, product);
 
-    return new ActionResponse(this._i18nResponse.entity(product));
+    return new ActionResponse(this._i18nResponse.entity(productResponse));
   }
 
   @Delete('delete-Product/:product_id')

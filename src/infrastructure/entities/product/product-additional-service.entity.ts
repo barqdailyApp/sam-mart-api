@@ -9,7 +9,7 @@ import { AdditionalService } from './additional-service.entity';
 export class ProductAdditionalService extends AuditableEntity {
   @ManyToOne(
     () => ProductCategoryPrice,
-    (productCategoryPrice) => productCategoryPrice.product_services,
+    (productCategoryPrice) => productCategoryPrice.product_additional_services,
     {
       onDelete: 'CASCADE',
     },

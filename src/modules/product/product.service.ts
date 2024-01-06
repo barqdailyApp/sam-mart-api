@@ -119,7 +119,7 @@ export class ProductService {
         product_images: true,
         product_measurements: {
           product_category_prices: {
-            product_services: {
+            product_additional_services: {
               additional_service: true,
             },
           },
@@ -158,7 +158,7 @@ export class ProductService {
         product_images: true,
         product_measurements: {
           product_category_prices: {
-            product_services: {
+            product_additional_services: {
               additional_service: true,
             },
           },

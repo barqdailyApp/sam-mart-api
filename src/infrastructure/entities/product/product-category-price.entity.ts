@@ -46,5 +46,5 @@ export class ProductCategoryPrice extends AuditableEntity {
     () => ProductAdditionalService,
     (productService) => productService.product_category_price,
   )
-  product_services: ProductAdditionalService[];
+  product_additional_services: ProductAdditionalService[];
 }
