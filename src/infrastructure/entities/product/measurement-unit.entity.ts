@@ -12,9 +12,6 @@ export class MeasurementUnit extends AuditableEntity {
   @Column()
   name_en: string;
 
-  @Column()
-  abbreviation: string; // KG, L
-
   @OneToMany(
     () => ProductMeasurement,
     (productMeasurement) => productMeasurement.measurement_unit,

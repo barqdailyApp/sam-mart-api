@@ -30,7 +30,7 @@ export class CityService {
       relations: { country: true },
     });
     if (!city) {
-      throw new NotFoundException('city_not_found');
+    throw new NotFoundException('message.city_not_found');
     }
     return city;
   }

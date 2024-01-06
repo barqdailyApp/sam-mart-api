@@ -11,13 +11,18 @@ import {
   import { I18nResponse } from 'src/core/helpers/i18n.helper';
   import { ActionResponse } from 'src/core/base/responses/action.response';
   import { plainToClass } from 'class-transformer';
-  import { ApiTags } from '@nestjs/swagger';
+  import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { AdditionalServiceService } from './additional-service.service';
 import { AdditionalServiceResponse } from './dto/responses/additional-service.response';
 import { CreateAdditionalServiceRequest } from './dto/requests/create-additional-service.request';
 import { UpdateAdditionalServiceRequest } from './dto/requests/update-additional-service.request';
   
-  
+@ApiBearerAuth()
+@ApiHeader({
+  name: 'Accept-Language',
+  required: false,
+  description: 'Language header: en, ar',
+})
 @ApiTags('Additional-Service')
 @Controller('additional-service')
 export class AdditionalServiceController {

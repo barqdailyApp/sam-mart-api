@@ -28,7 +28,7 @@ export class AdditionalServiceService {
           where: { id: additional_service_id },
         });
         if (!additionalService) {
-          throw new NotFoundException('additional service Unit not found');
+          throw new NotFoundException('message.additional_service_unit_not_found');
         }
         return additionalService;
       }

@@ -22,7 +22,7 @@ export class CreateProductMeasurementRequest {
   @ApiProperty({ default: false })
   @IsNotEmpty()
   @Transform(({ value }) => {
-    return value === 'true';
+    return value === 'true'  || value === true;
   })
   @IsBoolean()
   is_main_unit: boolean;

@@ -45,14 +45,15 @@ import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { Roles } from '../authentication/guards/roles.decorator';
 
 
+
 @ApiBearerAuth()
-@ApiTags('User')
 @ApiHeader({
   name: 'Accept-Language',
   required: false,
   description: 'Language header: en, ar',
 })
 @UseGuards(JwtAuthGuard, RolesGuard)
+@ApiTags('User')
 @Controller('users')
 export class UserController {
   constructor(

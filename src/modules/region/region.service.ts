@@ -26,11 +26,12 @@ export class RegionService {
       },
     });
     if (!region) {
-      throw new NotFoundException('region_not_found');
+      throw new NotFoundException('message.region_not_found');
     }
     return region;
   }
   async allRegionsCity(city_id: string): Promise<Region[]> {
+    await this.single(city_id);
     return await this.regionRepository.find({
       where: { city_id: city_id },
       relations: {
@@ -46,10 +47,13 @@ export class RegionService {
     updateRegionRequest: UpdateRegionRequest,
   ): Promise<UpdateResult> {
     await this.single(region_id);
-   return await this.regionRepository.update({ id: region_id }, updateRegionRequest);
+    return await this.regionRepository.update(
+      { id: region_id },
+      updateRegionRequest,
+    );
   }
   async delete(region_id: string): Promise<DeleteResult> {
     await this.single(region_id);
-   return await this.regionRepository.delete({ id: region_id });
+    return await this.regionRepository.delete({ id: region_id });
   }
 }

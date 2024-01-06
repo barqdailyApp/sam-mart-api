@@ -1,32 +1,26 @@
 [
     {
         "name_ar": "طن",
-        "name_en": "Ton",
-        "abbreviation": "t"
+        "name_en": "Ton"
     },
     {
         "name_ar": "كيلوغرام",
-        "name_en": "Kilogram",
-        "abbreviation": "kg"
+        "name_en": "Kilogram"
     },
     {
         "name_ar": "جرام",
-        "name_en": "Gram",
-        "abbreviation": "g"
+        "name_en": "Gram"
     },
     {
         "name_ar": "قطعة",
-        "name_en": "Piece",
-        "abbreviation": "pc"
+        "name_en": "Piece"
     },
     {
         "name_ar": "كرتون",
-        "name_en": "Carton",
-        "abbreviation": "ctn"
+        "name_en": "Carton"
     },
     {
         "name_ar": "صندوق",
-        "name_en": "Box",
-        "abbreviation": "box"
+        "name_en": "Box"
     }
 ]

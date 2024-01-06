@@ -20,6 +20,12 @@ import { plainToClass } from 'class-transformer';
 import { CountryResponse } from './dto/responses/country.response';
 import { I18nResponse } from 'src/core/helpers/i18n.helper';
 import { ActionResponse } from 'src/core/base/responses/action.response';
+@ApiBearerAuth()
+@ApiHeader({
+  name: 'Accept-Language',
+  required: false,
+  description: 'Language header: en, ar',
+})
 @ApiTags('Country')
 @Controller('country')
 export class CountryController {

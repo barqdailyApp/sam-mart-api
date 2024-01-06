@@ -19,9 +19,14 @@ import { ProductImage } from 'src/infrastructure/entities/product/product-image.
 import { ProductMeasurement } from 'src/infrastructure/entities/product/product-measurement.entity';
 import { MeasurementUnitService } from 'src/modules/measurement-unit/measurement-unit.service';
 import { CreateProductMeasurementRequest } from '../dto/request/create-product-measurement.request';
+import {
+  ensureFilesExists,
+  moveTmpFile,
+  moveTmpFiles,
+} from 'src/core/helpers/file.helper';
 
 @Injectable()
-export class AddProductTransaction extends BaseTransaction<
+export class CreateProductTransaction extends BaseTransaction<
   CreateProductRequest,
   Product
 > {
@@ -47,7 +52,6 @@ export class AddProductTransaction extends BaseTransaction<
         description,
         is_active,
         is_recovered,
-        logo,
         measurements,
         name_ar,
         name_en,
@@ -57,32 +61,55 @@ export class AddProductTransaction extends BaseTransaction<
 
       const createProduct = context.create(Product, {
         description,
-        logo,
         is_active,
         is_recovered,
         name_ar,
         name_en,
       });
 
+      // const moveLogoImage = moveTmpFile(logo, '/product-images/');
+      // createProduct.logo = moveLogoImage.next().value as string;
+
       //* save product
       const saveProduct = await context.save(Product, createProduct);
 
       //* -------------------- Create Product Images ----------------------------
 
+      //* validate product images
+      const product_images_url = product_images.map((image) => image.url);
+      ensureFilesExists(product_images_url);
+
+      //* generator to move images to product-images folder
+      const moveItemImages = moveTmpFiles(
+        product_images_url,
+        '/product-images/',
+      );
+      const newItemImagePaths = moveItemImages.next().value as string[];
       for (let index = 0; index < product_images.length; index++) {
-        //* create product image
-        const createProductImage = context.create(ProductImage, {
-          url: product_images[index],
+        product_images[index].url = newItemImagePaths[index];
+      }
+      //* create Product images
+
+      const productImages = product_images.map((image) => {
+        return context.create(ProductImage, {
+          url: image.url,
+          is_logo: image.is_logo,
           product_id: saveProduct.id,
         });
-        //* save product image
-        await context.save(createProductImage);
-      }
+      });
+
+      //* save product images
+      await context.save(ProductImage, productImages);
 
       //* -------------------- Add Measurements To Product ----------------------------
 
+      //* There must be a primary unit
+      if (!measurements.find((measurement) => measurement.is_main_unit)) {
+        throw new NotFoundException('message.there_must_be_a_primary_unit');
+      }
+
       for (let index = 0; index < measurements.length; index++) {
-        //* Check Measurement Unit
+        //* Check Measurement Units
         await this.measurementUnitService.single(
           measurements[index].measurement_unit_id,
         );
@@ -101,10 +128,6 @@ export class AddProductTransaction extends BaseTransaction<
         }
 
         //* Save Product Measurement
-        console.log(
-          `create measurementUnit ${index}`,
-          createProductMeasurement,
-        );
 
         await context.save(createProductMeasurement);
       }

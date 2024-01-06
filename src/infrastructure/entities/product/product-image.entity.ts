@@ -7,6 +7,9 @@ export class ProductImage extends AuditableEntity {
   @Column()
   url: string;
 
+  @Column()
+  is_logo:boolean
+
   @ManyToOne(() => Product, (product) => product.product_images, {
     onDelete: 'CASCADE',
   })
@@ -15,4 +18,6 @@ export class ProductImage extends AuditableEntity {
 
   @Column()
   product_id: string;
+
+
 }

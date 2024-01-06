@@ -15,9 +15,14 @@ import { ActionResponse } from 'src/core/base/responses/action.response';
 import { UpdateMeasurementUnitRequest } from './dto/requests/update-measurement-unit.request';
 import { plainToClass } from 'class-transformer';
 import { MeasurementUnitResponse } from './dto/responses/measurement-unit.response';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
 
-
+@ApiBearerAuth()
+@ApiHeader({
+  name: 'Accept-Language',
+  required: false,
+  description: 'Language header: en, ar',
+})
 @ApiTags('Measurement-Unit')
 @Controller('measurement-unit')
 export class MeasurementUnitController {

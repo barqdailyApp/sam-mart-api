@@ -13,10 +13,17 @@ export class DriverService {
   ) {}
 
   async single(driver_id: string): Promise<Driver> {
-    return await this.driverRepository.findOne({
+
+
+    const driver = await this.driverRepository.findOne({
       where: { id: driver_id },
       relations: { user: true },
     });
+
+    if (!driver) {
+      throw new Error('message.driver_not_found');
+    }
+    return driver;
   }
 
   async all(): Promise<Driver[]> {

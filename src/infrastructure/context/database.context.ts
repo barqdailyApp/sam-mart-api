@@ -16,7 +16,10 @@ import { Subcategory } from '../entities/category/subcategory.entity';
 import { Section } from '../entities/section/section.entity';
 import { SectionCategory } from '../entities/section/section-category.entity';
 import { CategorySubCategory } from '../entities/category/category-subcategory.entity';
-
+import { ProductCategoryPrice } from '../entities/product/product-category-price.entity';
+import { ProductAdditionalService } from '../entities/product/product-additional-service.entity';
+import { ProductCategoryPriceModule } from 'src/modules/product-category-price/product-category-price.module';
+import { ProductSubCategory } from '../entities/product/product-sub-category.entity';
 
 export const DB_ENTITIES = [
   User,
@@ -36,8 +39,11 @@ export const DB_ENTITIES = [
   Subcategory,
   Section,
   SectionCategory,
-  CategorySubCategory
-
+  CategorySubCategory,
+  ProductCategoryPrice,
+  ProductAdditionalService,
+  ProductCategoryPriceModule,
+  ProductSubCategory,
 ];
 
 export const DB_VIEWS = [];
