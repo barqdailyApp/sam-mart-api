@@ -2,10 +2,12 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
+  Delete,
   Get,
   Inject,
   Param,
   Post,
+  Put,
   Query,
   UploadedFile,
   UseGuards,
@@ -32,6 +34,8 @@ import { UploadValidator } from 'src/core/validators/upload.validator';
 import { applyQuerySort } from 'src/core/helpers/service-related.helper';
 import { SectionCategoryRequest } from './dto/requests/create-section-category.request';
 import { toUrl } from 'src/core/helpers/file.helper';
+import { UpdateSectionRequest } from './dto/requests/update-section.request';
+import { UpdateSectionCategoryRequest } from './dto/requests/update-section-category.request';
 
 @ApiHeader({
   name: 'Accept-Language',
@@ -59,10 +63,41 @@ export class SectionController {
     return new ActionResponse(await this.sectionService.createSection(req));
   }
 
-  @Post('/category')
+  @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('logo'))
+  @ApiConsumes('multipart/form-data')
+  @Put()
+  async update(
+    @Body() req: UpdateSectionRequest,
+    @UploadedFile(new UploadValidator().build())
+    logo: Express.Multer.File,
+  ) {
+    console.log(req);
+    req.logo = logo;
+    return new ActionResponse(await this.sectionService.createSection(req));
+  }
+
+  @Delete('/:id')
+  async deleteSection(@Param('id') id: string) {
+    return new ActionResponse(await this.sectionService.delete(id));
+  }
+
+  @Post('/add-category')
   async addCategoryToSection(@Body() req: SectionCategoryRequest) {
     return new ActionResponse(
       await this.sectionService.addCategoryToSection(req),
+    );
+  }
+
+  @Put('/section-category')
+  async updateSectionCategory(@Body() req: UpdateSectionCategoryRequest) {
+    return new ActionResponse(
+      await this.sectionService.updatSectionCategory(req),
+    );
+  }
+  @Delete('/section-category/:id')
+  async deleteSectionCategory(@Param('id') id: string) {
+    return new ActionResponse(
+      await this.sectionService.deleteSectionCategory(id),
     );
   }
 
@@ -91,6 +126,7 @@ export class SectionController {
         (e) =>
           new CategoryResponse({
             ...e,
+            logo: e.category.logo,
             name: e.category.name,
             category_id: e.category_id,
           }),

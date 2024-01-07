@@ -1,4 +1,4 @@
-import { Body, ClassSerializerInterceptor, Controller, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, ClassSerializerInterceptor, Controller, Get, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiConsumes, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { ActionResponse } from 'src/core/base/responses/action.response';
@@ -6,6 +6,10 @@ import { UploadValidator } from 'src/core/validators/upload.validator';
 import { CreateCategoryRequest } from '../category/dto/requests/create-category-request';
 import { Subcategory } from 'src/infrastructure/entities/category/subcategory.entity';
 import { SubcategoryService } from './subcategory.service';
+import { CategoryResponse } from '../category/dto/response/category-response';
+import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
+import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
+import { I18nResponse } from 'src/core/helpers/i18n.helper';
 
 @ApiHeader({
     name: 'Accept-Language',
@@ -15,7 +19,8 @@ import { SubcategoryService } from './subcategory.service';
   @ApiTags('Subcategory')
 @Controller('subcategory')
 export class SubcategoryController {
-constructor(private readonly subcategory:SubcategoryService){}
+constructor(private readonly subcategoryService:SubcategoryService,
+  private readonly _i18nResponse: I18nResponse,){}
 
     @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('logo'))
     @ApiConsumes('multipart/form-data')
@@ -27,6 +32,24 @@ constructor(private readonly subcategory:SubcategoryService){}
     ) {
       console.log(req);
       req.logo = logo;
-      return new ActionResponse(await this.subcategory.createSubcategory(req));
+      return new ActionResponse(await this.subcategoryService.createSubcategory(req));
     }
+
+
+    @Get()
+  async getCategories(@Query() query: PaginatedRequest) {
+    const categories = this._i18nResponse.entity(
+      await this.subcategoryService.findAll(query),
+    );
+    const categoriesRespone=categories.map((e) => new CategoryResponse(e));
+
+    if (query.page && query.limit) {
+      const total = await this.subcategoryService.count();
+      return new PaginatedResponse(categoriesRespone, {
+        meta: { total, ...query },
+      });
+    } else {
+      return new ActionResponse(categoriesRespone);
+    }
+  }
 }

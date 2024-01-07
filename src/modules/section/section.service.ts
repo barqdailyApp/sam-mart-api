@@ -14,6 +14,9 @@ import * as sharp from 'sharp';
 import { StorageManager } from 'src/integration/storage/storage.manager';
 import { plainToInstance } from 'class-transformer';
 import { SectionCategoryRequest } from './dto/requests/create-section-category.request';
+import { UpdateSectionRequest } from './dto/requests/update-section.request';
+import { FileService } from '../file/file.service';
+import { UpdateSectionCategoryRequest } from './dto/requests/update-section-category.request';
 
 @Injectable()
 export class SectionService extends BaseService<Section> {
@@ -25,6 +28,7 @@ export class SectionService extends BaseService<Section> {
     private readonly section_category_repo: Repository<SectionCategory>,
     @Inject(StorageManager) private readonly storageManager: StorageManager,
     @Inject(ImageManager) private readonly imageManager: ImageManager,
+    @Inject(FileService) private _fileService: FileService,
 
     @Inject(REQUEST) readonly request: Request,
   ) {
@@ -38,23 +42,28 @@ export class SectionService extends BaseService<Section> {
   async createSection(req: CreateSectionRequest): Promise<Section> {
     const section = this._repo.create(plainToInstance(Section, req));
     if (req.logo) {
-      // resize image to 300x300
-      const resizedImage = await this.imageManager.resize(req.logo, {
-        size: { width: 300, height: 300 },
-        options: {
-          fit: sharp.fit.cover,
-          position: sharp.strategy.entropy,
-        },
-      });
 
-      // save image
-      const path = await this.storageManager.store(
-        { buffer: resizedImage, originalname: req.logo.originalname },
-        { path: 'section-logo' },
-      );
+const logo=await this._fileService.upload(req.logo)
+   
+      // set avatar path
+      section.logo = logo;
+    }
+    await this._repo.save(section);
+    return section;
+  }
+
+  async updateSection(req: UpdateSectionRequest): Promise<Section> {
+    const section = await this._repo.findOne({where:{id:req.id}});
+    
+    if (req.logo) {
+
+    await  this._fileService.delete (section.logo)
+      // resize image to 300x300
+   const logo=  await this._fileService.upload(req.logo)
+   
 
       // set avatar path
-      section.logo = path;
+      section.logo = logo;
     }
     await this._repo.save(section);
     return section;
@@ -62,22 +71,33 @@ export class SectionService extends BaseService<Section> {
 
   async getSectionCategories(section_id: string): Promise<SectionCategory[]> {
     return await this.section_category_repo.find({
-      where: { section_id },
+      where: { section_id ,is_active :true},
       relations: { category: true },
       order: { order_by: 'ASC' },
     });
   }
 
-  async addCategoryToSection(req:SectionCategoryRequest) {
+  async addCategoryToSection(req: SectionCategoryRequest) {
     const section = await this.section_repo.findOne({
       where: { id: req.section_id },
       relations: { section_categories: true },
     });
-    if (section.section_categories.find((e) => e.category_id === req.category_id)) {
+    if (
+      section.section_categories.find((e) => e.category_id === req.category_id)
+    ) {
       throw new BadRequestException('category already exist');
     }
     return await this.section_category_repo.save({
-     ...req
+      ...req,
     });
+  }
+
+  async updatSectionCategory(req:UpdateSectionCategoryRequest){
+    return await this.section_category_repo.update(req.id,req)
+
+  }
+
+  async deleteSectionCategory(id:string){
+    return await this.section_category_repo.delete(id)
   }
 }
