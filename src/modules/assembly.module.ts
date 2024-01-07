@@ -13,6 +13,7 @@ import { SectionModule } from './section/section.module';
 import { CategoryModule } from './category/category.module';
 import { SubcategoryModule } from './subcategory/subcategory.module';
 import { ProductCategoryPriceModule } from './product-category-price/product-category-price.module';
+import { WarehouseModule } from './warehouse/warehouse.module';
 
 @Module({
   imports: [
@@ -27,7 +28,8 @@ import { ProductCategoryPriceModule } from './product-category-price/product-cat
     AdditionalServiceModule,
     SectionModule,
     CategoryModule,
-    ProductCategoryPriceModule
+    ProductCategoryPriceModule,
+    WarehouseModule
   ],
   exports: [],
   providers: [],

@@ -14,8 +14,7 @@ export class Category extends BaseEntity {
 
   @Column() 
   logo: string;
-  @OneToMany(() => CategorySubCategory, categorySubCategory => categorySubCategory.category)
-  category_subCategory: CategorySubCategory[];
+  
 
   @OneToMany(() => SectionCategory, sectionCategory => sectionCategory.category)
   section_categories: SectionCategory[];
