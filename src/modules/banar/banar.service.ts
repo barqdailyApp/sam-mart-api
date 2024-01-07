@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/core/base/service/service.base';
-import { Repository } from 'typeorm';
+import { LessThan, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { Banar } from 'src/infrastructure/entities/banar/banar.entity';
 import { CreateBanarRequest } from './dto/request/create-banar.request';
 import { FileService } from '../file/file.service';
@@ -18,7 +18,7 @@ export class BanarService extends BaseService<Banar> {
 
     async createBanar(banar: CreateBanarRequest) {
         const tempImage = await this._fileService.upload(
-            banar.banar, 
+            banar.banar,
             `banars/`,
         );
 
@@ -30,5 +30,16 @@ export class BanarService extends BaseService<Banar> {
         });
 
         return await this.banarRepository.save(createdBanar);
+    }
+
+    async getBanars() {
+        return await this.banarRepository.find({ 
+            where: { 
+                is_active: true,
+                started_at: LessThanOrEqual(new Date()),
+                ended_at: MoreThanOrEqual(new Date())
+
+            }
+        });
     }
 }

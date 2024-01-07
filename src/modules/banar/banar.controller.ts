@@ -14,6 +14,8 @@ import { Roles } from '../authentication/guards/roles.decorator';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { ActionResponse } from 'src/core/base/responses/action.response';
 import { Banar } from 'src/infrastructure/entities/banar/banar.entity';
+import { plainToInstance } from 'class-transformer';
+import { BannerResponse } from './dto/response/banner.response';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -41,5 +43,13 @@ export class BanarController {
         req.banar = banar;
         const result = await this.banarService.createBanar(req);
         return new ActionResponse<Banar>(result);
+    }
+
+    @Get()
+    // @Roles(Role.CLIENT)
+    async getBanars(): Promise<ActionResponse<BannerResponse[]>> {
+        const banners = await this.banarService.getBanars();
+        const result = plainToInstance(BannerResponse, banners, { excludeExtraneousValues: true })
+        return new ActionResponse<BannerResponse[]>(result);
     }
 }
