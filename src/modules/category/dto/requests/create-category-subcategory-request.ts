@@ -6,7 +6,7 @@ export class CategorySubcategoryRequest {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  category_id: string;
+  section_category_id: string;
 
   @ApiProperty()
   @IsNotEmpty()

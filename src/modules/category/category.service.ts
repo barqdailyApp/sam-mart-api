@@ -20,6 +20,7 @@ export class CategoryService extends BaseService<Category> {
   constructor(
     @InjectRepository(Category)
     private readonly category_repo: Repository<Category>,
+    
     @InjectRepository(Subcategory)
     private readonly subcategory_repo: Repository<Subcategory>,
     @InjectRepository(CategorySubCategory)
@@ -30,9 +31,9 @@ export class CategoryService extends BaseService<Category> {
     super(category_repo);
   }
 
-  async getCategorySubcategory(category_id: string) {
+  async getCategorySubcategory(section_category_id: string) {
     return await this.category_subcategory_repo.find({
-      where: { category_id: category_id },
+      where: { section_category_id: section_category_id },
       relations: { subcategory: true },
       order: { order_by: 'ASC' },
     });
@@ -63,13 +64,14 @@ export class CategoryService extends BaseService<Category> {
     return category;
   }
   async addSubcategoryToCategory(req:CategorySubcategoryRequest) {
-    const  category= await this.category_repo.findOne({
-      where: { id: req.category_id },
-      relations: { category_subCategory: true },
+    const  category= await this.category_subcategory_repo.findOne({
+      where: { section_category_id: req.section_category_id , subcategory_id: req.subcategory_id},
+      relations: { subcategory: true },
     });
-    if (category.category_subCategory.find((e) => e.subcategory_id === req.subcategory_id)) {
+  
+    if (category!=null)
       throw new BadRequestException('subcategory already exist');
-    }
+    
     return await this.category_subcategory_repo.save({
      ...req
     });
