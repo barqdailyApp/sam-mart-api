@@ -6,13 +6,11 @@ export class CreateBanarRequest {
     @ApiProperty({ type: 'file', required: true })
     banar: Express.Multer.File;
 
-    @ApiProperty()
-    @IsDateString()
+    @ApiProperty({  default: new Date().toISOString().split('T')[0]  })
     @IsNotEmpty()
     started_at: Date;
 
-    @ApiProperty()
-    @IsDateString()
+    @ApiProperty({  default: new Date().toISOString().split('T')[0]  })
     @IsNotEmpty()
     ended_at: Date;
 
