@@ -31,7 +31,6 @@ export class RegionService {
     return region;
   }
   async allRegionsCity(city_id: string): Promise<Region[]> {
-    await this.single(city_id);
     return await this.regionRepository.find({
       where: { city_id: city_id },
       relations: {
