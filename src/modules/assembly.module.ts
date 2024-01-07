@@ -1,4 +1,3 @@
-
 import { Module } from '@nestjs/common';
 
 import { UserModule } from './user/user.module';
@@ -13,27 +12,24 @@ import { AdditionalServiceModule } from './additional-service/additional-service
 import { SectionModule } from './section/section.module';
 import { CategoryModule } from './category/category.module';
 import { SubcategoryModule } from './subcategory/subcategory.module';
-
+import { ProductCategoryPriceModule } from './product-category-price/product-category-price.module';
 
 @Module({
-    imports: [
-
-        UserModule,
-        AuthenticationModule,
-        CountryModule,
-        CityModule,
-        RegionModule,
-        DriverModule,
-        ProductModule,
-        MeasurementUnitModule,
-        AdditionalServiceModule,
-        SectionModule,
-        CategoryModule,
-        SubcategoryModule
-    ],
-    exports: [
-
-    ],
-    providers: [],
+  imports: [
+    UserModule,
+    AuthenticationModule,
+    CountryModule,
+    CityModule,
+    RegionModule,
+    DriverModule,
+    ProductModule,
+    MeasurementUnitModule,
+    AdditionalServiceModule,
+    SectionModule,
+    CategoryModule,
+    ProductCategoryPriceModule
+  ],
+  exports: [],
+  providers: [],
 })
-export class AssemblyModule { }
+export class AssemblyModule {}

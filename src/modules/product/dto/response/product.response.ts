@@ -15,12 +15,14 @@ export class ProductResponse {
 
   @Expose() readonly description: string;
 
-  @Transform(({ value }) => toUrl(value))
-  @Expose()
-  readonly logo: string;
+
   @Expose() readonly is_active: boolean;
 
   @Expose() readonly is_recovered: boolean;
+
+  @Expose() readonly created_at: Date;
+
+  @Expose() readonly updated_at: Date;
 
   @Transform(({ value }) => plainToClass(ProductMeasurementResponse, value))
   @Expose()
@@ -29,8 +31,4 @@ export class ProductResponse {
   @Transform(({ value }) => plainToClass(ProductImagesResponse, value))
   @Expose()
   readonly product_images: ProductImagesResponse;
-
-  @Expose() readonly created_at: Date;
-
-  @Expose() readonly updated_at: Date;
 }

@@ -5,7 +5,8 @@ import { MeasurementUnitResponse } from 'src/modules/measurement-unit/dto/respon
 @Exclude()
 export class ProductImagesResponse {
   @Expose() readonly id: string;
-  
+  @Expose() readonly is_logo: boolean;
+
   @Transform(({ value }) => toUrl(value))
   @Expose() readonly url: string;
 

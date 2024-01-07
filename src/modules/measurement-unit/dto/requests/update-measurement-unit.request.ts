@@ -12,9 +12,6 @@ export class UpdateMeasurementUnitRequest {
     @IsString()
     name_en: string;
 
-    @ApiProperty({nullable: true,required:false})
-    @IsOptional()
-    @IsString()
-    abbreviation: string;
+
 
 }

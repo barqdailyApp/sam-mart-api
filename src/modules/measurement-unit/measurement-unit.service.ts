@@ -28,7 +28,7 @@ export class MeasurementUnitService {
       where: { id: measurement_unit_id },
     });
     if (!measurementUnit) {
-      throw new NotFoundException('Measurement Unit not found');
+      throw new NotFoundException('message_measurement_Unit_not_found');
     }
     return measurementUnit;
   }

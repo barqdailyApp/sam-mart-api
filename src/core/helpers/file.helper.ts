@@ -4,11 +4,11 @@ import { readEnv } from './env.helper';
 
 const getFileExtension = (file: Partial<Express.Multer.File>): string => {
   return file.originalname.split('.').pop().toLowerCase();
-}
+};
 
 const getFileName = (file: Partial<Express.Multer.File>): string => {
   return file.originalname.split('.').shift() + '-' + new Date().getTime();
-}
+};
 
 function toUrl(path: string, direct = false): string {
  
@@ -31,10 +31,7 @@ function ensureFilesExists(paths: string[] | string): void {
     );
 }
 
-function* moveTmpFile(
-  file: string,
-  dir: string,
-): Generator<string, void> {
+function* moveTmpFile(file: string, dir: string): Generator<string, void> {
   ensureDirExists(dir);
 
   let newFilePath = file.replace('/tmp/', dir);
@@ -67,7 +64,6 @@ function* moveTmpFiles(
   files.forEach((file, index) => fs.renameSync(file, newFilePathes[index]));
 }
 
-
 export {
   getFileExtension,
   getFileName,
@@ -76,4 +72,4 @@ export {
   toUrl,
   ensureDirExists,
   ensureFilesExists,
-}
+};

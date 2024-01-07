@@ -12,10 +12,7 @@ export class CreateMeasurementUnitRequest {
   @IsString()
   name_en: string;
 
-  @ApiProperty({ example: 'KG' })
-  @IsNotEmpty()
-  @IsString()
-  abbreviation: string;
+
 
   
 

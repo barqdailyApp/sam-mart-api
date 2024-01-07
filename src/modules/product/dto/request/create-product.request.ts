@@ -12,6 +12,7 @@ import {
   isArray,
 } from 'class-validator';
 import { CreateProductMeasurementRequest } from './create-product-measurement.request';
+import { CreateProductImageRequest } from './create-product-image.request';
 
 export class CreateProductRequest {
   @ApiProperty()
@@ -29,15 +30,11 @@ export class CreateProductRequest {
   @IsString()
   description: string;
 
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
-  logo: string;
 
   @ApiProperty({ default: true })
   @IsNotEmpty()
   @Transform(({ value }) => {
-    return value === 'true';
+    return value === 'true'  || value === true;
   })
   @IsBoolean()
   is_active: boolean;
@@ -45,15 +42,15 @@ export class CreateProductRequest {
   @ApiProperty({ default: true })
   @IsNotEmpty()
   @Transform(({ value }) => {
-    return value === 'true';
+    return value === 'true'  || value === true;
   })
   @IsBoolean()
   is_recovered: boolean;
 
-  @ApiProperty()
+  @ApiProperty({ isArray: true, type: () => CreateProductImageRequest })
   @IsNotEmpty()
   @IsArray()
-  product_images: string[];
+  product_images: CreateProductImageRequest[];
 
   @ApiProperty({ isArray: true, type: () => CreateProductMeasurementRequest }) // Use a factory function to specify the array type
   measurements: CreateProductMeasurementRequest[];

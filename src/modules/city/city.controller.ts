@@ -23,6 +23,12 @@ import { CityResponse } from './dto/responses/cityresponse';
 import { City } from 'src/infrastructure/entities/city/city.entity';
 import { UpdateCityRequest } from './dto/requests/update-city.request';
 import { ActionResponse } from 'src/core/base/responses/action.response';
+@ApiBearerAuth()
+@ApiHeader({
+  name: 'Accept-Language',
+  required: false,
+  description: 'Language header: en, ar',
+})
 @ApiTags('City')
 @Controller('city')
 export class CityController {

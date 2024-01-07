@@ -1,0 +1,68 @@
+[
+    {
+        "name_ar": "تفاح",
+        "name_en": "ِApples",
+        "description": "Apples are often eaten fresh as a snack or used in a variety of culinary applications, such as pies, salads, juices, and sauces.",
+        "is_active": true,
+        "is_recovered": true,
+        "product_images": [
+            {
+                "url": "assets/products/apple1.png",
+                "is_logo": false
+            },
+            {
+                "url": "assets/products/apple2.png",
+                "is_logo": true
+            }
+        ],
+        "product_measurements": [
+            {
+                "conversion_factor": 1.00,
+                "measurement_unit": {
+                    "name_en": "Gram"
+                },
+                "is_main_unit": true
+            },
+            {
+                "conversion_factor": 1000.00,
+                "measurement_unit": {
+                    "name_en": "Kilogram"
+                },
+                "is_main_unit": false
+            }
+        ]
+    },
+    {
+        "name_ar": "موز",
+        "name_en": "Bananas",
+        "description": "Bananas are a popular tropical fruit known for their sweet and creamy flavor. They are often eaten fresh, added to smoothies, or used in baking and desserts.",
+        "is_active": true,
+        "is_recovered": true,
+        "product_images": [
+            {
+                "url": "assets/products/banana1.png",
+                "is_logo": false
+            },
+            {
+                "url": "assets/products/banana2.png",
+                "is_logo": true
+            }
+        ],
+        "product_measurements": [
+            {
+                "conversion_factor": 1.00,
+                "measurement_unit": {
+                    "name_en": "Gram"
+                },
+                "is_main_unit": true
+            },
+            {
+                "conversion_factor": 1000.00,
+                "measurement_unit": {
+                    "name_en": "Kilogram"
+                },
+                "is_main_unit": false
+            }
+        ]
+    }
+]
