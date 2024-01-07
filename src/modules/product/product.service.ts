@@ -15,6 +15,8 @@ import { UpdateProductImageRequest } from './dto/request/update-product-image.re
 import { ProductFilter } from './dto/filter/product.filter';
 import { Subcategory } from 'src/infrastructure/entities/category/subcategory.entity';
 import { ProductSubCategory } from 'src/infrastructure/entities/product/product-sub-category.entity';
+import { ProductOffer } from 'src/infrastructure/entities/product/product-offer.entity';
+import { CreateProductOfferRequest } from './dto/request/create-product-offer.request';
 
 @Injectable()
 export class ProductService {
@@ -30,6 +32,10 @@ export class ProductService {
 
     @InjectRepository(ProductSubCategory)
     private productSubCategory_repo: Repository<ProductSubCategory>,
+
+    @InjectRepository(ProductOffer)
+    private productOffer_repo: Repository<ProductOffer>,
+
     @Inject(CreateProductTransaction)
     private readonly addProductTransaction: CreateProductTransaction,
 
@@ -43,8 +49,21 @@ export class ProductService {
     private readonly updateProductImageTransaction: UpdateProductImageTransaction,
   ) {}
 
-  async create(createProductRequest: CreateProductRequest): Promise<Product> {
+  async createProduct(
+    createProductRequest: CreateProductRequest,
+  ): Promise<Product> {
     return await this.addProductTransaction.run(createProductRequest);
+  }
+
+  async createProductOffer(
+    product_category_price_id: string,
+    createProductOfferRequest: CreateProductOfferRequest,
+  ) {
+    const createProductOffer = this.productOffer_repo.create(
+      createProductOfferRequest,
+    );
+    createProductOffer.product_category_price_id = product_category_price_id;
+    return await this.productOffer_repo.save(createProductOffer);
   }
 
   async updateProduct(
@@ -106,7 +125,6 @@ export class ProductService {
       skip,
       take: limit,
       where: {
-
         product_measurements: {
           product_category_prices: {
             product_sub_category: {

@@ -20,6 +20,7 @@ import { ProductCategoryPrice } from '../entities/product/product-category-price
 import { ProductAdditionalService } from '../entities/product/product-additional-service.entity';
 import { ProductCategoryPriceModule } from 'src/modules/product-category-price/product-category-price.module';
 import { ProductSubCategory } from '../entities/product/product-sub-category.entity';
+import { ProductOffer } from '../entities/product/product-offer.entity';
 
 export const DB_ENTITIES = [
   User,
@@ -44,6 +45,7 @@ export const DB_ENTITIES = [
   ProductAdditionalService,
   ProductCategoryPriceModule,
   ProductSubCategory,
+  ProductOffer
 ];
 
 export const DB_VIEWS = [];

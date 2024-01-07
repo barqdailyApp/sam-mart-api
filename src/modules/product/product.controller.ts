@@ -30,6 +30,7 @@ import { UpdateProductRequest } from './dto/request/update-product.request';
 import { UpdateProductMeasurementRequest } from './dto/request/update-product-measurement.request';
 import { UpdateProductImageRequest } from './dto/request/update-product-image.request';
 import { ProductFilter } from './dto/filter/product.filter';
+import { CreateProductOfferRequest } from './dto/request/create-product-offer.request';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -43,13 +44,29 @@ export class ProductController {
     private readonly productService: ProductService,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
   ) {}
+
   @Post('create-product')
   async createProduct(@Body() createProductRequest: CreateProductRequest) {
-    const product = await this.productService.create(createProductRequest);
+    const product = await this.productService.createProduct(
+      createProductRequest,
+    );
     const productResponse = plainToClass(ProductResponse, product);
 
     return new ActionResponse(this._i18nResponse.entity(productResponse));
   }
+
+  @Post('create-product-offer/:product_category_price_id')
+  async createProductOffer(
+    @Param('product_category_price_id') product_category_price_id: string,
+    @Body() createProductOfferRequest: CreateProductOfferRequest,
+  ) {
+    const product = await this.productService.createProductOffer(
+      product_category_price_id,
+      createProductOfferRequest,
+    );
+    return new ActionResponse(product);
+  }
+
   @Put('update-product')
   async updateProduct(@Body() updateProductRequest: UpdateProductRequest) {
     const product = await this.productService.updateProduct(
