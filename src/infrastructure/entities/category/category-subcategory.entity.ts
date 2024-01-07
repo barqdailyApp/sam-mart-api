@@ -1,18 +1,20 @@
-import { Column, Entity, ManyToOne } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
 import { Subcategory } from "./subcategory.entity";
 import { Category } from "./category.entity";
 import { BaseEntity } from "src/infrastructure/base/base.entity";
+import { SectionCategory } from "../section/section-category.entity";
 
 @Entity()
 
 export class CategorySubCategory extends BaseEntity{
-    @ManyToOne(() => Category, category => category.category_subCategory)
-    category: Category
+    @ManyToOne(() => SectionCategory, SectionCategory => SectionCategory.category_subCategory)
+    section_category: SectionCategory
 
     @Column({ name: 'category_id' })
-    category_id: string
+    section_category_id: string
 
     @ManyToOne(() => Subcategory, subcategory => subcategory.category_subCategory)  
+    @JoinColumn({ name: 'subcategory_id' })
     subcategory: Subcategory
 
     @Column({ name: 'subcategory_id' })

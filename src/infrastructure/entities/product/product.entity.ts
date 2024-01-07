@@ -3,6 +3,8 @@ import { Column, Entity, OneToMany } from 'typeorm';
 import { ProductImage } from './product-image.entity';
 import { ProductMeasurement } from './product-measurement.entity';
 import { ProductSubCategory } from './product-sub-category.entity';
+import { WarehouseOperations } from '../warehouse/warehouse-opreations.entity';
+import { WarehouseProducts } from '../warehouse/warehouse-products.entity';
 
 @Entity()
 export class Product extends AuditableEntity {
@@ -34,4 +36,8 @@ export class Product extends AuditableEntity {
     (productMeasurement) => productMeasurement.product,
   )
   product_measurements: ProductMeasurement[];
+
+
+  @OneToMany(()=>WarehouseProducts,warehouseProducts=>warehouseProducts.product)
+  warehouses:WarehouseProducts[]
 }

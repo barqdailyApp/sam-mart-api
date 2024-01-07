@@ -1,7 +1,8 @@
 import { BaseEntity } from "src/infrastructure/base/base.entity";
-import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
 import { Section } from "./section.entity";
 import { Category } from "../category/category.entity";
+import { CategorySubCategory } from "../category/category-subcategory.entity";
 
 @Entity()
 
@@ -16,6 +17,9 @@ section_id: string
 @ManyToOne(() => Category, category => category.section_categories,{onDelete:"CASCADE"})
 @JoinColumn({ name: 'category_id' })
 category: Category
+
+@OneToMany(() => CategorySubCategory, categorySubCategory => categorySubCategory.section_category)
+  category_subCategory: CategorySubCategory[];
 
 @Column({ name: 'category_id' })
 category_id: string
