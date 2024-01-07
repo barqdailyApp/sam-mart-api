@@ -10,7 +10,7 @@ export class CategorySubCategory extends BaseEntity{
     @ManyToOne(() => SectionCategory, SectionCategory => SectionCategory.category_subCategory)
     section_category: SectionCategory
 
-    @Column({ name: 'category_id' })
+    @Column()
     section_category_id: string
 
     @ManyToOne(() => Subcategory, subcategory => subcategory.category_subCategory)  
