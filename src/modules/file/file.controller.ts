@@ -32,7 +32,7 @@ export class FileController {
         @UploadedFile((new UploadValidator()).build()) file: Express.Multer.File
     ) {
         req.file = file;
-        const path = await this._service.upload(req);
+        const path = await this._service.upload(file);
         const result = new UploadFileResponse(path);
         return new ActionResponse<UploadFileResponse>(result);
     }

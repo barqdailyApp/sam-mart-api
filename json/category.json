@@ -4,28 +4,28 @@
       "name_en": "Vegetables and Fruits",
       "order_by": 1,
       "is_active": true,
-      "logo": "https://example.com/vegetables-fruits.png",
+      "logo": "assets/images/categories/vegetables.png",
       "subcategories": [
         {
           "name_ar": "خضروات",
           "name_en": "Vegetables",
           "order_by": 1,
           "is_active": true,
-          "logo": "https://example.com/vegetables.png"
+          "logo": "assets/images/subcategories/vegetable.png"
         },
         {
           "name_ar": "فواكه طازجة",
           "name_en": "Fresh Fruits",
           "order_by": 2,
           "is_active": true,
-          "logo": "https://example.com/fresh-fruits.png"
+          "logo":"assets/images/subcategories/fruits.png"
         },
         {
           "name_ar": "مكسرات",
           "name_en": "Nuts",
           "order_by": 3,
           "is_active": true,
-          "logo": "https://example.com/nuts.png"
+          "logo": "assets/images/subcategories/nuts.png"
         }
       ]
     },
@@ -34,21 +34,21 @@
       "name_en": "Frozen Foods",
       "order_by": 2,
       "is_active": true,
-      "logo": "https://example.com/frozen-foods.png",
+      "logo":  "assets/images/categories/frozen-food.png",
       "subcategories": [
         {
           "name_ar": "أطعمة مجمدة",
           "name_en": "Frozen Meals",
           "order_by": 1,
           "is_active": true,
-          "logo": "https://example.com/frozen-meals.png"
+          "logo": "assets/images/categories/frozen-food.png"
         },
         {
           "name_ar": "آيس كريم",
           "name_en": "Ice Cream",
           "order_by": 2,
           "is_active": true,
-          "logo": "https://example.com/ice-cream.png"
+          "logo": "assets/images/categories/frozen.png"
         }
       ]
     },
@@ -57,21 +57,21 @@
       "name_en": "Dairy Products",
       "order_by": 3,
       "is_active": true,
-      "logo": "https://example.com/dairy-products.png",
+      "logo": "assets/images/subcategories/dairy-products.png",
       "subcategories": [
         {
           "name_ar": "حليب",
           "name_en": "Milk",
           "order_by": 1,
           "is_active": true,
-          "logo": "https://example.com/milk.png"
+          "logo":"assets/images/subcategories/milk.png"
         },
         {
           "name_ar": "جبن",
           "name_en": "Cheese",
           "order_by": 2,
           "is_active": true,
-          "logo": "https://example.com/cheese.png"
+          "logo": "assets/images/subcategories/cheese.png"
         }
       ]
     },
@@ -80,28 +80,28 @@
           "name_en": "Meat and Seafood",
           "order_by": 4,
           "is_active": true,
-          "logo": "https://example.com/meat-seafood.png",
+          "logo": "assets/images/categories/frozen-food.png",
           "subcategories": [
             {
               "name_ar": "لحوم حمراء",
               "name_en": "Red Meat",
               "order_by": 1,
               "is_active": true,
-              "logo": "https://example.com/red-meat.png"
+              "logo": "assets/images/subcategories/meat.png"
             },
             {
               "name_ar": "لحوم بيضاء",
               "name_en": "White Meat",
               "order_by": 2,
               "is_active": true,
-              "logo": "https://example.com/white-meat.png"
+              "logo":  "assets/images/subcategories/chicken-leg.png"
             },
             {
               "name_ar": "أسماك طازجة",
               "name_en": "Fresh Fish",
               "order_by": 3,
               "is_active": true,
-              "logo": "https://example.com/fresh-fish.png"
+              "logo": "assets/images/subcategories/clown-fish.png"
             }
           ]
         },
@@ -110,28 +110,28 @@
           "name_en": "Ready-to-Eat",
           "order_by": 5,
           "is_active": true,
-          "logo": "https://example.com/ready-to-eat.png",
+          "logo": "assets/images/categories/fast-food.png",
           "subcategories": [
             {
               "name_ar": "وجبات سريعة",
               "name_en": "Fast Food",
               "order_by": 1,
               "is_active": true,
-              "logo": "https://example.com/fast-food.png"
+              "logo": "assets/images/categories/fast-food.png"
             },
             {
               "name_ar": "بيتزا",
               "name_en": "Pizza",
               "order_by": 2,
               "is_active": true,
-              "logo": "https://example.com/pizza.png"
+              "logo": "assets/images/subcategories/pizza.png"
             },
             {
               "name_ar": "مأكولات آسيوية",
               "name_en": "Asian Cuisine",
               "order_by": 3,
               "is_active": true,
-              "logo": "https://example.com/asian-cuisine.png"
+              "logo":  "assets/images/subcategories/ramen.png"
             }
           ]
         },
@@ -140,21 +140,21 @@
           "name_en": "Beverages",
           "order_by": 6,
           "is_active": true,
-          "logo": "https://example.com/beverages.png",
+          "logo": "assets/images/subcategories/soft-drink.png",
           "subcategories": [
             {
               "name_ar": "مشروبات غازية",
               "name_en": "Soft Drinks",
               "order_by": 1,
               "is_active": true,
-              "logo": "https://example.com/soft-drinks.png"
+              "logo": "assets/images/subcategories/soft-drink.png"
             },
             {
               "name_ar": "عصائر طازجة",
               "name_en": "Fresh Juices",
               "order_by": 2,
               "is_active": true,
-              "logo": "https://example.com/fresh-juices.png"
+              "logo": "assets/images/subcategories/juices.png"
             }
           ]
         },
@@ -163,28 +163,28 @@
           "name_en": "Staples",
           "order_by": 7,
           "is_active": true,
-          "logo": "https://example.com/staples.png",
+          "logo": "assets/images/categories/bread.png",
           "subcategories": [
             {
               "name_ar": "أرز ومعكرونة",
               "name_en": "Rice and Pasta",
               "order_by": 1,
               "is_active": true,
-              "logo": "https://example.com/rice-pasta.png"
+              "logo": "assets/images/subcategories/rice.png"
             },
             {
               "name_ar": "زيوت وتوابل",
               "name_en": "Oils and Spices",
               "order_by": 2,
               "is_active": true,
-              "logo": "https://example.com/oils-spices.png"
+              "logo": "assets/images/subcategories/seasoning.png"
             },
             {
               "name_ar": "علب ومعلبات",
               "name_en": "Canned Goods",
               "order_by": 3,
               "is_active": true,
-              "logo": "https://example.com/canned-goods.png"
+              "logo": "assets/images/subcategories/can.png"
             }
           ]
         }
