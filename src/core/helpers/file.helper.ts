@@ -11,14 +11,11 @@ const getFileName = (file: Partial<Express.Multer.File>): string => {
 };
 
 function toUrl(path: string, direct = false): string {
+ 
   if (path && path.startsWith('http')) return path;
   const host = readEnv('APP_HOST');
-
-  if (path.includes('assets')) {
-    return `${host}/${path}`;
-  } else {
-    return `${host}/v1/${path}`;
-  }
+  if (direct || path.includes('assets')) return `${host}/${path}`;
+  return `${host}/v1/${path}`;
 }
 
 function ensureDirExists(path: string): void {

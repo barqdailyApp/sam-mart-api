@@ -82,7 +82,7 @@ export class CategorySeeder implements Seeder {
     }
 
     const section = await this.section_repo.find();
-    const categories = await this.category_repo.find();
+    const categories = await this.category_repo.find({order:{name_en:'DESC'}});
 
     for (let index = 0; index < categories.length ; index++) {
       const sectionCategory = new SectionCategory({
@@ -95,7 +95,9 @@ export class CategorySeeder implements Seeder {
   }
 
   async drop(): Promise<any> {
+    this.subcategory_repo.delete({});
     this.section_category_repo.delete({});
+
     this.categorySubCategory.delete({});
     this.section_repo.delete({});
     return this.category_repo.delete({});

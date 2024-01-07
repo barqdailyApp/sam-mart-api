@@ -76,6 +76,7 @@ export class CategoryController {
         (e) =>
           new SubcategoryResponse({
             ...e,
+            logo: e.subcategory.logo,
             name: e.subcategory.name,
             sub_category_id: e.subcategory_id,
           }),
@@ -83,7 +84,7 @@ export class CategoryController {
     );
   }
 
-  @Post('/subcategory')
+  @Post('/add-subcategory')
   async addSubcategoryToCategory(@Body() req: CategorySubcategoryRequest) {
     return new ActionResponse(
       await this.categoryService.addSubcategoryToCategory(req),

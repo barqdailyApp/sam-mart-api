@@ -3,7 +3,7 @@
 {
 "name_ar":"سام مارت",
 "name_en":"sam mart",
-"logo":"assets/images/sections/mart.png",
+"logo":"assets/images/sections/market.png",
 "order_by":"1",
 "delivery_price":"40",
 "min_order_price":"100",
@@ -12,10 +12,10 @@
 {
     "name_ar":"سام مطاعم",
     "name_en":"sam resturants",
-    "logo":"assets/images/sections/mart.png",
+    "logo":"assets/images/sections/market.png",
     "order_by":"2"
     ,
-    "allowed_roles":["CLIENT","RESTURANT"],
+    "allowed_roles":["RESTURANT"],
     
     "delivery_price":"100",
     "min_order_price":"500"

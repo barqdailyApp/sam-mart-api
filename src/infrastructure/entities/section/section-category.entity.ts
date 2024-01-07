@@ -7,13 +7,13 @@ import { Category } from "../category/category.entity";
 
 export class SectionCategory extends BaseEntity{
 
-@ManyToOne(() => Section, section => section.section_categories)
+@ManyToOne(() => Section, section => section.section_categories,{onDelete:"CASCADE"})
 @JoinColumn({ name: 'section_id' })
 section: Section
 @Column({ name: 'section_id' })
 section_id: string
 
-@ManyToOne(() => Category, category => category.section_categories)
+@ManyToOne(() => Category, category => category.section_categories,{onDelete:"CASCADE"})
 @JoinColumn({ name: 'category_id' })
 category: Category
 
