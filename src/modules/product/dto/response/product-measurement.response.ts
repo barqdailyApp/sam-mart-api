@@ -16,14 +16,12 @@ export class ProductMeasurementResponse {
   @Expose()
   readonly measurement_unit: MeasurementUnitResponse;
 
-
-  // @Transform(({ value }) => plainToClass(ProductCategoryPriceResponse, value))
-  //  @Transform(({ value }) =>value.map((item: any) => plainToClass(ProductCategoryPriceResponse, item)))
-  // @Expose()
-  // readonly product_category_prices: ProductCategoryPriceResponse;
-
-
-  @Transform(({ value }) => value && value.length > 0 ? plainToClass(ProductCategoryPriceResponse, value[0]) : null)
+  @Transform(({ value }) => {
+  
+    return value && value.length > 0
+      ? plainToClass(ProductCategoryPriceResponse, value[0])
+      : null;
+  })
   @Expose()
   readonly product_category_prices: ProductCategoryPriceResponse;
 
