@@ -21,6 +21,7 @@ import { ProductAdditionalService } from '../entities/product/product-additional
 import { ProductCategoryPriceModule } from 'src/modules/product-category-price/product-category-price.module';
 import { ProductSubCategory } from '../entities/product/product-sub-category.entity';
 import { Banar } from '../entities/banar/banar.entity';
+import { MostHitSubcategory } from '../entities/category/most-hit-subcategory.entity';
 
 export const DB_ENTITIES = [
   User,
@@ -46,6 +47,7 @@ export const DB_ENTITIES = [
   ProductCategoryPriceModule,
   ProductSubCategory,
   Banar,
+  MostHitSubcategory,
 ];
 
 export const DB_VIEWS = [];
