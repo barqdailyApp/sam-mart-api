@@ -58,15 +58,16 @@ export class SubcategoryService extends BaseService<Subcategory> {
 
 
   async updateMostHitSubCategory(
-    sub_category_id: string,
+    { sub_category_id, section_category_id }: { sub_category_id?: string, section_category_id?: string }
   ) {
     const findCategorySubCategory = await this.categorySubCategoryRepository
       .find({
-        where: {
-          subcategory_id: sub_category_id
-        }
+        where: [
+          { subcategory_id: sub_category_id },
+          { section_category_id: section_category_id }
+        ]
       })
-
+      
     for (const categorySubCategory of findCategorySubCategory) {
       const findMostHitSubCategory = await this.mostHitSubcategoryRepository.findOne({
         where: {
