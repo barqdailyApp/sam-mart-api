@@ -5,6 +5,7 @@ import DatabaseSetup from './database.setup';
 import StorageSetup from './storage.setup';
 import ServeStaticSetup from './serve-static.setup';
 import I18nSetup from './i18n.setup';
+import ScheduleSetup from './schedule.setup';
 
 export default () => [
   ConfigurationSetup(), // Configuration Setup
@@ -12,5 +13,6 @@ export default () => [
   StorageSetup(), // Storage Setup
   CacheSetup(), // Cache Setup
   ServeStaticSetup(), // Serve Static Setup
-  I18nSetup() // I18n Setup
+  I18nSetup(), // I18n Setup
+  ScheduleSetup() // Schedule Setup
 ];
