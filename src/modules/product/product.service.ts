@@ -28,7 +28,7 @@ export class ProductService {
     private readonly productMeasurementRepository: Repository<ProductMeasurement>,
     @InjectRepository(Subcategory)
     private subcategory_repo: Repository<Subcategory>,
-  
+
 
     @InjectRepository(ProductSubCategory)
     private productSubCategory_repo: Repository<ProductSubCategory>,
@@ -106,7 +106,7 @@ export class ProductService {
       throw new NotFoundException(`Subcategory ID not found`);
     }
 
-    await this.subCategoryService.updateMostHitSubCategory(sub_category_id)
+    await this.subCategoryService.updateMostHitSubCategory({ sub_category_id })
 
     return await this.productRepository.find({
       skip,
