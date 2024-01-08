@@ -9,12 +9,18 @@ import { ImageManager } from 'src/integration/sharp/image.manager';
 import { Repository } from 'typeorm';
 import { CreateCategoryRequest } from '../category/dto/requests/create-category-request';
 import { StorageManager } from 'src/integration/storage/storage.manager';
+import { MostHitSubcategory } from 'src/infrastructure/entities/category/most-hit-subcategory.entity';
+import { CategorySubCategory } from 'src/infrastructure/entities/category/category-subcategory.entity';
 
 @Injectable()
 export class SubcategoryService extends BaseService<Subcategory> {
   constructor(
     @InjectRepository(Subcategory)
     private readonly subcategory_repo: Repository<Subcategory>,
+    @InjectRepository(MostHitSubcategory)
+    private mostHitSubcategoryRepository: Repository<MostHitSubcategory>,
+    @InjectRepository(CategorySubCategory)
+    private categorySubCategoryRepository: Repository<CategorySubCategory>,
     @Inject(StorageManager) private readonly storageManager: StorageManager,
     @Inject(ImageManager) private readonly imageManager: ImageManager,
   ) {
@@ -51,5 +57,35 @@ export class SubcategoryService extends BaseService<Subcategory> {
   }
 
 
-  
+  async updateMostHitSubCategory(
+    sub_category_id: string,
+  ) {
+    const findCategorySubCategory = await this.categorySubCategoryRepository
+      .find({
+        where: {
+          subcategory_id: sub_category_id
+        }
+      })
+
+    for (const categorySubCategory of findCategorySubCategory) {
+      const findMostHitSubCategory = await this.mostHitSubcategoryRepository.findOne({
+        where: {
+          category_sub_category_id: categorySubCategory.id,
+        },
+      });
+
+      if (findMostHitSubCategory) {
+        findMostHitSubCategory.current_hit += 1;
+        await this.mostHitSubcategoryRepository.save(findMostHitSubCategory);
+      } else {
+        const newSubCategory = this.mostHitSubcategoryRepository.create({
+          categorySubCategory,
+          current_hit: 1,
+        });
+        await this.mostHitSubcategoryRepository.save(newSubCategory);
+      }
+    }
+  }
+
+
 }
