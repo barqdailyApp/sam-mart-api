@@ -67,4 +67,12 @@ export class BanarService extends BaseService<Banar> {
 
         return await this.banarRepository.save(banarEntity);
     }
+
+    async deleteBanar(id: string) {
+        const banar = await this.banarRepository.findOne({ where: { id } });
+        if (!banar) {
+            throw new NotFoundException("Banar not found");
+        }
+        return await this.banarRepository.remove(banar);
+    }
 }
