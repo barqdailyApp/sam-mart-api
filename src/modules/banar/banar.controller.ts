@@ -1,7 +1,7 @@
 import {
     Body,
     ClassSerializerInterceptor,
-    Controller, Get, Param, Patch, Post, UploadedFile, UseGuards, UseInterceptors,
+    Controller, Delete, Get, Param, Patch, Post, UploadedFile, UseGuards, UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { BanarService } from './banar.service';
@@ -67,6 +67,16 @@ export class BanarController {
     ): Promise<ActionResponse<BannerResponse>> {
         if(banar) req.banar = banar;
         const banner = await this.banarService.updateBanar(id, req);
+        const result = plainToInstance(BannerResponse, banner, { excludeExtraneousValues: true })
+        return new ActionResponse<BannerResponse>(result);
+    }
+
+    @Delete(":id")
+    // @Roles(Role.ADMIN)
+    async deleteBanar(
+        @Param('id') id: string,
+    ): Promise<ActionResponse<BannerResponse>> {
+        const banner = await this.banarService.deleteBanar(id);
         const result = plainToInstance(BannerResponse, banner, { excludeExtraneousValues: true })
         return new ActionResponse<BannerResponse>(result);
     }
