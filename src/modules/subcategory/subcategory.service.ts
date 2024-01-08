@@ -13,6 +13,7 @@ import { MostHitSubcategory } from 'src/infrastructure/entities/category/most-hi
 import { CategorySubCategory } from 'src/infrastructure/entities/category/category-subcategory.entity';
 import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { QueryHitsSubCategoryRequest } from './dto/request/query-hits-subcategory.request';
 
 @Injectable()
 export class SubcategoryService extends BaseService<Subcategory> {
@@ -91,22 +92,27 @@ export class SubcategoryService extends BaseService<Subcategory> {
   }
 
 
-  async getMostHitSubcategory(paginatedRequest: PaginatedRequest) {
-    let { page, limit, select } = paginatedRequest;
+  async getMostHitSubcategory(queryRequest: QueryHitsSubCategoryRequest) {
+    let { page, limit, section_category_id, section_id } = queryRequest;
 
     page = page || 1;
     limit = limit || 10;
 
+
     const queryOptions: any = {
-      relations: { subcategory: true },
+      where: {
+        categorySubCategory: {
+          section_category_id: section_category_id,
+          section_category: {
+            section_id: section_id
+          }
+        }
+      },
+      relations: ['categorySubCategory', 'categorySubCategory.subcategory', 'categorySubCategory.section_category'],
       order: { previous_hit: 'DESC', current_hit: 'DESC' },
       skip: (page - 1) * limit,
       take: limit,
     };
-
-    if (select) {
-      queryOptions.select = select;
-    }
 
     return await this.mostHitSubcategoryRepository.find(queryOptions);
   }
