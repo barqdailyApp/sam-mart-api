@@ -14,6 +14,8 @@ import { StorageManager } from 'src/integration/storage/storage.manager';
 import { CreateCategoryRequest } from './dto/requests/create-category-request';
 import { CategorySubcategoryRequest } from './dto/requests/create-category-subcategory-request';
 import { Subcategory } from 'src/infrastructure/entities/category/subcategory.entity';
+import { FileService } from '../file/file.service';
+import { UpdateCategoryRequest } from './dto/requests/update-category-request';
 
 @Injectable()
 export class CategoryService extends BaseService<Category> {
@@ -27,9 +29,14 @@ export class CategoryService extends BaseService<Category> {
     private readonly category_subcategory_repo: Repository<CategorySubCategory>,
     @Inject(StorageManager) private readonly storageManager: StorageManager,
     @Inject(ImageManager) private readonly imageManager: ImageManager,
+    @Inject(FileService) private _fileService: FileService,
   ) {
     super(category_repo);
   }
+
+
+
+
 
   async getCategorySubcategory(section_category_id: string) {
     return await this.category_subcategory_repo.find({
@@ -61,6 +68,22 @@ export class CategoryService extends BaseService<Category> {
       category.logo = path;
     }
     await this._repo.save(category);
+    return category;
+  }
+  async updateCategory(req: UpdateCategoryRequest): Promise<Category> {
+    const category = await this._repo.findOne({where:{id:req.id}});
+    
+    if (req.logo) {
+
+    await  this._fileService.delete (category.logo)
+      // resize image to 300x300
+   const logo=  await this._fileService.upload(req.logo)
+   
+
+      // set avatar path
+      category.logo = logo;
+    }
+    await this._repo.update(category.id,{...plainToInstance(Category, req),logo:category.logo});
     return category;
   }
   async addSubcategoryToCategory(req:CategorySubcategoryRequest) {

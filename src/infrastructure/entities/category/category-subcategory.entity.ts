@@ -7,7 +7,8 @@ import { SectionCategory } from "../section/section-category.entity";
 @Entity()
 
 export class CategorySubCategory extends BaseEntity{
-    @ManyToOne(() => SectionCategory, SectionCategory => SectionCategory.category_subCategory)
+    @ManyToOne(() => SectionCategory, SectionCategory => SectionCategory.category_subCategory,{onDelete:"CASCADE"})
+    @JoinColumn({ name: 'section_category_id' })
     section_category: SectionCategory
 
     @Column()

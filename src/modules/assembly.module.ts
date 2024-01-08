@@ -28,6 +28,7 @@ import { WarehouseModule } from './warehouse/warehouse.module';
     AdditionalServiceModule,
     SectionModule,
     CategoryModule,
+    SubcategoryModule,
     ProductCategoryPriceModule,
     WarehouseModule
   ],
