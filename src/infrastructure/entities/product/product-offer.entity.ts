@@ -6,7 +6,7 @@ import { DiscountType } from 'src/infrastructure/data/enums/discount-type.enum';
 
 @Entity()
 export class ProductOffer extends AuditableEntity {
-  @OneToOne(() => ProductCategoryPrice)
+  @OneToOne(() => ProductCategoryPrice, (product_category_price) => product_category_price.product_offer)
   @JoinColumn({ name: 'product_category_price_id' })
   product_category_price: ProductCategoryPrice;
 

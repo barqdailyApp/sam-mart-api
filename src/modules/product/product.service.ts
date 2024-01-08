@@ -17,6 +17,7 @@ import { Subcategory } from 'src/infrastructure/entities/category/subcategory.en
 import { ProductSubCategory } from 'src/infrastructure/entities/product/product-sub-category.entity';
 import { ProductOffer } from 'src/infrastructure/entities/product/product-offer.entity';
 import { CreateProductOfferRequest } from './dto/request/create-product-offer.request';
+import { CategorySubCategory } from 'src/infrastructure/entities/category/category-subcategory.entity';
 
 @Injectable()
 export class ProductService {
@@ -27,11 +28,11 @@ export class ProductService {
     private readonly productImageRepository: Repository<ProductImage>,
     @InjectRepository(ProductMeasurement)
     private readonly productMeasurementRepository: Repository<ProductMeasurement>,
-    @InjectRepository(Subcategory)
-    private subcategory_repo: Repository<Subcategory>,
+    @InjectRepository(CategorySubCategory)
+    private readonly categorySubcategory_repo: Repository<CategorySubCategory>,
 
     @InjectRepository(ProductSubCategory)
-    private productSubCategory_repo: Repository<ProductSubCategory>,
+    private readonly productSubCategory_repo: Repository<ProductSubCategory>,
 
     @InjectRepository(ProductOffer)
     private productOffer_repo: Repository<ProductOffer>,
@@ -107,17 +108,17 @@ export class ProductService {
 
   async subCategoryAllProducts(
     productFilter: ProductFilter,
-    sub_category_id: string,
+    categorySubCategory_id: string,
   ): Promise<Product[]> {
     const { page, limit } = productFilter;
 
     const skip = (page - 1) * limit;
 
     //* Check if sub category exist
-    const subCategory = await this.subcategory_repo.findOne({
-      where: { id: sub_category_id },
+    const categorySubcategory = await this.categorySubcategory_repo.findOne({
+      where: { id: categorySubCategory_id },
     });
-    if (!subCategory) {
+    if (!categorySubcategory) {
       throw new NotFoundException(`Subcategory ID not found`);
     }
 
@@ -128,7 +129,7 @@ export class ProductService {
         product_measurements: {
           product_category_prices: {
             product_sub_category: {
-              sub_category_id,
+              categorySubCategory_id,
             },
           },
         },
@@ -137,6 +138,8 @@ export class ProductService {
         product_images: true,
         product_measurements: {
           product_category_prices: {
+            product_offer: true,
+
             product_additional_services: {
               additional_service: true,
             },
@@ -149,14 +152,14 @@ export class ProductService {
 
   async singleProduct(
     product_id: string,
-    sub_category_id?: string,
+    categorySubCategory_id?: string,
   ): Promise<Product> {
     //* Check if sub category exist
-    if (sub_category_id) {
-      const subCategory = await this.subcategory_repo.findOne({
-        where: { id: sub_category_id },
+    if (categorySubCategory_id) {
+      const categorySubcategory = await this.categorySubcategory_repo.findOne({
+        where: { id: categorySubCategory_id },
       });
-      if (!subCategory) {
+      if (!categorySubcategory) {
         throw new NotFoundException(`Subcategory ID not found`);
       }
     }
@@ -167,7 +170,7 @@ export class ProductService {
         product_measurements: {
           product_category_prices: {
             product_sub_category: {
-              sub_category_id,
+              categorySubCategory_id,
             },
           },
         },
@@ -176,6 +179,7 @@ export class ProductService {
         product_images: true,
         product_measurements: {
           product_category_prices: {
+            product_offer: true,
             product_additional_services: {
               additional_service: true,
             },

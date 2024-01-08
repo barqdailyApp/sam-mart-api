@@ -107,14 +107,14 @@ export class ProductController {
     return new ActionResponse(this._i18nResponse.entity(productsResponse));
   }
 
-  @Get(':sub_category_id/all-products')
+  @Get(':categorySubCategory_id/all-products')
   async subCategoryAllProducts(
     @Query() productFilter: ProductFilter,
-    @Param('sub_category_id') sub_category_id: string,
+    @Param('categorySubCategory_id') categorySubCategory_id: string,
   ) {
     const products = await this.productService.subCategoryAllProducts(
       productFilter,
-      sub_category_id,
+      categorySubCategory_id,
     );
     const productsResponse = products.map((product) => {
       return plainToClass(ProductResponse, product);
@@ -125,17 +125,17 @@ export class ProductController {
   @Get('single-product/:product_id')
   @ApiParam({ name: 'product_id', required: true, type: String })
   @ApiQuery({
-    name: 'sub_category_id',
+    name: 'categorySubCategory_id',
     required: false,
     type: String,
   })
   async singleProduct(
     @Param('product_id') id: string,
-    @Query('sub_category_id') sub_category_id?: string,
+    @Query('categorySubCategory_id') categorySubCategory_id?: string,
   ) {
     const product = await this.productService.singleProduct(
       id,
-      sub_category_id,
+      categorySubCategory_id,
     );
     const productResponse = plainToClass(ProductResponse, product);
 

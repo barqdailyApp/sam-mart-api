@@ -5,18 +5,23 @@ import { Product } from './product.entity';
 import { ProductMeasurement } from './product-measurement.entity';
 import { Subcategory } from '../category/subcategory.entity';
 import { ProductCategoryPrice } from './product-category-price.entity';
+import { CategorySubCategory } from '../category/category-subcategory.entity';
 
 @Entity()
 export class ProductSubCategory extends AuditableEntity {
   // sub category
-  @ManyToOne(() => Subcategory, (category) => category.product_sub_categories, {
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn({ name: 'sub_category_id' })
-  sub_category: Subcategory;
+  @ManyToOne(
+    () => CategorySubCategory,
+    (categorySubCategory) => categorySubCategory.product_sub_categories,
+    {
+      onDelete: 'CASCADE',
+    },
+  )
+  @JoinColumn({ name: 'categorySubCategory_id' })
+  category_subCategory: CategorySubCategory;
 
   @Column()
-  sub_category_id: string;
+  categorySubCategory_id: string;
 
   // product
   @ManyToOne(() => Product, (product) => product.product_sub_categories, {

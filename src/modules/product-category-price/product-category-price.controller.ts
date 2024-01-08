@@ -25,72 +25,72 @@ export class ProductCategoryPriceController {
     private readonly productCategoryPriceService: ProductCategoryPriceService,
   ) {}
 
-  @Post('create-link-product-subcategory/:product_id/:sub_category_id')
+  @Post('create-link-product-subcategory/:product_id/:categorySubCategory_id')
   async linkProductSubcategory(
     @Param('product_id') product_id: string,
-    @Param('sub_category_id') sub_category_id: string,
+    @Param('categorySubCategory_id') categorySubCategory_id: string,
   ) {
     return new ActionResponse(
       await this.productCategoryPriceService.createLinkProductSubcategory(
         product_id,
-        sub_category_id,
+        categorySubCategory_id,
       ),
     );
   }
-  @Get('get-link-product-subcategory/:product_id/:sub_category_id')
+  @Get('get-link-product-subcategory/:product_id/:categorySubCategory_id')
   async getLinkProductSubcategory(
     @Param('product_id') product_id: string,
-    @Param('sub_category_id') sub_category_id: string,
+    @Param('categorySubCategory_id') categorySubCategory_id: string,
   ) {
     return new ActionResponse(
       await this.productCategoryPriceService.getLinkProductSubcategory(
         product_id,
-        sub_category_id,
+        categorySubCategory_id,
       ),
     );
   }
 
-  @Delete('delete-link-product-subcategory/:product_id/:sub_category_id')
+  @Delete('delete-link-product-subcategory/:product_id/:categorySubCategory_id')
   async deleteLinkProductSubcategory(
     @Param('product_id') product_id: string,
-    @Param('sub_category_id') sub_category_id: string,
+    @Param('categorySubCategory_id') categorySubCategory_id: string,
   ) {
     return new ActionResponse(
       await this.productCategoryPriceService.deleteLinkProductSubcategory(
         product_id,
-        sub_category_id,
+        categorySubCategory_id,
       ),
     );
   }
-  @Post('unit-prices-product/:product_id/:sub_category_id')
+  @Post('unit-prices-product/:product_id/:categorySubCategory_id')
   async UnitPricesProduct(
     @Body()
     productMeasurementRequest: ProductMeasurementRequest,
     @Param('product_id') product_id: string,
-    @Param('sub_category_id') sub_category_id: string,
+    @Param('categorySubCategory_id') categorySubCategory_id: string,
   ) {
     return new ActionResponse(
       await this.productCategoryPriceService.unitPriceProduct(
         product_id,
-        sub_category_id,
+        categorySubCategory_id,
         productMeasurementRequest,
       ),
     );
   }
 
   @Post(
-    'product-additional-service/:product_id/:sub_category_id/:product_measurement_id',
+    'product-additional-service/:product_id/:categorySubCategory_id/:product_measurement_id',
   )
   async productAdditionalService(
     @Param('product_id') product_id: string,
-    @Param('sub_category_id') sub_category_id: string,
+    @Param('categorySubCategory_id') categorySubCategory_id: string,
     @Param('product_measurement_id') product_measurement_id: string,
     @Body() productAdditionalServiceRequest: ProductAdditionalServiceRequest,
   ) {
     return new ActionResponse(
       await this.productCategoryPriceService.productAdditionalService(
         product_id,
-        sub_category_id,
+        categorySubCategory_id,
         product_measurement_id,
         productAdditionalServiceRequest,
       ),
