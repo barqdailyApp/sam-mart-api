@@ -14,6 +14,9 @@ import { StorageManager } from 'src/integration/storage/storage.manager';
 import { CreateCategoryRequest } from './dto/requests/create-category-request';
 import { CategorySubcategoryRequest } from './dto/requests/create-category-subcategory-request';
 import { Subcategory } from 'src/infrastructure/entities/category/subcategory.entity';
+import { MostHitSubcategory } from 'src/infrastructure/entities/category/most-hit-subcategory.entity';
+import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class CategoryService extends BaseService<Category> {
@@ -25,11 +28,18 @@ export class CategoryService extends BaseService<Category> {
     private readonly subcategory_repo: Repository<Subcategory>,
     @InjectRepository(CategorySubCategory)
     private readonly category_subcategory_repo: Repository<CategorySubCategory>,
+    @InjectRepository(MostHitSubcategory)
+    private readonly most_hit_subcategory_repo: Repository<MostHitSubcategory>,
     @Inject(StorageManager) private readonly storageManager: StorageManager,
     @Inject(ImageManager) private readonly imageManager: ImageManager,
+    @Inject(FileService) private _fileService: FileService,
   ) {
     super(category_repo);
   }
+
+
+
+
 
   async getCategorySubcategory(section_category_id: string) {
     return await this.category_subcategory_repo.find({
@@ -63,6 +73,22 @@ export class CategoryService extends BaseService<Category> {
     await this._repo.save(category);
     return category;
   }
+  async updateCategory(req: UpdateCategoryRequest): Promise<Category> {
+    const category = await this._repo.findOne({where:{id:req.id}});
+    
+    if (req.logo) {
+
+    await  this._fileService.delete (category.logo)
+      // resize image to 300x300
+   const logo=  await this._fileService.upload(req.logo)
+   
+
+      // set avatar path
+      category.logo = logo;
+    }
+    await this._repo.update(category.id,{...plainToInstance(Category, req),logo:category.logo});
+    return category;
+  }
   async addSubcategoryToCategory(req:CategorySubcategoryRequest) {
     const  category= await this.category_subcategory_repo.findOne({
       where: { section_category_id: req.section_category_id , subcategory_id: req.subcategory_id},
@@ -73,7 +99,32 @@ export class CategoryService extends BaseService<Category> {
       throw new BadRequestException('subcategory already exist');
     
     return await this.category_subcategory_repo.save({
-     ...req
+      ...req
     });
+  }
+
+  async getMostHitSubcategory(paginatedRequest: PaginatedRequest) {
+    let { page, limit, select } = paginatedRequest;
+
+    page = page || 1;
+    limit = limit || 10;
+
+    const queryOptions: any = {
+      relations: { subcategory: true },
+      order: { previous_hit: 'DESC', current_hit: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    };
+
+    if (select) {
+      queryOptions.select = select;
+    }
+
+    return await this.most_hit_subcategory_repo.find(queryOptions);
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  async flushMostHitSubcategory() {
+    await this.most_hit_subcategory_repo.update({}, { previous_hit: () => 'current_hit', current_hit: 0 });
   }
 }

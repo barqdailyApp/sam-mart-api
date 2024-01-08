@@ -15,6 +15,7 @@ import { UpdateProductImageRequest } from './dto/request/update-product-image.re
 import { ProductFilter } from './dto/filter/product.filter';
 import { Subcategory } from 'src/infrastructure/entities/category/subcategory.entity';
 import { ProductSubCategory } from 'src/infrastructure/entities/product/product-sub-category.entity';
+import { MostHitSubcategory } from 'src/infrastructure/entities/category/most-hit-subcategory.entity';
 import { ProductOffer } from 'src/infrastructure/entities/product/product-offer.entity';
 import { CreateProductOfferRequest } from './dto/request/create-product-offer.request';
 import { CategorySubCategory } from 'src/infrastructure/entities/category/category-subcategory.entity';
@@ -30,6 +31,8 @@ export class ProductService {
     private readonly productMeasurementRepository: Repository<ProductMeasurement>,
     @InjectRepository(CategorySubCategory)
     private readonly categorySubcategory_repo: Repository<CategorySubCategory>,
+    @InjectRepository(MostHitSubcategory)
+    private mostHitSubcategoryRepository: Repository<MostHitSubcategory>,
 
     @InjectRepository(ProductSubCategory)
     private readonly productSubCategory_repo: Repository<ProductSubCategory>,
@@ -48,7 +51,7 @@ export class ProductService {
 
     @Inject(UpdateProductImageTransaction)
     private readonly updateProductImageTransaction: UpdateProductImageTransaction,
-  ) {}
+  ) { }
 
   async createProduct(
     createProductRequest: CreateProductRequest,
@@ -120,6 +123,23 @@ export class ProductService {
     });
     if (!categorySubcategory) {
       throw new NotFoundException(`Subcategory ID not found`);
+    }
+
+    const hitSubCategory = await this.mostHitSubcategoryRepository.findOne({
+      where: { sub_category_id },
+    });
+
+    if (hitSubCategory) {
+      await this.mostHitSubcategoryRepository.update(
+        { sub_category_id },
+        { current_hit: hitSubCategory.current_hit + 1 },
+      );
+    } else {
+      const newSubCategory = this.mostHitSubcategoryRepository.create({
+        subcategory: subCategory,
+        current_hit: 1,
+      });
+      await this.mostHitSubcategoryRepository.save(newSubCategory);
     }
 
     return await this.productRepository.find({

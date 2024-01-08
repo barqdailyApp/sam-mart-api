@@ -65,7 +65,7 @@ const logo=await this._fileService.upload(req.logo)
       // set avatar path
       section.logo = logo;
     }
-    await this._repo.save(section);
+    await this._repo.update(section.id,{...plainToInstance(Section, req),logo:section.logo});
     return section;
   }
 

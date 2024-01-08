@@ -6,12 +6,11 @@ import { SectionCategory } from '../section/section-category.entity';
 import { ProductSubCategory } from '../product/product-sub-category.entity';
 
 @Entity()
-export class CategorySubCategory extends BaseEntity {
-  @ManyToOne(
-    () => SectionCategory,
-    (SectionCategory) => SectionCategory.category_subCategory,
-  )
-  section_category: SectionCategory;
+
+export class CategorySubCategory extends BaseEntity{
+    @ManyToOne(() => SectionCategory, SectionCategory => SectionCategory.category_subCategory,{onDelete:"CASCADE"})
+    @JoinColumn({ name: 'section_category_id' })
+    section_category: SectionCategory
 
   @Column()
   section_category_id: string;
