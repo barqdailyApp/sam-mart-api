@@ -76,6 +76,12 @@ quantity=operationType.IMPORT==request.type?quantity:quantity*-1
 
 
 const warehouseProducts= await context.findOne(WarehouseProducts,{where:{warehouse_id:request.warehouse_id,product_id:request.product_id}})
+if( warehouseProducts==null && quantity<0 || warehouseProducts==null?0: warehouseProducts.quantity+quantity<0)
+{
+    throw new BadRequestException('warehouse doesnt have enough products')
+}
+
+
 if(warehouseProducts)
 {
     warehouseProducts.quantity=warehouseProducts.quantity+quantity
