@@ -21,8 +21,12 @@ export class UpdateProductRequest {
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()
   @IsString()
-  description: string;
+  description_ar: string;
 
+  @ApiProperty({ nullable: true, required: false })
+  @IsOptional()
+  @IsString()
+  description_en: string;
 
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()

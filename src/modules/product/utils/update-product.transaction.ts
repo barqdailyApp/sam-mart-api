@@ -48,7 +48,8 @@ export class UpdateProductTransaction extends BaseTransaction<
     try {
       const {
         id,
-        description,
+        description_ar,
+        description_en,
         is_active,
         is_recovered,
         name_ar,
@@ -61,7 +62,8 @@ export class UpdateProductTransaction extends BaseTransaction<
       }
       //* convert Dto To Product (Entity)
       const updateProduct: Product = plainToInstance(Product, {
-        description,
+        description_ar,
+        description_en,
         is_active,
         is_recovered,
         name_ar,

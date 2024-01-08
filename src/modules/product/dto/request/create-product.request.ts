@@ -28,8 +28,12 @@ export class CreateProductRequest {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  description: string;
+  description_ar: string;
 
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  description_en: string;
 
   @ApiProperty({ default: true })
   @IsNotEmpty()

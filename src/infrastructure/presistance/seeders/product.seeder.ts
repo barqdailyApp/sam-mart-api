@@ -58,7 +58,9 @@ export class ProductSeeder implements Seeder {
       const createProduct = this.product_repo.create({
         name_ar: product.name_ar,
         name_en: product.name_en,
-        description: product.description,
+        description_ar: product.description_ar,
+        description_en: product.description_en,
+       
         is_active: product.is_active,
         is_recovered: product.is_recovered,
       });

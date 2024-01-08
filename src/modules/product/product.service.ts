@@ -19,6 +19,8 @@ import { MostHitSubcategory } from 'src/infrastructure/entities/category/most-hi
 import { ProductOffer } from 'src/infrastructure/entities/product/product-offer.entity';
 import { CreateProductOfferRequest } from './dto/request/create-product-offer.request';
 import { CategorySubCategory } from 'src/infrastructure/entities/category/category-subcategory.entity';
+import { Warehouse } from 'src/infrastructure/entities/warehouse/warehouse.entity';
+import { SingleProductRequest } from './dto/request/single-product.request';
 
 @Injectable()
 export class ProductService {
@@ -32,13 +34,16 @@ export class ProductService {
     @InjectRepository(CategorySubCategory)
     private readonly categorySubcategory_repo: Repository<CategorySubCategory>,
     @InjectRepository(MostHitSubcategory)
-    private mostHitSubcategoryRepository: Repository<MostHitSubcategory>,
+    private readonly mostHitSubcategoryRepository: Repository<MostHitSubcategory>,
 
     @InjectRepository(ProductSubCategory)
     private readonly productSubCategory_repo: Repository<ProductSubCategory>,
 
     @InjectRepository(ProductOffer)
     private productOffer_repo: Repository<ProductOffer>,
+
+    @InjectRepository(Warehouse)
+    private readonly warehouse_repo: Repository<Warehouse>,
 
     @Inject(CreateProductTransaction)
     private readonly addProductTransaction: CreateProductTransaction,
@@ -51,7 +56,7 @@ export class ProductService {
 
     @Inject(UpdateProductImageTransaction)
     private readonly updateProductImageTransaction: UpdateProductImageTransaction,
-  ) { }
+  ) {}
 
   async createProduct(
     createProductRequest: CreateProductRequest,
@@ -113,7 +118,7 @@ export class ProductService {
     productFilter: ProductFilter,
     categorySubCategory_id: string,
   ): Promise<Product[]> {
-    const { page, limit } = productFilter;
+    const { page, limit, userLatitude, userLongitude } = productFilter;
 
     const skip = (page - 1) * limit;
 
@@ -124,28 +129,59 @@ export class ProductService {
     if (!categorySubcategory) {
       throw new NotFoundException(`Subcategory ID not found`);
     }
+    //*TODO: add hit
+    // const hitSubCategory = await this.mostHitSubcategoryRepository.findOne({
+    //   where: { sub_category_id },
+    // });
 
-    const hitSubCategory = await this.mostHitSubcategoryRepository.findOne({
-      where: { sub_category_id },
-    });
-
-    if (hitSubCategory) {
-      await this.mostHitSubcategoryRepository.update(
-        { sub_category_id },
-        { current_hit: hitSubCategory.current_hit + 1 },
-      );
-    } else {
-      const newSubCategory = this.mostHitSubcategoryRepository.create({
-        subcategory: subCategory,
-        current_hit: 1,
-      });
-      await this.mostHitSubcategoryRepository.save(newSubCategory);
+    // if (hitSubCategory) {
+    //   await this.mostHitSubcategoryRepository.update(
+    //     { sub_category_id },
+    //     { current_hit: hitSubCategory.current_hit + 1 },
+    //   );
+    // } else {
+    //   const newSubCategory = this.mostHitSubcategoryRepository.create({
+    //     subcategory: subCategory,
+    //     current_hit: 1,
+    //   });
+    //   await this.mostHitSubcategoryRepository.save(newSubCategory);
+    // }
+    let warehouses: Warehouse;
+    if (userLatitude && userLongitude) {
+      warehouses = await this.warehouse_repo
+        .createQueryBuilder('warehouse')
+        .orderBy(
+          `ST_Distance_Sphere(
+            ST_SRID(point(${userLatitude}, ${userLongitude}), 4326),
+            warehouse.location
+        )`,
+        )
+        .getOne();
     }
 
     return await this.productRepository.find({
       skip,
       take: limit,
+      // where: {
+      //   warehouses_products: {
+      //     warehouse_id: warehouses.id,
+      //   },
+      //   product_measurements: {
+      //     product_category_prices: {
+      //       product_sub_category: {
+      //         category_subCategory:{
+      //           section_category:{
+      //             section_id
+      //           }
+      //         }
+      //       },
+      //     },
+      //   },
+      // },
       where: {
+        warehouses_products: {
+          warehouse_id: warehouses?.id,
+        },
         product_measurements: {
           product_category_prices: {
             product_sub_category: {
@@ -156,6 +192,7 @@ export class ProductService {
       },
       relations: {
         product_images: true,
+        warehouses_products: true,
         product_measurements: {
           product_category_prices: {
             product_offer: true,
@@ -172,8 +209,12 @@ export class ProductService {
 
   async singleProduct(
     product_id: string,
-    categorySubCategory_id?: string,
+    singleProductRequest: SingleProductRequest,
   ): Promise<Product> {
+
+  
+    const { categorySubCategory_id, userLatitude, userLongitude } =
+      singleProductRequest;
     //* Check if sub category exist
     if (categorySubCategory_id) {
       const categorySubcategory = await this.categorySubcategory_repo.findOne({
@@ -183,10 +224,25 @@ export class ProductService {
         throw new NotFoundException(`Subcategory ID not found`);
       }
     }
+    let warehouses: Warehouse;
+    if (userLatitude && userLongitude) {
+      warehouses = await this.warehouse_repo
+        .createQueryBuilder('warehouse')
+        .orderBy(
+          `ST_Distance_Sphere(
+            ST_SRID(point(${userLatitude}, ${userLongitude}), 4326),
+            warehouse.location
+        )`,
+        )
+        .getOne();
+    }
 
     const product = await this.productRepository.findOne({
       where: {
         id: product_id,
+        warehouses_products: {
+          warehouse_id: warehouses?.id,
+        },
         product_measurements: {
           product_category_prices: {
             product_sub_category: {
@@ -217,7 +273,12 @@ export class ProductService {
     product_id: string,
     image_id: string,
   ): Promise<ProductImage> {
-    await this.singleProduct(product_id);
+    const product = await this.productRepository.findOne({
+      where: { id: product_id },
+    });
+    if (!product) {
+      throw new NotFoundException('message_product_not_found');
+    }
 
     const productImage = await this.productImageRepository.findOne({
       where: { id: image_id },
@@ -231,8 +292,12 @@ export class ProductService {
     product_id: string,
     measurement_id: string,
   ): Promise<ProductMeasurement> {
-    await this.singleProduct(product_id);
-
+    const product = await this.productRepository.findOne({
+      where: { id: product_id },
+    });
+    if (!product) {
+      throw new NotFoundException('message_product_not_found');
+    }
     const productMeasurement = await this.productMeasurementRepository.findOne({
       where: { id: measurement_id },
     });
@@ -243,7 +308,12 @@ export class ProductService {
   }
 
   async deleteProduct(product_id: string): Promise<DeleteResult> {
-    await this.singleProduct(product_id);
+    const product = await this.productRepository.findOne({
+      where: { id: product_id },
+    });
+    if (!product) {
+      throw new NotFoundException('message_product_not_found');
+    }
     return await this.productRepository.delete({ id: product_id });
   }
 
@@ -251,7 +321,12 @@ export class ProductService {
     product_id: string,
     image_id: string,
   ): Promise<DeleteResult> {
-    const product = await this.singleProduct(product_id);
+    const product = await this.productRepository.findOne({
+      where: { id: product_id },
+    });
+    if (!product) {
+      throw new NotFoundException('message_product_not_found');
+    }
     if (product.product_images.length == 1) {
       throw new NotFoundException('There must be at least one photo');
     }
@@ -263,7 +338,12 @@ export class ProductService {
     product_id: string,
     measurement_id: string,
   ): Promise<DeleteResult> {
-    await this.singleProduct(product_id);
+    const product = await this.productRepository.findOne({
+      where: { id: product_id },
+    });
+    if (!product) {
+      throw new NotFoundException('message_product_not_found');
+    }
     const measurement = await this.SingleProductMeasurement(
       product_id,
       measurement_id,

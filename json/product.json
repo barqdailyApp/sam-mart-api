@@ -2,7 +2,8 @@
     {
         "name_ar": "تفاح",
         "name_en": "ِApples",
-        "description": "Apples are often eaten fresh as a snack or used in a variety of culinary applications, such as pies, salads, juices, and sauces.",
+        "description_ar": "غالبًا ما يتم تناول التفاح طازجًا كوجبة خفيفة أو يستخدم في مجموعة متنوعة من تطبيقات الطهي، مثل الفطائر والسلطات والعصائر والصلصات.",
+        "description_en": "Apples are often eaten fresh as a snack or used in a variety of culinary applications, such as pies, salads, juices, and sauces.",
         "is_active": true,
         "is_recovered": true,
         "product_images": [
@@ -35,7 +36,8 @@
     {
         "name_ar": "موز",
         "name_en": "Bananas",
-        "description": "Bananas are a popular tropical fruit known for their sweet and creamy flavor. They are often eaten fresh, added to smoothies, or used in baking and desserts.",
+        "description_ar": "الموز هو فاكهة استوائية مشهورة معروفة بنكهتها الحلوة والكريمية. وغالبًا ما يتم تناولها طازجة أو إضافتها إلى العصائر أو استخدامها في الخبز والحلويات.",
+        "description_en": "Bananas are a popular tropical fruit known for their sweet and creamy flavor. They are often eaten fresh, added to smoothies, or used in baking and desserts.",
         "is_active": true,
         "is_recovered": true,
         "product_images": [

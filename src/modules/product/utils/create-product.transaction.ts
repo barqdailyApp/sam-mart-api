@@ -49,7 +49,8 @@ export class CreateProductTransaction extends BaseTransaction<
   ): Promise<Product> {
     try {
       const {
-        description,
+        description_ar,
+        description_en,
         is_active,
         is_recovered,
         measurements,
@@ -60,7 +61,8 @@ export class CreateProductTransaction extends BaseTransaction<
       //* -------------------- Create Product ----------------------------
 
       const createProduct = context.create(Product, {
-        description,
+        description_ar,
+        description_en,
         is_active,
         is_recovered,
         name_ar,

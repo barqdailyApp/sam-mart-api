@@ -24,13 +24,15 @@ import {
 } from '@nestjs/swagger';
 import { ActionResponse } from 'src/core/base/responses/action.response';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { plainToClass } from 'class-transformer';
+import { plainToClass, plainToInstance } from 'class-transformer';
 import { ProductResponse } from './dto/response/product.response';
 import { UpdateProductRequest } from './dto/request/update-product.request';
 import { UpdateProductMeasurementRequest } from './dto/request/update-product-measurement.request';
 import { UpdateProductImageRequest } from './dto/request/update-product-image.request';
 import { ProductFilter } from './dto/filter/product.filter';
 import { CreateProductOfferRequest } from './dto/request/create-product-offer.request';
+import { SingleProductRequest } from './dto/request/single-product.request';
+import { ProductWarehouseResponse } from './dto/response/product-warehouse.response';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -116,26 +118,27 @@ export class ProductController {
       productFilter,
       categorySubCategory_id,
     );
+    //   console.log('first item', products[0]);
     const productsResponse = products.map((product) => {
-      return plainToClass(ProductResponse, product);
+  const productResponse = plainToClass(ProductResponse, product);
+      productResponse.totalQuantity =
+        productResponse.warehouses_products.reduce(
+          (acc, cur) => acc + cur.quantity,
+          0,
+        );
+      return productResponse;
     });
     return new ActionResponse(this._i18nResponse.entity(productsResponse));
   }
 
   @Get('single-product/:product_id')
-  @ApiParam({ name: 'product_id', required: true, type: String })
-  @ApiQuery({
-    name: 'categorySubCategory_id',
-    required: false,
-    type: String,
-  })
   async singleProduct(
     @Param('product_id') id: string,
-    @Query('categorySubCategory_id') categorySubCategory_id?: string,
+    @Query() singleProductRequest: SingleProductRequest,
   ) {
     const product = await this.productService.singleProduct(
       id,
-      categorySubCategory_id,
+      singleProductRequest,
     );
     const productResponse = plainToClass(ProductResponse, product);
 

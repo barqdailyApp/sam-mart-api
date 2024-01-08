@@ -15,20 +15,24 @@ export class Product extends AuditableEntity {
   name_en: string;
 
   @Column({ type: 'longtext' })
-  description: string;
+  description_ar: string;
 
+  @Column({ type: 'longtext' })
+  description_en: string;
 
   @Column({ default: true })
   is_active: boolean;
 
   @Column({ default: false })
   is_recovered: boolean;
-  
 
   @OneToMany(() => ProductImage, (productImage) => productImage.product)
   product_images: ProductImage[];
 
-  @OneToMany(() => ProductSubCategory, (productSubCategory) => productSubCategory.product)
+  @OneToMany(
+    () => ProductSubCategory,
+    (productSubCategory) => productSubCategory.product,
+  )
   product_sub_categories: ProductSubCategory[];
 
   @OneToMany(
@@ -37,7 +41,9 @@ export class Product extends AuditableEntity {
   )
   product_measurements: ProductMeasurement[];
 
-
-  @OneToMany(()=>WarehouseProducts,warehouseProducts=>warehouseProducts.product)
-  warehouses:WarehouseProducts[]
+  @OneToMany(
+    () => WarehouseProducts,
+    (warehouseProducts) => warehouseProducts.product,
+  )
+  warehouses_products: WarehouseProducts[];
 }
