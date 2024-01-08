@@ -11,7 +11,7 @@ const getFileName = (file: Partial<Express.Multer.File>): string => {
 };
 
 function toUrl(path: string, direct = false): string {
- 
+ if (path === null || path === undefined) return 
   if (path && path.startsWith('http')) return path;
   const host = readEnv('APP_HOST');
   if (direct || path.includes('assets')) return `${host}/${path}`;
