@@ -32,9 +32,14 @@ export class CategoryService extends BaseService<Category> {
     private readonly most_hit_subcategory_repo: Repository<MostHitSubcategory>,
     @Inject(StorageManager) private readonly storageManager: StorageManager,
     @Inject(ImageManager) private readonly imageManager: ImageManager,
+    @Inject(FileService) private _fileService: FileService,
   ) {
     super(category_repo);
   }
+
+
+
+
 
   async getCategorySubcategory(section_category_id: string) {
     return await this.category_subcategory_repo.find({
@@ -66,6 +71,22 @@ export class CategoryService extends BaseService<Category> {
       category.logo = path;
     }
     await this._repo.save(category);
+    return category;
+  }
+  async updateCategory(req: UpdateCategoryRequest): Promise<Category> {
+    const category = await this._repo.findOne({where:{id:req.id}});
+    
+    if (req.logo) {
+
+    await  this._fileService.delete (category.logo)
+      // resize image to 300x300
+   const logo=  await this._fileService.upload(req.logo)
+   
+
+      // set avatar path
+      category.logo = logo;
+    }
+    await this._repo.update(category.id,{...plainToInstance(Category, req),logo:category.logo});
     return category;
   }
   async addSubcategoryToCategory(req:CategorySubcategoryRequest) {
