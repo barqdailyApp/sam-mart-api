@@ -15,11 +15,13 @@ export class Subcategory extends BaseEntity {
   @Column()
   logo: string;
 
-  @OneToMany(() => CategorySubCategory, categorySubCategory => categorySubCategory.subcategory, { onDelete: "CASCADE" })
-  category_subCategory: Category
+   @OneToMany(() => CategorySubCategory, categorySubCategory => categorySubCategory.subcategory,{onDelete:"CASCADE"})
+  
+   category_subCategory: CategorySubCategory[]
 
-  @OneToMany(() => ProductSubCategory, (productSubCategory) => productSubCategory.sub_category)
-  product_sub_categories: ProductSubCategory[];
+  
+   @OneToMany(() => ProductSubCategory, (productSubCategory) => productSubCategory.sub_category)
+   product_sub_categories: ProductSubCategory[];
 
   @OneToOne(() => MostHitSubcategory, mostHitSubcategory => mostHitSubcategory.subcategory)
   most_hit_subcategory: MostHitSubcategory;

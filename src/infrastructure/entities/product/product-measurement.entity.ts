@@ -4,6 +4,7 @@ import { ProductImage } from './product-image.entity';
 import { Product } from './product.entity';
 import { MeasurementUnit } from './measurement-unit.entity';
 import { ProductCategoryPrice } from './product-category-price.entity';
+import { WarehouseProducts } from '../warehouse/warehouse-products.entity';
 
 @Entity()
 export class ProductMeasurement extends AuditableEntity {
@@ -38,6 +39,9 @@ export class ProductMeasurement extends AuditableEntity {
 
   @Column({ default: false })
   is_main_unit: boolean;
+
+  @OneToMany(() => WarehouseProducts, (warehouseProducts) => warehouseProducts.product)
+  warehouses: WarehouseProducts[]
 
   @OneToMany(
     () => ProductCategoryPrice,

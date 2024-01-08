@@ -19,6 +19,7 @@ import { RegionModule } from 'src/modules/region/region.module';
 import { SectionModule } from 'src/modules/section/section.module';
 import { SubcategoryModule } from 'src/modules/subcategory/subcategory.module';
 import { UserModule } from 'src/modules/user/user.module';
+import { WarehouseModule } from 'src/modules/warehouse/warehouse.module';
 
 export default (app: INestApplication, config: ConfigService) => {
   const operationIdFactory = (controllerKey: string, methodKey: string) =>
@@ -57,6 +58,7 @@ export default (app: INestApplication, config: ConfigService) => {
       SubcategoryModule,
       ProductCategoryPriceModule,
       BanarModule,
+      WarehouseModule,
     ],
     operationIdFactory,
   });

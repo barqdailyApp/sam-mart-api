@@ -22,6 +22,9 @@ import { ProductCategoryPriceModule } from 'src/modules/product-category-price/p
 import { ProductSubCategory } from '../entities/product/product-sub-category.entity';
 import { Banar } from '../entities/banar/banar.entity';
 import { MostHitSubcategory } from '../entities/category/most-hit-subcategory.entity';
+import { WarehouseProducts } from '../entities/warehouse/warehouse-products.entity';
+import { WarehouseOperations } from '../entities/warehouse/warehouse-opreations.entity';
+import { Warehouse } from '../entities/warehouse/warehouse.entity';
 
 export const DB_ENTITIES = [
   User,
@@ -48,6 +51,9 @@ export const DB_ENTITIES = [
   ProductSubCategory,
   Banar,
   MostHitSubcategory,
+  WarehouseProducts,
+  WarehouseOperations,
+  Warehouse
 ];
 
 export const DB_VIEWS = [];

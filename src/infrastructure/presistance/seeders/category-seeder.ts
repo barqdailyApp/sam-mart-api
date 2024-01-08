@@ -51,7 +51,7 @@ export class CategorySeeder implements Seeder {
     const data = fs.readFileSync('./json/category.json', 'utf8');
     const dataObject: Category[] = JSON.parse(data);
 
-    for (let index = 0; index < 2; index++) {
+  
       for (const category of dataObject) {
         const categoryCreated = this.category_repo.create({
           name_ar: category.name_ar,
@@ -69,29 +69,36 @@ export class CategorySeeder implements Seeder {
           const subcategorySaved = await this.subcategory_repo.save(
             subcategoryCreated,
           );
-          const categorySubCategory = new CategorySubCategory({
-            category: categorySaved,
-            subcategory: subcategorySaved,
-            order_by: index,
-          });
-
-          await this.categorySubCategory.save(categorySubCategory);
+        
           index++;
         }
       }
-    }
+    
 
     const section = await this.section_repo.find();
     const categories = await this.category_repo.find({order:{name_en:'DESC'}});
-
-    for (let index = 0; index < categories.length ; index++) {
+      const subcategories = await this.subcategory_repo.find({order:{name_en:'DESC'}});
+    for (let index = 0; index < 14 ; index++) {
       const sectionCategory = new SectionCategory({
-        section_id: section[index % 2 == 0 ? 0 : 1].id,
-        category_id: categories[index].id,
+        section_id: section[ index>=7?0:1 ].id,
+        category_id: categories[index>=7?index-7: index].id,
         order_by: index ,
       });
       await this.section_category_repo.save(sectionCategory);
     }
+    const section_categories= await this.section_category_repo.find();
+    for (let index = 0; index < section_categories.length; index++) {
+      const categorySubCategory = new CategorySubCategory({
+        section_category_id: section_categories[index].id,
+      subcategory_id: subcategories[index].id,
+        order_by: index,
+      });
+
+      await this.categorySubCategory.save(categorySubCategory);
+      
+    }
+
+
   }
 
   async drop(): Promise<any> {
