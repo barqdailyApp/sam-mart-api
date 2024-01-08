@@ -14,6 +14,8 @@ import { StorageManager } from 'src/integration/storage/storage.manager';
 import { CreateCategoryRequest } from './dto/requests/create-category-request';
 import { CategorySubcategoryRequest } from './dto/requests/create-category-subcategory-request';
 import { Subcategory } from 'src/infrastructure/entities/category/subcategory.entity';
+import { MostHitSubcategory } from 'src/infrastructure/entities/category/most-hit-subcategory.entity';
+import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 
 @Injectable()
 export class CategoryService extends BaseService<Category> {
@@ -24,6 +26,8 @@ export class CategoryService extends BaseService<Category> {
     private readonly subcategory_repo: Repository<Subcategory>,
     @InjectRepository(CategorySubCategory)
     private readonly category_subcategory_repo: Repository<CategorySubCategory>,
+    @InjectRepository(MostHitSubcategory)
+    private readonly mostHitSubcategory_repo: Repository<MostHitSubcategory>,
     @Inject(StorageManager) private readonly storageManager: StorageManager,
     @Inject(ImageManager) private readonly imageManager: ImageManager,
   ) {
@@ -62,8 +66,8 @@ export class CategoryService extends BaseService<Category> {
     await this._repo.save(category);
     return category;
   }
-  async addSubcategoryToCategory(req:CategorySubcategoryRequest) {
-    const  category= await this.category_repo.findOne({
+  async addSubcategoryToCategory(req: CategorySubcategoryRequest) {
+    const category = await this.category_repo.findOne({
       where: { id: req.category_id },
       relations: { category_subCategory: true },
     });
@@ -71,7 +75,27 @@ export class CategoryService extends BaseService<Category> {
       throw new BadRequestException('subcategory already exist');
     }
     return await this.category_subcategory_repo.save({
-     ...req
+      ...req
     });
+  }
+
+  async getMostHitSubcategory(paginatedRequest: PaginatedRequest) {
+    let { page, limit, select } = paginatedRequest;
+
+    page = page || 1;
+    limit = limit || 10;
+
+    const queryOptions: any = {
+      relations: { subcategory: true },
+      order: { previous_hit: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    };
+
+    if (select) {
+      queryOptions.select = select;
+    }
+
+    return await this.mostHitSubcategory_repo.find(queryOptions);
   }
 }
