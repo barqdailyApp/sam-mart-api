@@ -2,6 +2,7 @@ import { AuditableEntity } from 'src/infrastructure/base/auditable.entity';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from 'typeorm';
 import { Driver } from '../driver/driver.entity';
 import { City } from '../city/city.entity';
+import { Warehouse } from '../warehouse/warehouse.entity';
 
 @Entity()
 export class Region extends AuditableEntity {
@@ -14,6 +15,8 @@ export class Region extends AuditableEntity {
   @OneToMany(() => Driver, (driver) => driver.region)
   drivers: Driver[];
 
+  @OneToMany(() => Warehouse, (warehouse) => warehouse.region)
+  warehouses: Warehouse[];
 
   @ManyToOne(() => City, (city) => city.regions,{
     onDelete: 'CASCADE',

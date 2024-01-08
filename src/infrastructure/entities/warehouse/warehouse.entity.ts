@@ -1,13 +1,24 @@
 import { AuditableEntity } from "src/infrastructure/base/auditable.entity";
-import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
 import { WarehouseOperations } from "./warehouse-opreations.entity";
 import { WarehouseProducts } from "./warehouse-products.entity";
+import { City } from "../city/city.entity";
+import { Region } from "../region/region.entity";
 
 @Entity()
 
 export class Warehouse extends AuditableEntity {
-@Column()
- name:string   
+@Column({unique:true})
+ name_ar:string   
+
+ @Column({unique:true})
+ name_en:string   
+
+ @Column()
+ is_active:boolean
+ @ManyToOne(() => Region, (region) => region.warehouses)
+ @JoinColumn()
+  region: Region;
  @Column({
     type: 'geometry',
     spatialFeatureType: 'Point',
