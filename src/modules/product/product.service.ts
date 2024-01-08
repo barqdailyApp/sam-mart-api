@@ -15,7 +15,7 @@ import { UpdateProductImageRequest } from './dto/request/update-product-image.re
 import { ProductFilter } from './dto/filter/product.filter';
 import { Subcategory } from 'src/infrastructure/entities/category/subcategory.entity';
 import { ProductSubCategory } from 'src/infrastructure/entities/product/product-sub-category.entity';
-import { MostHitSubcategory } from 'src/infrastructure/entities/category/most-hit-subcategory.entity';
+import { SubcategoryService } from '../subcategory/subcategory.service';
 
 @Injectable()
 export class ProductService {
@@ -28,8 +28,7 @@ export class ProductService {
     private readonly productMeasurementRepository: Repository<ProductMeasurement>,
     @InjectRepository(Subcategory)
     private subcategory_repo: Repository<Subcategory>,
-    @InjectRepository(MostHitSubcategory)
-    private mostHitSubcategoryRepository: Repository<MostHitSubcategory>,
+  
 
     @InjectRepository(ProductSubCategory)
     private productSubCategory_repo: Repository<ProductSubCategory>,
@@ -44,6 +43,8 @@ export class ProductService {
 
     @Inject(UpdateProductImageTransaction)
     private readonly updateProductImageTransaction: UpdateProductImageTransaction,
+
+    @Inject(SubcategoryService) private readonly subCategoryService: SubcategoryService,
   ) { }
 
   async create(createProductRequest: CreateProductRequest): Promise<Product> {
@@ -105,22 +106,7 @@ export class ProductService {
       throw new NotFoundException(`Subcategory ID not found`);
     }
 
-    const hitSubCategory = await this.mostHitSubcategoryRepository.findOne({
-      where: { sub_category_id },
-    });
-
-    if (hitSubCategory) {
-      await this.mostHitSubcategoryRepository.update(
-        { sub_category_id },
-        { current_hit: hitSubCategory.current_hit + 1 },
-      );
-    } else {
-      const newSubCategory = this.mostHitSubcategoryRepository.create({
-        subcategory: subCategory,
-        current_hit: 1,
-      });
-      await this.mostHitSubcategoryRepository.save(newSubCategory);
-    }
+    await this.subCategoryService.updateMostHitSubCategory(sub_category_id)
 
     return await this.productRepository.find({
       skip,
