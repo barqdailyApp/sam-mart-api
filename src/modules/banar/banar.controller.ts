@@ -1,7 +1,7 @@
 import {
     Body,
     ClassSerializerInterceptor,
-    Controller, Get, Post, UploadedFile, UseGuards, UseInterceptors,
+    Controller, Get, Param, Patch, Post, UploadedFile, UseGuards, UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { BanarService } from './banar.service';
@@ -16,6 +16,7 @@ import { ActionResponse } from 'src/core/base/responses/action.response';
 import { Banar } from 'src/infrastructure/entities/banar/banar.entity';
 import { plainToInstance } from 'class-transformer';
 import { BannerResponse } from './dto/response/banner.response';
+import { UpdateBannerRequest } from './dto/request/update-banner.request';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -39,10 +40,11 @@ export class BanarController {
         @Body() req: CreateBanarRequest,
         @UploadedFile(new UploadValidator().build())
         banar: Express.Multer.File,
-    ): Promise<ActionResponse<Banar>> {
+    ): Promise<ActionResponse<BannerResponse>> {
         req.banar = banar;
-        const result = await this.banarService.createBanar(req);
-        return new ActionResponse<Banar>(result);
+        const banner = await this.banarService.createBanar(req);
+        const result = plainToInstance(BannerResponse, banner, { excludeExtraneousValues: true })
+        return new ActionResponse<BannerResponse>(result);
     }
 
     @Get()
@@ -51,5 +53,21 @@ export class BanarController {
         const banners = await this.banarService.getBanars();
         const result = plainToInstance(BannerResponse, banners, { excludeExtraneousValues: true })
         return new ActionResponse<BannerResponse[]>(result);
+    }
+
+    @Patch(":id")
+    @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('banar'))
+    @ApiConsumes('multipart/form-data')
+    // @Roles(Role.ADMIN)
+    async updateBanar(
+        @Param('id') id: string,
+        @Body() req: UpdateBannerRequest,
+        @UploadedFile(new UploadValidator().build())
+        banar: Express.Multer.File,
+    ): Promise<ActionResponse<BannerResponse>> {
+        if(banar) req.banar = banar;
+        const banner = await this.banarService.updateBanar(id, req);
+        const result = plainToInstance(BannerResponse, banner, { excludeExtraneousValues: true })
+        return new ActionResponse<BannerResponse>(result);
     }
 }
