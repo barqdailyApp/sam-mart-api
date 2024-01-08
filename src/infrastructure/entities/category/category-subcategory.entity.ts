@@ -1,8 +1,9 @@
-import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from "typeorm";
 import { Subcategory } from "./subcategory.entity";
 import { Category } from "./category.entity";
 import { BaseEntity } from "src/infrastructure/base/base.entity";
 import { SectionCategory } from "../section/section-category.entity";
+import { MostHitSubcategory } from "./most-hit-subcategory.entity";
 
 @Entity()
 
@@ -21,11 +22,14 @@ export class CategorySubCategory extends BaseEntity{
     @Column({ name: 'subcategory_id' })
     subcategory_id: string
 
+    @OneToOne(()=> MostHitSubcategory, most_hit_subcategory => most_hit_subcategory.categorySubCategory)
+    most_hit_subcategory: MostHitSubcategory
+
     @Column()
     order_by: number;
     @Column({default:true})
     is_active: boolean;
-
+ 
 
     constructor(partial?: Partial<CategorySubCategory>) {
         super();
