@@ -11,6 +11,8 @@ import { CreateCategoryRequest } from '../category/dto/requests/create-category-
 import { StorageManager } from 'src/integration/storage/storage.manager';
 import { MostHitSubcategory } from 'src/infrastructure/entities/category/most-hit-subcategory.entity';
 import { CategorySubCategory } from 'src/infrastructure/entities/category/category-subcategory.entity';
+import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class SubcategoryService extends BaseService<Subcategory> {
@@ -67,7 +69,7 @@ export class SubcategoryService extends BaseService<Subcategory> {
           { section_category_id: section_category_id }
         ]
       })
-      
+
     for (const categorySubCategory of findCategorySubCategory) {
       const findMostHitSubCategory = await this.mostHitSubcategoryRepository.findOne({
         where: {
@@ -89,4 +91,28 @@ export class SubcategoryService extends BaseService<Subcategory> {
   }
 
 
+  async getMostHitSubcategory(paginatedRequest: PaginatedRequest) {
+    let { page, limit, select } = paginatedRequest;
+
+    page = page || 1;
+    limit = limit || 10;
+
+    const queryOptions: any = {
+      relations: { subcategory: true },
+      order: { previous_hit: 'DESC', current_hit: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    };
+
+    if (select) {
+      queryOptions.select = select;
+    }
+
+    return await this.mostHitSubcategoryRepository.find(queryOptions);
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  async flushMostHitSubcategory() {
+    await this.mostHitSubcategoryRepository.update({}, { previous_hit: () => 'current_hit', current_hit: 0 });
+  }
 }

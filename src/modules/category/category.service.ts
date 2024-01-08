@@ -26,13 +26,8 @@ export class CategoryService extends BaseService<Category> {
   constructor(
     @InjectRepository(Category)
     private readonly category_repo: Repository<Category>,
-
-    @InjectRepository(Subcategory)
-    private readonly subcategory_repo: Repository<Subcategory>,
     @InjectRepository(CategorySubCategory)
     private readonly category_subcategory_repo: Repository<CategorySubCategory>,
-    @InjectRepository(MostHitSubcategory)
-    private readonly most_hit_subcategory_repo: Repository<MostHitSubcategory>,
     @Inject(StorageManager) private readonly storageManager: StorageManager,
     @Inject(ImageManager) private readonly imageManager: ImageManager,
     @Inject(FileService) private _fileService: FileService,
@@ -102,30 +97,5 @@ export class CategoryService extends BaseService<Category> {
     return await this.category_subcategory_repo.save({
       ...req
     });
-  }
-
-  async getMostHitSubcategory(paginatedRequest: PaginatedRequest) {
-    let { page, limit, select } = paginatedRequest;
-
-    page = page || 1;
-    limit = limit || 10;
-
-    const queryOptions: any = {
-      relations: { subcategory: true },
-      order: { previous_hit: 'DESC', current_hit: 'DESC' },
-      skip: (page - 1) * limit,
-      take: limit,
-    };
-
-    if (select) {
-      queryOptions.select = select;
-    }
-
-    return await this.most_hit_subcategory_repo.find(queryOptions);
-  }
-
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
-  async flushMostHitSubcategory() {
-    await this.most_hit_subcategory_repo.update({}, { previous_hit: () => 'current_hit', current_hit: 0 });
   }
 }

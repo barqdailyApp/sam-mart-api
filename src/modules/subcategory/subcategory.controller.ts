@@ -52,4 +52,11 @@ constructor(private readonly subcategoryService:SubcategoryService,
       return new ActionResponse(categoriesRespone);
     }
   }
+
+  @Get('/most-hit-subcategory')
+  async getMostHitSubcategory(@Query() query: PaginatedRequest) {
+    return new ActionResponse(
+      await this.subcategoryService.getMostHitSubcategory(query),
+    );
+  }
 }
