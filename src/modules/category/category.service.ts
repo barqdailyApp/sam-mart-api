@@ -17,6 +17,8 @@ import { Subcategory } from 'src/infrastructure/entities/category/subcategory.en
 import { MostHitSubcategory } from 'src/infrastructure/entities/category/most-hit-subcategory.entity';
 import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { UpdateCategoryRequest } from './dto/requests/update-category-request';
+import { FileService } from '../file/file.service';
 
 @Injectable()
 export class CategoryService extends BaseService<Category> {
