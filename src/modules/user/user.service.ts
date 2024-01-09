@@ -70,7 +70,7 @@ export class UserService extends BaseService<User> {
     }
   }
 
-  private get currentUser(): User {
+  get currentUser(): User {
     return this.request.user;
   }
 }

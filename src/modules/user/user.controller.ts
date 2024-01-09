@@ -44,6 +44,7 @@ import { ActionResponse } from 'src/core/base/responses/action.response';
 import { UpdateLanguageRequest } from './dto/requests/update-language.request';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { Roles } from '../authentication/guards/roles.decorator';
+import { plainToInstance } from 'class-transformer';
 
 
 
@@ -88,7 +89,16 @@ export class UserController {
     @UploadedFile(new UploadValidator().build())
     avatarFile: Express.Multer.File,
   ) {
-    if(avatarFile) req.avatarFile = avatarFile
+    if (avatarFile) req.avatarFile = avatarFile
     return new ActionResponse(await this._service.updateProfile(req));
+  }
+
+  @Get('get-profile')
+  async profile(): Promise<ActionResponse<ProfileResponse>> {
+    const result = new ProfileResponse({
+      user_info: this._service.currentUser
+    });
+
+    return new ActionResponse<ProfileResponse>(result);
   }
 }
