@@ -44,7 +44,7 @@ constructor(private readonly subcategoryService:SubcategoryService,
     const categoriesRespone=categories.map((e) => new CategoryResponse(e));
 
     if (query.page && query.limit) {
-      const total = await this.subcategoryService.count();
+      const total = await this.subcategoryService.count(query);
       return new PaginatedResponse(categoriesRespone, {
         meta: { total, ...query },
       });

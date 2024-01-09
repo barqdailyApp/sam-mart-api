@@ -14,11 +14,13 @@ export class Warehouse extends AuditableEntity {
  @Column({unique:true})
  name_en:string   
 
- @Column()
+ @Column({default:true})
  is_active:boolean
  @ManyToOne(() => Region, (region) => region.warehouses)
  @JoinColumn()
   region: Region;
+  @Column({nullable:true})
+  region_id:string
  @Column({
     type: 'geometry',
     spatialFeatureType: 'Point',

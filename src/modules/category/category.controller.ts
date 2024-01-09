@@ -7,13 +7,14 @@ import {
   Post,
   Query,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { I18nResponse } from 'src/core/helpers/i18n.helper';
 import { ActionResponse } from 'src/core/base/responses/action.response';
 import { SubcategoryResponse } from './dto/response/subcategory-response';
-import { ApiConsumes, ApiHeader, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { CreateCategoryRequest } from './dto/requests/create-category-request';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadValidator } from 'src/core/validators/upload.validator';
@@ -23,6 +24,10 @@ import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 import { plainToInstance } from 'class-transformer';
 import { CategoryResponse } from './dto/response/category-response';
+import { Role } from 'src/infrastructure/data/enums/role.enum';
+import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
+import { Roles } from '../authentication/guards/roles.decorator';
+import { RolesGuard } from '../authentication/guards/roles.guard';
 
 @ApiHeader({
   name: 'Accept-Language',
@@ -50,6 +55,11 @@ export class CategoryController {
     return new ActionResponse(await this.categoryService.createCategory(req));
   }
 
+  @ApiBearerAuth()
+
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN)
+
   @Get()
   async getCategories(@Query() query: PaginatedRequest) {
     const categories = this._i18nResponse.entity(
@@ -58,7 +68,7 @@ export class CategoryController {
     const categoriesRespone=categories.map((e) => new CategoryResponse(e));
 
     if (query.page && query.limit) {
-      const total = await this.categoryService.count();
+      const total = await this.categoryService.count(query);
       return new PaginatedResponse(categoriesRespone, {
         meta: { total, ...query },
       });
