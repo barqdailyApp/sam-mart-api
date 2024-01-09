@@ -10,6 +10,7 @@ import { UpdateProfileRequest } from './dto/requests/update-profile.request';
 import { ImageManager } from 'src/integration/sharp/image.manager';
 import * as sharp from 'sharp';
 import { StorageManager } from 'src/integration/storage/storage.manager';
+import { SendOtpTransaction } from '../authentication/transactions/send-otp.transaction';
 
 
 
@@ -22,6 +23,7 @@ export class UserService extends BaseService<User> {
     @Inject(REQUEST) readonly request: Request,
     @Inject(StorageManager) private readonly storageManager: StorageManager,
     @Inject(ImageManager) private readonly imageManager: ImageManager,
+    @Inject(SendOtpTransaction) private readonly sendOtpTransaction: SendOtpTransaction,
   ) {
     super(userRepo);
   }
@@ -32,6 +34,7 @@ export class UserService extends BaseService<User> {
       { allow_notification },
     );
   }
+
   async updateProfile(updatdReq: UpdateProfileRequest) {
     const user = await this.userRepo.findOne({ where: { id: this.currentUser.id } });
 
@@ -61,6 +64,10 @@ export class UserService extends BaseService<User> {
 
     Object.assign(user, updatdReq);
     await this.userRepo.save(user);
+    
+    if (updatdReq.phone) {
+      await this.sendOtpTransaction.run({ type: 'phone', username: updatdReq.phone })
+    }
   }
 
   private get currentUser(): User {
