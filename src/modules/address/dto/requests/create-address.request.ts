@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  IsBoolean,
   IsNotEmpty,
   IsOptional,
   IsPhoneNumber,
@@ -36,6 +37,10 @@ export class CreateAddressRequest {
   )
   longitude: string;
 
+  @ApiProperty({required :false})
+  @IsOptional()
+  @IsBoolean()
+  is_favorite?: boolean;
 
 
 

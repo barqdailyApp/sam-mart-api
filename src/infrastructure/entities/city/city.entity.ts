@@ -31,6 +31,7 @@ export class City extends AuditableEntity {
 
   @OneToMany(() => WorkingArea, (workingArea) => workingArea.city)
   WorkingAreas: WorkingArea[];
+  
 
   @OneToMany(() => Region, (region) => region.city)
   regions: Region[];

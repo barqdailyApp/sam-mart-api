@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { WarehouseService } from './warehouse.service';
 import { WarehouseOperationRequest } from './dto/requests/warehouse-operation.request';
 import { ApiBearerAuth, ApiTags, ApiHeader } from '@nestjs/swagger';
@@ -8,6 +8,11 @@ import { CreateWarehouseRequest } from './dto/requests/create-warehouse.request'
 import { plainToInstance } from 'class-transformer';
 import { Warehouse } from 'src/infrastructure/entities/warehouse/warehouse.entity';
 import { ActionResponse } from 'src/core/base/responses/action.response';
+import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
+import { I18nResponse } from 'src/core/helpers/i18n.helper';
+import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
+import { applyQueryIncludes } from 'src/core/helpers/service-related.helper';
+import { Region } from 'src/infrastructure/entities/region/region.entity';
 
 @ApiBearerAuth()
 @ApiTags('Warehouse')
@@ -19,7 +24,30 @@ import { ActionResponse } from 'src/core/base/responses/action.response';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('warehouse')
 export class WarehouseController {
-  constructor(private readonly warehouseService: WarehouseService) {}
+  constructor(private readonly warehouseService: WarehouseService,
+    private readonly _i18nResponse: I18nResponse,
+    ) {}
+
+@Get()
+async get(@Query() query: PaginatedRequest) {
+  applyQueryIncludes(query, "region");
+  applyQueryIncludes(query, "region.city");
+  applyQueryIncludes(query, "region.city.country");
+  const warehouses = this._i18nResponse.entity(
+    await this.warehouseService.findAll(query),
+  );
+
+
+  if (query.page && query.limit) {
+    const total = await this.warehouseService.count(query);
+    return new PaginatedResponse(warehouses, {
+      meta: { total, ...query },
+    });
+  } else {
+    return new ActionResponse(warehouses);
+  }
+
+}
 
   @Post()
   async create(@Body() request: CreateWarehouseRequest) {

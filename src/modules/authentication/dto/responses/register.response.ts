@@ -10,7 +10,7 @@ export class RegisterResponse {
     @Exclude() private _avatar: string;
     @Expose()
     get avatar(): string {
-        return toUrl(this._avatar)
+        return  toUrl(this._avatar)
     }
     @Expose() username: string;
     @Expose() email: string;
