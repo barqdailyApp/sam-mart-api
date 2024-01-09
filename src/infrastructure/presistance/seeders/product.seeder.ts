@@ -18,6 +18,7 @@ import { ProductSubCategory } from 'src/infrastructure/entities/product/product-
 import { ProductCategoryPrice } from 'src/infrastructure/entities/product/product-category-price.entity';
 import { ProductAdditionalService } from 'src/infrastructure/entities/product/product-additional-service.entity';
 import { AdditionalService } from 'src/infrastructure/entities/product/additional-service.entity';
+import { CategorySubCategory } from 'src/infrastructure/entities/category/category-subcategory.entity';
 
 @Injectable()
 export class ProductSeeder implements Seeder {
@@ -30,8 +31,13 @@ export class ProductSeeder implements Seeder {
     private readonly productMeasurement_repo: Repository<ProductMeasurement>,
     @InjectRepository(MeasurementUnit)
     private readonly measurementUnit_repo: Repository<MeasurementUnit>,
+
     @InjectRepository(Subcategory)
     private readonly subCategory_repo: Repository<Subcategory>,
+
+    @InjectRepository(CategorySubCategory)
+    private readonly categorySubCategory_repo: Repository<CategorySubCategory>,
+    //
     @InjectRepository(ProductSubCategory)
     private readonly productSubCategory_repo: Repository<ProductSubCategory>,
     @InjectRepository(ProductCategoryPrice)
@@ -51,7 +57,9 @@ export class ProductSeeder implements Seeder {
       const createProduct = this.product_repo.create({
         name_ar: product.name_ar,
         name_en: product.name_en,
-        description: product.description,
+        description_ar: product.description_ar,
+        description_en: product.description_en,
+
         is_active: product.is_active,
         is_recovered: product.is_recovered,
       });
@@ -84,13 +92,13 @@ export class ProductSeeder implements Seeder {
     }
 
     //* Link Products with subcategory
-    const subCategories = await this.subCategory_repo.find();
+    const categorySubcategory = await this.categorySubCategory_repo.find();
     const products = await this.product_repo.find();
-    for (let i = 0; i < subCategories.length; i++) {
+    for (let i = 0; i < categorySubcategory.length; i++) {
       for (let j = 0; j < products.length; j++) {
         const createProductSubCategory = this.productSubCategory_repo.create({
           product_id: products[j].id,
-          sub_category_id: subCategories[i].id,
+          category_sub_category_id: categorySubcategory[i].id,
         });
         await this.productSubCategory_repo.save(createProductSubCategory);
       }
@@ -144,24 +152,24 @@ export class ProductSeeder implements Seeder {
     //     }
     //   }
     // }
-      const productMeasurement = await this.productMeasurement_repo.find({
-        where: { product_id: productSubCategory[0].product_id },
-      });
-      const productCategoryPrice = await this.productCategoryPrice_repo.findOne({
-        where: {
-          product_measurement_id: productMeasurement[0].id,
-          product_sub_category_id: productSubCategory[0].id,
-        },
-      });
+    const productMeasurement = await this.productMeasurement_repo.find({
+      where: { product_id: productSubCategory[0].product_id },
+    });
+    const productCategoryPrice = await this.productCategoryPrice_repo.findOne({
+      where: {
+        product_measurement_id: productMeasurement[0].id,
+        product_sub_category_id: productSubCategory[0].id,
+      },
+    });
 
-      const createProductAdditionalService = this.productService_repo.create({
-        product_category_price_id: productCategoryPrice.id,
+    const createProductAdditionalService = this.productService_repo.create({
+      product_category_price_id: productCategoryPrice.id,
 
-        additional_service_id: additionalService[0].id,
-        price: Math.floor(Math.random() * 100) + 1,
-      });
+      additional_service_id: additionalService[0].id,
+      price: Math.floor(Math.random() * 100) + 1,
+    });
 
-     await this.productService_repo.save(createProductAdditionalService);
+    await this.productService_repo.save(createProductAdditionalService);
   }
 
   async drop(): Promise<any> {
@@ -169,8 +177,10 @@ export class ProductSeeder implements Seeder {
 
     await this.productSubCategory_repo.delete({});
     await this.productMeasurement_repo.delete({});
+    await this.categorySubCategory_repo.delete({});
 
     await this.subCategory_repo.delete({});
+
     // await this.productService_repo.delete({});
     // await this.additionalService_repo.delete({});
     return await this.product_repo.delete({});

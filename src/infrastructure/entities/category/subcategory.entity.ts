@@ -17,7 +17,7 @@ export class Subcategory extends BaseEntity {
    category_subCategory: CategorySubCategory[]
 
   
-   @OneToMany(() => ProductSubCategory, (productSubCategory) => productSubCategory.sub_category)
+   @OneToMany(() => ProductSubCategory, (productSubCategory) => productSubCategory.category_subCategory)
    product_sub_categories: ProductSubCategory[];
 
   constructor(partial?: Partial<Subcategory>) {

@@ -17,4 +17,13 @@ export class ProductFilter {
   @IsNumber()
   limit: number;
 
+  @ApiProperty({ nullable: true, required: false })
+  @IsOptional()
+  @IsString()
+  userLongitude: number;
+
+  @ApiProperty({ nullable: true, required: false })
+  @IsOptional()
+  @IsString()
+  userLatitude: number;
 }

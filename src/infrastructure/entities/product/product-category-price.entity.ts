@@ -1,9 +1,10 @@
 import { AuditableEntity } from 'src/infrastructure/base/auditable.entity';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from 'typeorm';
 import { Product } from './product.entity';
 import { ProductMeasurement } from './product-measurement.entity';
 import { ProductAdditionalService } from './product-additional-service.entity';
 import { ProductSubCategory } from './product-sub-category.entity';
+import { ProductOffer } from './product-offer.entity';
 
 @Entity()
 export class ProductCategoryPrice extends AuditableEntity {
@@ -47,4 +48,7 @@ export class ProductCategoryPrice extends AuditableEntity {
     (productService) => productService.product_category_price,
   )
   product_additional_services: ProductAdditionalService[];
+
+  @OneToOne(() => ProductOffer, productOffer => productOffer.product_category_price)
+  product_offer: ProductOffer;
 }

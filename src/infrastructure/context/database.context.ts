@@ -25,6 +25,7 @@ import { MostHitSubcategory } from '../entities/category/most-hit-subcategory.en
 import { WarehouseProducts } from '../entities/warehouse/warehouse-products.entity';
 import { WarehouseOperations } from '../entities/warehouse/warehouse-opreations.entity';
 import { Warehouse } from '../entities/warehouse/warehouse.entity';
+import { ProductOffer } from '../entities/product/product-offer.entity';
 
 export const DB_ENTITIES = [
   User,
@@ -53,7 +54,8 @@ export const DB_ENTITIES = [
   MostHitSubcategory,
   WarehouseProducts,
   WarehouseOperations,
-  Warehouse
+  Warehouse,
+  ProductOffer
 ];
 
 export const DB_VIEWS = [];

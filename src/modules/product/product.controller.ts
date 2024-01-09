@@ -24,12 +24,15 @@ import {
 } from '@nestjs/swagger';
 import { ActionResponse } from 'src/core/base/responses/action.response';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { plainToClass } from 'class-transformer';
+import { plainToClass, plainToInstance } from 'class-transformer';
 import { ProductResponse } from './dto/response/product.response';
 import { UpdateProductRequest } from './dto/request/update-product.request';
 import { UpdateProductMeasurementRequest } from './dto/request/update-product-measurement.request';
 import { UpdateProductImageRequest } from './dto/request/update-product-image.request';
 import { ProductFilter } from './dto/filter/product.filter';
+import { CreateProductOfferRequest } from './dto/request/create-product-offer.request';
+import { SingleProductRequest } from './dto/request/single-product.request';
+import { ProductWarehouseResponse } from './dto/response/product-warehouse.response';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -43,13 +46,29 @@ export class ProductController {
     private readonly productService: ProductService,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
   ) {}
+
   @Post('create-product')
   async createProduct(@Body() createProductRequest: CreateProductRequest) {
-    const product = await this.productService.create(createProductRequest);
+    const product = await this.productService.createProduct(
+      createProductRequest,
+    );
     const productResponse = plainToClass(ProductResponse, product);
 
     return new ActionResponse(this._i18nResponse.entity(productResponse));
   }
+
+  @Post('create-product-offer/:product_category_price_id')
+  async createProductOffer(
+    @Param('product_category_price_id') product_category_price_id: string,
+    @Body() createProductOfferRequest: CreateProductOfferRequest,
+  ) {
+    const product = await this.productService.createProductOffer(
+      product_category_price_id,
+      createProductOfferRequest,
+    );
+    return new ActionResponse(product);
+  }
+
   @Put('update-product')
   async updateProduct(@Body() updateProductRequest: UpdateProductRequest) {
     const product = await this.productService.updateProduct(
@@ -90,35 +109,36 @@ export class ProductController {
     return new ActionResponse(this._i18nResponse.entity(productsResponse));
   }
 
-  @Get(':sub_category_id/all-products')
+  @Get(':categorySubCategory_id/all-products')
   async subCategoryAllProducts(
     @Query() productFilter: ProductFilter,
-    @Param('sub_category_id') sub_category_id: string,
+    @Param('categorySubCategory_id') categorySubCategory_id: string,
   ) {
     const products = await this.productService.subCategoryAllProducts(
       productFilter,
-      sub_category_id,
+      categorySubCategory_id,
     );
+    //   console.log('first item', products[0]);
     const productsResponse = products.map((product) => {
-      return plainToClass(ProductResponse, product);
+  const productResponse = plainToClass(ProductResponse, product);
+      productResponse.totalQuantity =
+        productResponse.warehouses_products.reduce(
+          (acc, cur) => acc + cur.quantity,
+          0,
+        );
+      return productResponse;
     });
     return new ActionResponse(this._i18nResponse.entity(productsResponse));
   }
 
   @Get('single-product/:product_id')
-  @ApiParam({ name: 'product_id', required: true, type: String })
-  @ApiQuery({
-    name: 'sub_category_id',
-    required: false,
-    type: String,
-  })
   async singleProduct(
     @Param('product_id') id: string,
-    @Query('sub_category_id') sub_category_id?: string,
+    @Query() singleProductRequest: SingleProductRequest,
   ) {
     const product = await this.productService.singleProduct(
       id,
-      sub_category_id,
+      singleProductRequest,
     );
     const productResponse = plainToClass(ProductResponse, product);
 
