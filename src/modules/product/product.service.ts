@@ -185,7 +185,7 @@ export class ProductService {
         product_measurements: {
           product_category_prices: {
             product_sub_category: {
-              categorySubCategory_id,
+              category_sub_category_id: categorySubCategory_id,
             },
           },
         },
@@ -211,8 +211,6 @@ export class ProductService {
     product_id: string,
     singleProductRequest: SingleProductRequest,
   ): Promise<Product> {
-
-  
     const { categorySubCategory_id, userLatitude, userLongitude } =
       singleProductRequest;
     //* Check if sub category exist
@@ -246,7 +244,7 @@ export class ProductService {
         product_measurements: {
           product_category_prices: {
             product_sub_category: {
-              categorySubCategory_id,
+              category_sub_category_id: categorySubCategory_id,
             },
           },
         },

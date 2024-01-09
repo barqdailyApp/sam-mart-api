@@ -62,7 +62,7 @@ export class ProductCategoryPriceService {
     const productSubCategory = await this.productSubCategory_repo.findOne({
       where: {
         product_id,
-        categorySubCategory_id,
+        category_sub_category_id: categorySubCategory_id,
       },
     });
     if (productSubCategory) {
@@ -73,12 +73,15 @@ export class ProductCategoryPriceService {
     //* -------------------------- Create product sub category if Not Exist --------------------------*/
     const productSubCategoryCreate = this.productSubCategory_repo.create({
       product_id,
-      categorySubCategory_id,
+      category_sub_category_id: categorySubCategory_id,
     });
     return await this.productSubCategory_repo.save(productSubCategoryCreate);
   }
 
-  async getLinkProductSubcategory(product_id: string, categorySubCategory_id: string) {
+  async getLinkProductSubcategory(
+    product_id: string,
+    categorySubCategory_id: string,
+  ) {
     //*--------------------------------- Make Check For User Data ---------------------------------*/
     //* Check if sub category exist
     const categorySubcategory = await this.categorySubcategory_repo.findOne({
@@ -98,7 +101,7 @@ export class ProductCategoryPriceService {
     const productSubCategory = await this.productSubCategory_repo.findOne({
       where: {
         product_id,
-        categorySubCategory_id,
+        category_sub_category_id: categorySubCategory_id,
       },
     });
     if (!productSubCategory) {
@@ -116,7 +119,7 @@ export class ProductCategoryPriceService {
     const productSubCategory = await this.productSubCategory_repo.findOne({
       where: {
         product_id,
-        categorySubCategory_id,
+        category_sub_category_id: categorySubCategory_id,
       },
     });
     if (!productSubCategory) {
@@ -143,7 +146,7 @@ export class ProductCategoryPriceService {
     const productSubCategory = await this.productSubCategory_repo.findOne({
       where: {
         product_id,
-        categorySubCategory_id,
+        category_sub_category_id: categorySubCategory_id,
       },
     });
     if (!productSubCategory) {
@@ -179,9 +182,10 @@ export class ProductCategoryPriceService {
       min_order_quantity,
       max_order_quantity,
     });
-    return await this.productCategoryPrice_repo.save(createProductCategoryPrice);
+    return await this.productCategoryPrice_repo.save(
+      createProductCategoryPrice,
+    );
   }
-
 
   async productAdditionalService(
     product_id: string,
@@ -194,7 +198,7 @@ export class ProductCategoryPriceService {
 
     //* Check if product sub category id exist
     const productSubCategory = await this.productSubCategory_repo.findOne({
-      where: { product_id, categorySubCategory_id },
+      where: { product_id, category_sub_category_id: categorySubCategory_id },
     });
     if (!productSubCategory) {
       throw new NotFoundException(`Product sub category ID not found`);
@@ -238,7 +242,7 @@ export class ProductCategoryPriceService {
 
       return await this.productService_repo.save(productAdditionalService);
     }
-        //* -------------------------- Create product additional service --------------------------*/
+    //* -------------------------- Create product additional service --------------------------*/
 
     const createProductAdditionalService = this.productService_repo.create({
       product_category_price_id: productCategoryPrice.id,
