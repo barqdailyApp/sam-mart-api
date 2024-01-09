@@ -73,7 +73,7 @@ export class SectionController {
   ) {
     console.log(req);
     req.logo = logo;
-    return new ActionResponse(await this.sectionService.createSection(req));
+    return new ActionResponse(await this.sectionService.updateSection(req));
   }
 
   @Delete('/:id')
