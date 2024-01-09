@@ -54,7 +54,12 @@ export class AddressService extends BaseUserService<Address> {
     // if entity has property user_id, set it to the current user
     entity.user_id = super.currentUser.id;
     entity.location = `POINT(${entity.latitude} ${entity.longitude})`;
-    return await super.create(entity);
+ 
+    const address= await super.create(entity);
+    if(entity.is_favorite)
+    await this.setFavorite(entity.id);
+
+    return address;
   }
 
   override async update(entity: Address): Promise<Address> {
@@ -82,7 +87,15 @@ export class AddressService extends BaseUserService<Address> {
   async setFavorite(id: string): Promise<Address> {
     const item = await super.findOne(id);
     this.entityRelatedValidator.isExist(item);
+
     this.entityRelatedValidator.ownership(item, super.currentUser);
+   await this._repo.createQueryBuilder()
+    .update("Address")
+    .set({ is_favorite: false }) // Replace 'yourColumn' with the actual column name
+    .where('user_id = :user_id', { user_id: this.currentUser.id })
+    .execute();
+
+
     item.is_favorite = true;
     return await super.update(item);
   }

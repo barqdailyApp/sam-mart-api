@@ -11,7 +11,17 @@ export class CreateWarehouseRequest {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  name: string;
+  name_ar: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  name_en: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  region_id: string;
 
   @ApiProperty()
   @IsNotEmpty()
@@ -31,7 +41,9 @@ export class CreateWarehouseRequest {
   )
   longitude: string;
 
-
+@ApiPropertyOptional()
+  @IsOptional()
+  is_active: boolean;
 
 
 }

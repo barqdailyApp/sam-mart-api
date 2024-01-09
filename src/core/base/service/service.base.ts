@@ -78,7 +78,17 @@ export abstract class BaseService<T extends BaseEntity> implements IBaseService<
     return entity;
   }
 
-  async count(): Promise<number> {
-    return await this._repo.createQueryBuilder().getCount();
+  async count(options?: PaginatedRequest): Promise<number> {
+    let query: any;
+
+    if (options.where && options.where.length) query = { ...query, where: options.where };
+    if (options.order) query = { ...query, order: options.order };
+    if (options.relations) query = { ...query, relations: options.relations };
+    if (options.select) query = { ...query, select: options.select };
+   
+    const result=await this._repo.findAndCount(query)
+   
+    
+    return  result[1];
   }
 }
