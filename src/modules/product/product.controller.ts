@@ -102,7 +102,9 @@ export class ProductController {
 
   @Get('all-products')
   async allProducts(@Query() productFilter: ProductFilter) {
-    const products = await this.productService.AllProduct(productFilter);
+    const products = await this.productService.AllProduct(
+      productFilter,
+    );
     const productsResponse = products.map((product) => {
       return plainToClass(ProductResponse, product);
     });
@@ -120,7 +122,7 @@ export class ProductController {
     );
     //   console.log('first item', products[0]);
     const productsResponse = products.map((product) => {
-  const productResponse = plainToClass(ProductResponse, product);
+      const productResponse = plainToClass(ProductResponse, product);
       productResponse.totalQuantity =
         productResponse.warehouses_products.reduce(
           (acc, cur) => acc + cur.quantity,
