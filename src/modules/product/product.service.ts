@@ -15,6 +15,7 @@ import { UpdateProductImageRequest } from './dto/request/update-product-image.re
 import { ProductFilter } from './dto/filter/product.filter';
 import { Subcategory } from 'src/infrastructure/entities/category/subcategory.entity';
 import { ProductSubCategory } from 'src/infrastructure/entities/product/product-sub-category.entity';
+import { SubcategoryService } from '../subcategory/subcategory.service';
 import { MostHitSubcategory } from 'src/infrastructure/entities/category/most-hit-subcategory.entity';
 import { ProductOffer } from 'src/infrastructure/entities/product/product-offer.entity';
 import { CreateProductOfferRequest } from './dto/request/create-product-offer.request';
@@ -31,6 +32,9 @@ export class ProductService {
     private readonly productImageRepository: Repository<ProductImage>,
     @InjectRepository(ProductMeasurement)
     private readonly productMeasurementRepository: Repository<ProductMeasurement>,
+    @InjectRepository(Subcategory)
+    private subcategory_repo: Repository<Subcategory>,
+
     @InjectRepository(CategorySubCategory)
     private readonly categorySubcategory_repo: Repository<CategorySubCategory>,
     @InjectRepository(MostHitSubcategory)
@@ -56,7 +60,9 @@ export class ProductService {
 
     @Inject(UpdateProductImageTransaction)
     private readonly updateProductImageTransaction: UpdateProductImageTransaction,
-  ) {}
+
+    @Inject(SubcategoryService) private readonly subCategoryService: SubcategoryService,
+  ) { }
 
   async createProduct(
     createProductRequest: CreateProductRequest,
@@ -129,23 +135,9 @@ export class ProductService {
     if (!categorySubcategory) {
       throw new NotFoundException(`Subcategory ID not found`);
     }
-    //*TODO: add hit
-    // const hitSubCategory = await this.mostHitSubcategoryRepository.findOne({
-    //   where: { sub_category_id },
-    // });
 
-    // if (hitSubCategory) {
-    //   await this.mostHitSubcategoryRepository.update(
-    //     { sub_category_id },
-    //     { current_hit: hitSubCategory.current_hit + 1 },
-    //   );
-    // } else {
-    //   const newSubCategory = this.mostHitSubcategoryRepository.create({
-    //     subcategory: subCategory,
-    //     current_hit: 1,
-    //   });
-    //   await this.mostHitSubcategoryRepository.save(newSubCategory);
-    // }
+    await this.subCategoryService.updateMostHitSubCategory({ sub_category_id: categorySubcategory.subcategory_id });
+  
     let warehouses: Warehouse;
     if (userLatitude && userLongitude) {
       warehouses = await this.warehouse_repo

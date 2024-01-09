@@ -19,31 +19,25 @@ import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { UpdateCategoryRequest } from './dto/requests/update-category-request';
 import { FileService } from '../file/file.service';
+import { SubcategoryService } from '../subcategory/subcategory.service';
 
 @Injectable()
 export class CategoryService extends BaseService<Category> {
   constructor(
     @InjectRepository(Category)
     private readonly category_repo: Repository<Category>,
-    
-    @InjectRepository(Subcategory)
-    private readonly subcategory_repo: Repository<Subcategory>,
     @InjectRepository(CategorySubCategory)
     private readonly category_subcategory_repo: Repository<CategorySubCategory>,
-    @InjectRepository(MostHitSubcategory)
-    private readonly most_hit_subcategory_repo: Repository<MostHitSubcategory>,
     @Inject(StorageManager) private readonly storageManager: StorageManager,
     @Inject(ImageManager) private readonly imageManager: ImageManager,
     @Inject(FileService) private _fileService: FileService,
+    @Inject(SubcategoryService) private readonly subCategoryService: SubcategoryService,
   ) {
     super(category_repo);
   }
 
-
-
-
-
   async getCategorySubcategory(section_category_id: string) {
+    await this.subCategoryService.updateMostHitSubCategory({ section_category_id });
     return await this.category_subcategory_repo.find({
       where: { section_category_id: section_category_id },
       relations: { subcategory: true },
@@ -76,57 +70,32 @@ export class CategoryService extends BaseService<Category> {
     return category;
   }
   async updateCategory(req: UpdateCategoryRequest): Promise<Category> {
-    const category = await this._repo.findOne({where:{id:req.id}});
-    
+    const category = await this._repo.findOne({ where: { id: req.id } });
+
     if (req.logo) {
 
-    await  this._fileService.delete (category.logo)
+      await this._fileService.delete(category.logo)
       // resize image to 300x300
-   const logo=  await this._fileService.upload(req.logo)
-   
+      const logo = await this._fileService.upload(req.logo)
+
 
       // set avatar path
       category.logo = logo;
     }
-    await this._repo.update(category.id,{...plainToInstance(Category, req),logo:category.logo});
+    await this._repo.update(category.id, { ...plainToInstance(Category, req), logo: category.logo });
     return category;
   }
-  async addSubcategoryToCategory(req:CategorySubcategoryRequest) {
-    const  category= await this.category_subcategory_repo.findOne({
-      where: { section_category_id: req.section_category_id , subcategory_id: req.subcategory_id},
+  async addSubcategoryToCategory(req: CategorySubcategoryRequest) {
+    const category = await this.category_subcategory_repo.findOne({
+      where: { section_category_id: req.section_category_id, subcategory_id: req.subcategory_id },
       relations: { subcategory: true },
     });
-  
-    if (category!=null)
+
+    if (category != null)
       throw new BadRequestException('subcategory already exist');
-    
+
     return await this.category_subcategory_repo.save({
       ...req
     });
-  }
-
-  async getMostHitSubcategory(paginatedRequest: PaginatedRequest) {
-    let { page, limit, select } = paginatedRequest;
-
-    page = page || 1;
-    limit = limit || 10;
-
-    const queryOptions: any = {
-      relations: { subcategory: true },
-      order: { previous_hit: 'DESC', current_hit: 'DESC' },
-      skip: (page - 1) * limit,
-      take: limit,
-    };
-
-    if (select) {
-      queryOptions.select = select;
-    }
-
-    return await this.most_hit_subcategory_repo.find(queryOptions);
-  }
-
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
-  async flushMostHitSubcategory() {
-    await this.most_hit_subcategory_repo.update({}, { previous_hit: () => 'current_hit', current_hit: 0 });
   }
 }

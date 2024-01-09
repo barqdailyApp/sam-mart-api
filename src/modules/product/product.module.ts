@@ -6,6 +6,7 @@ import { MeasurementUnitModule } from '../measurement-unit/measurement-unit.modu
 import { UpdateProductTransaction } from './utils/update-product.transaction';
 import { UpdateProductMeasurementTransaction } from './utils/update-product-measurment.transaction';
 import { UpdateProductImageTransaction } from './utils/update-product-image.transaction';
+import { SubcategoryService } from '../subcategory/subcategory.service';
 
 @Module({
   controllers: [ProductController],
@@ -15,6 +16,7 @@ import { UpdateProductImageTransaction } from './utils/update-product-image.tran
     UpdateProductTransaction,
     UpdateProductMeasurementTransaction,
     UpdateProductImageTransaction,
+    SubcategoryService,
   ],
   imports: [MeasurementUnitModule],
   exports: [ProductService],
