@@ -19,13 +19,13 @@ export class ProductFilter {
 
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()
-  @IsNumber()
-  longitude: number;
+  @IsString()
+  longitude: string;
 
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()
-  @IsNumber()
-  latitude: number;
+  @IsString()
+  latitude: string;
 
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()
@@ -36,8 +36,11 @@ export class ProductFilter {
 
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()
-  @IsString()
-  category_sub_category_id: string;
+  @Transform(({ value }) => {
+    return value === 'true' || value === true;
+  })
+  withOffers: boolean;
+
 
   
   @ApiProperty({ nullable: true, required: false })
@@ -51,6 +54,17 @@ export class ProductFilter {
   @IsOptional()
   @IsString()
   section_id: string;
+
+  @ApiProperty({ nullable: true, required: false })
+  @IsOptional()
+  @IsString()
+  section_category_id: string;
+
+  @ApiProperty({ nullable: true, required: false })
+  @IsOptional()
+  @IsString()
+  category_sub_category_id: string;
+
 
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()

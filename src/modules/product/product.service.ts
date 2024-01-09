@@ -107,12 +107,14 @@ export class ProductService {
       page,
       limit,
       section_id,
+      section_category_id,
       withPrices,
       product_name,
       withWarehouse,
       category_sub_category_id,
       latitude,
       longitude,
+      withOffers,
     } = productFilter;
 
     const skip = (page - 1) * limit;
@@ -138,8 +140,6 @@ export class ProductService {
       .leftJoinAndSelect('product.product_measurements', 'product_measurements')
 
       .leftJoinAndSelect('product.warehouses_products', 'warehouses_products')
-
-   //   .leftJoinAndSelect('warehouses_products.warehouses_products', 'warehouses_products')
 
       .leftJoinAndSelect(
         'product.product_sub_categories',
@@ -167,7 +167,18 @@ export class ProductService {
         'product_category_prices.product_sub_category',
         'product_sub_category',
       )
-
+      .leftJoinAndSelect(
+        'product_category_prices.product_offer',
+        'product_offer',
+      )
+      // .leftJoinAndSelect(
+      //   'product_category_prices.product_additional_services',
+      //   'product_additional_services',
+      // )
+      // .leftJoinAndSelect(
+      //   'product_additional_services.additional_service',
+      //   'additional_service',
+      // )
       .skip(skip)
       .take(limit);
 
@@ -175,14 +186,43 @@ export class ProductService {
 
     if (withPrices) {
       query.where('product_category_prices.id IS NOT NULL');
+      
+    }
+    if (withOffers) {
+      query.andWhere('product_offer.id IS NOT NULL');
     }
     if (section_id) {
       query.andWhere('section.id = :section_id', { section_id });
     }
 
+    if (section_category_id) {
+      query.andWhere(
+        'category_subCategory.section_category_id = :section_category_id',
+        {
+          section_category_id,
+        },
+      );
+    }
+
     if (category_sub_category_id) {
       query.andWhere('category_subCategory.id = :category_sub_category_id', {
         category_sub_category_id,
+      });
+      // query.andWhere(
+      //   'product_sub_category.category_sub_category_id = :category_sub_category_id',
+      //   {
+      //     category_sub_category_id,
+      //   },
+      // );
+
+      const categorySubcategory = await this.categorySubcategory_repo.findOne({
+        where: { id: category_sub_category_id },
+      });
+      if (!categorySubcategory) {
+        throw new NotFoundException(`Subcategory ID not found`);
+      }
+      await this.subCategoryService.updateMostHitSubCategory({
+        sub_category_id: categorySubcategory.subcategory_id,
       });
     }
 
@@ -201,7 +241,7 @@ export class ProductService {
 
     if (warehouse) {
       query.andWhere('warehouses_products.warehouse_id = :warehouse', {
-        warehouse,
+        warehouse: warehouse.id,
       });
     }
     return await query.getMany();
