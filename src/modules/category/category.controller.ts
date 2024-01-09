@@ -100,11 +100,4 @@ export class CategoryController {
       await this.categoryService.addSubcategoryToCategory(req),
     );
   }
-
-  @Get('/most-hit-subcategory')
-  async getMostHitSubcategory(@Query() query: PaginatedRequest) {
-    return new ActionResponse(
-      await this.categoryService.getMostHitSubcategory(query),
-    );
-  }
 }

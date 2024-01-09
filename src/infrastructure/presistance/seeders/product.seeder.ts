@@ -35,10 +35,9 @@ export class ProductSeeder implements Seeder {
     @InjectRepository(Subcategory)
     private readonly subCategory_repo: Repository<Subcategory>,
 
-    
     @InjectRepository(CategorySubCategory)
     private readonly categorySubCategory_repo: Repository<CategorySubCategory>,
-   // 
+    //
     @InjectRepository(ProductSubCategory)
     private readonly productSubCategory_repo: Repository<ProductSubCategory>,
     @InjectRepository(ProductCategoryPrice)
@@ -60,7 +59,7 @@ export class ProductSeeder implements Seeder {
         name_en: product.name_en,
         description_ar: product.description_ar,
         description_en: product.description_en,
-       
+
         is_active: product.is_active,
         is_recovered: product.is_recovered,
       });
@@ -99,7 +98,7 @@ export class ProductSeeder implements Seeder {
       for (let j = 0; j < products.length; j++) {
         const createProductSubCategory = this.productSubCategory_repo.create({
           product_id: products[j].id,
-          categorySubCategory_id: categorySubcategory[i].id,
+          category_sub_category_id: categorySubcategory[i].id,
         });
         await this.productSubCategory_repo.save(createProductSubCategory);
       }
@@ -153,24 +152,24 @@ export class ProductSeeder implements Seeder {
     //     }
     //   }
     // }
-      const productMeasurement = await this.productMeasurement_repo.find({
-        where: { product_id: productSubCategory[0].product_id },
-      });
-      const productCategoryPrice = await this.productCategoryPrice_repo.findOne({
-        where: {
-          product_measurement_id: productMeasurement[0].id,
-          product_sub_category_id: productSubCategory[0].id,
-        },
-      });
+    const productMeasurement = await this.productMeasurement_repo.find({
+      where: { product_id: productSubCategory[0].product_id },
+    });
+    const productCategoryPrice = await this.productCategoryPrice_repo.findOne({
+      where: {
+        product_measurement_id: productMeasurement[0].id,
+        product_sub_category_id: productSubCategory[0].id,
+      },
+    });
 
-      const createProductAdditionalService = this.productService_repo.create({
-        product_category_price_id: productCategoryPrice.id,
+    const createProductAdditionalService = this.productService_repo.create({
+      product_category_price_id: productCategoryPrice.id,
 
-        additional_service_id: additionalService[0].id,
-        price: Math.floor(Math.random() * 100) + 1,
-      });
+      additional_service_id: additionalService[0].id,
+      price: Math.floor(Math.random() * 100) + 1,
+    });
 
-     await this.productService_repo.save(createProductAdditionalService);
+    await this.productService_repo.save(createProductAdditionalService);
   }
 
   async drop(): Promise<any> {

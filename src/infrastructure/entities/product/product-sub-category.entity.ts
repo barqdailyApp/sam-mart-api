@@ -17,11 +17,11 @@ export class ProductSubCategory extends AuditableEntity {
       onDelete: 'CASCADE',
     },
   )
-  @JoinColumn({ name: 'categorySubCategory_id' })
+  @JoinColumn({ name: 'category_sub_category_id' })
   category_subCategory: CategorySubCategory;
 
   @Column()
-  categorySubCategory_id: string;
+  category_sub_category_id: string;
 
   // product
   @ManyToOne(() => Product, (product) => product.product_sub_categories, {
