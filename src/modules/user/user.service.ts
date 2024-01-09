@@ -1,13 +1,17 @@
 import { Inject, Injectable, Scope } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/infrastructure/entities/user/user.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { BaseService } from 'src/core/base/service/service.base';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
-import { ProfileResponse } from './dto/responses/profile.response';
 import { FileService } from '../file/file.service';
-import { UploadFileRequest } from '../file/dto/requests/upload-file.request';
+import { UpdateProfileRequest } from './dto/requests/update-profile.request';
+import { ImageManager } from 'src/integration/sharp/image.manager';
+import * as sharp from 'sharp';
+import { StorageManager } from 'src/integration/storage/storage.manager';
+
+
 
 @Injectable({ scope: Scope.REQUEST })
 export class UserService extends BaseService<User> {
@@ -16,15 +20,50 @@ export class UserService extends BaseService<User> {
 
     @Inject(FileService) private _fileService: FileService,
     @Inject(REQUEST) readonly request: Request,
+    @Inject(StorageManager) private readonly storageManager: StorageManager,
+    @Inject(ImageManager) private readonly imageManager: ImageManager,
   ) {
     super(userRepo);
   }
 
   async allowNotification(allow_notification: boolean) {
     await this.userRepo.update(
-      { id: this.request.user.id },
+      { id: this.currentUser.id },
       { allow_notification },
     );
   }
-  
+  async updateProfile(updatdReq: UpdateProfileRequest) {
+    const user = await this.userRepo.findOne({ where: { id: this.currentUser.id } });
+
+    if (updatdReq.delete_avatar) {
+      await this._fileService.delete(user.avatar);
+      user.avatar = null;
+    }
+
+    if (updatdReq.avatarFile) {
+      // resize image to 300x300
+      const resizedImage = await this.imageManager.resize(updatdReq.avatarFile, {
+        size: { width: 300, height: 300 },
+        options: {
+          fit: sharp.fit.cover,
+          position: sharp.strategy.entropy
+        },
+      });
+
+      // save image
+      const path = await this.storageManager.store(
+        { buffer: resizedImage, originalname: updatdReq.avatarFile.originalname },
+        { path: 'avatars' },
+      );
+
+      user.avatar = path;
+    }
+
+    Object.assign(user, updatdReq);
+    await this.userRepo.save(user);
+  }
+
+  private get currentUser(): User {
+    return this.request.user;
+  }
 }
