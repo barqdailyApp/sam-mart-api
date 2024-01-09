@@ -1,27 +1,36 @@
-//UpdateProfile request
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { Transform } from "class-transformer";
-import { IsBoolean, IsEmail, IsNotEmpty, IsOptional, IsString, } from "class-validator";
-import { Unique } from "src/core/validators/unique-constraints.validator";
+import { ApiProperty } from "@nestjs/swagger";
+import { IsDate, IsEnum, IsNotEmpty, IsOptional } from "class-validator";
+import { Gender } from "src/infrastructure/data/enums/gender.enum";
+import { RegisterRequest } from "src/modules/authentication/dto/requests/register.dto";
 
-export class UpdateProfileRequest {
-    
-        @ApiProperty() @IsNotEmpty() @IsString()
-        first_name: string;
-        @ApiProperty() @IsNotEmpty() @IsString()
-        last_name: string;
-        @ApiPropertyOptional()
-        @IsOptional()
-        @IsNotEmpty()
-        @IsEmail()
-        email:string
+export class UpdateProfileRequest extends RegisterRequest {
+    @ApiProperty({ required: false })
+    @IsOptional()
+    first_name: string;
 
-        @ApiProperty({ type: 'file', required: false })
-        @IsOptional()
-        file: Express.Multer.File;
-        @ApiProperty() @Transform(({ value} ) => value === 'true') @IsBoolean()
-        delete_avatar: boolean;
+    @ApiProperty({ required: false })
+    @IsOptional()
+    last_name: string;
 
+    @ApiProperty({ required: false })
+    @IsOptional()
+    phone: string;
 
-    
+    @ApiProperty({ enum: Gender, required: false })
+    @IsEnum(Gender)
+    @IsOptional()
+    gender: Gender
+
+    @ApiProperty({ default: new Date().toISOString().split('T')[0], required: false })
+    @IsOptional()
+    birth_date: Date;
+
+    @ApiProperty({ required: false })
+    @IsOptional()
+    delete_avatar: boolean;
+
+    constructor(data: Partial<UpdateProfileRequest>) {
+        super(data)
     }
+
+}
