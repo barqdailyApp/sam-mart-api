@@ -20,6 +20,7 @@ import {
   ApiBearerAuth,
   ApiConsumes,
   ApiHeader,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { RolesGuard } from '../authentication/guards/roles.guard';
@@ -102,11 +103,12 @@ export class SectionController {
   }
 
   @Get()
-  async getSections(@Query() query: PaginatedRequest) {
-    applyQuerySort(query, 'order_by=ASC');
+  @ApiQuery({ name: 'user_id', type: String, required: false })
+  async getSections(@Query('user_id') userId?: string) {
+    
     return new ActionResponse(
       this._i18nResponse.entity(
-        (await this.sectionService.findAll(query)).map((e) => {
+        (await this.sectionService.getSections(userId)).map((e) => {
           e.logo = toUrl(e.logo);
           return e;
         }),

@@ -35,8 +35,15 @@ export class SectionService extends BaseService<Section> {
     super(section_repo);
   }
 
-  async getSections(): Promise<Section[]> {
-    return await this.section_repo.find();
+  async getSections(user_id: string): Promise<Section[]> {
+    const user=user_id==null?null: await this.user_repo.findOne({where:{id:user_id},})
+    const sections= await this.section_repo.find({order:{order_by: "ASC"}});
+    if(!user)
+    return sections.filter(section=>section.allowed_roles.includes(Role.CLIENT))
+ return   sections.filter(section=>{
+  
+      return  user.roles.includes(section.allowed_roles[0])
+    })
   }
 
   async createSection(req: CreateSectionRequest): Promise<Section> {
