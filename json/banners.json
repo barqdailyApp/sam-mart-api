@@ -1,0 +1,21 @@
+[
+    {
+      "banar": "assets/images/banners/banner1.png",
+      "started_at": "2024-01-01T00:00:00.000Z",
+      "ended_at": "2024-02-31T00:00:00.000Z",
+      "is_active": true
+    },
+    {
+      "banar": "assets/images/banners/banner1.png",
+      "started_at": "2024-01-10T00:00:00.000Z",
+      "ended_at": "2024-02-28T00:00:00.000Z",
+      "is_active": true
+    },
+    {
+      "banar": "assets/images/banners/banner1.png",
+      "started_at": "2024-01-05T00:00:00.000Z",
+      "ended_at": "2024-02-31T00:00:00.000Z",
+      "is_active": true
+    }
+  ]
+  
