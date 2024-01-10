@@ -18,6 +18,12 @@ export class User extends AuditableEntity {
   @Column({ length: 100, unique: true })
   username: string;
 
+  @Column({ length: 100, nullable: true })
+  first_name: string;
+
+  @Column({ length: 100, nullable: true })
+  last_name: string;
+  
   @Column({ nullable: true, length: 60 })
   password: string;
 
