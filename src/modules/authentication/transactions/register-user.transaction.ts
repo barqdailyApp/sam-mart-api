@@ -64,6 +64,9 @@ export class RegisterUserTransaction extends BaseTransaction<
       user.username = user.phone;
       // set user role
       user.roles =  [ Role.CLIENT];
+
+        user.first_name = req.first_name;
+        user.last_name = req.last_name
       // save user
       const savedUser = await context.save(User, user);
 
