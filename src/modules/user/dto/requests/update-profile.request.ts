@@ -6,12 +6,8 @@ import { RegisterRequest } from "src/modules/authentication/dto/requests/registe
 export class UpdateProfileRequest extends RegisterRequest {
     @ApiProperty({ required: false })
     @IsOptional()
-    first_name: string;
-
-    @ApiProperty({ required: false })
-    @IsOptional()
-    last_name: string;
-
+    name: string
+    
     @ApiProperty({ required: false })
     @IsOptional()
     phone: string;
