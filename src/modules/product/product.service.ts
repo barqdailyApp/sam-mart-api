@@ -22,6 +22,7 @@ import { CreateProductOfferRequest } from './dto/request/create-product-offer.re
 import { CategorySubCategory } from 'src/infrastructure/entities/category/category-subcategory.entity';
 import { Warehouse } from 'src/infrastructure/entities/warehouse/warehouse.entity';
 import { SingleProductRequest } from './dto/request/single-product.request';
+import { Console } from 'console';
 
 @Injectable()
 export class ProductService {
@@ -141,19 +142,18 @@ export class ProductService {
 
       .leftJoinAndSelect('product.warehouses_products', 'warehouses_products')
 
-      .leftJoinAndSelect(
+      .leftJoin(
         'product.product_sub_categories',
         'product_sub_categories',
       )
-      .leftJoinAndSelect(
+      .leftJoin(
         'product_sub_categories.category_subCategory',
         'category_subCategory',
       )
-      .leftJoinAndSelect(
+      .leftJoin(
         'category_subCategory.section_category',
         'section_category',
       )
-      .leftJoinAndSelect('section_category.section', 'section')
 
       .leftJoinAndSelect(
         'product_measurements.measurement_unit',
@@ -167,53 +167,79 @@ export class ProductService {
         'product_category_prices.product_sub_category',
         'product_sub_category',
       )
+      .leftJoin(
+        'product_sub_category.category_subCategory',
+        'category_subCategory_price',
+      )
+      .leftJoin(
+        'category_subCategory_price.section_category',
+        'section_category_price',
+      )
       .leftJoinAndSelect(
         'product_category_prices.product_offer',
         'product_offer',
       )
-      // .leftJoinAndSelect(
-      //   'product_category_prices.product_additional_services',
-      //   'product_additional_services',
-      // )
-      // .leftJoinAndSelect(
-      //   'product_additional_services.additional_service',
-      //   'additional_service',
-      // )
+
       .skip(skip)
       .take(limit);
 
-    // get products have only prices
-
     if (withPrices) {
-      query.where('product_category_prices.id IS NOT NULL');
-      
+      query.orWhere('product_category_prices.id IS NOT NULL');
     }
     if (withOffers) {
-      query.andWhere('product_offer.id IS NOT NULL');
+      query.orWhere('product_offer.id IS NOT NULL');
     }
     if (section_id) {
-      query.andWhere('section.id = :section_id', { section_id });
+      if (withPrices) {
+        query.andWhere('section_category_price.section_id = :section_id', {
+          section_id,
+        });
+      } else {
+        query.orWhere('section_category.section_id = :section_id', {
+          section_id,
+        });
+      }
     }
 
     if (section_category_id) {
-      query.andWhere(
-        'category_subCategory.section_category_id = :section_category_id',
-        {
-          section_category_id,
-        },
-      );
+      if (withPrices) {
+        const categorySubcategory = await this.categorySubcategory_repo.findOne(
+          {
+            relations: { section_category: true },
+            where: { section_category: { id: section_category_id } },
+          },
+        );
+
+        query.andWhere(
+          'product_sub_category.category_sub_category_id = :category_sub_category_id',
+          {
+            category_sub_category_id: categorySubcategory.id,
+          },
+        );
+      } else {
+        query.orWhere(
+          'category_subCategory.section_category_id = :section_category_id',
+          {
+            section_category_id,
+          },
+        );
+      }
     }
 
     if (category_sub_category_id) {
-      query.andWhere('category_subCategory.id = :category_sub_category_id', {
-        category_sub_category_id,
-      });
-      // query.andWhere(
-      //   'product_sub_category.category_sub_category_id = :category_sub_category_id',
-      //   {
-      //     category_sub_category_id,
-      //   },
-      // );
+      if (withPrices) {
+        console.log('category_sub_category_id', category_sub_category_id);
+        query.andWhere(
+          'product_sub_category.category_sub_category_id = :category_sub_category_id',
+          {
+            category_sub_category_id,
+          },
+        );
+      } else {
+        query.orWhere('category_subCategory.id = :category_sub_category_id', {
+          category_sub_category_id,
+        });
+      }
 
       const categorySubcategory = await this.categorySubcategory_repo.findOne({
         where: { id: category_sub_category_id },
@@ -240,10 +266,11 @@ export class ProductService {
     }
 
     if (warehouse) {
-      query.andWhere('warehouses_products.warehouse_id = :warehouse', {
+      query.orWhere('warehouses_products.warehouse_id = :warehouse', {
         warehouse: warehouse.id,
       });
     }
+
     return await query.getMany();
   }
 

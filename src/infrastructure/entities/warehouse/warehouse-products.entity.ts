@@ -6,13 +6,17 @@ import { ProductMeasurement } from '../product/product-measurement.entity';
 
 @Entity()
 export class WarehouseProducts extends BaseEntity {
-  @ManyToOne(() => Warehouse, (warehouse) => warehouse.products)
+  @ManyToOne(() => Warehouse, (warehouse) => warehouse.products, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
   warehouse: Warehouse;
   @Column()
   warehouse_id: string;
 
-  @ManyToOne(() => Product, (product) => product.warehouses_products)
+  @ManyToOne(() => Product, (product) => product.warehouses_products, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
   product: Product;
 
@@ -24,7 +28,9 @@ export class WarehouseProducts extends BaseEntity {
 
   @ManyToOne(
     () => ProductMeasurement,
-    (productMeasurement) => productMeasurement.warehouses,
+    (productMeasurement) => productMeasurement.warehouses, {
+      onDelete: 'CASCADE',
+    }
   )
   @JoinColumn()
   product_measurement: ProductMeasurement;
