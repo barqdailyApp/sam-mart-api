@@ -45,6 +45,7 @@ export class ProductCategoryPriceService {
     //*--------------------------------- Make Check For User Data ---------------------------------*/
     //* Check if sub category exist
     const categorySubcategory = await this.categorySubcategory_repo.findOne({
+      relations: { section_category: true },
       where: { id: categorySubCategory_id },
     });
     if (!categorySubcategory) {
@@ -58,18 +59,38 @@ export class ProductCategoryPriceService {
     if (!product) {
       throw new NotFoundException(`Product ID not found`);
     }
-    //* Check if product sub category exist
-    const productSubCategory = await this.productSubCategory_repo.findOne({
+    //* Check if product  there is a section
+    const sectionSubcategory = categorySubcategory.section_category.section_id;
+    const productSection = await this.product_repo.findOne({
       where: {
-        product_id,
-        category_sub_category_id: categorySubCategory_id,
+        id: product_id,
+        product_sub_categories: {
+          category_subCategory: {
+            section_category: {
+              section_id: sectionSubcategory,
+            },
+          },
+        },
       },
     });
-    if (productSubCategory) {
-      throw new BadRequestException(
-        `There Relation Between Product And Sub Category`,
-      );
+
+    if (productSection) {
+      throw new BadRequestException(`This product cannot be added in the same section`);
     }
+
+    // //* Check if product sub category exist
+    // const productSubCategory = await this.productSubCategory_repo.findOne({
+    //   where: {
+    //     product_id,
+    //     category_sub_category_id: categorySubCategory_id,
+    //   },
+    // });
+    // if (productSubCategory) {
+    //   throw new BadRequestException(
+    //     `There Relation Between Product And Sub Category`,
+    //   );
+    // }
+
     //* -------------------------- Create product sub category if Not Exist --------------------------*/
     const productSubCategoryCreate = this.productSubCategory_repo.create({
       product_id,
