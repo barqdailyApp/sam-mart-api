@@ -6,8 +6,7 @@ import { Double } from 'typeorm';
 
 export class UserInfoResponse {
   id: string;
-  first_name: string;
-  last_name: string;
+  name:string;
   avatar: string;
   phone: string;
   allow_notification: boolean;
@@ -15,13 +14,9 @@ export class UserInfoResponse {
   birth_date: string;
   gender: string;
 
-
-
-
   constructor(partial: Partial<UserInfoResponse>) {
     this.id = partial.id;
-    this.first_name = partial.first_name;
-    this.last_name = partial.last_name;
+    this.name = partial.name;
     this.avatar = partial.avatar;
     this.phone = partial.phone;
     this.email = partial.email;

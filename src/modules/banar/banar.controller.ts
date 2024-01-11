@@ -25,7 +25,6 @@ import { UpdateBannerRequest } from './dto/request/update-banner.request';
     description: 'Language header: en, ar',
 })
 @ApiTags('Banar')
-@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('banar')
 export class BanarController {
     constructor(
@@ -33,6 +32,7 @@ export class BanarController {
     ) { }
 
     @Post()
+    @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN)
     @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('banar'))
     @ApiConsumes('multipart/form-data')
@@ -56,9 +56,10 @@ export class BanarController {
     }
 
     @Patch(":id")
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
     @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('banar'))
     @ApiConsumes('multipart/form-data')
-    @Roles(Role.ADMIN)
     async updateBanar(
         @Param('id') id: string,
         @Body() req: UpdateBannerRequest,
@@ -72,6 +73,7 @@ export class BanarController {
     }
 
     @Delete(":id")
+    @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN)
     async deleteBanar(
         @Param('id') id: string,
