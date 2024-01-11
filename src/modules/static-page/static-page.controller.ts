@@ -15,7 +15,7 @@ import { I18nResponse } from 'src/core/helpers/i18n.helper';
 import { ActionResponse } from 'src/core/base/responses/action.response';
 import { StaticPage } from 'src/infrastructure/entities/static-pages/static-pages.entity';
 import { plainToInstance } from 'class-transformer';
-import { StaticPageResponse } from './dto/request/response/static-page.response';
+import { StaticPageResponse } from './dto/response/static-page.response';
 
 
 @ApiBearerAuth()

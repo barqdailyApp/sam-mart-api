@@ -19,7 +19,7 @@ export class StaticPageSeeder implements Seeder {
         for (const data of staticPagesData) {
             const staticPage = this.staticPageRepository.create(data);
 
-            const result = await this.staticPageRepository.save(staticPage);
+            await this.staticPageRepository.save(staticPage);
         }
     }
 
