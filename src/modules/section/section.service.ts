@@ -73,7 +73,7 @@ const logo=await this._fileService.upload(req.logo)
       section.logo = logo;
     }
     await this._repo.update(section.id,{...plainToInstance(Section, req),logo:section.logo});
-    return section;
+    return plainToInstance(Section, req);
   }
 
   async getSectionCategories(section_id: string): Promise<SectionCategory[]> {
