@@ -2,9 +2,11 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
+  Put,
   Query,
   UploadedFile,
   UseGuards,
@@ -28,6 +30,8 @@ import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
 import { Roles } from '../authentication/guards/roles.decorator';
 import { RolesGuard } from '../authentication/guards/roles.guard';
+import { UpdateCategoryRequest } from './dto/requests/update-category-request';
+import { UpdateSectionCategoryRequest } from '../section/dto/requests/update-section-category.request';
 
 @ApiHeader({
   name: 'Accept-Language',
@@ -56,6 +60,21 @@ export class CategoryController {
   }
 
   @ApiBearerAuth()
+
+  @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('logo'))
+  @ApiConsumes('multipart/form-data')
+  @Put()
+  async update(
+    @Body() req: UpdateCategoryRequest,
+    @UploadedFile(new UploadValidator().build())
+    logo: Express.Multer.File,
+  ) {
+   
+    req.logo = logo;
+    return new ActionResponse(await this.categoryService.updateCategory(req));
+  }
+
+
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.ADMIN)
@@ -98,6 +117,20 @@ export class CategoryController {
   async addSubcategoryToCategory(@Body() req: CategorySubcategoryRequest) {
     return new ActionResponse(
       await this.categoryService.addSubcategoryToCategory(req),
+    );
+  }
+
+  
+  @Put('/category-subcategory')
+  async updateSectionCategory(@Body() req: UpdateSectionCategoryRequest) {
+    return new ActionResponse(
+      await this.categoryService.updateCategorySubcategory(req),
+    );
+  }
+  @Delete('/category-subcategory:id')
+  async deleteSectionCategory(@Param('id') id: string) {
+    return new ActionResponse(
+      await this.categoryService.deleteCategorySubcategory(id),
     );
   }
 }
