@@ -3,11 +3,12 @@ import { SupportTicketService } from './support-ticket.service';
 import { FileService } from '../file/file.service';
 import { SupportTicketController } from './support-ticket.controller';
 import { TicketCommentService } from './ticket-comment.service';
+import { GatewaysModule } from 'src/integration/gateways/gateways.module';
 
 @Module({
     controllers: [SupportTicketController],
     providers: [SupportTicketService, TicketCommentService, FileService],
-    imports: []
+    imports: [GatewaysModule]
 })
 export class SupportTicketModule {
 }

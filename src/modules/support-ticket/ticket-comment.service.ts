@@ -10,6 +10,7 @@ import { SupportTicket } from 'src/infrastructure/entities/support-ticket/suppor
 import { AddTicketCommentRequest } from './dto/request/add-ticket-comment.request';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { TicketAttachment } from 'src/infrastructure/entities/support-ticket/ticket-attachement.entity';
+import { SupportTicketGateway } from 'src/integration/gateways/support-ticket.gateway';
 
 
 @Injectable()
@@ -20,6 +21,7 @@ export class TicketCommentService extends BaseService<TicketComment> {
         @InjectRepository(SupportTicket) private readonly supportTicketRepository: Repository<SupportTicket>,
         @Inject(REQUEST) private readonly request: Request,
         @Inject(FileService) private _fileService: FileService,
+        private readonly supportTicketGateway: SupportTicketGateway,
     ) {
         super(ticketCommentRepository);
     }
@@ -54,6 +56,7 @@ export class TicketCommentService extends BaseService<TicketComment> {
             attachment: attachedFile
         });
 
+        this.supportTicketGateway.handleSendMessage({ supportTicket: ticket, ticketComment: savedComment, action: 'ADD_COMMENT' });
         return await this.ticketCommentRepository.save(savedComment);
     }
 
