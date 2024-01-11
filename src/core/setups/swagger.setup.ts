@@ -17,7 +17,9 @@ import { ProductCategoryPriceModule } from 'src/modules/product-category-price/p
 import { ProductModule } from 'src/modules/product/product.module';
 import { RegionModule } from 'src/modules/region/region.module';
 import { SectionModule } from 'src/modules/section/section.module';
+import { StaticPageModule } from 'src/modules/static-page/static-page.module';
 import { SubcategoryModule } from 'src/modules/subcategory/subcategory.module';
+import { SupportTicketModule } from 'src/modules/support-ticket/suuport-ticket.module';
 import { UserModule } from 'src/modules/user/user.module';
 import { WarehouseModule } from 'src/modules/warehouse/warehouse.module';
 
@@ -59,6 +61,8 @@ export default (app: INestApplication, config: ConfigService) => {
       ProductCategoryPriceModule,
       BanarModule,
       WarehouseModule,
+      SupportTicketModule,
+      StaticPageModule,
     ],
     operationIdFactory,
   });
