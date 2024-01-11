@@ -28,4 +28,9 @@ export abstract class Gateways {
     /** order-id */
     static UserId = 'user-';
   };
+
+  static SupportTicket = class {
+    /** support-ticket */
+    static Namespace = 'support-ticket';
+  }
 }
