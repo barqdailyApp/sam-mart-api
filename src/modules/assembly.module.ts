@@ -16,6 +16,7 @@ import { ProductCategoryPriceModule } from './product-category-price/product-cat
 import { BanarModule } from './banar/banar.module';
 import { WarehouseModule } from './warehouse/warehouse.module';
 import { SupportTicketModule } from './support-ticket/suuport-ticket.module';
+import { StaticPageModule } from './static-page/static-page.module';
 
 @Module({
   imports: [
@@ -34,7 +35,8 @@ import { SupportTicketModule } from './support-ticket/suuport-ticket.module';
     ProductCategoryPriceModule,
     BanarModule,
     WarehouseModule,
-    SupportTicketModule
+    SupportTicketModule,
+    StaticPageModule,
   ],
   exports: [],
   providers: [],
