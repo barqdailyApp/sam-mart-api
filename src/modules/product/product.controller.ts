@@ -33,6 +33,8 @@ import { ProductFilter } from './dto/filter/product.filter';
 import { CreateProductOfferRequest } from './dto/request/create-product-offer.request';
 import { SingleProductRequest } from './dto/request/single-product.request';
 import { ProductWarehouseResponse } from './dto/response/product-warehouse.response';
+import { PageMetaDto } from 'src/core/helpers/pagination/page-meta.dto';
+import { PageDto } from 'src/core/helpers/pagination/page.dto';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -102,7 +104,12 @@ export class ProductController {
 
   @Get('all-products')
   async allProducts(@Query() productFilter: ProductFilter) {
-    const products = await this.productService.AllProduct(productFilter);
+    const { limit, page } = productFilter;
+    const { products, total } = await this.productService.AllProduct(
+      productFilter,
+    );
+    console.log('first item', products[0]);
+
     const productsResponse = products.map((product) => {
       const productResponse = plainToClass(ProductResponse, product);
       productResponse.totalQuantity =
@@ -112,7 +119,11 @@ export class ProductController {
         );
       return productResponse;
     });
-    return new ActionResponse(this._i18nResponse.entity(productsResponse));
+    const pageMetaDto = new PageMetaDto(page, limit, total);
+    const data = this._i18nResponse.entity(productsResponse);
+    const pageDto = new PageDto(data, pageMetaDto);
+
+    return new ActionResponse(pageDto);
   }
 
   @Get(':categorySubCategory_id/all-products')
@@ -124,7 +135,6 @@ export class ProductController {
       productFilter,
       categorySubCategory_id,
     );
-    //   console.log('first item', products[0]);
     const productsResponse = products.map((product) => {
       const productResponse = plainToClass(ProductResponse, product);
       productResponse.totalQuantity =
