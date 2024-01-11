@@ -103,7 +103,7 @@ export class ProductService {
     );
   }
 
-  async AllProduct(productFilter: ProductFilter): Promise<Product[]> {
+  async AllProduct(productFilter: ProductFilter) {
     const {
       page,
       limit,
@@ -142,15 +142,15 @@ export class ProductService {
 
       .leftJoinAndSelect('product.warehouses_products', 'warehouses_products')
 
-      .leftJoin(
+      .leftJoinAndSelect(
         'product.product_sub_categories',
         'product_sub_categories',
       )
-      .leftJoin(
+      .leftJoinAndSelect(
         'product_sub_categories.category_subCategory',
         'category_subCategory',
       )
-      .leftJoin(
+      .leftJoinAndSelect(
         'category_subCategory.section_category',
         'section_category',
       )
@@ -183,19 +183,22 @@ export class ProductService {
       .skip(skip)
       .take(limit);
 
-    if (withPrices) {
-      query.orWhere('product_category_prices.id IS NOT NULL');
-    }
+    // if (withPrices) {
+    //   query.andWhere('product_category_prices.id IS NOT NULL');
+    // }
     if (withOffers) {
-      query.orWhere('product_offer.id IS NOT NULL');
+      query.andWhere('product_offer.id IS NOT NULL');
     }
     if (section_id) {
       if (withPrices) {
+        query.andWhere('section_category.section_id = :section_id', {
+          section_id,
+        });
         query.andWhere('section_category_price.section_id = :section_id', {
           section_id,
         });
       } else {
-        query.orWhere('section_category.section_id = :section_id', {
+        query.andWhere('section_category.section_id = :section_id', {
           section_id,
         });
       }
@@ -209,7 +212,12 @@ export class ProductService {
             where: { section_category: { id: section_category_id } },
           },
         );
-
+        query.andWhere(
+          'category_subCategory.section_category_id = :section_category_id',
+          {
+            section_category_id,
+          },
+        );
         query.andWhere(
           'product_sub_category.category_sub_category_id = :category_sub_category_id',
           {
@@ -217,7 +225,7 @@ export class ProductService {
           },
         );
       } else {
-        query.orWhere(
+        query.andWhere(
           'category_subCategory.section_category_id = :section_category_id',
           {
             section_category_id,
@@ -228,7 +236,9 @@ export class ProductService {
 
     if (category_sub_category_id) {
       if (withPrices) {
-        console.log('category_sub_category_id', category_sub_category_id);
+        query.andWhere('category_subCategory.id = :category_sub_category_id', {
+          category_sub_category_id,
+        });
         query.andWhere(
           'product_sub_category.category_sub_category_id = :category_sub_category_id',
           {
@@ -236,7 +246,7 @@ export class ProductService {
           },
         );
       } else {
-        query.orWhere('category_subCategory.id = :category_sub_category_id', {
+        query.andWhere('category_subCategory.id = :category_sub_category_id', {
           category_sub_category_id,
         });
       }
@@ -266,12 +276,12 @@ export class ProductService {
     }
 
     if (warehouse) {
-      query.orWhere('warehouses_products.warehouse_id = :warehouse', {
+      query.andWhere('warehouses_products.warehouse_id = :warehouse', {
         warehouse: warehouse.id,
       });
     }
-
-    return await query.getMany();
+    const [products, total] = await query.getManyAndCount();
+    return { products, total };
   }
 
   async subCategoryAllProducts(

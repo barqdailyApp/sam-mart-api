@@ -5,6 +5,8 @@ import { MeasurementUnitResponse } from 'src/modules/measurement-unit/dto/respon
 import { ProductMeasurementResponse } from './product-measurement.response';
 import { ProductImagesResponse } from './product-images.response';
 import { ProductWarehouseResponse } from './product-warehouse.response';
+import { SectionCategoryResponse } from './section-category.respnse';
+import { ProductSubCategory } from 'src/infrastructure/entities/product/product-sub-category.entity';
 
 @Exclude()
 export class ProductResponse {
@@ -25,6 +27,10 @@ export class ProductResponse {
   @Expose() readonly created_at: Date;
 
   @Expose() readonly updated_at: Date;
+
+
+  @Expose()
+  readonly product_sub_categories: ProductSubCategory[];
 
   @Expose()
   totalQuantity: number;
