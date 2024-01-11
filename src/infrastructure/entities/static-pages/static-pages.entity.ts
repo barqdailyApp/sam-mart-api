@@ -12,8 +12,8 @@ export class StaticPage extends AuditableEntity {
     static_page_type: StaticPagesEnum;
 
     @Column({ type: "longtext", nullable: true })
-    content_arabic: string;
+    content_ar: string;
 
     @Column({ type: "longtext", nullable: true })
-    content_english: string;
+    content_en: string;
 }

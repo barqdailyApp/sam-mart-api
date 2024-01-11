@@ -1,22 +1,22 @@
 [
     {
         "static_page_type": "ABOUT_US",
-        "content_arabic": "المحتوى العربي لصفحة من نحن",
-        "content_english": "English content for About Us page"
+        "content_ar": "المحتوى العربي لصفحة من نحن",
+        "content_en": "English content for About Us page"
     },
     {
         "static_page_type": "TERMS_AND_CONDITIONS",
-        "content_arabic": "المحتوى العربي لصفحة الشروط والأحكام",
-        "content_english": "English content for Terms and Conditions page"
+        "content_ar": "المحتوى العربي لصفحة الشروط والأحكام",
+        "content_en": "English content for Terms and Conditions page"
     },
     {
         "static_page_type": "PRIVACY_POLICY",
-        "content_arabic": "المحتوى العربي لصفحة سياسة الخصوصية",
-        "content_english": "English content for PRIVACY_POLICY page"
+        "content_ar": "المحتوى العربي لصفحة سياسة الخصوصية",
+        "content_en": "English content for PRIVACY_POLICY page"
     },
     {
         "static_page_type": "RETURN_POLICY",
-        "content_arabic": "المحتوى العربي لصفحة سياسة الإرجاع",
-        "content_english": "English content for RETURN_POLICY page"
+        "content_ar": "المحتوى العربي لصفحة سياسة الإرجاع",
+        "content_en": "English content for RETURN_POLICY page"
     }
 ]
