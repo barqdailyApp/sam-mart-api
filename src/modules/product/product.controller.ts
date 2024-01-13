@@ -32,7 +32,7 @@ import { plainToClass, plainToInstance } from 'class-transformer';
 import { ProductResponse } from './dto/response/product.response';
 import { UpdateProductRequest } from './dto/request/update-product.request';
 import { UpdateProductMeasurementRequest } from './dto/request/update-product-measurement.request';
-import { ProductFilter } from './dto/filter/product.filter';
+import { ProductsDashboardQuery } from './dto/filter/products-dashboard.query';
 import { CreateProductOfferRequest } from './dto/request/create-product-offer.request';
 import { SingleProductRequest } from './dto/request/single-product.request';
 import { ProductWarehouseResponse } from './dto/response/product-warehouse.response';
@@ -41,6 +41,8 @@ import { PageDto } from 'src/core/helpers/pagination/page.dto';
 import { CreateSingleImageRequest } from './dto/request/product-images/create-single-image.request';
 import { UpdateSingleImageRequest } from './dto/request/product-images/update-single-image.request';
 import { CreateProductMeasurementRequest } from './dto/request/create-product-measurement.request';
+import { ProductClientQuery } from './dto/filter/products-client.query';
+import { SingleProductClientQuery } from './dto/filter/single-product-client.query';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -150,13 +152,38 @@ export class ProductController {
     return new ActionResponse(product);
   }
 
-  @Get('all-products')
-  async allProducts(@Query() productFilter: ProductFilter) {
-    const { limit, page } = productFilter;
-    const { products, total } = await this.productService.AllProduct(
-      productFilter,
-    );
+  @Get('all-products-for-client')
+  async allProductsForClient(@Query() productClientFilter: ProductClientQuery) {
+    const { limit, page } = productClientFilter;
 
+    const { products, total } =
+      await this.productService.getAllProductsForClient(productClientFilter);
+  console.log('products clients',products);
+    const productsResponse = products.map((product) => {
+      const productResponse = plainToClass(ProductResponse, product);
+      productResponse.totalQuantity =
+        productResponse.warehouses_products.reduce(
+          (acc, cur) => acc + cur.quantity,
+          0,
+        );
+      return productResponse;
+    });
+    const pageMetaDto = new PageMetaDto(page, limit, total);
+    const data = this._i18nResponse.entity(productsResponse);
+    const pageDto = new PageDto(data, pageMetaDto);
+
+    return new ActionResponse(pageDto);
+  }
+  @Get('all-products-for-dashboard')
+  async allProductsForDashboard(
+    @Query() productsDashboardQuery: ProductsDashboardQuery,
+  ) {
+    const { limit, page } = productsDashboardQuery;
+
+    const { products, total } =
+      await this.productService.getAllProductsForDashboard(
+        productsDashboardQuery,
+      );
     const productsResponse = products.map((product) => {
       const productResponse = plainToClass(ProductResponse, product);
       productResponse.totalQuantity =
@@ -173,15 +200,30 @@ export class ProductController {
     return new ActionResponse(pageDto);
   }
 
-  @Get('single-product/:product_id')
-  async singleProduct(
+  @Get('single-product-client/:product_id')
+  async singleProductClient(
     @Param('product_id') id: string,
-    @Query() singleProductRequest: SingleProductRequest,
+    @Query() singleProductClientQuery: SingleProductClientQuery,
   ) {
-    const product = await this.productService.singleProduct(
+    const product = await this.productService.getSingleProductForClient(
       id,
-      singleProductRequest,
+      singleProductClientQuery,
     );
+    const productResponse = plainToClass(ProductResponse, product);
+    if (productResponse.warehouses_products) {
+      productResponse.totalQuantity =
+        productResponse.warehouses_products.reduce(
+          (acc, cur) => acc + cur.quantity,
+          0,
+        );
+    }
+
+    return new ActionResponse(this._i18nResponse.entity(productResponse));
+  }
+
+  @Get('single-product-dashboard/:product_id')
+  async singleProductDashboard(@Param('product_id') id: string) {
+    const product = await this.productService.getSingleProductForDashboard(id);
     const productResponse = plainToClass(ProductResponse, product);
     if (productResponse.warehouses_products) {
       productResponse.totalQuantity =

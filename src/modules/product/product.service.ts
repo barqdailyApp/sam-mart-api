@@ -8,7 +8,7 @@ import { UpdateProductRequest } from './dto/request/update-product.request';
 import { ProductImage } from 'src/infrastructure/entities/product/product-image.entity';
 import { ProductMeasurement } from 'src/infrastructure/entities/product/product-measurement.entity';
 import { UpdateProductMeasurementRequest } from './dto/request/update-product-measurement.request';
-import { ProductFilter } from './dto/filter/product.filter';
+import { ProductsDashboardQuery } from './dto/filter/products-dashboard.query';
 import { Subcategory } from 'src/infrastructure/entities/category/subcategory.entity';
 import { ProductSubCategory } from 'src/infrastructure/entities/product/product-sub-category.entity';
 import { SubcategoryService } from '../subcategory/subcategory.service';
@@ -26,6 +26,8 @@ import { CreateProductImageRequest } from './dto/request/product-images/create-p
 import { CreateSingleImageRequest } from './dto/request/product-images/create-single-image.request';
 import { UpdateSingleImageRequest } from './dto/request/product-images/update-single-image.request';
 import { CreateProductMeasurementRequest } from './dto/request/create-product-measurement.request';
+import { ProductClientQuery } from './dto/filter/products-client.query';
+import { SingleProductClientQuery } from './dto/filter/single-product-client.query';
 
 @Injectable()
 export class ProductService {
@@ -263,23 +265,144 @@ export class ProductService {
     });
   }
 
-  async AllProduct(productFilter: ProductFilter) {
+  //* Get All Products For Client
+  async getAllProductsForClient(productClientQuery: ProductClientQuery) {
     const {
       page,
       limit,
-      section_id,
-      section_category_id,
-      withPrices,
-      product_name,
-      withWarehouse,
-      category_sub_category_id,
-      latitude,
       longitude,
-      withOffers,
-    } = productFilter;
-
+      latitude,
+      section_id,
+      category_sub_category_id,
+      product_name,
+    } = productClientQuery;
     const skip = (page - 1) * limit;
 
+    // For guests and individuals, orders are taken from the nearest warehouse
+
+    let warehouse: Warehouse;
+    if (latitude && longitude) {
+      warehouse = await this.warehouse_repo
+        .createQueryBuilder('warehouse')
+        .orderBy(
+          `ST_Distance_Sphere(
+             ST_SRID(point(${latitude}, ${longitude}), 4326),
+             warehouse.location
+         )`,
+        )
+        .getOne();
+    }
+
+    // Start building the query
+    let query = this.productRepository
+      .createQueryBuilder('product')
+
+      .innerJoinAndSelect('product.warehouses_products', 'warehousesProduct')
+      .innerJoinAndSelect(
+        'product.product_measurements',
+        'product_measurements',
+      )
+      .innerJoinAndSelect(
+        'product_measurements.measurement_unit',
+        'measurement_unit',
+      )
+      .innerJoinAndSelect(
+        'product_measurements.product_category_prices',
+        'product_category_prices',
+      )
+      .leftJoinAndSelect(
+        'product_category_prices.product_offer',
+        'product_offer',
+      )
+      .leftJoin(
+        'product_category_prices.product_sub_category',
+        'product_sub_category',
+      )
+      .leftJoin(
+        'product_sub_category.category_subCategory',
+        'category_subCategory',
+      )
+      .leftJoin('category_subCategory.section_category', 'section_category')
+      .skip(skip)
+      .take(limit);
+
+    // Initial condition to ensure product is in at least one warehouse
+    // query = query.where('warehousesProduct.id IS NOT NULL');
+
+    // Modify condition if warehouse is defined
+    if (warehouse) {
+      query = query.andWhere('warehousesProduct.warehouse_id = :warehouseId', {
+        warehouseId: warehouse.id,
+      });
+    }
+
+    // // Conditional where clause based on prices
+    // query = query.andWhere('product_category_prices.id IS NOT NULL');
+
+    // Add search term condition if provided
+    if (product_name) {
+      query = query.andWhere(
+        'product.name_ar LIKE :product_name OR product.name_en LIKE :product_name',
+        { product_name: `%${product_name}%` },
+      );
+    }
+
+    // Conditional where clause based on sub category
+    if (category_sub_category_id) {
+      query = query.andWhere(
+        'product_sub_category.category_sub_category_id = :category_sub_category_id',
+        {
+          category_sub_category_id,
+        },
+      );
+    }
+
+    // Conditional where clause based on section
+    if (section_id) {
+      query = query.andWhere('section_category.section_id = :section_id', {
+        section_id,
+      });
+    }
+
+    const [products, total] = await query.getManyAndCount();
+    return { products, total };
+  }
+
+
+
+  
+  //* Get All Products For DashBoard
+  async getAllProductsForDashboard(
+    productsDashboardQuery: ProductsDashboardQuery,
+  ) {
+    const { limit, page } = productsDashboardQuery;
+    const skip = (page - 1) * limit;
+
+    const query = this.productRepository
+      .createQueryBuilder('product')
+      .leftJoinAndSelect('product.warehouses_products', 'warehousesProduct')
+      .leftJoinAndSelect('product.product_measurements', 'product_measurements')
+      .leftJoinAndSelect(
+        'product_measurements.measurement_unit',
+        'measurement_unit',
+      )
+      .leftJoinAndSelect(
+        'product_measurements.product_category_prices',
+        'product_category_prices',
+      )
+      .skip(skip)
+      .take(limit);
+    const [products, total] = await query.getManyAndCount();
+    return { products, total };
+  }
+
+  //* Get Single Product For Client
+  async getSingleProductForClient(
+    product_id: string,
+    singleProductClientFilter: SingleProductClientQuery,
+  ) {
+    const { latitude, longitude, section_id, category_sub_category_id } =
+      singleProductClientFilter;
     // For guests and individuals, orders are taken from the nearest warehouse
     let warehouse: Warehouse;
     if (latitude && longitude) {
@@ -287,29 +410,88 @@ export class ProductService {
         .createQueryBuilder('warehouse')
         .orderBy(
           `ST_Distance_Sphere(
-            ST_SRID(point(${latitude}, ${longitude}), 4326),
-            warehouse.location
-        )`,
+             ST_SRID(point(${latitude}, ${longitude}), 4326),
+             warehouse.location
+         )`,
         )
         .getOne();
     }
-
-    const query = this.productRepository
+    // Start building the query
+    let query = this.productRepository
       .createQueryBuilder('product')
 
-      .leftJoinAndSelect('product.product_images', 'product_images')
-
-      .leftJoinAndSelect('product.product_measurements', 'product_measurements')
-
-      .leftJoinAndSelect('product.warehouses_products', 'warehouses_products')
-
-      .leftJoin('product.product_sub_categories', 'product_sub_categories')
-
+      .innerJoinAndSelect('product.warehouses_products', 'warehousesProduct')
+      .innerJoinAndSelect(
+        'product.product_measurements',
+        'product_measurements',
+      )
+      .innerJoinAndSelect(
+        'product_measurements.measurement_unit',
+        'measurement_unit',
+      )
+      .innerJoinAndSelect(
+        'product_measurements.product_category_prices',
+        'product_category_prices',
+      )
+      .leftJoinAndSelect(
+        'product_category_prices.product_offer',
+        'product_offer',
+      )
+      .leftJoinAndSelect(
+        'product_category_prices.product_additional_services',
+        'product_additional_services',
+      )
+      .leftJoinAndSelect(
+        'product_additional_services.additional_service',
+        'additional_service',
+      )
       .leftJoin(
-        'product_sub_categories.category_subCategory',
+        'product_category_prices.product_sub_category',
+        'product_sub_category',
+      )
+      .leftJoin(
+        'product_sub_category.category_subCategory',
         'category_subCategory',
       )
-      .leftJoin('category_subCategory.section_category', 'section_category')
+      .leftJoin('category_subCategory.section_category', 'section_category');
+
+    // Get single product
+    query = query.where('product.id = :product_id', { product_id });
+    // Initial condition to ensure product is in at least one warehouse
+    if (warehouse) {
+      query = query.andWhere('warehousesProduct.warehouse_id = :warehouseId', {
+        warehouseId: warehouse.id,
+      });
+    }
+    // Conditional where clause based on sub category
+    if (category_sub_category_id) {
+      query = query.andWhere(
+        'product_sub_category.category_sub_category_id = :category_sub_category_id',
+        {
+          category_sub_category_id,
+        },
+      );
+    }
+
+    // Conditional where clause based on section
+    if (section_id) {
+      query = query.andWhere('section_category.section_id = :section_id', {
+        section_id,
+      });
+    }
+    return await query.getOne();
+  }
+
+  //* Get Single Product For Dashboard
+  async getSingleProductForDashboard(product_id: string) {
+    // For guests and individuals, orders are taken from the nearest warehouse
+    // Start building the query
+    let query = this.productRepository
+      .createQueryBuilder('product')
+
+      .leftJoinAndSelect('product.warehouses_products', 'warehousesProduct')
+
+      .leftJoinAndSelect('product.product_measurements', 'product_measurements')
 
       .leftJoinAndSelect(
         'product_measurements.measurement_unit',
@@ -320,214 +502,31 @@ export class ProductService {
         'product_category_prices',
       )
       .leftJoinAndSelect(
+        'product_category_prices.product_offer',
+        'product_offer',
+      )
+      .leftJoinAndSelect(
+        'product_category_prices.product_additional_services',
+        'product_additional_services',
+      )
+      .leftJoinAndSelect(
+        'product_additional_services.additional_service',
+        'additional_service',
+      )
+      .leftJoin(
         'product_category_prices.product_sub_category',
         'product_sub_category',
       )
       .leftJoin(
         'product_sub_category.category_subCategory',
-        'category_subCategory_price',
+        'category_subCategory',
       )
-      .leftJoin(
-        'category_subCategory_price.section_category',
-        'section_category_price',
-      )
-      .leftJoinAndSelect(
-        'product_category_prices.product_offer',
-        'product_offer',
-      )
+      .leftJoin('category_subCategory.section_category', 'section_category');
 
-      .skip(skip)
-      .take(limit);
+    // Get single product
+    query = query.where('product.id = :product_id', { product_id });
 
-    //* filter products by section
-    if (section_id) {
-      // if product have prices
-      if (withPrices) {
-        query.andWhere('section_category.section_id = :section_id', {
-          section_id,
-        });
-        query.andWhere('section_category_price.section_id = :section_id', {
-          section_id,
-        });
-      } else {
-        query.andWhere('section_category.section_id = :section_id', {
-          section_id,
-        });
-      }
-    }
-    //* filter products by section category
-    if (section_category_id) {
-      // if product have prices
-      if (withPrices) {
-        const categorySubcategory = await this.categorySubcategory_repo.findOne(
-          {
-            relations: { section_category: true },
-            where: { section_category: { id: section_category_id } },
-          },
-        );
-        query.andWhere(
-          'category_subCategory.section_category_id = :section_category_id',
-          {
-            section_category_id,
-          },
-        );
-        query.andWhere(
-          'product_sub_category.category_sub_category_id = :category_sub_category_id',
-          {
-            category_sub_category_id: categorySubcategory.id,
-          },
-        );
-      } else {
-        query.andWhere(
-          'category_subCategory.section_category_id = :section_category_id',
-          {
-            section_category_id,
-          },
-        );
-      }
-    }
-
-    //* filter products by sub category
-    if (category_sub_category_id) {
-      // if product have prices
-      if (withPrices) {
-        query.andWhere('category_subCategory.id = :category_sub_category_id', {
-          category_sub_category_id,
-        });
-        query.andWhere(
-          'product_sub_category.category_sub_category_id = :category_sub_category_id',
-          {
-            category_sub_category_id,
-          },
-        );
-      } else {
-        query.andWhere('category_subCategory.id = :category_sub_category_id', {
-          category_sub_category_id,
-        });
-      }
-
-      const categorySubcategory = await this.categorySubcategory_repo.findOne({
-        where: { id: category_sub_category_id },
-      });
-      if (!categorySubcategory) {
-        throw new NotFoundException(`Subcategory ID not found`);
-      }
-      await this.subCategoryService.updateMostHitSubCategory({
-        sub_category_id: categorySubcategory.subcategory_id,
-      });
-    }
-
-    //* filter products by name
-    if (product_name) {
-      query.orWhere('product.name_ar like :product_name', {
-        product_name: `%${product_name}%`,
-      });
-      query.orWhere('product.name_en like :product_name', {
-        product_name: `%${product_name}%`,
-      });
-    }
-
-    //* filter products have offers
-    if (withOffers) {
-      query.andWhere('product_offer.product_category_price_id IS NOT NULL');
-    }
-
-    //* filter products by warehouse
-    if (withWarehouse) {
-      query.andWhere('warehouses_products.product_id IS NOT NULL');
-    }
-
-    //* filter products by warehouse
-    if (warehouse) {
-      console.log('filter products by warehouse');
-      query.andWhere('warehouses_products.warehouse_id = :warehouse', {
-        warehouse: warehouse.id,
-      });
-    }
-    const [products, total] = await query.getManyAndCount();
-    return { products, total };
-  }
-
-
-
-  //* Get All Products For Client
-  // async getAllProductsForClient(){
-  // }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  async singleProduct(
-    product_id: string,
-    singleProductRequest: SingleProductRequest,
-  ): Promise<Product> {
-    const { categorySubCategory_id, latitude, longitude } =
-      singleProductRequest;
-    //* Check if sub category exist
-    if (categorySubCategory_id) {
-      const categorySubcategory = await this.categorySubcategory_repo.findOne({
-        where: { id: categorySubCategory_id },
-      });
-      if (!categorySubcategory) {
-        throw new NotFoundException(`Subcategory ID not found`);
-      }
-    }
-    let warehouses: Warehouse;
-    if (latitude && longitude) {
-      warehouses = await this.warehouse_repo
-        .createQueryBuilder('warehouse')
-        .orderBy(
-          `ST_Distance_Sphere(
-            ST_SRID(point(${latitude}, ${longitude}), 4326),
-            warehouse.location
-        )`,
-        )
-        .getOne();
-    }
-
-    const product = await this.productRepository.findOne({
-      where: {
-        id: product_id,
-        warehouses_products: {
-          warehouse_id: warehouses?.id,
-        },
-        product_measurements: {
-          product_category_prices: {
-            product_sub_category: {
-              category_sub_category_id: categorySubCategory_id,
-            },
-          },
-        },
-      },
-      relations: {
-        product_images: true,
-        product_measurements: {
-          product_category_prices: {
-            product_offer: true,
-            product_additional_services: {
-              additional_service: true,
-            },
-          },
-          measurement_unit: true,
-        },
-      },
-    });
-    if (!product) {
-      throw new NotFoundException('message.product_not_found');
-    }
-    return product;
+    return await query.getOne();
   }
 
   async deleteProduct(product_id: string): Promise<DeleteResult> {
