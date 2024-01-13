@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, Put } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { plainToInstance } from 'class-transformer';
 import { where } from 'sequelize';
@@ -20,6 +20,8 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { UpdateCategoryRequest } from './dto/requests/update-category-request';
 import { FileService } from '../file/file.service';
 import { SubcategoryService } from '../subcategory/subcategory.service';
+import { UpdateSectionCategoryRequest } from '../section/dto/requests/update-section-category.request';
+import { ActionResponse } from 'src/core/base/responses/action.response';
 
 @Injectable()
 export class CategoryService extends BaseService<Category> {
@@ -83,7 +85,7 @@ export class CategoryService extends BaseService<Category> {
       category.logo = logo;
     }
     await this._repo.update(category.id, { ...plainToInstance(Category, req), logo: category.logo });
-    return category;
+    return plainToInstance(Category, req);
   }
   async addSubcategoryToCategory(req: CategorySubcategoryRequest) {
     const category = await this.category_subcategory_repo.findOne({
@@ -98,4 +100,15 @@ export class CategoryService extends BaseService<Category> {
       ...req
     });
   }
+
+
+  async updateCategorySubcategory(req:UpdateSectionCategoryRequest){
+    return await this.category_subcategory_repo.update(req.id,req)
+
+  }
+
+  async deleteCategorySubcategory(id:string){
+    return await this.category_subcategory_repo.delete(id)
+  }
 }
+

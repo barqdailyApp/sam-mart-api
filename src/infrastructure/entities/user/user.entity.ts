@@ -12,6 +12,8 @@ import { Gender } from 'src/infrastructure/data/enums/gender.enum';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { Language } from 'src/infrastructure/data/enums/language.enum';
 import { Address } from './address.entity';
+import { SupportTicket } from '../support-ticket/support-ticket.entity';
+import { TicketComment } from '../support-ticket/ticket-comment.entity';
 
 @Entity()
 export class User extends AuditableEntity {
@@ -51,6 +53,11 @@ export class User extends AuditableEntity {
   @Column({ type: 'set', enum: Role, default: [Role.CLIENT] })
   roles: Role[];
 
+  @OneToMany(()=>SupportTicket, supportTicket => supportTicket.user)
+  support_tickets: SupportTicket[]
+
+  @OneToMany(()=> TicketComment, ticketComment => ticketComment.user)
+  ticket_comments: TicketComment[]
 
   @OneToMany(()=>Address,address=>address.user)
   addresses:Address[]

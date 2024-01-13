@@ -36,12 +36,16 @@ export class CreateSectionRequest extends CreateCategoryRequest {
   @IsNotEmpty()
   @IsEnum(DeliveryType)
   delivery_type: DeliveryType;
+  @ApiProperty({required:false,
+    enum: [
+        Role.CLIENT,
+        Role.RESTURANT
+      ],})
+@IsNotEmpty()
 
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsEnum(Role, {
-    each: true,
-    message: 'Invalid role. Allowed values: admin, user, moderator',
-  })
-  allowed_roles: Role[];
+@IsEnum(Role, {
+  each: true,
+  message: 'Invalid role. Allowed values: admin, user, moderator',
+})
+allowed_roles: Role[];
 }
