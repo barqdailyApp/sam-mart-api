@@ -5,13 +5,9 @@ import { DeleteResult, IsNull, Not, Repository } from 'typeorm';
 import { CreateProductRequest } from './dto/request/create-product.request';
 import { CreateProductTransaction } from './utils/create-product.transaction';
 import { UpdateProductRequest } from './dto/request/update-product.request';
-import { UpdateProductTransaction } from './utils/update-product.transaction';
 import { ProductImage } from 'src/infrastructure/entities/product/product-image.entity';
 import { ProductMeasurement } from 'src/infrastructure/entities/product/product-measurement.entity';
-import { UpdateProductMeasurementTransaction } from './utils/update-product-measurment.transaction';
 import { UpdateProductMeasurementRequest } from './dto/request/update-product-measurement.request';
-import { UpdateProductImageTransaction } from './utils/update-product-image.transaction';
-import { UpdateProductImageRequest } from './dto/request/update-product-image.request';
 import { ProductFilter } from './dto/filter/product.filter';
 import { Subcategory } from 'src/infrastructure/entities/category/subcategory.entity';
 import { ProductSubCategory } from 'src/infrastructure/entities/product/product-sub-category.entity';
@@ -23,6 +19,13 @@ import { CategorySubCategory } from 'src/infrastructure/entities/category/catego
 import { Warehouse } from 'src/infrastructure/entities/warehouse/warehouse.entity';
 import { SingleProductRequest } from './dto/request/single-product.request';
 import { Console } from 'console';
+import { StorageManager } from 'src/integration/storage/storage.manager';
+import * as sharp from 'sharp';
+import { ImageManager } from 'src/integration/sharp/image.manager';
+import { CreateProductImageRequest } from './dto/request/product-images/create-product-image.request';
+import { CreateSingleImageRequest } from './dto/request/product-images/create-single-image.request';
+import { UpdateSingleImageRequest } from './dto/request/product-images/update-single-image.request';
+import { CreateProductMeasurementRequest } from './dto/request/create-product-measurement.request';
 
 @Injectable()
 export class ProductService {
@@ -53,17 +56,12 @@ export class ProductService {
     @Inject(CreateProductTransaction)
     private readonly addProductTransaction: CreateProductTransaction,
 
-    @Inject(UpdateProductTransaction)
-    private readonly updateProductTransaction: UpdateProductTransaction,
-
-    @Inject(UpdateProductMeasurementTransaction)
-    private readonly updateProductMeasurementTransaction: UpdateProductMeasurementTransaction,
-
-    @Inject(UpdateProductImageTransaction)
-    private readonly updateProductImageTransaction: UpdateProductImageTransaction,
-
     @Inject(SubcategoryService)
     private readonly subCategoryService: SubcategoryService,
+
+    @Inject(StorageManager) private readonly storageManager: StorageManager,
+
+    @Inject(ImageManager) private readonly imageManager: ImageManager,
   ) {}
 
   async createProduct(
@@ -83,24 +81,186 @@ export class ProductService {
     return await this.productOffer_repo.save(createProductOffer);
   }
 
+  async addProductImage(
+    product_id: string,
+    createSingleImageRequest: CreateSingleImageRequest,
+  ) {
+    const { file, is_logo } = createSingleImageRequest;
+    const product = await this.productRepository.findOne({
+      where: { id: product_id },
+    });
+    if (!product) {
+      throw new NotFoundException('message_product_not_found');
+    }
+
+    const resizedImage = await this.imageManager.resize(file, {
+      size: {},
+      options: {
+        fit: sharp.fit.cover,
+        position: sharp.strategy.entropy,
+      },
+    });
+
+    // save image
+    const path = await this.storageManager.store(
+      { buffer: resizedImage, originalname: file.originalname },
+      { path: 'banners' },
+    );
+
+    const productImage = this.productImageRepository.create({
+      product_id,
+      is_logo,
+      url: path,
+    });
+    return await this.productImageRepository.save(productImage);
+  }
+
+  async addProductMeasurement(
+    product_id: string,
+    createProductMeasurementRequest: CreateProductMeasurementRequest,
+  ) {
+    const { conversion_factor, is_main_unit, measurement_unit_id } =
+      createProductMeasurementRequest;
+    const product = await this.productRepository.findOne({
+      where: { id: product_id },
+    });
+    if (!product) {
+      throw new NotFoundException('message_product_not_found');
+    }
+    const productMeasurement = this.productMeasurementRepository.create({
+      conversion_factor,
+      is_main_unit,
+      measurement_unit_id,
+      product_id,
+    });
+    //* Set Main Unit
+    if (is_main_unit) {
+      productMeasurement.base_unit_id = measurement_unit_id;
+    }
+    return await this.productMeasurementRepository.save(productMeasurement);
+  }
   async updateProduct(
+    product_id: string,
     updateProductRequest: UpdateProductRequest,
   ): Promise<Product> {
-    return await this.updateProductTransaction.run(updateProductRequest);
+    const {
+      description_ar,
+      description_en,
+      is_active,
+      is_recovered,
+      name_ar,
+      name_en,
+    } = updateProductRequest;
+
+    //* Check if product exist
+    const product = await this.productRepository.findOne({
+      where: { id: product_id },
+    });
+    if (!product) {
+      throw new NotFoundException('message_product_not_found');
+    }
+    await this.productRepository.update(
+      { id: product_id },
+      {
+        is_active,
+        is_recovered,
+        name_en,
+        name_ar,
+        description_ar,
+        description_en,
+      },
+    );
+    return await this.productRepository.findOne({
+      where: { id: product_id },
+    });
   }
   async updateProductMeasurement(
+    product_id: string,
+    product_measurement_unit_id: string,
     updateProductMeasurementRequest: UpdateProductMeasurementRequest,
-  ): Promise<Product> {
-    return await this.updateProductMeasurementTransaction.run(
-      updateProductMeasurementRequest,
+  ) {
+    const { conversion_factor, is_main_unit } = updateProductMeasurementRequest;
+    const product = await this.productRepository.findOne({
+      where: { id: product_id },
+    });
+    if (!product) {
+      throw new NotFoundException('message_product_not_found');
+    }
+    const productMeasurement = await this.productMeasurementRepository.findOne({
+      where: { id: product_measurement_unit_id },
+    });
+    if (!productMeasurement) {
+      throw new NotFoundException('message_product_measurement_not_found');
+    }
+    const updateData: any = { conversion_factor, is_main_unit };
+
+    //* Update base unit
+    if (is_main_unit != undefined || is_main_unit != null) {
+      if (is_main_unit) {
+        updateData.base_unit_id = product_measurement_unit_id;
+      } else {
+        updateData.base_unit_id = null;
+      }
+    }
+    await this.productMeasurementRepository.update(
+      { id: product_measurement_unit_id },
+      updateData,
     );
+    return await this.productMeasurementRepository.findOne({
+      where: { id: product_measurement_unit_id },
+    });
   }
+
   async updateProductImage(
-    updateProductImageRequest: UpdateProductImageRequest,
-  ): Promise<Product> {
-    return await this.updateProductImageTransaction.run(
-      updateProductImageRequest,
-    );
+    product_id: string,
+    image_id: string,
+    updateSingleImageRequest: UpdateSingleImageRequest,
+  ) {
+    const { file, is_logo } = updateSingleImageRequest;
+
+    //* Check if product exist
+    const product = await this.productRepository.findOne({
+      where: { id: product_id },
+    });
+    if (!product) {
+      throw new NotFoundException('message_product_not_found');
+    }
+
+    //* Check if image exist
+    const productImage = await this.productImageRepository.findOne({
+      where: { id: image_id },
+    });
+    if (!productImage) {
+      throw new NotFoundException('message_product_image_not_found');
+    }
+    //* Update image
+    if (file) {
+      const resizedImage = await this.imageManager.resize(file, {
+        size: {},
+        options: {
+          fit: sharp.fit.cover,
+          position: sharp.strategy.entropy,
+        },
+      });
+
+      // save image
+      const path = await this.storageManager.store(
+        { buffer: resizedImage, originalname: file.originalname },
+        { path: 'banners' },
+      );
+      await this.productImageRepository.update(image_id, {
+        url: path,
+        is_logo: is_logo,
+      });
+    } else {
+      await this.productImageRepository.update(image_id, {
+        is_logo: is_logo,
+      });
+    }
+    //* Return updated image
+    return await this.productImageRepository.findOne({
+      where: { id: image_id },
+    });
   }
 
   async AllProduct(productFilter: ProductFilter) {
@@ -120,6 +280,7 @@ export class ProductService {
 
     const skip = (page - 1) * limit;
 
+    // For guests and individuals, orders are taken from the nearest warehouse
     let warehouse: Warehouse;
     if (latitude && longitude) {
       warehouse = await this.warehouse_repo
@@ -142,18 +303,13 @@ export class ProductService {
 
       .leftJoinAndSelect('product.warehouses_products', 'warehouses_products')
 
-      .leftJoinAndSelect(
-        'product.product_sub_categories',
-        'product_sub_categories',
-      )
-      .leftJoinAndSelect(
+      .leftJoin('product.product_sub_categories', 'product_sub_categories')
+
+      .leftJoin(
         'product_sub_categories.category_subCategory',
         'category_subCategory',
       )
-      .leftJoinAndSelect(
-        'category_subCategory.section_category',
-        'section_category',
-      )
+      .leftJoin('category_subCategory.section_category', 'section_category')
 
       .leftJoinAndSelect(
         'product_measurements.measurement_unit',
@@ -183,13 +339,9 @@ export class ProductService {
       .skip(skip)
       .take(limit);
 
-    // if (withPrices) {
-    //   query.andWhere('product_category_prices.id IS NOT NULL');
-    // }
-    if (withOffers) {
-      query.andWhere('product_offer.id IS NOT NULL');
-    }
+    //* filter products by section
     if (section_id) {
+      // if product have prices
       if (withPrices) {
         query.andWhere('section_category.section_id = :section_id', {
           section_id,
@@ -203,8 +355,9 @@ export class ProductService {
         });
       }
     }
-
+    //* filter products by section category
     if (section_category_id) {
+      // if product have prices
       if (withPrices) {
         const categorySubcategory = await this.categorySubcategory_repo.findOne(
           {
@@ -234,7 +387,9 @@ export class ProductService {
       }
     }
 
+    //* filter products by sub category
     if (category_sub_category_id) {
+      // if product have prices
       if (withPrices) {
         query.andWhere('category_subCategory.id = :category_sub_category_id', {
           category_sub_category_id,
@@ -262,12 +417,9 @@ export class ProductService {
       });
     }
 
-    if (withWarehouse) {
-      query.where('warehouses_products.id IS NOT NULL');
-    }
-
+    //* filter products by name
     if (product_name) {
-      query.andWhere('product.name_ar like :product_name', {
+      query.orWhere('product.name_ar like :product_name', {
         product_name: `%${product_name}%`,
       });
       query.orWhere('product.name_en like :product_name', {
@@ -275,7 +427,19 @@ export class ProductService {
       });
     }
 
+    //* filter products have offers
+    if (withOffers) {
+      query.andWhere('product_offer.product_category_price_id IS NOT NULL');
+    }
+
+    //* filter products by warehouse
+    if (withWarehouse) {
+      query.andWhere('warehouses_products.product_id IS NOT NULL');
+    }
+
+    //* filter products by warehouse
     if (warehouse) {
+      console.log('filter products by warehouse');
       query.andWhere('warehouses_products.warehouse_id = :warehouse', {
         warehouse: warehouse.id,
       });
@@ -284,75 +448,26 @@ export class ProductService {
     return { products, total };
   }
 
-  async subCategoryAllProducts(
-    productFilter: ProductFilter,
-    categorySubCategory_id: string,
-  ): Promise<Product[]> {
-    const {
-      page,
-      limit,
-      latitude: userLatitude,
-      longitude: userLongitude,
-    } = productFilter;
 
-    const skip = (page - 1) * limit;
 
-    //* Check if sub category exist
-    const categorySubcategory = await this.categorySubcategory_repo.findOne({
-      where: { id: categorySubCategory_id },
-    });
-    if (!categorySubcategory) {
-      throw new NotFoundException(`Subcategory ID not found`);
-    }
+  //* Get All Products For Client
+  // async getAllProductsForClient(){
+  // }
 
-    await this.subCategoryService.updateMostHitSubCategory({
-      sub_category_id: categorySubcategory.subcategory_id,
-    });
 
-    let warehouses: Warehouse;
-    if (userLatitude && userLongitude) {
-      warehouses = await this.warehouse_repo
-        .createQueryBuilder('warehouse')
-        .orderBy(
-          `ST_Distance_Sphere(
-            ST_SRID(point(${userLatitude}, ${userLongitude}), 4326),
-            warehouse.location
-        )`,
-        )
-        .getOne();
-    }
 
-    return await this.productRepository.find({
-      skip,
-      take: limit,
-      where: {
-        warehouses_products: {
-          warehouse_id: warehouses?.id,
-        },
-        product_measurements: {
-          product_category_prices: {
-            product_sub_category: {
-              category_sub_category_id: categorySubCategory_id,
-            },
-          },
-        },
-      },
-      relations: {
-        product_images: true,
-        warehouses_products: true,
-        product_measurements: {
-          product_category_prices: {
-            product_offer: true,
 
-            product_additional_services: {
-              additional_service: true,
-            },
-          },
-          measurement_unit: true,
-        },
-      },
-    });
-  }
+
+
+
+
+
+
+
+
+
+
+
 
   async singleProduct(
     product_id: string,
@@ -415,45 +530,6 @@ export class ProductService {
     return product;
   }
 
-  private async singleProductImage(
-    product_id: string,
-    image_id: string,
-  ): Promise<ProductImage> {
-    const product = await this.productRepository.findOne({
-      where: { id: product_id },
-    });
-    if (!product) {
-      throw new NotFoundException('message_product_not_found');
-    }
-
-    const productImage = await this.productImageRepository.findOne({
-      where: { id: image_id },
-    });
-    if (!productImage) {
-      throw new NotFoundException('message_product_image_not_found');
-    }
-    return productImage;
-  }
-
-  private async SingleProductMeasurement(
-    product_id: string,
-    measurement_id: string,
-  ): Promise<ProductMeasurement> {
-    const product = await this.productRepository.findOne({
-      where: { id: product_id },
-    });
-    if (!product) {
-      throw new NotFoundException('message_product_not_found');
-    }
-    const productMeasurement = await this.productMeasurementRepository.findOne({
-      where: { id: measurement_id },
-    });
-    if (!productMeasurement) {
-      throw new NotFoundException('Product Measurement not found');
-    }
-    return productMeasurement;
-  }
-
   async deleteProduct(product_id: string): Promise<DeleteResult> {
     const product = await this.productRepository.findOne({
       where: { id: product_id },
@@ -483,7 +559,7 @@ export class ProductService {
 
   async deleteProductMeasurement(
     product_id: string,
-    measurement_id: string,
+    product_measurement_id: string,
   ): Promise<DeleteResult> {
     const product = await this.productRepository.findOne({
       where: { id: product_id },
@@ -493,7 +569,7 @@ export class ProductService {
     }
     const measurement = await this.SingleProductMeasurement(
       product_id,
-      measurement_id,
+      product_measurement_id,
     );
     if (measurement.base_unit_id != null) {
       throw new NotFoundException(
@@ -501,7 +577,46 @@ export class ProductService {
       );
     }
     return await this.productMeasurementRepository.delete({
-      id: measurement_id,
+      id: product_measurement_id,
     });
+  }
+
+  private async singleProductImage(
+    product_id: string,
+    image_id: string,
+  ): Promise<ProductImage> {
+    const product = await this.productRepository.findOne({
+      where: { id: product_id },
+    });
+    if (!product) {
+      throw new NotFoundException('message_product_not_found');
+    }
+
+    const productImage = await this.productImageRepository.findOne({
+      where: { id: image_id },
+    });
+    if (!productImage) {
+      throw new NotFoundException('message_product_image_not_found');
+    }
+    return productImage;
+  }
+
+  private async SingleProductMeasurement(
+    product_id: string,
+    product_measurement_id: string,
+  ): Promise<ProductMeasurement> {
+    const product = await this.productRepository.findOne({
+      where: { id: product_id },
+    });
+    if (!product) {
+      throw new NotFoundException('message_product_not_found');
+    }
+    const productMeasurement = await this.productMeasurementRepository.findOne({
+      where: { id: product_measurement_id },
+    });
+    if (!productMeasurement) {
+      throw new NotFoundException('Product Measurement not found');
+    }
+    return productMeasurement;
   }
 }

@@ -8,6 +8,7 @@ import {
   Post,
   Put,
   Query,
+  UploadedFile,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
@@ -23,18 +24,23 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ActionResponse } from 'src/core/base/responses/action.response';
-import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import {
+  FileFieldsInterceptor,
+  FileInterceptor,
+} from '@nestjs/platform-express';
 import { plainToClass, plainToInstance } from 'class-transformer';
 import { ProductResponse } from './dto/response/product.response';
 import { UpdateProductRequest } from './dto/request/update-product.request';
 import { UpdateProductMeasurementRequest } from './dto/request/update-product-measurement.request';
-import { UpdateProductImageRequest } from './dto/request/update-product-image.request';
 import { ProductFilter } from './dto/filter/product.filter';
 import { CreateProductOfferRequest } from './dto/request/create-product-offer.request';
 import { SingleProductRequest } from './dto/request/single-product.request';
 import { ProductWarehouseResponse } from './dto/response/product-warehouse.response';
 import { PageMetaDto } from 'src/core/helpers/pagination/page-meta.dto';
 import { PageDto } from 'src/core/helpers/pagination/page.dto';
+import { CreateSingleImageRequest } from './dto/request/product-images/create-single-image.request';
+import { UpdateSingleImageRequest } from './dto/request/product-images/update-single-image.request';
+import { CreateProductMeasurementRequest } from './dto/request/create-product-measurement.request';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -71,35 +77,77 @@ export class ProductController {
     return new ActionResponse(product);
   }
 
-  @Put('update-product')
-  async updateProduct(@Body() updateProductRequest: UpdateProductRequest) {
+  @Post('add-image-to-product/:product_id')
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('file'))
+  async addImageToProduct(
+    @Param('product_id') id: string,
+    @Body() createSingleImageRequest: CreateSingleImageRequest,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    createSingleImageRequest.file = file;
+    const product = await this.productService.addProductImage(
+      id,
+      createSingleImageRequest,
+    );
+    return new ActionResponse(product);
+  }
+
+  @Post('add-measurement-to-product/:product_id')
+  async addMeasurementToProduct(
+    @Param('product_id') product_id: string,
+    @Body() createProductMeasurementRequest: CreateProductMeasurementRequest,
+  ) {
+    const product = await this.productService.addProductMeasurement(
+      product_id,
+      createProductMeasurementRequest,
+    );
+    return new ActionResponse(product);
+  }
+
+  @Put('update-product/:product_id')
+  async updateProduct(
+    @Param('product_id') product_id: string,
+    @Body() updateProductRequest: UpdateProductRequest,
+  ) {
     const product = await this.productService.updateProduct(
+      product_id,
       updateProductRequest,
     );
     const productResponse = plainToClass(ProductResponse, product);
 
     return new ActionResponse(this._i18nResponse.entity(productResponse));
   }
-  @Put('update-product-measurement')
+  @Put('update-product-measurement/:product_id/:product_measurement_unit_id')
   async updateProductMeasurement(
+    @Param('product_id') product_id: string,
+    @Param('product_measurement_unit_id') product_measurement_unit_id: string,
     @Body() updateProductMeasurementRequest: UpdateProductMeasurementRequest,
   ) {
     const product = await this.productService.updateProductMeasurement(
+      product_id,
+      product_measurement_unit_id,
       updateProductMeasurementRequest,
     );
-    const productResponse = plainToClass(ProductResponse, product);
-    return new ActionResponse(this._i18nResponse.entity(productResponse));
+    return new ActionResponse(product);
   }
 
-  @Put('update-product-image')
+  @Put('update-product-image/:product_id/:image_id')
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('file'))
   async updateProductImage(
-    @Body() updateProductImageRequest: UpdateProductImageRequest,
+    @Param('product_id') product_id: string,
+    @Param('image_id') image_id: string,
+    @Body() updateSingleImageRequest: UpdateSingleImageRequest,
+    @UploadedFile() file: Express.Multer.File,
   ) {
+    updateSingleImageRequest.file = file;
     const product = await this.productService.updateProductImage(
-      updateProductImageRequest,
+      product_id,
+      image_id,
+      updateSingleImageRequest,
     );
-    const productResponse = plainToClass(ProductResponse, product);
-    return new ActionResponse(this._i18nResponse.entity(productResponse));
+    return new ActionResponse(product);
   }
 
   @Get('all-products')
@@ -108,7 +156,6 @@ export class ProductController {
     const { products, total } = await this.productService.AllProduct(
       productFilter,
     );
-    console.log('first item', products[0]);
 
     const productsResponse = products.map((product) => {
       const productResponse = plainToClass(ProductResponse, product);
@@ -126,27 +173,6 @@ export class ProductController {
     return new ActionResponse(pageDto);
   }
 
-  @Get(':categorySubCategory_id/all-products')
-  async subCategoryAllProducts(
-    @Query() productFilter: ProductFilter,
-    @Param('categorySubCategory_id') categorySubCategory_id: string,
-  ) {
-    const products = await this.productService.subCategoryAllProducts(
-      productFilter,
-      categorySubCategory_id,
-    );
-    const productsResponse = products.map((product) => {
-      const productResponse = plainToClass(ProductResponse, product);
-      productResponse.totalQuantity =
-        productResponse.warehouses_products.reduce(
-          (acc, cur) => acc + cur.quantity,
-          0,
-        );
-      return productResponse;
-    });
-    return new ActionResponse(this._i18nResponse.entity(productsResponse));
-  }
-
   @Get('single-product/:product_id')
   async singleProduct(
     @Param('product_id') id: string,
@@ -157,16 +183,21 @@ export class ProductController {
       singleProductRequest,
     );
     const productResponse = plainToClass(ProductResponse, product);
-    productResponse.totalQuantity = productResponse.warehouses_products.reduce(
-      (acc, cur) => acc + cur.quantity,
-      0,
-    );
+    if (productResponse.warehouses_products) {
+      productResponse.totalQuantity =
+        productResponse.warehouses_products.reduce(
+          (acc, cur) => acc + cur.quantity,
+          0,
+        );
+    }
+
     return new ActionResponse(this._i18nResponse.entity(productResponse));
   }
 
   @Delete('delete-Product/:product_id')
   async deleteProduct(@Param('product_id') id: string) {
-    return await this.productService.deleteProduct(id);
+    const product = await this.productService.deleteProduct(id);
+    return new ActionResponse(product);
   }
 
   @Delete('delete-Product-image/:product_id/:image_id')
@@ -174,16 +205,21 @@ export class ProductController {
     @Param('product_id') product_id: string,
     @Param('image_id') image_id: string,
   ) {
-    return await this.productService.deleteProductImage(product_id, image_id);
+    const product = await this.productService.deleteProductImage(
+      product_id,
+      image_id,
+    );
+    return new ActionResponse(product);
   }
-  @Delete('delete-Product-measurement/:product_id/:measurement_id')
+  @Delete('delete-Product-measurement/:product_id/:product_measurement_id')
   async deleteProductMeasurement(
     @Param('product_id') product_id: string,
-    @Param('measurement_id') measurement_id: string,
+    @Param('product_measurement_id') product_measurement_id: string,
   ) {
-    return await this.productService.deleteProductMeasurement(
+    const product = await this.productService.deleteProductMeasurement(
       product_id,
-      measurement_id,
+      product_measurement_id,
     );
+    return new ActionResponse(product);
   }
 }
