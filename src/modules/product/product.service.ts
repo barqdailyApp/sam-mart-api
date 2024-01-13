@@ -374,6 +374,12 @@ export class ProductService {
           category_sub_category_id,
         },
       );
+      const categorySubcategory = await this.categorySubcategory_repo.findOne({
+        where: { id: category_sub_category_id },
+      });
+      await this.subCategoryService.updateMostHitSubCategory({
+        sub_category_id: categorySubcategory.subcategory_id,
+      });
     }
 
     // Conditional where clause based on section
