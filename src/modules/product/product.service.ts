@@ -28,6 +28,8 @@ import { UpdateSingleImageRequest } from './dto/request/product-images/update-si
 import { CreateProductMeasurementRequest } from './dto/request/create-product-measurement.request';
 import { ProductClientQuery } from './dto/filter/products-client.query';
 import { SingleProductClientQuery } from './dto/filter/single-product-client.query';
+import { ProductCategoryPrice } from 'src/infrastructure/entities/product/product-category-price.entity';
+import { DiscountType } from 'src/infrastructure/data/enums/discount-type.enum';
 
 @Injectable()
 export class ProductService {
@@ -48,6 +50,9 @@ export class ProductService {
 
     @InjectRepository(ProductSubCategory)
     private readonly productSubCategory_repo: Repository<ProductSubCategory>,
+
+    @InjectRepository(ProductCategoryPrice)
+    private readonly productCategoryPrice_repo: Repository<ProductCategoryPrice>,
 
     @InjectRepository(ProductOffer)
     private productOffer_repo: Repository<ProductOffer>,
@@ -76,10 +81,24 @@ export class ProductService {
     product_category_price_id: string,
     createProductOfferRequest: CreateProductOfferRequest,
   ) {
+    const productCategoryPrice = await this.productCategoryPrice_repo.findOne({
+      where: { id: product_category_price_id },
+    });
+    if (!productCategoryPrice) {
+      throw new NotFoundException('message_product_category_price_not_found');
+    }
+
     const createProductOffer = this.productOffer_repo.create(
       createProductOfferRequest,
     );
     createProductOffer.product_category_price_id = product_category_price_id;
+    if (createProductOffer.discount_type == DiscountType.VALUE) {
+      createProductOffer.price =
+        productCategoryPrice.price - createProductOffer.discount_value;
+    } else {
+     const discountedPercentage  = productCategoryPrice.price * createProductOffer.discount_value / 100;
+     createProductOffer.price = productCategoryPrice.price - discountedPercentage
+    }
     return await this.productOffer_repo.save(createProductOffer);
   }
 
@@ -368,9 +387,109 @@ export class ProductService {
     return { products, total };
   }
 
+  //* Get All Products Offers  For Client
+  async getAllProductsOffersForClient(productClientQuery: ProductClientQuery) {
+    const {
+      page,
+      limit,
+      longitude,
+      latitude,
+      section_id,
+      category_sub_category_id,
+      product_name,
+    } = productClientQuery;
+    const skip = (page - 1) * limit;
 
+    // For guests and individuals, orders are taken from the nearest warehouse
 
-  
+    let warehouse: Warehouse;
+    if (latitude && longitude) {
+      warehouse = await this.warehouse_repo
+        .createQueryBuilder('warehouse')
+        .orderBy(
+          `ST_Distance_Sphere(
+             ST_SRID(point(${latitude}, ${longitude}), 4326),
+             warehouse.location
+         )`,
+        )
+        .getOne();
+    }
+
+    // Start building the query
+    let query = this.productRepository
+      .createQueryBuilder('product')
+
+      .innerJoinAndSelect('product.warehouses_products', 'warehousesProduct')
+      .innerJoinAndSelect(
+        'product.product_measurements',
+        'product_measurements',
+      )
+      .innerJoinAndSelect(
+        'product_measurements.measurement_unit',
+        'measurement_unit',
+      )
+      .innerJoinAndSelect(
+        'product_measurements.product_category_prices',
+        'product_category_prices',
+      )
+      .innerJoinAndSelect(
+        'product_category_prices.product_offer',
+        'product_offer',
+      )
+      .leftJoin(
+        'product_category_prices.product_sub_category',
+        'product_sub_category',
+      )
+      .leftJoin(
+        'product_sub_category.category_subCategory',
+        'category_subCategory',
+      )
+      .leftJoin('category_subCategory.section_category', 'section_category')
+      .skip(skip)
+      .take(limit);
+
+    // Initial condition to ensure product is in at least one warehouse
+    // query = query.where('warehousesProduct.id IS NOT NULL');
+
+    // Modify condition if warehouse is defined
+    if (warehouse) {
+      query = query.andWhere('warehousesProduct.warehouse_id = :warehouseId', {
+        warehouseId: warehouse.id,
+      });
+    }
+
+    // // Conditional where clause based on prices
+    // query = query.andWhere('product_category_prices.id IS NOT NULL');
+
+    // Add search term condition if provided
+    if (product_name) {
+      query = query.andWhere(
+        'product.name_ar LIKE :product_name OR product.name_en LIKE :product_name',
+        { product_name: `%${product_name}%` },
+      );
+    }
+
+    // Conditional where clause based on sub category
+    if (category_sub_category_id) {
+      query = query.andWhere(
+        'product_sub_category.category_sub_category_id = :category_sub_category_id',
+        {
+          category_sub_category_id,
+        },
+      );
+    }
+
+    // Conditional where clause based on section
+    if (section_id) {
+      query = query.andWhere('section_category.section_id = :section_id', {
+        section_id,
+      });
+    }
+
+    const [products, total] = await query.getManyAndCount();
+    return { products, total };
+  }
+
   //* Get All Products For DashBoard
   async getAllProductsForDashboard(
     productsDashboardQuery: ProductsDashboardQuery,
@@ -389,6 +508,38 @@ export class ProductService {
       .leftJoinAndSelect(
         'product_measurements.product_category_prices',
         'product_category_prices',
+      )
+      .skip(skip)
+      .take(limit);
+    const [products, total] = await query.getManyAndCount();
+    return { products, total };
+  }
+
+  //* Get All Products Offers For DashBoard
+  async getAllProductsOffersForDashboard(
+    productsDashboardQuery: ProductsDashboardQuery,
+  ) {
+    const { limit, page } = productsDashboardQuery;
+    const skip = (page - 1) * limit;
+
+    const query = this.productRepository
+      .createQueryBuilder('product')
+      .leftJoinAndSelect('product.warehouses_products', 'warehousesProduct')
+      .innerJoinAndSelect(
+        'product.product_measurements',
+        'product_measurements',
+      )
+      .innerJoinAndSelect(
+        'product_measurements.measurement_unit',
+        'measurement_unit',
+      )
+      .innerJoinAndSelect(
+        'product_measurements.product_category_prices',
+        'product_category_prices',
+      )
+      .innerJoinAndSelect(
+        'product_category_prices.product_offer',
+        'product_offer',
       )
       .skip(skip)
       .take(limit);

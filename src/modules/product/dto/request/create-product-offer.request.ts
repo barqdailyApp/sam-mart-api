@@ -24,10 +24,6 @@ export class CreateProductOfferRequest {
   @IsNotEmpty()
   end_date: Date;
 
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsNumber()
-  price: number;
 
   @ApiProperty()
   @IsNotEmpty()

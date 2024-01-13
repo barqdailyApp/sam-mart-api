@@ -158,7 +158,7 @@ export class ProductController {
 
     const { products, total } =
       await this.productService.getAllProductsForClient(productClientFilter);
-  console.log('products clients',products);
+    console.log('products clients', products);
     const productsResponse = products.map((product) => {
       const productResponse = plainToClass(ProductResponse, product);
       productResponse.totalQuantity =
@@ -174,6 +174,32 @@ export class ProductController {
 
     return new ActionResponse(pageDto);
   }
+  @Get('all-products-offers-for-client')
+  async allProductsOffersForClient(
+    @Query() productClientFilter: ProductClientQuery,
+  ) {
+    const { limit, page } = productClientFilter;
+
+    const { products, total } =
+      await this.productService.getAllProductsOffersForClient(
+        productClientFilter,
+      );
+    const productsResponse = products.map((product) => {
+      const productResponse = plainToClass(ProductResponse, product);
+      productResponse.totalQuantity =
+        productResponse.warehouses_products.reduce(
+          (acc, cur) => acc + cur.quantity,
+          0,
+        );
+      return productResponse;
+    });
+    const pageMetaDto = new PageMetaDto(page, limit, total);
+    const data = this._i18nResponse.entity(productsResponse);
+    const pageDto = new PageDto(data, pageMetaDto);
+
+    return new ActionResponse(pageDto);
+  }
+
   @Get('all-products-for-dashboard')
   async allProductsForDashboard(
     @Query() productsDashboardQuery: ProductsDashboardQuery,
@@ -182,6 +208,32 @@ export class ProductController {
 
     const { products, total } =
       await this.productService.getAllProductsForDashboard(
+        productsDashboardQuery,
+      );
+    const productsResponse = products.map((product) => {
+      const productResponse = plainToClass(ProductResponse, product);
+      productResponse.totalQuantity =
+        productResponse.warehouses_products.reduce(
+          (acc, cur) => acc + cur.quantity,
+          0,
+        );
+      return productResponse;
+    });
+    const pageMetaDto = new PageMetaDto(page, limit, total);
+    const data = this._i18nResponse.entity(productsResponse);
+    const pageDto = new PageDto(data, pageMetaDto);
+
+    return new ActionResponse(pageDto);
+  }
+
+  @Get('all-products-offers-for-dashboard')
+  async allProductsOffersForDashboard(
+    @Query() productsDashboardQuery: ProductsDashboardQuery,
+  ) {
+    const { limit, page } = productsDashboardQuery;
+
+    const { products, total } =
+      await this.productService.getAllProductsOffersForDashboard(
         productsDashboardQuery,
       );
     const productsResponse = products.map((product) => {
