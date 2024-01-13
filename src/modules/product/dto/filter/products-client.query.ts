@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class ProductFilter {
+export class ProductClientQuery {
   @ApiProperty({ required: false, default: 1 })
   @Transform(({ value }) => {
     return Number(value);
@@ -29,42 +29,13 @@ export class ProductFilter {
 
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()
-  @Transform(({ value }) => {
-    return value === 'true' || value === true;
-  })
-  withPrices: boolean;
-
-  @ApiProperty({ nullable: true, required: false })
-  @IsOptional()
-  @Transform(({ value }) => {
-    return value === 'true' || value === true;
-  })
-  withOffers: boolean;
-
-
-  
-  @ApiProperty({ nullable: true, required: false })
-  @IsOptional()
-  @Transform(({ value }) => {
-    return value === 'true' || value === true;
-  })
-  withWarehouse: boolean;
-
-  @ApiProperty({ nullable: true, required: false })
-  @IsOptional()
   @IsString()
   section_id: string;
 
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()
   @IsString()
-  section_category_id: string;
-
-  @ApiProperty({ nullable: true, required: false })
-  @IsOptional()
-  @IsString()
   category_sub_category_id: string;
-
 
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()

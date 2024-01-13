@@ -12,6 +12,8 @@ import { ApiBearerAuth, ApiBody, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { ProductMeasurementRequest } from './dto/request/product-measurement.request';
 import { ActionResponse } from 'src/core/base/responses/action.response';
 import { ProductAdditionalServiceRequest } from './dto/request/product-additional-service.request';
+import { plainToClass } from 'class-transformer';
+import { ProductCategoryPriceResponse } from '../product/dto/response/product-category-price.response';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -50,52 +52,58 @@ export class ProductCategoryPriceController {
     );
   }
 
-  @Delete('delete-link-product-subcategory/:product_id/:categorySubCategory_id')
+  @Delete('delete-link-product-subcategory/:product_sub_category_id')
   async deleteLinkProductSubcategory(
-    @Param('product_id') product_id: string,
-    @Param('categorySubCategory_id') categorySubCategory_id: string,
+    @Param('product_sub_category_id') product_sub_category_id: string,
   ) {
     return new ActionResponse(
       await this.productCategoryPriceService.deleteLinkProductSubcategory(
-        product_id,
-        categorySubCategory_id,
+        product_sub_category_id,
       ),
     );
   }
-  @Post('unit-prices-product/:product_id/:categorySubCategory_id')
+
+  @Get('unit-prices-product/:product_sub_category_id')
+  async AllUnitPricesProduct(
+    @Param('product_sub_category_id') product_sub_category_id: string,
+  ) {
+    const result =
+      await this.productCategoryPriceService.getAllUnitPriceProduct(
+        product_sub_category_id,
+      );
+    const ResultDto = result.map((x) =>
+      plainToClass(ProductCategoryPriceResponse, x),
+    );
+    return new ActionResponse(ResultDto);
+  }
+  @Post('unit-prices-product/:product_sub_category_id')
   async UnitPricesProduct(
     @Body()
     productMeasurementRequest: ProductMeasurementRequest,
-    @Param('product_id') product_id: string,
-    @Param('categorySubCategory_id') categorySubCategory_id: string,
+    @Param('product_sub_category_id') product_sub_category_id: string,
   ) {
     return new ActionResponse(
       await this.productCategoryPriceService.unitPriceProduct(
-        product_id,
-        categorySubCategory_id,
+        product_sub_category_id,
         productMeasurementRequest,
       ),
     );
   }
 
   @Post(
-    'product-additional-service/:product_id/:categorySubCategory_id/:product_measurement_id',
+    'product-additional-service/:product_sub_category_id/:product_measurement_id',
   )
   async productAdditionalService(
-    @Param('product_id') product_id: string,
-    @Param('categorySubCategory_id') categorySubCategory_id: string,
+    @Param('product_sub_category_id') product_sub_category_id: string,
     @Param('product_measurement_id') product_measurement_id: string,
     @Body() productAdditionalServiceRequest: ProductAdditionalServiceRequest,
   ) {
     return new ActionResponse(
       await this.productCategoryPriceService.productAdditionalService(
-        product_id,
-        categorySubCategory_id,
+        product_sub_category_id,
         product_measurement_id,
         productAdditionalServiceRequest,
       ),
     );
   }
-
-
 }

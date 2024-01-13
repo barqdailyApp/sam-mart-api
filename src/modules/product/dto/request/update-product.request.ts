@@ -3,10 +3,6 @@ import { Transform } from 'class-transformer';
 import { IsOptional, IsString, IsBoolean, IsNotEmpty } from 'class-validator';
 
 export class UpdateProductRequest {
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
-  id: string;
 
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()

@@ -9,16 +9,6 @@ import {
 } from 'class-validator';
 
 export class UpdateProductMeasurementRequest {
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
-  product_id: string;
-
-  
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
-  product_measurement_unit_id: string;
 
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()
