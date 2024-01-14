@@ -17,6 +17,8 @@ import { BanarModule } from './banar/banar.module';
 import { WarehouseModule } from './warehouse/warehouse.module';
 import { CartModule } from './cart/cart.module';
 
+import { SupportTicketModule } from './support-ticket/suuport-ticket.module';
+import { StaticPageModule } from './static-page/static-page.module';
 
 @Module({
   imports: [
@@ -35,6 +37,8 @@ import { CartModule } from './cart/cart.module';
     ProductCategoryPriceModule,
     BanarModule,
     WarehouseModule,
+    SupportTicketModule,
+    StaticPageModule,,
     CartModule
 
   ],

@@ -26,6 +26,10 @@ import { WarehouseProducts } from '../entities/warehouse/warehouse-products.enti
 import { WarehouseOperations } from '../entities/warehouse/warehouse-opreations.entity';
 import { Warehouse } from '../entities/warehouse/warehouse.entity';
 import { ProductOffer } from '../entities/product/product-offer.entity';
+import { SupportTicket } from '../entities/support-ticket/support-ticket.entity';
+import { TicketAttachment } from '../entities/support-ticket/ticket-attachement.entity';
+import { TicketComment } from '../entities/support-ticket/ticket-comment.entity';
+import { StaticPage } from '../entities/static-pages/static-pages.entity';
 import { Cart } from '../entities/cart/cart.entity';
 import { CartProduct } from '../entities/cart/cart-products';
 
@@ -59,7 +63,11 @@ export const DB_ENTITIES = [
   Warehouse,
   ProductOffer,
   Cart,
-  CartProduct
+  CartProduct,
+  SupportTicket,
+  TicketAttachment,
+  TicketComment,
+  StaticPage
 ];
 
 export const DB_VIEWS = [];

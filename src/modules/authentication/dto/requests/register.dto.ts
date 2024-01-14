@@ -15,7 +15,7 @@ export class RegisterRequest {
   @IsNotEmpty()
   @IsString()
   name: string;
-
+  
   @ApiPropertyOptional()
   @IsOptional()
   @IsNotEmpty()

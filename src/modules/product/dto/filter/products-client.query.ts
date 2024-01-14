@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class ProductFilter {
+export class ProductClientQuery {
   @ApiProperty({ required: false, default: 1 })
   @Transform(({ value }) => {
     return Number(value);
@@ -20,10 +20,25 @@ export class ProductFilter {
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()
   @IsString()
-  userLongitude: number;
+  longitude: string;
 
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()
   @IsString()
-  userLatitude: number;
+  latitude: string;
+
+  @ApiProperty({ nullable: true, required: false })
+  @IsOptional()
+  @IsString()
+  section_id: string;
+
+  @ApiProperty({ nullable: true, required: false })
+  @IsOptional()
+  @IsString()
+  category_sub_category_id: string;
+
+  @ApiProperty({ nullable: true, required: false })
+  @IsOptional()
+  @IsString()
+  product_name: string;
 }

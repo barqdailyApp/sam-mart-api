@@ -19,11 +19,11 @@ export class ProductMeasurementResponse {
   @Transform(({ value }) => {
   
     return value && value.length > 0
-      ? plainToClass(ProductCategoryPriceResponse, value[0])
+      ? plainToClass(ProductCategoryPriceResponse, value)
       : null;
   })
   @Expose()
-  readonly product_category_prices: ProductCategoryPriceResponse;
+  readonly product_category_prices: ProductCategoryPriceResponse[];
 
   @Expose() readonly base_unit_id: string;
 }

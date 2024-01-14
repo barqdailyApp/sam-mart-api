@@ -19,10 +19,13 @@ import { ProductCategoryPrice } from 'src/infrastructure/entities/product/produc
 import { ProductAdditionalService } from 'src/infrastructure/entities/product/product-additional-service.entity';
 import { AdditionalService } from 'src/infrastructure/entities/product/additional-service.entity';
 import { CategorySubCategory } from 'src/infrastructure/entities/category/category-subcategory.entity';
+import { Section } from 'src/infrastructure/entities/section/section.entity';
 
 @Injectable()
 export class ProductSeeder implements Seeder {
   constructor(
+    @InjectRepository(Section)
+    private readonly section_repo: Repository<Section>,
     @InjectRepository(Product)
     private readonly product_repo: Repository<Product>,
     @InjectRepository(ProductImage)
@@ -92,17 +95,24 @@ export class ProductSeeder implements Seeder {
     }
 
     //* Link Products with subcategory
-    const categorySubcategory = await this.categorySubCategory_repo.find();
     const products = await this.product_repo.find();
-    for (let i = 0; i < categorySubcategory.length; i++) {
+
+    const sections = await this.section_repo.find({
+      relations: { section_categories: { category_subCategory: true } },
+    });
+
+    for (let i = 0; i < sections.length; i++) {
+      const category_subCategory = sections[i].section_categories[0].category_subCategory[0];
       for (let j = 0; j < products.length; j++) {
         const createProductSubCategory = this.productSubCategory_repo.create({
           product_id: products[j].id,
-          category_sub_category_id: categorySubcategory[i].id,
+          category_sub_category_id: category_subCategory.id,
         });
         await this.productSubCategory_repo.save(createProductSubCategory);
       }
     }
+
+    
     //* Link Product Sub Category with product measurement and price
     const productSubCategory = await this.productSubCategory_repo.find();
     for (let i = 0; i < productSubCategory.length; i++) {
@@ -180,6 +190,7 @@ export class ProductSeeder implements Seeder {
     await this.categorySubCategory_repo.delete({});
 
     await this.subCategory_repo.delete({});
+    // await this.section_repo.delete({});
 
     // await this.productService_repo.delete({});
     // await this.additionalService_repo.delete({});

@@ -8,22 +8,10 @@ import {
   IsString,
 } from 'class-validator';
 
-export class UpdateProductImageRequest {
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
-  product_id: string;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
-  product_image_id: string;
-
-  @ApiProperty({ nullable: true, required: false })
-  @IsOptional()
-  @IsString()
-  url: string;
-
+export class UpdateSingleImageRequest {
+  @ApiProperty({ type: 'file',  nullable: true, required: false  })
+  file: Express.Multer.File;
+  
 
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()

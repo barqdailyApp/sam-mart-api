@@ -1,29 +1,29 @@
 import { plainToInstance } from 'class-transformer';
 import { toUrl } from 'src/core/helpers/file.helper';
+import { Gender } from 'src/infrastructure/data/enums/gender.enum';
 import { User } from 'src/infrastructure/entities/user/user.entity';
 import { Double } from 'typeorm';
 
 export class UserInfoResponse {
   id: string;
-  first_name: string;
-  last_name: string;
+  name:string;
   avatar: string;
   phone: string;
-  notification_is_active: boolean;
+  allow_notification: boolean;
   email: string;
-
-
-  
+  birth_date: string;
+  gender: string;
 
   constructor(partial: Partial<UserInfoResponse>) {
     this.id = partial.id;
-    this.first_name = partial.first_name;
-    this.last_name = partial.last_name;
+    this.name = partial.name;
     this.avatar = partial.avatar;
     this.phone = partial.phone;
     this.email = partial.email;
-    this.notification_is_active = partial.notification_is_active;
-
+    this.allow_notification = partial.allow_notification;
+    this.birth_date = partial.birth_date;
+    this.gender = partial.gender;
+    
     if (this.avatar) {
       if (this.avatar.includes('assets')) {
         this.avatar = toUrl(this.avatar, true);
@@ -37,12 +37,12 @@ export class UserInfoResponse {
 export class ProfileResponse {
   user_info: UserInfoResponse;
   wash_balance: number;
-  wash_time?:number;
+  wash_time?: number;
   vehicles_count: number;
   points: number;
   notifications_is_read: boolean;
-  points_per_wash:number
-  IdLastOrderHaveReview?:string;
+  points_per_wash: number
+  IdLastOrderHaveReview?: string;
   constructor(partial: Partial<ProfileResponse>) {
     Object.assign(this, partial);
     this.user_info = new UserInfoResponse({ ...this.user_info });

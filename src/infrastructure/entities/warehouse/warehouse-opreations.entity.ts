@@ -9,7 +9,9 @@ import { operationType } from "src/infrastructure/data/enums/operation-type.enum
 @Entity()
 
 export class WarehouseOperations extends OwnedEntity {
-@ManyToOne(() => Warehouse, (warehouse) => warehouse.operations)
+@ManyToOne(() => Warehouse, (warehouse) => warehouse.operations, {
+    onDelete: 'CASCADE',
+  })
 @JoinColumn()
     warehouse: Warehouse;
 @Column()

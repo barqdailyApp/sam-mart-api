@@ -45,6 +45,7 @@ export class ProductCategoryPriceService {
     //*--------------------------------- Make Check For User Data ---------------------------------*/
     //* Check if sub category exist
     const categorySubcategory = await this.categorySubcategory_repo.findOne({
+      relations: { section_category: true },
       where: { id: categorySubCategory_id },
     });
     if (!categorySubcategory) {
@@ -58,18 +59,40 @@ export class ProductCategoryPriceService {
     if (!product) {
       throw new NotFoundException(`Product ID not found`);
     }
-    //* Check if product sub category exist
-    const productSubCategory = await this.productSubCategory_repo.findOne({
+    //* Check if product  there is a section
+    const sectionSubcategory = categorySubcategory.section_category.section_id;
+    const productSection = await this.product_repo.findOne({
       where: {
-        product_id,
-        category_sub_category_id: categorySubCategory_id,
+        id: product_id,
+        product_sub_categories: {
+          category_subCategory: {
+            section_category: {
+              section_id: sectionSubcategory,
+            },
+          },
+        },
       },
     });
-    if (productSubCategory) {
+
+    if (productSection) {
       throw new BadRequestException(
-        `There Relation Between Product And Sub Category`,
+        `This product cannot be added in the same section`,
       );
     }
+
+    // //* Check if product sub category exist
+    // const productSubCategory = await this.productSubCategory_repo.findOne({
+    //   where: {
+    //     product_id,
+    //     category_sub_category_id: categorySubCategory_id,
+    //   },
+    // });
+    // if (productSubCategory) {
+    //   throw new BadRequestException(
+    //     `There Relation Between Product And Sub Category`,
+    //   );
+    // }
+
     //* -------------------------- Create product sub category if Not Exist --------------------------*/
     const productSubCategoryCreate = this.productSubCategory_repo.create({
       product_id,
@@ -112,14 +135,10 @@ export class ProductCategoryPriceService {
     return productSubCategory;
   }
 
-  async deleteLinkProductSubcategory(
-    product_id: string,
-    categorySubCategory_id: string,
-  ) {
+  async deleteLinkProductSubcategory(product_sub_category_id: string) {
     const productSubCategory = await this.productSubCategory_repo.findOne({
       where: {
-        product_id,
-        category_sub_category_id: categorySubCategory_id,
+        id: product_sub_category_id,
       },
     });
     if (!productSubCategory) {
@@ -130,9 +149,29 @@ export class ProductCategoryPriceService {
     return await this.productSubCategory_repo.remove(productSubCategory);
   }
 
+  async getAllUnitPriceProduct(product_sub_category_id: string) {
+    const productSubCategory = await this.productSubCategory_repo.findOne({
+      where: {
+        id: product_sub_category_id,
+      },
+    });
+    if (!productSubCategory) {
+      throw new NotFoundException(`Product sub category ID not found`);
+    }
+    return await this.productCategoryPrice_repo.find({
+      where: {
+        product_sub_category_id: product_sub_category_id,
+      },
+      relations: {
+        product_measurement: true,
+        product_additional_services: {
+          additional_service: true,
+        },
+      },
+    });
+  }
   async unitPriceProduct(
-    product_id: string,
-    categorySubCategory_id: string,
+    product_sub_category_id: string,
     measurement_detail: ProductMeasurementRequest,
   ) {
     const {
@@ -145,8 +184,7 @@ export class ProductCategoryPriceService {
     //* Check if product sub category id exist
     const productSubCategory = await this.productSubCategory_repo.findOne({
       where: {
-        product_id,
-        category_sub_category_id: categorySubCategory_id,
+        id: product_sub_category_id,
       },
     });
     if (!productSubCategory) {
@@ -188,8 +226,7 @@ export class ProductCategoryPriceService {
   }
 
   async productAdditionalService(
-    product_id: string,
-    categorySubCategory_id: string,
+    product_sub_category_id: string,
     product_measurement_id: string,
     productAdditionalServiceRequest: ProductAdditionalServiceRequest,
   ) {
@@ -198,7 +235,7 @@ export class ProductCategoryPriceService {
 
     //* Check if product sub category id exist
     const productSubCategory = await this.productSubCategory_repo.findOne({
-      where: { product_id, category_sub_category_id: categorySubCategory_id },
+      where: { id: product_sub_category_id },
     });
     if (!productSubCategory) {
       throw new NotFoundException(`Product sub category ID not found`);
