@@ -43,11 +43,12 @@ export class SectionService extends BaseService<Section> {
     const sections = await this.section_repo.find({
       order: { order_by: 'ASC' },
     });
-    if(user.roles.includes(Role.ADMIN)) return sections
+   
     if (!user)
       return sections.filter((section) =>
         section.allowed_roles.includes(Role.CLIENT),
       );
+      if(user.roles.includes(Role.ADMIN)) return sections
     return sections.filter((section) => {
       return user.roles.includes(section.allowed_roles[0]);
     });
