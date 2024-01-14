@@ -5,7 +5,7 @@ import { CategorySubCategory } from './category-subcategory.entity';
 
 @Entity()
 export class MostHitSubcategory extends AuditableEntity {
-    @OneToOne(() => CategorySubCategory, subcategory => subcategory.most_hit_subcategory)
+    @OneToOne(() => CategorySubCategory, subcategory => subcategory.most_hit_subcategory,{onDelete:"CASCADE"})
     @JoinColumn({ name: 'category_sub_category_id' })
     categorySubCategory: CategorySubCategory;
 

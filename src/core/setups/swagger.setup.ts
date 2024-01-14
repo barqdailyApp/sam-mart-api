@@ -7,6 +7,7 @@ import { AddressModule } from 'src/modules/address/address.module';
 
 import { AuthenticationModule } from 'src/modules/authentication/authentication.module';
 import { BanarModule } from 'src/modules/banar/banar.module';
+import { CartModule } from 'src/modules/cart/cart.module';
 import { CategoryModule } from 'src/modules/category/category.module';
 import { CityModule } from 'src/modules/city/city.module';
 import { CountryModule } from 'src/modules/country/country.module';
@@ -59,6 +60,7 @@ export default (app: INestApplication, config: ConfigService) => {
       ProductCategoryPriceModule,
       BanarModule,
       WarehouseModule,
+      CartModule
     ],
     operationIdFactory,
   });

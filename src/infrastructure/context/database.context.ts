@@ -26,6 +26,8 @@ import { WarehouseProducts } from '../entities/warehouse/warehouse-products.enti
 import { WarehouseOperations } from '../entities/warehouse/warehouse-opreations.entity';
 import { Warehouse } from '../entities/warehouse/warehouse.entity';
 import { ProductOffer } from '../entities/product/product-offer.entity';
+import { Cart } from '../entities/cart/cart.entity';
+import { CartProduct } from '../entities/cart/cart-products';
 
 export const DB_ENTITIES = [
   User,
@@ -55,7 +57,9 @@ export const DB_ENTITIES = [
   WarehouseProducts,
   WarehouseOperations,
   Warehouse,
-  ProductOffer
+  ProductOffer,
+  Cart,
+  CartProduct
 ];
 
 export const DB_VIEWS = [];

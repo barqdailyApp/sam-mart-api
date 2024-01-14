@@ -7,7 +7,7 @@ import { UsersSeeder } from './users.seeder';
 
 export const DB_SEEDERS = [
   // UsersSeeder,
-  CountryCityRegionSeeder,
+  // CountryCityRegionSeeder,
   MeasurementUnitSeeder,
   AdditionalServiceSeeder,
   CategorySeeder,

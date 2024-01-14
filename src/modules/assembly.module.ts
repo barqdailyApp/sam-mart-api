@@ -15,6 +15,8 @@ import { SubcategoryModule } from './subcategory/subcategory.module';
 import { ProductCategoryPriceModule } from './product-category-price/product-category-price.module';
 import { BanarModule } from './banar/banar.module';
 import { WarehouseModule } from './warehouse/warehouse.module';
+import { CartModule } from './cart/cart.module';
+
 
 @Module({
   imports: [
@@ -32,7 +34,9 @@ import { WarehouseModule } from './warehouse/warehouse.module';
     SubcategoryModule,
     ProductCategoryPriceModule,
     BanarModule,
-    WarehouseModule
+    WarehouseModule,
+    CartModule
+
   ],
   exports: [],
   providers: [],

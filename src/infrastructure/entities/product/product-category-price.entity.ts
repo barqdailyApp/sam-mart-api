@@ -5,6 +5,7 @@ import { ProductMeasurement } from './product-measurement.entity';
 import { ProductAdditionalService } from './product-additional-service.entity';
 import { ProductSubCategory } from './product-sub-category.entity';
 import { ProductOffer } from './product-offer.entity';
+import { CartProduct } from '../cart/cart-products';
 
 @Entity()
 export class ProductCategoryPrice extends AuditableEntity {
@@ -51,4 +52,7 @@ export class ProductCategoryPrice extends AuditableEntity {
 
   @OneToOne(() => ProductOffer, productOffer => productOffer.product_category_price)
   product_offer: ProductOffer;
+
+  @OneToMany(()=>CartProduct,cartProduct=>cartProduct.product_category_price)
+  cart_products:CartProduct[]
 }
