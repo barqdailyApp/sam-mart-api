@@ -36,22 +36,28 @@ export class SectionService extends BaseService<Section> {
   }
 
   async getSections(user_id: string): Promise<Section[]> {
-    const user=user_id==null?null: await this.user_repo.findOne({where:{id:user_id},})
-    const sections= await this.section_repo.find({order:{order_by: "ASC"}});
-    if(!user)
-    return sections.filter(section=>section.allowed_roles.includes(Role.CLIENT))
- return   sections.filter(section=>{
-  
-      return  user.roles.includes(section.allowed_roles[0])
-    })
+    const user =
+      user_id == null
+        ? null
+        : await this.user_repo.findOne({ where: { id: user_id } });
+    const sections = await this.section_repo.find({
+      order: { order_by: 'ASC' },
+    });
+    if(user.roles.includes(Role.ADMIN)) return sections
+    if (!user)
+      return sections.filter((section) =>
+        section.allowed_roles.includes(Role.CLIENT),
+      );
+    return sections.filter((section) => {
+      return user.roles.includes(section.allowed_roles[0]);
+    });
   }
 
   async createSection(req: CreateSectionRequest): Promise<Section> {
     const section = this._repo.create(plainToInstance(Section, req));
     if (req.logo) {
+      const logo = await this._fileService.upload(req.logo);
 
-const logo=await this._fileService.upload(req.logo)
-   
       // set avatar path
       section.logo = logo;
     }
@@ -60,25 +66,26 @@ const logo=await this._fileService.upload(req.logo)
   }
 
   async updateSection(req: UpdateSectionRequest): Promise<Section> {
-    const section = await this._repo.findOne({where:{id:req.id}});
-    
-    if (req.logo) {
+    const section = await this._repo.findOne({ where: { id: req.id } });
 
-    await  this._fileService.delete (section.logo)
+    if (req.logo) {
+      await this._fileService.delete(section.logo);
       // resize image to 300x300
-   const logo=  await this._fileService.upload(req.logo)
-   
+      const logo = await this._fileService.upload(req.logo);
 
       // set avatar path
       section.logo = logo;
     }
-    await this._repo.update(section.id,{...plainToInstance(Section, req),logo:section.logo});
+    await this._repo.update(section.id, {
+      ...plainToInstance(Section, req),
+      logo: section.logo,
+    });
     return plainToInstance(Section, req);
   }
 
   async getSectionCategories(section_id: string): Promise<SectionCategory[]> {
     return await this.section_category_repo.find({
-      where: { section_id ,is_active :true},
+      where: { section_id, is_active: true },
       relations: { category: true },
       order: { order_by: 'ASC' },
     });
@@ -99,12 +106,11 @@ const logo=await this._fileService.upload(req.logo)
     });
   }
 
-  async updatSectionCategory(req:UpdateSectionCategoryRequest){
-    return await this.section_category_repo.update(req.id,req)
-
+  async updatSectionCategory(req: UpdateSectionCategoryRequest) {
+    return await this.section_category_repo.update(req.id, req);
   }
 
-  async deleteSectionCategory(id:string){
-    return await this.section_category_repo.delete(id)
+  async deleteSectionCategory(id: string) {
+    return await this.section_category_repo.delete(id);
   }
 }
