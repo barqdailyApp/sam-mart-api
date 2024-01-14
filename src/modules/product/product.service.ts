@@ -96,8 +96,10 @@ export class ProductService {
       createProductOffer.price =
         productCategoryPrice.price - createProductOffer.discount_value;
     } else {
-     const discountedPercentage  = productCategoryPrice.price * createProductOffer.discount_value / 100;
-     createProductOffer.price = productCategoryPrice.price - discountedPercentage
+      const discountedPercentage =
+        (productCategoryPrice.price * createProductOffer.discount_value) / 100;
+      createProductOffer.price =
+        productCategoryPrice.price - discountedPercentage;
     }
     return await this.productOffer_repo.save(createProductOffer);
   }
@@ -294,9 +296,25 @@ export class ProductService {
       section_id,
       category_sub_category_id,
       product_name,
+      sort,
     } = productClientQuery;
     const skip = (page - 1) * limit;
 
+    let productsSort = {};
+
+    switch (sort) {
+      case 'lowest_price':
+        // Convert price to a numeric type before sorting
+        productsSort = 'product_category_prices.price', 'ASC';
+        break;
+      case 'highest_price':
+        productsSort = 'product_category_prices.price', 'DESC';
+        break;
+      case 'new':
+        productsSort = 'product.created_at', 'DESC';
+        break;
+      // handle other sort cases if needed
+    }
     // For guests and individuals, orders are taken from the nearest warehouse
 
     let warehouse: Warehouse;
@@ -342,11 +360,9 @@ export class ProductService {
         'category_subCategory',
       )
       .leftJoin('category_subCategory.section_category', 'section_category')
+      .orderBy(productsSort)
       .skip(skip)
       .take(limit);
-
-    // Initial condition to ensure product is in at least one warehouse
-    // query = query.where('warehousesProduct.id IS NOT NULL');
 
     // Modify condition if warehouse is defined
     if (warehouse) {
@@ -354,9 +370,6 @@ export class ProductService {
         warehouseId: warehouse.id,
       });
     }
-
-    // // Conditional where clause based on prices
-    // query = query.andWhere('product_category_prices.id IS NOT NULL');
 
     // Add search term condition if provided
     if (product_name) {
@@ -402,12 +415,28 @@ export class ProductService {
       latitude,
       section_id,
       category_sub_category_id,
-      product_name,
+      product_name,sort
     } = productClientQuery;
     const skip = (page - 1) * limit;
 
-    // For guests and individuals, orders are taken from the nearest warehouse
 
+    let productsSort = {};
+
+    switch (sort) {
+      case 'lowest_price':
+        // Convert price to a numeric type before sorting
+        productsSort = 'product_offer.price', 'ASC';
+        break;
+      case 'highest_price':
+        productsSort = 'product_offer.price', 'DESC';
+        break;
+      case 'new':
+        productsSort = 'product_offer.created_at', 'DESC';
+        break;
+      // handle other sort cases if needed
+    }
+
+    // For guests and individuals, orders are taken from the nearest warehouse
     let warehouse: Warehouse;
     if (latitude && longitude) {
       warehouse = await this.warehouse_repo
@@ -451,11 +480,10 @@ export class ProductService {
         'category_subCategory',
       )
       .leftJoin('category_subCategory.section_category', 'section_category')
+      .orderBy(productsSort)
+
       .skip(skip)
       .take(limit);
-
-    // Initial condition to ensure product is in at least one warehouse
-    // query = query.where('warehousesProduct.id IS NOT NULL');
 
     // Modify condition if warehouse is defined
     if (warehouse) {
@@ -463,9 +491,6 @@ export class ProductService {
         warehouseId: warehouse.id,
       });
     }
-
-    // // Conditional where clause based on prices
-    // query = query.andWhere('product_category_prices.id IS NOT NULL');
 
     // Add search term condition if provided
     if (product_name) {
