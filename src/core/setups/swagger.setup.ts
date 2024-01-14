@@ -62,7 +62,7 @@ export default (app: INestApplication, config: ConfigService) => {
       ProductCategoryPriceModule,
       BanarModule,
       WarehouseModule,
-      CartModule
+      CartModule,
       SupportTicketModule,
       StaticPageModule,
     ],
