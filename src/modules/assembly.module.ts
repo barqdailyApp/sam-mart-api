@@ -1,24 +1,23 @@
-import { Module } from '@nestjs/common';
+import { Module } from "@nestjs/common";
+import { AdditionalServiceModule } from "./additional-service/additional-service.module";
+import { AuthenticationModule } from "./authentication/authentication.module";
+import { BanarModule } from "./banar/banar.module";
+import { CartModule } from "./cart/cart.module";
+import { CategoryModule } from "./category/category.module";
+import { CityModule } from "./city/city.module";
+import { CountryModule } from "./country/country.module";
+import { DriverModule } from "./driver/driver.module";
+import { MeasurementUnitModule } from "./measurement-unit/measurement-unit.module";
+import { ProductCategoryPriceModule } from "./product-category-price/product-category-price.module";
+import { ProductModule } from "./product/product.module";
+import { RegionModule } from "./region/region.module";
+import { SectionModule } from "./section/section.module";
+import { StaticPageModule } from "./static-page/static-page.module";
+import { SubcategoryModule } from "./subcategory/subcategory.module";
+import { SupportTicketModule } from "./support-ticket/suuport-ticket.module";
+import { UserModule } from "./user/user.module";
+import { WarehouseModule } from "./warehouse/warehouse.module";
 
-import { UserModule } from './user/user.module';
-import { AuthenticationModule } from './authentication/authentication.module';
-import { CountryModule } from './country/country.module';
-import { CityModule } from './city/city.module';
-import { RegionModule } from './region/region.module';
-import { DriverModule } from './driver/driver.module';
-import { ProductModule } from './product/product.module';
-import { MeasurementUnitModule } from './measurement-unit/measurement-unit.module';
-import { AdditionalServiceModule } from './additional-service/additional-service.module';
-import { SectionModule } from './section/section.module';
-import { CategoryModule } from './category/category.module';
-import { SubcategoryModule } from './subcategory/subcategory.module';
-import { ProductCategoryPriceModule } from './product-category-price/product-category-price.module';
-import { BanarModule } from './banar/banar.module';
-import { WarehouseModule } from './warehouse/warehouse.module';
-import { CartModule } from './cart/cart.module';
-
-import { SupportTicketModule } from './support-ticket/suuport-ticket.module';
-import { StaticPageModule } from './static-page/static-page.module';
 
 @Module({
   imports: [
@@ -38,7 +37,7 @@ import { StaticPageModule } from './static-page/static-page.module';
     BanarModule,
     WarehouseModule,
     SupportTicketModule,
-    StaticPageModule,,
+    StaticPageModule,
     CartModule
 
   ],
