@@ -41,4 +41,9 @@ export class ProductClientQuery {
   @IsOptional()
   @IsString()
   product_name: string;
+
+  @ApiProperty({ required: false, enum: ['lowest_price', 'highest_price', 'new'], default: 'new' })
+  @IsOptional()
+  @IsString()
+  sort: 'lowest_price' | 'highest_price' | 'new';
 }
