@@ -46,6 +46,8 @@ export class CategoryController {
     private readonly _i18nResponse: I18nResponse,
   ) {}
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN)
   @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('logo'))
   @ApiConsumes('multipart/form-data')
   @Post()
@@ -58,7 +60,8 @@ export class CategoryController {
     req.logo = logo;
     return new ActionResponse(await this.categoryService.createCategory(req));
   }
-
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @ApiBearerAuth()
 
   @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('logo'))
@@ -112,14 +115,16 @@ export class CategoryController {
       ),
     );
   }
-
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @Post('/add-subcategory')
   async addSubcategoryToCategory(@Body() req: CategorySubcategoryRequest) {
     return new ActionResponse(
       await this.categoryService.addSubcategoryToCategory(req),
     );
   }
-
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   
   @Put('/category-subcategory')
   async updateSectionCategory(@Body() req: UpdateSectionCategoryRequest) {
@@ -127,6 +132,8 @@ export class CategoryController {
       await this.categoryService.updateCategorySubcategory(req),
     );
   }
+  @UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN)
   @Delete('/category-subcategory:id')
   async deleteSectionCategory(@Param('id') id: string) {
     return new ActionResponse(
