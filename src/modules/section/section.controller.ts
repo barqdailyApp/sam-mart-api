@@ -37,6 +37,8 @@ import { SectionCategoryRequest } from './dto/requests/create-section-category.r
 import { toUrl } from 'src/core/helpers/file.helper';
 import { UpdateSectionRequest } from './dto/requests/update-section.request';
 import { UpdateSectionCategoryRequest } from './dto/requests/update-section-category.request';
+import { Role } from 'src/infrastructure/data/enums/role.enum';
+import { Roles } from '../authentication/guards/roles.decorator';
 
 @ApiHeader({
   name: 'Accept-Language',
@@ -50,7 +52,8 @@ export class SectionController {
     private readonly sectionService: SectionService,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
   ) {}
-
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('logo'))
   @ApiConsumes('multipart/form-data')
   @Post()
@@ -63,7 +66,8 @@ export class SectionController {
     req.logo = logo;
     return new ActionResponse(await this.sectionService.createSection(req));
   }
-
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('logo'))
   @ApiConsumes('multipart/form-data')
   @Put()
@@ -76,25 +80,30 @@ export class SectionController {
     req.logo = logo;
     return new ActionResponse(await this.sectionService.updateSection(req));
   }
-
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @Delete('/:id')
   async deleteSection(@Param('id') id: string) {
     return new ActionResponse(await this.sectionService.delete(id));
   }
-
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @Post('/add-category')
   async addCategoryToSection(@Body() req: SectionCategoryRequest) {
     return new ActionResponse(
       await this.sectionService.addCategoryToSection(req),
     );
   }
-
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @Put('/section-category')
   async updateSectionCategory(@Body() req: UpdateSectionCategoryRequest) {
     return new ActionResponse(
       await this.sectionService.updatSectionCategory(req),
     );
   }
+  @UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN)
   @Delete('/section-category/:id')
   async deleteSectionCategory(@Param('id') id: string) {
     return new ActionResponse(
