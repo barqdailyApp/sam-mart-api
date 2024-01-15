@@ -305,13 +305,13 @@ export class ProductService {
     switch (sort) {
       case 'lowest_price':
         // Convert price to a numeric type before sorting
-        productsSort = 'product_category_prices.price', 'ASC';
+        (productsSort = 'product_category_prices.price'), 'ASC';
         break;
       case 'highest_price':
-        productsSort = 'product_category_prices.price', 'DESC';
+        (productsSort = 'product_category_prices.price'), 'DESC';
         break;
       case 'new':
-        productsSort = 'product.created_at', 'DESC';
+        (productsSort = 'product.created_at'), 'DESC';
         break;
       // handle other sort cases if needed
     }
@@ -333,6 +333,8 @@ export class ProductService {
     // Start building the query
     let query = this.productRepository
       .createQueryBuilder('product')
+
+      .leftJoinAndSelect('product.product_images', 'product_images')
 
       .innerJoinAndSelect('product.warehouses_products', 'warehousesProduct')
       .innerJoinAndSelect(
@@ -415,23 +417,23 @@ export class ProductService {
       latitude,
       section_id,
       category_sub_category_id,
-      product_name,sort
+      product_name,
+      sort,
     } = productClientQuery;
     const skip = (page - 1) * limit;
-
 
     let productsSort = {};
 
     switch (sort) {
       case 'lowest_price':
         // Convert price to a numeric type before sorting
-        productsSort = 'product_offer.price', 'ASC';
+        (productsSort = 'product_offer.price'), 'ASC';
         break;
       case 'highest_price':
-        productsSort = 'product_offer.price', 'DESC';
+        (productsSort = 'product_offer.price'), 'DESC';
         break;
       case 'new':
-        productsSort = 'product_offer.created_at', 'DESC';
+        (productsSort = 'product_offer.created_at'), 'DESC';
         break;
       // handle other sort cases if needed
     }
@@ -453,6 +455,7 @@ export class ProductService {
     // Start building the query
     let query = this.productRepository
       .createQueryBuilder('product')
+      .leftJoinAndSelect('product.product_images', 'product_images')
 
       .innerJoinAndSelect('product.warehouses_products', 'warehousesProduct')
       .innerJoinAndSelect(
@@ -530,6 +533,8 @@ export class ProductService {
 
     const query = this.productRepository
       .createQueryBuilder('product')
+      .leftJoinAndSelect('product.product_images', 'product_images')
+
       .leftJoinAndSelect('product.warehouses_products', 'warehousesProduct')
       .leftJoinAndSelect('product.product_measurements', 'product_measurements')
       .leftJoinAndSelect(
@@ -555,6 +560,8 @@ export class ProductService {
 
     const query = this.productRepository
       .createQueryBuilder('product')
+      .leftJoinAndSelect('product.product_images', 'product_images')
+
       .leftJoinAndSelect('product.warehouses_products', 'warehousesProduct')
       .innerJoinAndSelect(
         'product.product_measurements',
@@ -601,6 +608,7 @@ export class ProductService {
     // Start building the query
     let query = this.productRepository
       .createQueryBuilder('product')
+      .leftJoinAndSelect('product.product_images', 'product_images')
 
       .innerJoinAndSelect('product.warehouses_products', 'warehousesProduct')
       .innerJoinAndSelect(
@@ -670,6 +678,7 @@ export class ProductService {
     // Start building the query
     let query = this.productRepository
       .createQueryBuilder('product')
+      .leftJoinAndSelect('product.product_images', 'product_images')
 
       .leftJoinAndSelect('product.warehouses_products', 'warehousesProduct')
 
