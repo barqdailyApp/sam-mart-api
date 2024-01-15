@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { plainToInstance } from 'class-transformer';
 import * as sharp from 'sharp';
@@ -14,6 +14,8 @@ import { CategorySubCategory } from 'src/infrastructure/entities/category/catego
 import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { QueryHitsSubCategoryRequest } from './dto/request/query-hits-subcategory.request';
+import { UpdateCategoryRequest } from '../category/dto/requests/update-category-request';
+import { FileService } from '../file/file.service';
 
 @Injectable()
 export class SubcategoryService extends BaseService<Subcategory> {
@@ -26,6 +28,7 @@ export class SubcategoryService extends BaseService<Subcategory> {
     private categorySubCategoryRepository: Repository<CategorySubCategory>,
     @Inject(StorageManager) private readonly storageManager: StorageManager,
     @Inject(ImageManager) private readonly imageManager: ImageManager,
+    @Inject(FileService) private _fileService: FileService,
   ) {
     super(subcategory_repo);
   }
@@ -120,5 +123,45 @@ export class SubcategoryService extends BaseService<Subcategory> {
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async flushMostHitSubcategory() {
     await this.mostHitSubcategoryRepository.update({}, { previous_hit: () => 'current_hit', current_hit: 0 });
+  }
+
+  async updateSubCategory(req: UpdateCategoryRequest) {
+    const subcategory = await this.subcategory_repo.findOne({ where: { id: req.id } });
+
+    if (!subcategory) {
+      throw new NotFoundException('Subcategory not found');
+    }
+
+    if (req.logo) {
+
+      await this._fileService.delete(subcategory.logo)
+      const resizedImage = await this.imageManager.resize(req.logo, {
+        size: { width: 300, height: 300 },
+        options: {
+          fit: sharp.fit.cover,
+          position: sharp.strategy.entropy,
+        },
+      });
+
+      // save image
+      const path = await this.storageManager.store(
+        { buffer: resizedImage, originalname: req.logo.originalname },
+        { path: 'sub-category-logo' },
+      );
+
+      subcategory.logo = path;
+    }
+
+    Object.assign(subcategory, req);
+    return await this.subcategory_repo.save(subcategory);
+  }
+
+  async deleteSubCategory(id: string) {
+    const subcategory = await this._repo.findOne({ where: { id: id } });
+    if (!subcategory) {
+      throw new NotFoundException('Subcategory not found');
+    }
+    await this._fileService.delete(subcategory.logo)
+    return await this.subcategory_repo.delete(id);
   }
 }
