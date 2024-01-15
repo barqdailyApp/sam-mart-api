@@ -49,7 +49,7 @@ export class CartService extends BaseService<CartProduct> {
 
   async addToCart(req: AddToCartRequest) {
     const cart = await this.getCart();
-    console.log(cart);
+
 
     const product_price = await this.productCategoryPrice.findOne({
       where: { id: req.product_category_price_id },
@@ -57,8 +57,9 @@ export class CartService extends BaseService<CartProduct> {
         product_offer: true,
       },
     });
-    console.log(product_price);
-    if (product_price.product_offer) {
+    console.log('product_price', product_price);
+    
+    if (product_price.product_offer !=null) {
       product_price.min_order_quantity =
         product_price.product_offer.min_offer_quantity;
       product_price.max_order_quantity =

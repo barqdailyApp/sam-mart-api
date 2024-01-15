@@ -36,12 +36,7 @@ export class CartController {
         new CartProductRespone({
           total_price: e.price,
           quantity: e.quantity,
-          section_id:
-            e.product_category_price.product_sub_category.category_subCategory
-              .section_category.section_id,
-          unit: e.product_category_price.product_measurement.measurement_unit
-            .name,
-          product: e.product_category_price.product_sub_category.product,
+          product: e.product_category_price,
         }),
     );
   }
