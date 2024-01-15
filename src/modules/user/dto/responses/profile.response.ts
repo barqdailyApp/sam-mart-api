@@ -25,7 +25,7 @@ export class UserInfoResponse {
     this.gender = partial.gender;
 
     if (!this.avatar) {
-      this.avatar = this.gender == "female" ? "public/assets/images/avatar/female.png" : "public/assets/images/avatar/male.png"
+      this.avatar = this.gender == "female" ? "assets/images/avatar/female.png" : "assets/images/avatar/male.png"
     }
 
     if (this.avatar) {
