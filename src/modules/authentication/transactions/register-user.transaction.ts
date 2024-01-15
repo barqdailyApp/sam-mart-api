@@ -11,6 +11,7 @@ import { StorageManager } from 'src/integration/storage/storage.manager';
 
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
+import { Cart } from 'src/infrastructure/entities/cart/cart.entity';
 
 
 @Injectable()
@@ -69,7 +70,7 @@ export class RegisterUserTransaction extends BaseTransaction<
       // save user
       const savedUser = await context.save(User, user);
 
-
+     await context.save(new Cart({user_id:savedUser.id}))
 
       // return user
       return savedUser;

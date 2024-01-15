@@ -4,7 +4,7 @@ import { BaseService } from 'src/core/base/service/service.base';
 import { CartProduct } from 'src/infrastructure/entities/cart/cart-products';
 import { Cart } from 'src/infrastructure/entities/cart/cart.entity';
 import { Repository } from 'typeorm/repository/Repository';
-import { AddToCartRequest } from './dto/add-to-cart-request';
+import { AddToCartRequest } from './dto/requests/add-to-cart-request';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { Product } from 'src/infrastructure/entities/product/product.entity';
@@ -34,23 +34,36 @@ export class CartService extends BaseService<CartProduct> {
   async getCartProducts(cart_id: string) {
     return await this.cartProductRepository.find({
       where: { cart_id: cart_id },
-      relations: { product_category_price: {product_sub_category:{product:true}} ,},
+      relations: {
+        product_category_price: {
+          product_measurement: { measurement_unit: true },
+
+          product_sub_category: {
+            product: { product_images: true },
+            category_subCategory: { section_category: true },
+          },
+        },
+      },
     });
   }
-  
+
   async addToCart(req: AddToCartRequest) {
     const cart = await this.getCart();
+    console.log(cart);
 
     const product_price = await this.productCategoryPrice.findOne({
       where: { id: req.product_category_price_id },
       relations: {
-          product_offer: true,
-      }
+        product_offer: true,
+      },
     });
-    if(product_price.product_offer){
-        product_price.min_order_quantity=product_price.product_offer.min_offer_quantity
-        product_price.max_order_quantity=product_price.product_offer.max_offer_quantity
-        product_price.price=product_price.product_offer.price
+    console.log(product_price);
+    if (product_price.product_offer) {
+      product_price.min_order_quantity =
+        product_price.product_offer.min_offer_quantity;
+      product_price.max_order_quantity =
+        product_price.product_offer.max_offer_quantity;
+      product_price.price = product_price.product_offer.price;
     }
     if (
       req.quantity < product_price.min_order_quantity ||

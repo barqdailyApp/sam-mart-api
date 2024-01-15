@@ -13,6 +13,9 @@ import { WarehouseProducts } from './warehouse-products.entity';
 import { City } from '../city/city.entity';
 import { Region } from '../region/region.entity';
 
+import { Order, } from '../order/order.entity';
+import { Shipment } from '../order/shipment.entity';
+
 @Entity()
 export class Warehouse extends AuditableEntity {
   @Column({ unique: true })
@@ -32,6 +35,12 @@ export class Warehouse extends AuditableEntity {
 
   @Column({ nullable: true })
   region_id: string;
+
+  @OneToMany(() => Order, (order) => order.warehouse)
+  orders: Order[];
+
+  @OneToMany(() => Shipment, (shipment) => shipment.warehouse)
+  shipments: Shipment[];
 
   @Column({
     type: 'geometry',

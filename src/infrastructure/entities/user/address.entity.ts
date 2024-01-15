@@ -1,4 +1,5 @@
 import { Factory } from 'nestjs-seeder';
+
 import { OwnedEntity } from 'src/infrastructure/base/owned.entity';
 import { User } from 'src/infrastructure/entities/user/user.entity';
 import {
@@ -10,6 +11,8 @@ import {
   BeforeUpdate,
   OneToMany,
 } from 'typeorm';
+import { Order } from '../order/order.entity';
+
 
 @Entity('addresses')
 export class Address extends OwnedEntity {
@@ -43,6 +46,10 @@ export class Address extends OwnedEntity {
 
   @Column({ default: false })
   is_favorite: boolean;
+
+  
+  @OneToMany(() => Order, (order) => order.warehouse)
+  orders: Order[];
 
   constructor(partial?: Partial<Address>) {
     super();

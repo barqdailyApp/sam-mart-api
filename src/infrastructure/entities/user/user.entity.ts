@@ -15,6 +15,8 @@ import { Address } from './address.entity';
 import { SupportTicket } from '../support-ticket/support-ticket.entity';
 import { TicketComment } from '../support-ticket/ticket-comment.entity';
 
+import { Order } from '../order/order.entity';
+
 @Entity()
 export class User extends AuditableEntity {
   @Column({ length: 100, unique: true })
@@ -22,7 +24,7 @@ export class User extends AuditableEntity {
 
   @Column({ nullable: false })
   name: string;
-  
+
   @Column({ nullable: true, length: 60 })
   password: string;
 
@@ -44,23 +46,26 @@ export class User extends AuditableEntity {
   @Column({ nullable: true, type: 'enum', enum: Gender })
   gender: Gender;
 
-  @Column({nullable:true})
+  @Column({ nullable: true })
   birth_date: string;
 
-  @Column({default : true})
+  @Column({ default: true })
   allow_notification: boolean;
 
   @Column({ type: 'set', enum: Role, default: [Role.CLIENT] })
   roles: Role[];
 
-  @OneToMany(()=>SupportTicket, supportTicket => supportTicket.user)
-  support_tickets: SupportTicket[]
+  @OneToMany(() => SupportTicket, (supportTicket) => supportTicket.user)
+  support_tickets: SupportTicket[];
 
-  @OneToMany(()=> TicketComment, ticketComment => ticketComment.user)
-  ticket_comments: TicketComment[]
+  @OneToMany(() => TicketComment, (ticketComment) => ticketComment.user)
+  ticket_comments: TicketComment[];
 
-  @OneToMany(()=>Address,address=>address.user)
-  addresses:Address[]
+  @OneToMany(() => Address, (address) => address.user)
+  addresses: Address[];
+
+  @OneToMany(() => Order, (order) => order.user)
+  orders: Order[];
 
   constructor(partial: Partial<User>) {
     super();
