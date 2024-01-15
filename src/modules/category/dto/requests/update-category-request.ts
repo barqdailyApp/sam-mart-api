@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsNotEmpty, IsOptional, IsString } from "class-validator";
 import { CreateCategoryRequest } from "./create-category-request";
 
 export class UpdateCategoryRequest extends CreateCategoryRequest {
@@ -10,13 +10,17 @@ export class UpdateCategoryRequest extends CreateCategoryRequest {
 
 
     @ApiProperty({required  : false})
+    @IsOptional()
     @IsNotEmpty()
     @IsString()
     name_ar: string;
+
     @ApiProperty({required  : false})
+    @IsOptional()
     @IsNotEmpty()
     @IsString()
     name_en: string;
+    
     @ApiProperty({required  : false})
     logo: Express.Multer.File;
   }
