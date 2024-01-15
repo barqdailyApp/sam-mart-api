@@ -6,7 +6,7 @@ import { Double } from 'typeorm';
 
 export class UserInfoResponse {
   id: string;
-  name:string;
+  name: string;
   avatar: string;
   phone: string;
   allow_notification: boolean;
@@ -23,7 +23,11 @@ export class UserInfoResponse {
     this.allow_notification = partial.allow_notification;
     this.birth_date = partial.birth_date;
     this.gender = partial.gender;
-    
+
+    if (!this.avatar) {
+      this.avatar = this.gender == "female" ? "public/assets/images/avatar/female.png" : "public/assets/images/avatar/male.png"
+    }
+
     if (this.avatar) {
       if (this.avatar.includes('assets')) {
         this.avatar = toUrl(this.avatar, true);

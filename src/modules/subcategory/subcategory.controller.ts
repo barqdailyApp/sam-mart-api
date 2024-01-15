@@ -1,4 +1,4 @@
-import { Body, ClassSerializerInterceptor, Controller, Get, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, ClassSerializerInterceptor, Controller, Delete, Get, Param, Post, Put, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiConsumes, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { ActionResponse } from 'src/core/base/responses/action.response';
@@ -11,6 +11,11 @@ import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 import { I18nResponse } from 'src/core/helpers/i18n.helper';
 import { QueryHitsSubCategoryRequest } from './dto/request/query-hits-subcategory.request';
+import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
+import { RolesGuard } from '../authentication/guards/roles.guard';
+import { Roles } from '../authentication/guards/roles.decorator';
+import { Role } from 'src/infrastructure/data/enums/role.enum';
+import { UpdateCategoryRequest } from '../category/dto/requests/update-category-request';
 
 @ApiHeader({
   name: 'Accept-Language',
@@ -58,5 +63,26 @@ export class SubcategoryController {
     return new ActionResponse(
       await this.subcategoryService.getMostHitSubcategory(query),
     );
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('logo'))
+  @ApiConsumes('multipart/form-data')
+  @Put()
+  async update(
+    @Body() req: UpdateCategoryRequest,
+    @UploadedFile(new UploadValidator().build())
+    logo: Express.Multer.File,
+  ) {
+    req.logo = logo;
+    return new ActionResponse(await this.subcategoryService.updateSubCategory(req));
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @Delete("/:sub_category_id")
+  async delete(@Param('sub_category_id') id: string) {
+    return new ActionResponse(await this.subcategoryService.deleteSubCategory(id));
   }
 }
