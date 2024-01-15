@@ -38,4 +38,10 @@ export class ProductSubCategory extends AuditableEntity {
     (productPrice) => productPrice.product_sub_category,
   )
   product_prices: ProductCategoryPrice[];
+
+  @Column()
+  order_by: number;
+
+  @Column()
+  is_active: boolean;
 }

@@ -16,6 +16,7 @@ import { AdditionalService } from 'src/infrastructure/entities/product/additiona
 import { ProductAdditionalServiceRequest } from './dto/request/product-additional-service.request';
 import { ProductAdditionalService } from 'src/infrastructure/entities/product/product-additional-service.entity';
 import { CategorySubCategory } from 'src/infrastructure/entities/category/category-subcategory.entity';
+import { CreateLinkProductSubcategoryRequest } from './dto/request/create-link-product-subcateory.request';
 
 @Injectable()
 export class ProductCategoryPriceService {
@@ -39,9 +40,14 @@ export class ProductCategoryPriceService {
   ) {}
 
   async createLinkProductSubcategory(
-    product_id: string,
-    categorySubCategory_id: string,
+    createLinkProductSubcategoryRequest: CreateLinkProductSubcategoryRequest,
   ) {
+    const {
+      product_id,
+      categorySubCategory_id,
+      order_by,
+      is_active,
+    } = createLinkProductSubcategoryRequest;
     //*--------------------------------- Make Check For User Data ---------------------------------*/
     //* Check if sub category exist
     const categorySubcategory = await this.categorySubcategory_repo.findOne({
@@ -80,23 +86,13 @@ export class ProductCategoryPriceService {
       );
     }
 
-    // //* Check if product sub category exist
-    // const productSubCategory = await this.productSubCategory_repo.findOne({
-    //   where: {
-    //     product_id,
-    //     category_sub_category_id: categorySubCategory_id,
-    //   },
-    // });
-    // if (productSubCategory) {
-    //   throw new BadRequestException(
-    //     `There Relation Between Product And Sub Category`,
-    //   );
-    // }
 
     //* -------------------------- Create product sub category if Not Exist --------------------------*/
     const productSubCategoryCreate = this.productSubCategory_repo.create({
       product_id,
       category_sub_category_id: categorySubCategory_id,
+      is_active,
+      order_by
     });
     return await this.productSubCategory_repo.save(productSubCategoryCreate);
   }
