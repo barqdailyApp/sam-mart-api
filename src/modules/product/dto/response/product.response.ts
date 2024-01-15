@@ -48,4 +48,8 @@ export class ProductResponse {
   @Transform(({ value }) => plainToClass(ProductImagesResponse, value))
   @Expose()
   readonly product_images: ProductImagesResponse;
+  constructor(data: Partial<ProductResponse>) {
+    Object.assign(this, data);
+  }
 }
+

@@ -9,7 +9,7 @@ import { StaticPageSeeder } from './static-pages.seeder';
 
 export const DB_SEEDERS = [
   // UsersSeeder,
-  CountryCityRegionSeeder,
+  // CountryCityRegionSeeder,
   MeasurementUnitSeeder,
   AdditionalServiceSeeder,
   CategorySeeder,

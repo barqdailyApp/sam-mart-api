@@ -30,6 +30,13 @@ import { SupportTicket } from '../entities/support-ticket/support-ticket.entity'
 import { TicketAttachment } from '../entities/support-ticket/ticket-attachement.entity';
 import { TicketComment } from '../entities/support-ticket/ticket-comment.entity';
 import { StaticPage } from '../entities/static-pages/static-pages.entity';
+import { Cart } from '../entities/cart/cart.entity';
+import { CartProduct } from '../entities/cart/cart-products';
+import { Order } from '../entities/order/order.entity';
+import { Slot } from '../entities/order/slot.entity';
+import { Shipment } from '../entities/order/shipment.entity';
+import { ShipmentProduct } from '../entities/order/shipment-product.entity';
+import { ShipmentStatus } from '../entities/order/shipment-status.entity';
 
 export const DB_ENTITIES = [
   User,
@@ -60,10 +67,20 @@ export const DB_ENTITIES = [
   WarehouseOperations,
   Warehouse,
   ProductOffer,
+  Cart,
+  CartProduct,
   SupportTicket,
   TicketAttachment,
   TicketComment,
-  StaticPage
+  StaticPage,
+  Order,
+  Slot,
+  Shipment,
+  ShipmentProduct,
+  ShipmentStatus
+
+  
+
 ];
 
 export const DB_VIEWS = [];

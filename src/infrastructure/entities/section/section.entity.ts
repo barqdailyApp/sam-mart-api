@@ -3,6 +3,7 @@ import { DeliveryType } from "src/infrastructure/data/enums/delivery-type.enum";
 import {  Column, Entity, OneToMany } from "typeorm";
 import {  SectionCategory } from "./section-category.entity";
 import { Role } from "src/infrastructure/data/enums/role.enum";
+import { Order } from "../order/order.entity";
 
 @Entity()
 export class Section extends BaseEntity {
@@ -35,6 +36,9 @@ delivery_price:number;
 
 @Column({enum:DeliveryType, type:"enum"})
 delivery_type:DeliveryType
+
+@OneToMany(() => Order, (order) => order.warehouse)
+orders: Order[];
 
 
 @OneToMany(()=>SectionCategory,sction_category=>sction_category.section)

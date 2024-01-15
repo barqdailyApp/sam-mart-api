@@ -5,6 +5,7 @@ import { Country } from '../country/country.entity';
 import { Region } from '../region/region.entity';
 import { vehicle_types } from 'src/infrastructure/data/enums/vehicle_type.enum';
 import { City } from '../city/city.entity';
+import { Shipment } from '../order/shipment.entity';
 
 @Entity()
 export class Driver extends AuditableEntity {
@@ -85,6 +86,9 @@ export class Driver extends AuditableEntity {
   @Column({  type: 'enum', enum: vehicle_types })
   vehicle_type:vehicle_types
   
+
+  @ManyToOne(()=>Shipment,Shipment=>Shipment.driver)
+  shipments:Shipment[]
   constructor(partial?: Partial<Driver>) {
     super();
     Object.assign(this, partial);

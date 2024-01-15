@@ -1,0 +1,11 @@
+export enum ShipmentStatusEnum {
+    
+    PENDING = 'PENDING',
+    CONFERMED = 'CONFIRMED',
+PROCESSING = 'PROCESSING',
+    DELIVERED = 'DELIVERED',
+    COMPLETED = 'COMPLETED',
+    RETRUNED = 'RETRUNED',
+    CANCELED = 'CANCELED',
+  }
+  
