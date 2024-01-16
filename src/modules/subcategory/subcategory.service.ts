@@ -1,6 +1,6 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { plainToInstance } from 'class-transformer';
+import { plainToClass, plainToInstance } from 'class-transformer';
 import * as sharp from 'sharp';
 import { BaseService } from 'src/core/base/service/service.base';
 import { Category } from 'src/infrastructure/entities/category/category.entity';
@@ -17,6 +17,9 @@ import { QueryHitsSubCategoryRequest } from './dto/request/query-hits-subcategor
 import { UpdateCategoryRequest } from '../category/dto/requests/update-category-request';
 import { FileService } from '../file/file.service';
 import { toUrl } from 'src/core/helpers/file.helper';
+import { ImportCategoryRequest } from '../category/dto/requests/import-category-request';
+import { CreateCategoriesExcelRequest, CreateCategoryExcelRequest } from '../category/dto/requests/create-categories-excel-request';
+import { validate } from 'class-validator';
 
 @Injectable()
 export class SubcategoryService extends BaseService<Subcategory> {
@@ -199,7 +202,7 @@ export class SubcategoryService extends BaseService<Subcategory> {
           }
         }
       } = subcategory;
-      
+
       return {
         id,
         subcategory_id,
@@ -222,5 +225,26 @@ export class SubcategoryService extends BaseService<Subcategory> {
     return await this._fileService.exportExcel(flattenedData, 'subcategories', 'subcategories');
   }
 
+  async importSubCategory(req: ImportCategoryRequest) {
+    const file = await this.storageManager.store(req.file, { path: 'subcategory-export' });
+    const jsonData = await this._fileService.importExcel(file);
+    const subCategoriesRequest = plainToClass(CreateCategoriesExcelRequest, { categories: jsonData });
+    const validationErrors = await validate(subCategoriesRequest);
+
+    if (validationErrors.length > 0) {
+      throw new NotFoundException(JSON.stringify(validationErrors));
+    }
+
+    const newSubCategories = jsonData.map((subcategoryData) => {
+      const { name_ar, name_en, logo } = plainToClass(CreateCategoryExcelRequest, subcategoryData);
+      return this._repo.create({
+        name_ar,
+        name_en,
+        logo,
+      });
+    });
+
+    return await this._repo.save(newSubCategories);
+  }
 
 }
