@@ -1,13 +1,16 @@
 import {
+  BadRequestException,
   Body,
   ClassSerializerInterceptor,
   Controller,
   Delete,
   Get,
+  Header,
   Param,
   Post,
   Put,
   Query,
+  Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -32,7 +35,8 @@ import { Roles } from '../authentication/guards/roles.decorator';
 import { RolesGuard } from '../authentication/guards/roles.guard';
 import { UpdateCategoryRequest } from './dto/requests/update-category-request';
 import { UpdateSectionCategoryRequest } from '../section/dto/requests/update-section-category.request';
-
+import { Response } from 'express';
+import { ImportCategoryRequest } from './dto/requests/import-category-request';
 @ApiHeader({
   name: 'Accept-Language',
   required: false,
@@ -44,10 +48,10 @@ export class CategoryController {
   constructor(
     private readonly categoryService: CategoryService,
     private readonly _i18nResponse: I18nResponse,
-  ) {}
+  ) { }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.ADMIN)
+  @Roles(Role.ADMIN)
   @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('logo'))
   @ApiConsumes('multipart/form-data')
   @Post()
@@ -72,22 +76,21 @@ export class CategoryController {
     @UploadedFile(new UploadValidator().build())
     logo: Express.Multer.File,
   ) {
-   
+
     req.logo = logo;
     return new ActionResponse(await this.categoryService.updateCategory(req));
   }
 
 
 
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.ADMIN)
-
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @Get()
   async getCategories(@Query() query: PaginatedRequest) {
     const categories = this._i18nResponse.entity(
       await this.categoryService.findAll(query),
     );
-    const categoriesRespone=categories.map((e) => new CategoryResponse(e));
+    const categoriesRespone = categories.map((e) => new CategoryResponse(e));
 
     if (query.page && query.limit) {
       const total = await this.categoryService.count(query);
@@ -97,6 +100,29 @@ export class CategoryController {
     } else {
       return new ActionResponse(categoriesRespone);
     }
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @Get("/export")
+  @Header('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+  async export(@Res() res: Response) {
+    const File = await this.categoryService.exportCategories();
+    res.download(`${File}`);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @Post("/import")
+  async import(@Body() req: ImportCategoryRequest,
+    @UploadedFile(new UploadValidator().build())
+    file: Express.Multer.File
+  ) {
+    req.file = file;
+    const jsonData = await this.categoryService.importCategories(req);
+    return new ActionResponse(jsonData);
   }
 
   @Get('/:section_category_id/subcategories')
@@ -115,6 +141,7 @@ export class CategoryController {
       ),
     );
   }
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @Post('/add-subcategory')
@@ -123,17 +150,18 @@ export class CategoryController {
       await this.categoryService.addSubcategoryToCategory(req),
     );
   }
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
-  
   @Put('/category-subcategory')
   async updateSectionCategory(@Body() req: UpdateSectionCategoryRequest) {
     return new ActionResponse(
       await this.categoryService.updateCategorySubcategory(req),
     );
   }
+
   @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.ADMIN)
+  @Roles(Role.ADMIN)
   @Delete('/category-subcategory:id')
   async deleteSectionCategory(@Param('id') id: string) {
     return new ActionResponse(
