@@ -135,23 +135,19 @@ export class CategoryService extends BaseService<Category> {
         section_category.category_subCategory.forEach((category_subCategory) => {
           flattenedData.push({
             id: category.id,
-            name_ar: category.name_ar,
-            name_en: category.name_en,
-            logo: toUrl(category.logo),
+            category_name_ar: category.name_ar,
+            category_name_en: category.name_en,
+            category_logo: toUrl(category.logo),
             is_active_category: section_category.is_active,
-            section: {
-              id: section_category.section.id,
-              name_ar: section_category.section.name_ar,
-              name_en: section_category.section.name_en,
-              logo: toUrl(section_category.section.logo),
-            },
-            subcategory: {
-              id: category_subCategory.subcategory.id,
-              is_active_subCategory: category_subCategory.is_active,
-              name_ar: category_subCategory.subcategory.name_ar,
-              name_en: category_subCategory.subcategory.name_en,
-              logo: toUrl(category_subCategory.subcategory.logo),
-            },
+            section_id: section_category.section.id,
+            section_name_ar: section_category.section.name_ar,
+            section_name_en: section_category.section.name_en,
+            section_logo: toUrl(section_category.section.logo),
+            subcategory_id: category_subCategory.subcategory.id,
+            is_active_subCategory: category_subCategory.is_active,
+            subcategory_name_ar: category_subCategory.subcategory.name_ar,
+            subcategory_name_en: category_subCategory.subcategory.name_en,
+            subcategory_logo: toUrl(category_subCategory.subcategory.logo),
           });
         });
       });
