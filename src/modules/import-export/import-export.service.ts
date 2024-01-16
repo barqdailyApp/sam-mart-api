@@ -27,9 +27,9 @@ export class ImportExportService {
             throw new BadRequestException(error.message);
         }
     }
-    
+
     async export(json: any, fileName: string, sheetName: string) {
-        let rows = []
+        let rows = [];
 
         json.forEach((element) => {
             rows.push(Object.values(element));
@@ -40,19 +40,33 @@ export class ImportExportService {
         rows.unshift(Object.keys(json[0]));
         worksheet.addRows(rows);
 
+        // Set the column widths
+        worksheet.columns.forEach((column) => {
+            let maxColumnLength = 0;
+            column.eachCell({ includeEmpty: true }, (cell) => {
+                const columnLength = cell.value ? cell.value.toString().length : 10;
+                if (columnLength > maxColumnLength) {
+                    maxColumnLength = columnLength;
+                }
+            });
+            column.width = maxColumnLength + 2;
+        });
+
         let File = await new Promise((resolve, reject) => {
             tmp.file({ discardDescriptor: true, prefix: fileName, postfix: '.xlsx', mode: parseInt('0600', 8) }, async (err, file) => {
-                if (err)
-                    throw new BadRequestException(err)
-                workbook.xlsx.writeFile(file).then(_ => {
-                    resolve(file)
-                }).catch(err => {
-                    reject(err)
-                    throw new BadRequestException(err)
-                });
-
+                if (err) {
+                    reject(err);
+                    throw new BadRequestException(err);
+                }
+                try {
+                    await workbook.xlsx.writeFile(file);
+                    resolve(file);
+                } catch (error) {
+                    reject(error);
+                    throw new BadRequestException(error);
+                }
             });
-        })
+        });
 
         return File;
     }

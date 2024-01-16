@@ -26,6 +26,7 @@ import { ImportExportService } from '../import-export/import-export.service';
 import { ImportCategoryRequest } from './dto/requests/import-category-request';
 import { validate } from 'class-validator';
 import { CreateCategoriesExcelRequest, CreateCategoryExcelRequest } from './dto/requests/create-categories-excel-request';
+import { toUrl } from 'src/core/helpers/file.helper';
 
 @Injectable()
 export class CategoryService extends BaseService<Category> {
@@ -137,20 +138,20 @@ export class CategoryService extends BaseService<Category> {
             id: category.id,
             name_ar: category.name_ar,
             name_en: category.name_en,
-            logo: category.logo,
+            logo: toUrl(category.logo),
             is_active_category: section_category.is_active,
             section: {
               id: section_category.section.id,
               name_ar: section_category.section.name_ar,
               name_en: section_category.section.name_en,
-              logo: section_category.section.logo,
+              logo: toUrl(section_category.section.logo),
             },
             subcategory: {
               id: category_subCategory.subcategory.id,
               is_active_subCategory: category_subCategory.is_active,
               name_ar: category_subCategory.subcategory.name_ar,
               name_en: category_subCategory.subcategory.name_en,
-              logo: category_subCategory.subcategory.logo,
+              logo: toUrl(category_subCategory.subcategory.logo),
             },
           });
         });
