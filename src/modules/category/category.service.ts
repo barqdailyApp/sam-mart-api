@@ -1,7 +1,7 @@
 import { BadRequestException, Inject, Injectable, Put } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { plainToInstance } from 'class-transformer';
-import { where } from 'sequelize';
+import { classToPlain, instanceToPlain, plainToClass, plainToInstance } from 'class-transformer';
+import { json, where } from 'sequelize';
 import * as sharp from 'sharp';
 import { BaseService } from 'src/core/base/service/service.base';
 import { CategorySubCategory } from 'src/infrastructure/entities/category/category-subcategory.entity';
@@ -22,6 +22,10 @@ import { FileService } from '../file/file.service';
 import { SubcategoryService } from '../subcategory/subcategory.service';
 import { UpdateSectionCategoryRequest } from '../section/dto/requests/update-section-category.request';
 import { ActionResponse } from 'src/core/base/responses/action.response';
+import { ImportExportService } from '../import-export/import-export.service';
+import { ImportCategoryRequest } from './dto/requests/import-category-request';
+import { validate } from 'class-validator';
+import { CreateCategoriesExcelRequest, CreateCategoryExcelRequest } from './dto/requests/create-categories-excel-request';
 
 @Injectable()
 export class CategoryService extends BaseService<Category> {
@@ -34,6 +38,7 @@ export class CategoryService extends BaseService<Category> {
     @Inject(ImageManager) private readonly imageManager: ImageManager,
     @Inject(FileService) private _fileService: FileService,
     @Inject(SubcategoryService) private readonly subCategoryService: SubcategoryService,
+    @Inject(ImportExportService) private readonly importExportService: ImportExportService,
   ) {
     super(category_repo);
   }
@@ -102,13 +107,80 @@ export class CategoryService extends BaseService<Category> {
   }
 
 
-  async updateCategorySubcategory(req:UpdateSectionCategoryRequest){
-    return await this.category_subcategory_repo.update(req.id,req)
+  async updateCategorySubcategory(req: UpdateSectionCategoryRequest) {
+    return await this.category_subcategory_repo.update(req.id, req)
 
   }
 
-  async deleteCategorySubcategory(id:string){
+  async deleteCategorySubcategory(id: string) {
     return await this.category_subcategory_repo.delete(id)
+  }
+
+  async exportCategories() {
+    const categories = await this._repo.find({
+      relations: {
+        section_categories: {
+          section: true,
+          category_subCategory: {
+            subcategory: true,
+          }
+        }
+      },
+    });
+
+    const flattenedData = [];
+
+    categories.forEach((category) => {
+      category.section_categories.forEach((section_category) => {
+        section_category.category_subCategory.forEach((category_subCategory) => {
+          flattenedData.push({
+            id: category.id,
+            name_ar: category.name_ar,
+            name_en: category.name_en,
+            logo: category.logo,
+            is_active_category: section_category.is_active,
+            section: {
+              id: section_category.section.id,
+              name_ar: section_category.section.name_ar,
+              name_en: section_category.section.name_en,
+              logo: section_category.section.logo,
+            },
+            subcategory: {
+              id: category_subCategory.subcategory.id,
+              is_active_subCategory: category_subCategory.is_active,
+              name_ar: category_subCategory.subcategory.name_ar,
+              name_en: category_subCategory.subcategory.name_en,
+              logo: category_subCategory.subcategory.logo,
+            },
+          });
+        });
+      });
+    });
+
+    return await this.importExportService.export(flattenedData, 'categories', 'categories');
+  }
+
+  async importCategories(req: ImportCategoryRequest) {
+    const file = await this.storageManager.store(req.file, { path: 'category-export' });
+    const jsonData = await this.importExportService.import(file);
+
+    const createCategoriesRequest = plainToClass(CreateCategoriesExcelRequest, { categories: jsonData });
+    const validationErrors = await validate(createCategoriesRequest)
+
+    if (validationErrors.length > 0) {
+      throw new BadRequestException(JSON.stringify(validationErrors));
+    }
+
+    const newCategories = jsonData.map((categoryData) => {
+      const { name_ar, name_en, logo } = plainToClass(CreateCategoryExcelRequest, categoryData);
+      return this._repo.create({
+        name_ar,
+        name_en,
+        logo
+      });
+    });
+
+    return await this._repo.save(newCategories);
   }
 }
 

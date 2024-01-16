@@ -12,9 +12,9 @@ export class Category extends BaseEntity {
   name_en: string;
 
 
-  @Column() 
+  @Column({ nullable: true })
   logo: string;
-  
+
 
   @OneToMany(() => SectionCategory, sectionCategory => sectionCategory.category)
   section_categories: SectionCategory[];
