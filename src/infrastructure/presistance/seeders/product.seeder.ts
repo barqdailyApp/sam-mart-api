@@ -103,10 +103,23 @@ export class ProductSeeder implements Seeder {
     const sections = await this.section_repo.find({
       relations: { section_categories: { category_subCategory: true } },
     });
-
+    // sam-mart
     for (let i = 0; i < sections.length; i++) {
       const category_subCategory =
         sections[i].section_categories[0].category_subCategory[0];
+      for (let j = 0; j < products.length; j++) {
+        const createProductSubCategory = this.productSubCategory_repo.create({
+          product_id: products[j].id,
+          order_by: j + 1,
+          category_sub_category_id: category_subCategory.id,
+        });
+        await this.productSubCategory_repo.save(createProductSubCategory);
+      }
+    }
+    // sam-restaurant
+    for (let i = 0; i < sections.length; i++) {
+      const category_subCategory =
+        sections[i].section_categories[1].category_subCategory[0];
       for (let j = 0; j < products.length; j++) {
         const createProductSubCategory = this.productSubCategory_repo.create({
           product_id: products[j].id,
