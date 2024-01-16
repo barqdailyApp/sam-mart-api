@@ -6,6 +6,7 @@ import { ProductSeeder } from './product.seeder';
 import { UsersSeeder } from './users.seeder';
 import { BanarSeeder } from './banner.seeder';
 import { StaticPageSeeder } from './static-pages.seeder';
+import { SlotSeeder } from './slot.seeder';
 
 export const DB_SEEDERS = [
   // UsersSeeder,
@@ -16,4 +17,5 @@ export const DB_SEEDERS = [
   ProductSeeder,
   BanarSeeder,
   StaticPageSeeder,
+  SlotSeeder
 ];

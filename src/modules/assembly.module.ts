@@ -17,6 +17,7 @@ import { SubcategoryModule } from "./subcategory/subcategory.module";
 import { SupportTicketModule } from "./support-ticket/suuport-ticket.module";
 import { UserModule } from "./user/user.module";
 import { WarehouseModule } from "./warehouse/warehouse.module";
+import { SlotModule } from './slot/slot.module';
 
 
 @Module({
@@ -38,7 +39,8 @@ import { WarehouseModule } from "./warehouse/warehouse.module";
     WarehouseModule,
     SupportTicketModule,
     StaticPageModule,
-    CartModule
+    CartModule,
+    SlotModule
 
   ],
   exports: [],

@@ -42,6 +42,6 @@ export class ProductSubCategory extends AuditableEntity {
   @Column()
   order_by: number;
 
-  @Column()
+  @Column({default: true})
   is_active: boolean;
 }

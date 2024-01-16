@@ -20,6 +20,7 @@ import { ProductAdditionalService } from 'src/infrastructure/entities/product/pr
 import { AdditionalService } from 'src/infrastructure/entities/product/additional-service.entity';
 import { CategorySubCategory } from 'src/infrastructure/entities/category/category-subcategory.entity';
 import { Section } from 'src/infrastructure/entities/section/section.entity';
+import { SectionCategory } from 'src/infrastructure/entities/section/section-category.entity';
 
 @Injectable()
 export class ProductSeeder implements Seeder {
@@ -34,6 +35,8 @@ export class ProductSeeder implements Seeder {
     private readonly productMeasurement_repo: Repository<ProductMeasurement>,
     @InjectRepository(MeasurementUnit)
     private readonly measurementUnit_repo: Repository<MeasurementUnit>,
+    @InjectRepository(SectionCategory)
+    private readonly sectionCategory_repo: Repository<SectionCategory>,
 
     @InjectRepository(Subcategory)
     private readonly subCategory_repo: Repository<Subcategory>,
@@ -102,17 +105,18 @@ export class ProductSeeder implements Seeder {
     });
 
     for (let i = 0; i < sections.length; i++) {
-      const category_subCategory = sections[i].section_categories[0].category_subCategory[0];
+      const category_subCategory =
+        sections[i].section_categories[0].category_subCategory[0];
       for (let j = 0; j < products.length; j++) {
         const createProductSubCategory = this.productSubCategory_repo.create({
           product_id: products[j].id,
+          order_by: j + 1,
           category_sub_category_id: category_subCategory.id,
         });
         await this.productSubCategory_repo.save(createProductSubCategory);
       }
     }
 
-    
     //* Link Product Sub Category with product measurement and price
     const productSubCategory = await this.productSubCategory_repo.find();
     for (let i = 0; i < productSubCategory.length; i++) {
@@ -183,17 +187,19 @@ export class ProductSeeder implements Seeder {
   }
 
   async drop(): Promise<any> {
-    await this.productCategoryPrice_repo.delete({});
+    // await this.productCategoryPrice_repo.delete({});
 
-    await this.productSubCategory_repo.delete({});
-    await this.productMeasurement_repo.delete({});
-    await this.categorySubCategory_repo.delete({});
+    // await this.productSubCategory_repo.delete({});
+    // await this.productMeasurement_repo.delete({});
+    // await this.categorySubCategory_repo.delete({});
 
-    await this.subCategory_repo.delete({});
-    // await this.section_repo.delete({});
+    // await this.subCategory_repo.delete({});
 
-    // await this.productService_repo.delete({});
-    // await this.additionalService_repo.delete({});
+    // await this.sectionCategory_repo.delete({});
+    // // await this.section_repo.delete({});
+
+    // // await this.productService_repo.delete({});
+    // // await this.additionalService_repo.delete({});
     return await this.product_repo.delete({});
   }
 }
