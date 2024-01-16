@@ -102,8 +102,8 @@ export class CategoryController {
     }
   }
 
-  // @UseGuards(JwtAuthGuard, RolesGuard)
-  // @Roles(Role.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @Get("/export")
   @Header('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
   async export(@Res() res: Response) {
