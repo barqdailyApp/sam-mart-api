@@ -1,4 +1,4 @@
-import { Body, ClassSerializerInterceptor, Controller, Delete, Get, Param, Post, Put, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, ClassSerializerInterceptor, Controller, Delete, Get, Header, Param, Post, Put, Query, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiConsumes, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { ActionResponse } from 'src/core/base/responses/action.response';
@@ -16,6 +16,7 @@ import { RolesGuard } from '../authentication/guards/roles.guard';
 import { Roles } from '../authentication/guards/roles.decorator';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { UpdateCategoryRequest } from '../category/dto/requests/update-category-request';
+import { Response } from 'express';
 
 @ApiHeader({
   name: 'Accept-Language',
@@ -85,4 +86,14 @@ export class SubcategoryController {
   async delete(@Param('sub_category_id') id: string) {
     return new ActionResponse(await this.subcategoryService.deleteSubCategory(id));
   }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @Get('/export')
+  @Header('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+  async exportSubCategory(@Res() res: Response) {
+    const File = await this.subcategoryService.exportSubCategory();
+    res.download(`${File}`);
+  }
+
 }
