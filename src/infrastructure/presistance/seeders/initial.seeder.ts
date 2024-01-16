@@ -2,20 +2,24 @@ import { CategorySeeder } from './category-seeder';
 import { AdditionalServiceSeeder } from './additional-service.seeder';
 import { CountryCityRegionSeeder } from './countries-cities-regions';
 import { MeasurementUnitSeeder } from './measurement-unit.seeder';
-import { ProductSeeder } from './product.seeder';
 import { UsersSeeder } from './users.seeder';
 import { BanarSeeder } from './banner.seeder';
 import { StaticPageSeeder } from './static-pages.seeder';
 import { SlotSeeder } from './slot.seeder';
+import { ProductSeeder } from './product.seeder';
+import { WareHouseSeeder } from './warehouse.seeder';
+import { WareHouseProductsSeeder } from './warehouse-product.seeder';
 
 export const DB_SEEDERS = [
   // UsersSeeder,
-  // CountryCityRegionSeeder,
+  CountryCityRegionSeeder,
   MeasurementUnitSeeder,
   AdditionalServiceSeeder,
   CategorySeeder,
   ProductSeeder,
   BanarSeeder,
   StaticPageSeeder,
-  SlotSeeder
+  SlotSeeder,
+  WareHouseSeeder,
+  WareHouseProductsSeeder
 ];

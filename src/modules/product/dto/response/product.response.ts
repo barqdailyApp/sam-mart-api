@@ -28,12 +28,17 @@ export class ProductResponse {
 
   @Expose() readonly updated_at: Date;
 
-  @Expose()
+  @Exclude()
   readonly product_sub_categories: ProductSubCategory[];
 
   @Expose()
-  @Transform(({ value }) => (value !== undefined ? value : 0))
-  totalQuantity = 0;
+  totalQuantity: number;
+
+  @Expose()
+  order_by: number;
+
+  @Expose()
+  product_subcategory_is_active: boolean;
 
   @Transform(({ value }) => {
     return plainToClass(ProductWarehouseResponse, value);
@@ -52,4 +57,3 @@ export class ProductResponse {
     Object.assign(this, data);
   }
 }
-
