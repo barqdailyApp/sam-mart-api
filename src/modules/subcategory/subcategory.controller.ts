@@ -17,6 +17,7 @@ import { Roles } from '../authentication/guards/roles.decorator';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { UpdateCategoryRequest } from '../category/dto/requests/update-category-request';
 import { Response } from 'express';
+import { ImportCategoryRequest } from '../category/dto/requests/import-category-request';
 
 @ApiHeader({
   name: 'Accept-Language',
@@ -96,4 +97,18 @@ export class SubcategoryController {
     res.download(`${File}`);
   }
 
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @Roles(Role.ADMIN)
+  @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @Post("/import")
+  async importSubCategory(
+    @Body() req: ImportCategoryRequest,
+    @UploadedFile(new UploadValidator().build())
+    file: Express.Multer.File
+  ) {
+    req.file = file;
+    const result = await this.subcategoryService.importSubCategory(req);
+    return new ActionResponse(result);
+  }
 }
