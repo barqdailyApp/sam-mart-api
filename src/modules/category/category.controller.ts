@@ -48,6 +48,7 @@ export class CategoryController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.ADMIN)
+@ApiBearerAuth()
   @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('logo'))
   @ApiConsumes('multipart/form-data')
   @Post()
@@ -81,7 +82,7 @@ export class CategoryController {
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.ADMIN)
-
+@ApiBearerAuth()
   @Get()
   async getCategories(@Query() query: PaginatedRequest) {
     const categories = this._i18nResponse.entity(
@@ -117,6 +118,7 @@ export class CategoryController {
   }
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiBearerAuth()
   @Post('/add-subcategory')
   async addSubcategoryToCategory(@Body() req: CategorySubcategoryRequest) {
     return new ActionResponse(
@@ -125,7 +127,7 @@ export class CategoryController {
   }
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
-  
+  @ApiBearerAuth()
   @Put('/category-subcategory')
   async updateSectionCategory(@Body() req: UpdateSectionCategoryRequest) {
     return new ActionResponse(
@@ -134,6 +136,7 @@ export class CategoryController {
   }
   @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.ADMIN)
+@ApiBearerAuth()
   @Delete('/category-subcategory:id')
   async deleteSectionCategory(@Param('id') id: string) {
     return new ActionResponse(
