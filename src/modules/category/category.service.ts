@@ -22,7 +22,6 @@ import { FileService } from '../file/file.service';
 import { SubcategoryService } from '../subcategory/subcategory.service';
 import { UpdateSectionCategoryRequest } from '../section/dto/requests/update-section-category.request';
 import { ActionResponse } from 'src/core/base/responses/action.response';
-import { ImportExportService } from '../import-export/import-export.service';
 import { ImportCategoryRequest } from './dto/requests/import-category-request';
 import { validate } from 'class-validator';
 import { CreateCategoriesExcelRequest, CreateCategoryExcelRequest } from './dto/requests/create-categories-excel-request';
@@ -39,7 +38,7 @@ export class CategoryService extends BaseService<Category> {
     @Inject(ImageManager) private readonly imageManager: ImageManager,
     @Inject(FileService) private _fileService: FileService,
     @Inject(SubcategoryService) private readonly subCategoryService: SubcategoryService,
-    @Inject(ImportExportService) private readonly importExportService: ImportExportService,
+    // @Inject(ImportExportService) private readonly importExportService: ImportExportService,
   ) {
     super(category_repo);
   }
@@ -158,13 +157,12 @@ export class CategoryService extends BaseService<Category> {
       });
     });
 
-    return await this.importExportService.export(flattenedData, 'categories', 'categories');
+    return await this._fileService.exportExcel(flattenedData, 'categories', 'categories');
   }
 
   async importCategories(req: ImportCategoryRequest) {
     const file = await this.storageManager.store(req.file, { path: 'category-export' });
-    const jsonData = await this.importExportService.import(file);
-
+    const jsonData = await this._fileService.importExcel(file);
     const createCategoriesRequest = plainToClass(CreateCategoriesExcelRequest, { categories: jsonData });
     const validationErrors = await validate(createCategoriesRequest)
 
