@@ -14,6 +14,7 @@ import { ActionResponse } from 'src/core/base/responses/action.response';
 import { ProductAdditionalServiceRequest } from './dto/request/product-additional-service.request';
 import { plainToClass } from 'class-transformer';
 import { ProductCategoryPriceResponse } from '../product/dto/response/product-category-price.response';
+import { CreateLinkProductSubcategoryRequest } from './dto/request/create-link-product-subcateory.request';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -29,13 +30,12 @@ export class ProductCategoryPriceController {
 
   @Post('create-link-product-subcategory/:product_id/:categorySubCategory_id')
   async linkProductSubcategory(
-    @Param('product_id') product_id: string,
-    @Param('categorySubCategory_id') categorySubCategory_id: string,
+    @Body()
+    createLinkProductSubcategoryRequest: CreateLinkProductSubcategoryRequest,
   ) {
     return new ActionResponse(
       await this.productCategoryPriceService.createLinkProductSubcategory(
-        product_id,
-        categorySubCategory_id,
+        createLinkProductSubcategoryRequest,
       ),
     );
   }

@@ -1,0 +1,16 @@
+[
+    {
+        "name_ar": "مستودع 1",
+        "name_en": "warehouse 1",
+        "latitude": "30.033333",
+        "longitude": "31.233334",
+        "is_active": true
+    },
+    {
+        "name_ar": "مستودع 2",
+        "name_en": "warehouse 2",
+        "latitude": "32.123456",
+        "longitude": "33.987654",
+        "is_active": true
+    }
+]
