@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from 'src/infrastructure/entities/product/product.entity';
 import { DeleteResult, IsNull, Not, Repository } from 'typeorm';
@@ -31,6 +31,10 @@ import { SingleProductClientQuery } from './dto/filter/single-product-client.que
 import { ProductCategoryPrice } from 'src/infrastructure/entities/product/product-category-price.entity';
 import { DiscountType } from 'src/infrastructure/data/enums/discount-type.enum';
 import { FileService } from '../file/file.service';
+import { plainToClass } from 'class-transformer';
+import { validate } from 'class-validator';
+import { CreateProductExcelRequest, CreateProductsExcelRequest } from './dto/request/create-products-excel.request';
+import { toUrl } from 'src/core/helpers/file.helper';
 
 @Injectable()
 export class ProductService {
@@ -802,23 +806,20 @@ export class ProductService {
         name_en: product.name_en,
         description_ar: product.description_ar,
         description_en: product.description_en,
-        isActive: product.is_active,
-        isRecovered: product.is_recovered,
-        productImages: product.product_images.map((image) => ({
-          url: image.url,
-          isLogo: image.is_logo,
+        is_active: product.is_active,
+        is_recovered: product.is_recovered,
+        product_images: product.product_images.map((image) => ({
+          url: toUrl(image.url),
+          is_logo: image.is_logo,
         })),
         warehousesProducts: product.warehouses_products,
         productMeasurements: product.product_measurements.map((measurement) => ({
-          measurementId: measurement.id,
-          createdAt: measurement.created_at,
-          updatedAt: measurement.updated_at,
-          deletedAt: measurement.deleted_at,
-          conversionFactor: measurement.conversion_factor,
-          productId: measurement.product_id,
-          measurementUnitId: measurement.measurement_unit_id,
-          baseUnitId: measurement.base_unit_id,
-          isMainUnit: measurement.is_main_unit,
+          measuremen_id: measurement.id,
+          conversion_factor: measurement.conversion_factor,
+          product_id: measurement.product_id,
+          measurement_unit_id: measurement.measurement_unit_id,
+          base_unit_id: measurement.base_unit_id,
+          is_main_unit: measurement.is_main_unit,
         })),
         productSubCategories: product.product_sub_categories.map((subCategory) => ({
           subCategory_id: subCategory.category_subCategory.subcategory.id,
@@ -835,6 +836,41 @@ export class ProductService {
     });
 
     return await this._fileService.exportExcel(flattenedProducts, 'products', 'products')
+  }
+
+  async importProducts(req: any) {
+    const file = await this.storageManager.store(req.file, { path: 'product-export' });
+    const jsonData = await this._fileService.importExcel(file);
+
+    const CreateProductRequest = plainToClass(CreateProductsExcelRequest, { products: jsonData });
+    const validationErrors = await validate(CreateProductRequest);
+    if (validationErrors.length > 0) {
+      throw new BadRequestException(JSON.stringify(validationErrors));
+    }
+
+    const newProducts = jsonData.map((productData) => {
+      const {
+        name_ar,
+        name_en,
+        description_ar,
+        description_en,
+        is_active,
+        is_recovered,
+        product_images,
+      } = plainToClass(CreateProductExcelRequest, productData)
+
+      return this.productRepository.create({
+        name_ar,
+        name_en,
+        description_ar,
+        description_en,
+        is_active,
+        is_recovered,
+        product_images,
+      });
+    });
+
+    return await this.productRepository.save(newProducts);
   }
 
   private async singleProductImage(
