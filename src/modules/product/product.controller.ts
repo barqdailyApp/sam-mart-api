@@ -1,5 +1,6 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Delete,
   Get,
@@ -51,6 +52,8 @@ import { RolesGuard } from '../authentication/guards/roles.guard';
 import { Roles } from '../authentication/guards/roles.decorator';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { Response } from 'express';
+import { ImportCategoryRequest } from '../category/dto/requests/import-category-request';
+import { UploadValidator } from 'src/core/validators/upload.validator';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -63,7 +66,7 @@ export class ProductController {
   constructor(
     private readonly productService: ProductService,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
-  ) {}
+  ) { }
 
   @Post('create-product')
   async createProduct(@Body() createProductRequest: CreateProductRequest) {
@@ -332,6 +335,21 @@ export class ProductController {
   async exportProducts(@Res() res: Response) {
     const File = await this.productService.exportProducts();
     res.download(`${File}`);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @Post('import')
+  async importProducts(
+    @Body() req: ImportCategoryRequest,
+    @UploadedFile(new UploadValidator().build())
+    file: Express.Multer.File
+  ) {
+    req.file = file;
+    const products = await this.productService.importProducts(req);
+    return new ActionResponse(products);
   }
 
 }
