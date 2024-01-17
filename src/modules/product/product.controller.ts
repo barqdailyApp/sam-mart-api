@@ -333,6 +333,7 @@ export class ProductController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiBearerAuth()
   @Get("/export")
   @Header('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
   async exportProducts(@Res() res: Response) {
@@ -342,6 +343,7 @@ export class ProductController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiBearerAuth()
   @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
   @Post('import')
