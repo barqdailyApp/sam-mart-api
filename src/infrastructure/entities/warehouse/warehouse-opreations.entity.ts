@@ -24,4 +24,9 @@ product_measurement_id: string
 quantity: number;
 @Column({type:'enum',enum:operationType})
 type:operationType
+
+constructor(data: Partial<WarehouseOperations>) {
+    super();
+    Object.assign(this, data);
+} 
 }

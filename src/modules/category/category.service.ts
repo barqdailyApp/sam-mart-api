@@ -46,7 +46,7 @@ export class CategoryService extends BaseService<Category> {
   async getCategorySubcategory(section_category_id: string) {
     await this.subCategoryService.updateMostHitSubCategory({ section_category_id });
     return await this.category_subcategory_repo.find({
-      where: { section_category_id: section_category_id },
+      where: { section_category_id: section_category_id,is_active:true },
       relations: { subcategory: true },
       order: { order_by: 'ASC' },
     });

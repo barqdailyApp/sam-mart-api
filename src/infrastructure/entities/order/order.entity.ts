@@ -23,7 +23,7 @@ export class Order extends OwnedEntity {
   @JoinColumn()
   warehouse: Warehouse;
   @Column()
-  warhouse_id: string;
+  warehouse_id: string;
 
   @ManyToOne(() => Address, (address) => address.orders)
   @JoinColumn()
@@ -39,7 +39,7 @@ export class Order extends OwnedEntity {
   @Column()
   section_id: string;
 
-  @Column()
+  @Column({nullable:true})
   total_price: number;
 
   @Column()
@@ -48,12 +48,14 @@ export class Order extends OwnedEntity {
   @Column()
   delivery_type: DeliveryType;
 
-  @Column()
+  @Column({nullable:true})
   estimated_delivery_time: Date;
 
   @ManyToOne(() => Slot, (slot) => slot.orders)
   @JoinColumn()
   slot: Slot;
+
+
 
   @Column({ nullable: true })
   slot_id: string;
