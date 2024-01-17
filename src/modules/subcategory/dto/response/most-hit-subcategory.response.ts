@@ -1,10 +1,11 @@
-import { Expose, Type } from "class-transformer";
+import { Expose, Transform, Type } from "class-transformer";
+import { toUrl } from "src/core/helpers/file.helper";
 
 class SubcategoryResponse {
     @Expose() id: string;
     @Expose() name_ar: string;
     @Expose() name_en: string;
-    @Expose() logo: string;
+    @Expose() @Transform(({ value }) => toUrl(value)) logo: string;
 }
 
 class SectionCategoryResponse {
