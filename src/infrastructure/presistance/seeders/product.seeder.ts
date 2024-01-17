@@ -20,6 +20,7 @@ import { ProductAdditionalService } from 'src/infrastructure/entities/product/pr
 import { AdditionalService } from 'src/infrastructure/entities/product/additional-service.entity';
 import { CategorySubCategory } from 'src/infrastructure/entities/category/category-subcategory.entity';
 import { Section } from 'src/infrastructure/entities/section/section.entity';
+import { SectionCategory } from 'src/infrastructure/entities/section/section-category.entity';
 
 @Injectable()
 export class ProductSeeder implements Seeder {
@@ -34,6 +35,8 @@ export class ProductSeeder implements Seeder {
     private readonly productMeasurement_repo: Repository<ProductMeasurement>,
     @InjectRepository(MeasurementUnit)
     private readonly measurementUnit_repo: Repository<MeasurementUnit>,
+    @InjectRepository(SectionCategory)
+    private readonly sectionCategory_repo: Repository<SectionCategory>,
 
     @InjectRepository(Subcategory)
     private readonly subCategory_repo: Repository<Subcategory>,
@@ -102,17 +105,18 @@ export class ProductSeeder implements Seeder {
     });
 
     for (let i = 0; i < sections.length; i++) {
-      const category_subCategory = sections[i].section_categories[0].category_subCategory[0];
+      const category_subCategory =
+        sections[i].section_categories[0].category_subCategory[0];
       for (let j = 0; j < products.length; j++) {
         const createProductSubCategory = this.productSubCategory_repo.create({
           product_id: products[j].id,
+          order_by: j + 1,
           category_sub_category_id: category_subCategory.id,
         });
         await this.productSubCategory_repo.save(createProductSubCategory);
       }
     }
-
-    
+  
     //* Link Product Sub Category with product measurement and price
     const productSubCategory = await this.productSubCategory_repo.find();
     for (let i = 0; i < productSubCategory.length; i++) {
@@ -133,67 +137,24 @@ export class ProductSeeder implements Seeder {
     }
     //* Add Additional Services To Product Measurement
     const additionalService = await this.additionalService_repo.find();
-    // console.log(productSubCategory.length);
-    // console.log(additionalService.length);
 
-    // for (let i = 0; 1 < 1; i++) {
-    //   const productMeasurement = await this.productMeasurement_repo.find({
-    //     where: { product_id: productSubCategory[i].product_id },
-    //   });
-    //   console.log(productMeasurement);
-    //   for (let j = 0; 1 < 1; j++) {
-    //     for (let k = 0; 1 < 1; k++) {
-    //       const productCategoryPrice =
-    //         await this.productCategoryPrice_repo.findOne({
-    //           where: {
-    //             product_measurement_id: productMeasurement[j].id,
-    //             product_sub_category_id: productSubCategory[i].id,
-    //           },
-    //         });
-    //       console.log(productCategoryPrice);
-    //       const createProductAdditionalService =
-    //         this.productService_repo.create({
-    //           product_category_price_id: productCategoryPrice.id,
-    //           additional_service_id: additionalService[k].id,
-    //           price: Math.floor(Math.random() * 100) + 1,
-    //         });
-    //       console.log(createProductAdditionalService);
-    //       await this.productService_repo.save(createProductAdditionalService);
-    //     }
-    //   }
-    // }
-    const productMeasurement = await this.productMeasurement_repo.find({
-      where: { product_id: productSubCategory[0].product_id },
-    });
-    const productCategoryPrice = await this.productCategoryPrice_repo.findOne({
-      where: {
-        product_measurement_id: productMeasurement[0].id,
-        product_sub_category_id: productSubCategory[0].id,
-      },
-    });
 
-    const createProductAdditionalService = this.productService_repo.create({
-      product_category_price_id: productCategoryPrice.id,
-
-      additional_service_id: additionalService[0].id,
-      price: Math.floor(Math.random() * 100) + 1,
-    });
-
-    await this.productService_repo.save(createProductAdditionalService);
+    const productCategoryPriceFull = await this.productCategoryPrice_repo.find();
+    for (let index = 0; index < productCategoryPriceFull.length; index++) {
+      const createProductAdditionalService = this.productService_repo.create({
+        product_category_price_id: productCategoryPriceFull[index].id,
+  
+        additional_service_id: additionalService[0].id,
+        price: Math.floor(Math.random() * 100) + 1,
+      });
+  
+      await this.productService_repo.save(createProductAdditionalService);
+      
+    }
+ 
   }
 
   async drop(): Promise<any> {
-    await this.productCategoryPrice_repo.delete({});
-
-    await this.productSubCategory_repo.delete({});
-    await this.productMeasurement_repo.delete({});
-    await this.categorySubCategory_repo.delete({});
-
-    await this.subCategory_repo.delete({});
-    // await this.section_repo.delete({});
-
-    // await this.productService_repo.delete({});
-    // await this.additionalService_repo.delete({});
     return await this.product_repo.delete({});
   }
 }

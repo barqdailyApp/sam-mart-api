@@ -66,5 +66,483 @@
                 "is_main_unit": false
             }
         ]
+    },
+    {
+        "name_ar": "برتقال",
+        "name_en": "Oranges",
+        "description_ar": "البرتقال هو فاكهة حمضية مشهورة بنكهتها المنعشة واللذيذة. يمكن تناولها بشكل طازج أو استخدامها في عصائر طازجة ومشروبات منعشة.",
+        "description_en": "Oranges are citrus fruits known for their refreshing and delicious flavor. They can be eaten fresh or used to make fresh juices and refreshing beverages.",
+        "is_active": true,
+        "is_recovered": true,
+        "product_images": [
+            {
+                "url": "assets/products/orange1.png",
+                "is_logo": false
+            },
+            {
+                "url": "assets/products/orange2.png",
+                "is_logo": true
+            }
+        ],
+        "product_measurements": [
+            {
+                "conversion_factor": 1.00,
+                "measurement_unit": {
+                    "name_en": "Gram"
+                },
+                "is_main_unit": true
+            },
+            {
+                "conversion_factor": 1000.00,
+                "measurement_unit": {
+                    "name_en": "Kilogram"
+                },
+                "is_main_unit": false
+            }
+        ]
+    },
+    {
+        "name_ar": "عنب",
+        "name_en": "Grapes",
+        "description_ar": "العنب هو نوع من الفواكه الصغيرة واللذيذة المعروفة بألوانها المتنوعة ونكهتها الحلوة. يمكن تناولها كوجبة خفيفة أو استخدامها في تحضير العصائر والزبائن.",
+        "description_en": "Grapes are small and delicious fruits known for their various colors and sweet flavor. They can be eaten as a snack or used in making juices and raisins.",
+        "is_active": true,
+        "is_recovered": true,
+        "product_images": [
+            {
+                "url": "assets/products/grapes1.png",
+                "is_logo": false
+            },
+            {
+                "url": "assets/products/grapes2.png",
+                "is_logo": true
+            }
+        ],
+        "product_measurements": [
+            {
+                "conversion_factor": 1.00,
+                "measurement_unit": {
+                    "name_en": "Gram"
+                },
+                "is_main_unit": true
+            },
+            {
+                "conversion_factor": 1000.00,
+                "measurement_unit": {
+                    "name_en": "Kilogram"
+                },
+                "is_main_unit": false
+            }
+        ]
+    },
+    {
+        "name_ar": "بطيخ",
+        "name_en": "Watermelon",
+        "description_ar": "البطيخ هو فاكهة صيفية منعشة ذات نكهة مميزة ورائعة. يمكن تناولها بشكل طازج أو استخدامها في تحضير العصائر والسلطات.",
+        "description_en": "Watermelon is a refreshing summer fruit with a unique and delightful flavor. It can be eaten fresh or used in making juices and salads.",
+        "is_active": true,
+        "is_recovered": true,
+        "product_images": [
+            {
+                "url": "assets/products/watermelon1.png",
+                "is_logo": false
+            },
+            {
+                "url": "assets/products/watermelon2.png",
+                "is_logo": true
+            }
+        ],
+        "product_measurements": [
+            {
+                "conversion_factor": 1.00,
+                "measurement_unit": {
+                    "name_en": "Gram"
+                },
+                "is_main_unit": true
+            },
+            {
+                "conversion_factor": 1000.00,
+                "measurement_unit": {
+                    "name_en": "Kilogram"
+                },
+                "is_main_unit": false
+            }
+        ]
+    },
+    {
+        "name_ar": "فراولة",
+        "name_en": "Strawberries",
+        "description_ar": "الفراولة هي فاكهة حمراء صغيرة الحجم تعتبر من أكثر الفواكه شهرة بنكهتها اللذيذة والحلوة. يمكن استهلاكها طازجة أو إضافتها إلى الحلويات والزبائن والمشروبات.",
+        "description_en": "Strawberries are small red fruits famous for their delicious and sweet flavor. They can be consumed fresh or added to desserts, yogurts, and beverages.",
+        "is_active": true,
+        "is_recovered": true,
+        "product_images": [
+            {
+                "url": "assets/products/strawberry1.png",
+                "is_logo": false
+            },
+            {
+                "url": "assets/products/strawberry2.png",
+                "is_logo": true
+            }
+        ],
+        "product_measurements": [
+            {
+                "conversion_factor": 1.00,
+                "measurement_unit": {
+                    "name_en": "Gram"
+                },
+                "is_main_unit": true
+            },
+            {
+                "conversion_factor": 1000.00,
+                "measurement_unit": {
+                    "name_en": "Kilogram"
+                },
+                "is_main_unit": false
+            }
+        ]
+    },
+    {
+        "name_ar": "تمر",
+        "name_en": "Dates",
+        "description_ar": "التمر هو نوع من الفواكه المعروف بنكهته الحلوة واللذيذة. يمكن تناولها كوجبة خفيفة أو استخدامها في تحضير الحلويات التقليدية مثل المعمول والبسبوسة.",
+        "description_en": "Dates are a type of fruit known for their sweet and delicious flavor. They can be eaten as a snack or used in traditional desserts like ma'amoul and basbousa.",
+        "is_active": true,
+        "is_recovered": true,
+        "product_images": [
+            {
+                "url": "assets/products/dates1.png",
+                "is_logo": false
+            },
+            {
+                "url": "assets/products/dates2.png",
+                "is_logo": true
+            }
+        ],
+        "product_measurements": [
+            {
+                "conversion_factor": 1.00,
+                "measurement_unit": {
+                    "name_en": "Gram"
+                },
+                "is_main_unit": true
+            },
+            {
+                "conversion_factor": 1000.00,
+                "measurement_unit": {
+                    "name_en": "Kilogram"
+                },
+                "is_main_unit": false
+            }
+        ]
+    },
+    {
+        "name_ar": "بطاطا",
+        "name_en": "Potatoes",
+        "description_ar": "البطاطا هي خضروات تستخدم على نطاق واسع في الأطباق المختلفة. يمكن تحضيرها بمختلف الأساليب، مثل القلي والمشوي والمسلوق.",
+        "description_en": "Potatoes are vegetables widely used in various dishes. They can be prepared in different ways, including frying, grilling, and boiling.",
+        "is_active": true,
+        "is_recovered": true,
+        "product_images": [
+            {
+                "url": "assets/products/potatoes1.png",
+                "is_logo": false
+            },
+            {
+                "url": "assets/products/potatoes2.png",
+                "is_logo": true
+            }
+        ],
+        "product_measurements": [
+            {
+                "conversion_factor": 1.00,
+                "measurement_unit": {
+                    "name_en": "Gram"
+                },
+                "is_main_unit": true
+            },
+            {
+                "conversion_factor": 1000.00,
+                "measurement_unit": {
+                    "name_en": "Kilogram"
+                },
+                "is_main_unit": false
+            }
+        ]
+    },
+    
+    {
+        "name_ar": "توت",
+        "name_en": "Blueberries",
+        "description_ar": "التوت الأزرق هو نوع من الفواكه الصغيرة واللذيذة المعروفة بنكهتها الحلوة والمغذية. يمكن تناولها طازجة أو استخدامها في تحضير العصائر والحلويات.",
+        "description_en": "Blueberries are small, delicious fruits known for their sweet and nutritious flavor. They can be eaten fresh or used in making juices and desserts.",
+        "is_active": true,
+        "is_recovered": true,
+        "product_images": [
+            {
+                "url": "assets/products/blueberries1.png",
+                "is_logo": false
+            },
+            {
+                "url": "assets/products/blueberries2.png",
+                "is_logo": true
+            }
+        ],
+        "product_measurements": [
+            {
+                "conversion_factor": 1.00,
+                "measurement_unit": {
+                    "name_en": "Gram"
+                },
+                "is_main_unit": true
+            },
+            {
+                "conversion_factor": 1000.00,
+                "measurement_unit": {
+                    "name_en": "Kilogram"
+                },
+                "is_main_unit": false
+            }
+        ]
+    },
+    {
+        "name_ar": "بصل",
+        "name_en": "Onions",
+        "description_ar": "البصل هو خضار منعش ذو نكهة قوية ومميزة. يتم استخدامه في العديد من الأطباق كمكون أساسي ويمكن قطعه وطهيه بمختلف الأساليب.",
+        "description_en": "Onions are pungent and distinctive vegetables used in many dishes as a fundamental ingredient. They can be chopped and cooked in various ways.",
+        "is_active": true,
+        "is_recovered": true,
+        "product_images": [
+            {
+                "url": "assets/products/onions1.png",
+                "is_logo": false
+            },
+            {
+                "url": "assets/products/onions2.png",
+                "is_logo": true
+            }
+        ],
+        "product_measurements": [
+            {
+                "conversion_factor": 1.00,
+                "measurement_unit": {
+                    "name_en": "Gram"
+                },
+                "is_main_unit": true
+            },
+            {
+                "conversion_factor": 1000.00,
+                "measurement_unit": {
+                    "name_en": "Kilogram"
+                },
+                "is_main_unit": false
+            }
+        ]
+    },
+    {
+        "name_ar": "جزر",
+        "name_en": "Carrots",
+        "description_ar": "الجزر هي خضروات مشهورة بلونها البرتقالي ونكهتها الحلوة. يمكن تناولها طازجة كوجبة خفيفة أو استخدامها في تحضير السلطات والعصائر.",
+        "description_en": "Carrots are vegetables known for their orange color and sweet flavor. They can be eaten fresh as a snack or used in making salads and juices.",
+        "is_active": true,
+        "is_recovered": true,
+        "product_images": [
+            {
+                "url": "assets/products/carrots1.png",
+                "is_logo": false
+            },
+            {
+                "url": "assets/products/carrots2.png",
+                "is_logo": true
+            }
+        ],
+        "product_measurements": [
+            {
+                "conversion_factor": 1.00,
+                "measurement_unit": {
+                    "name_en": "Gram"
+                },
+                "is_main_unit": true
+            },
+            {
+                "conversion_factor": 1000.00,
+                "measurement_unit": {
+                    "name_en": "Kilogram"
+                },
+                "is_main_unit": false
+            }
+        ]
+    },
+    {
+        "name_ar": "ليمون",
+        "name_en": "Lemons",
+        "description_ar": "الليمون هو فاكهة حمضية معروفة بنكهتها الحادة واستخدامها في مجموعة متنوعة من الأطعمة والمشروبات. يمكن استخدام عصير الليمون في تحضير الصلصات والمشروبات المنعشة.",
+        "description_en": "Lemons are citrus fruits known for their sharp flavor and their use in a variety of foods and beverages. Lemon juice can be used in making sauces and refreshing drinks.",
+        "is_active": true,
+        "is_recovered": true,
+        "product_images": [
+            {
+                "url": "assets/products/lemons1.png",
+                "is_logo": false
+            },
+            {
+                "url": "assets/products/lemons2.png",
+                "is_logo": true
+            }
+        ],
+        "product_measurements": [
+            {
+                "conversion_factor": 1.00,
+                "measurement_unit": {
+                    "name_en": "Gram"
+                },
+                "is_main_unit": true
+            },
+            {
+                "conversion_factor": 1000.00,
+                "measurement_unit": {
+                    "name_en": "Kilogram"
+                },
+                "is_main_unit": false
+            }
+        ]
+    },
+    {
+        "name_ar": "كرز",
+        "name_en": "Cherries",
+        "description_ar": "الكرز هو نوع من الفواكه الحمراء الصغيرة واللذيذة. يمكن تناولها طازجة أو استخدامها في تحضير الحلويات والكعك والمربى.",
+        "description_en": "Cherries are small, delicious red fruits. They can be eaten fresh or used in making desserts, cakes, and jams.",
+        "is_active": true,
+        "is_recovered": true,
+        "product_images": [
+            {
+                "url": "assets/products/cherries1.png",
+                "is_logo": false
+            },
+            {
+                "url": "assets/products/cherries2.png",
+                "is_logo": true
+            }
+        ],
+        "product_measurements": [
+            {
+                "conversion_factor": 1.00,
+                "measurement_unit": {
+                    "name_en": "Gram"
+                },
+                "is_main_unit": true
+            },
+            {
+                "conversion_factor": 1000.00,
+                "measurement_unit": {
+                    "name_en": "Kilogram"
+                },
+                "is_main_unit": false
+            }
+        ]
+    },
+    {
+        "name_ar": "تفاح أخضر",
+        "name_en": "Green Apples",
+        "description_ar": "تفاح أخضر هو نوع من التفاح المعروف بلونه الأخضر الزاهي ونكهته الحامضة والمنعشة. يمكن تناوله كوجبة خفيفة أو إضافته إلى السلطات.",
+        "description_en": "Green apples are a type of apple known for their bright green color and tart, refreshing flavor. They can be eaten as a snack or added to salads.",
+        "is_active": true,
+        "is_recovered": true,
+        "product_images": [
+            {
+                "url": "assets/products/green_apples1.png",
+                "is_logo": false
+            },
+            {
+                "url": "assets/products/green_apples2.png",
+                "is_logo": true
+            }
+        ],
+        "product_measurements": [
+            {
+                "conversion_factor": 1.00,
+                "measurement_unit": {
+                    "name_en": "Gram"
+                },
+                "is_main_unit": true
+            },
+            {
+                "conversion_factor": 1000.00,
+                "measurement_unit": {
+                    "name_en": "Kilogram"
+                },
+                "is_main_unit": false
+            }
+        ]
+    },
+
+    {
+        "name_ar": "فاصوليا",
+        "name_en": "Beans",
+        "description_ar": "الفاصوليا هي نوع من البقوليات المعروفة بقوامها اللذيذ والمغذي. يمكن استخدامها في العديد من الأطباق مثل الحساء والسلطات والأكلات الرئيسية.",
+        "description_en": "Beans are a type of legume known for their delicious and nutritious texture. They can be used in various dishes like soups, salads, and main courses.",
+        "is_active": true,
+        "is_recovered": true,
+        "product_images": [
+            {
+                "url": "assets/products/beans1.png",
+                "is_logo": false
+            },
+            {
+                "url": "assets/products/beans2.png",
+                "is_logo": true
+            }
+        ],
+        "product_measurements": [
+            {
+                "conversion_factor": 1.00,
+                "measurement_unit": {
+                    "name_en": "Gram"
+                },
+                "is_main_unit": true
+            },
+            {
+                "conversion_factor": 1000.00,
+                "measurement_unit": {
+                    "name_en": "Kilogram"
+                },
+                "is_main_unit": false
+            }
+        ]
+    },
+    {
+        "name_ar": "لفت",
+        "name_en": "Turnips",
+        "description_ar": "اللفت هو نوع من الخضروات المعروفة بجذورها اللذيذة والمستخدمة في تحضير مجموعة متنوعة من الأطباق مثل السلطات والأكلات المطهية.",
+        "description_en": "Turnips are a type of vegetable known for their delicious roots and used in preparing a variety of dishes like salads and cooked meals.",
+        "is_active": true,
+        "is_recovered": true,
+        "product_images": [
+            {
+                "url": "assets/products/turnips1.png",
+                "is_logo": false
+            },
+            {
+                "url": "assets/products/turnips2.png",
+                "is_logo": true
+            }
+        ],
+        "product_measurements": [
+            {
+                "conversion_factor": 1.00,
+                "measurement_unit": {
+                    "name_en": "Gram"
+                },
+                "is_main_unit": true
+            },
+            {
+                "conversion_factor": 1000.00,
+                "measurement_unit": {
+                    "name_en": "Kilogram"
+                },
+                "is_main_unit": false
+            }
+        ]
     }
 ]

@@ -57,6 +57,7 @@ export class SectionController {
   ) { }
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiBearerAuth()
   @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('logo'))
   @ApiConsumes('multipart/form-data')
   @Post()
@@ -71,6 +72,7 @@ export class SectionController {
   }
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiBearerAuth()
   @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('logo'))
   @ApiConsumes('multipart/form-data')
   @Put()
@@ -85,12 +87,14 @@ export class SectionController {
   }
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiBearerAuth()
   @Delete('/:id')
   async deleteSection(@Param('id') id: string) {
     return new ActionResponse(await this.sectionService.delete(id));
   }
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiBearerAuth()
   @Post('/add-category')
   async addCategoryToSection(@Body() req: SectionCategoryRequest) {
     return new ActionResponse(
@@ -99,6 +103,7 @@ export class SectionController {
   }
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiBearerAuth()
   @Put('/section-category')
   async updateSectionCategory(@Body() req: UpdateSectionCategoryRequest) {
     return new ActionResponse(
@@ -107,6 +112,7 @@ export class SectionController {
   }
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiBearerAuth()
   @Delete('/section-category/:id')
   async deleteSectionCategory(@Param('id') id: string) {
     return new ActionResponse(

@@ -1,6 +1,6 @@
 import { Body, ClassSerializerInterceptor, Controller, Delete, Get, Header, Param, Post, Put, Query, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiConsumes, ApiHeader, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { ActionResponse } from 'src/core/base/responses/action.response';
 import { UploadValidator } from 'src/core/validators/upload.validator';
 import { CreateCategoryRequest } from '../category/dto/requests/create-category-request';
@@ -31,7 +31,9 @@ import { MostHitSubCategoryResponse, MostHitSubcategoryReponseWithInfo } from '.
 export class SubcategoryController {
   constructor(private readonly subcategoryService: SubcategoryService,
     private readonly _i18nResponse: I18nResponse,) { }
-
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    @ApiBearerAuth()
   @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('logo'))
   @ApiConsumes('multipart/form-data')
   @Post()
@@ -85,9 +87,9 @@ export class SubcategoryController {
     req.logo = logo;
     return new ActionResponse(await this.subcategoryService.updateSubCategory(req));
   }
-
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
+@Roles(Role.ADMIN)
+@ApiBearerAuth()
   @Delete("/:sub_category_id")
   async delete(@Param('sub_category_id') id: string) {
     return new ActionResponse(await this.subcategoryService.deleteSubCategory(id));

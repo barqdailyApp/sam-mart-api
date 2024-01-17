@@ -342,7 +342,18 @@ export class ProductService {
       .createQueryBuilder('product')
 
       .leftJoinAndSelect('product.product_images', 'product_images')
-
+      .leftJoinAndSelect(
+        'product.product_sub_categories',
+        'product_sub_categories',
+      )
+      .leftJoin(
+        'product_sub_categories.category_subCategory',
+        'product_category_subCategory',
+      )
+      .leftJoin(
+        'product_category_subCategory.section_category',
+        'product_section_category',
+      )
       .innerJoinAndSelect('product.warehouses_products', 'warehousesProduct')
       .innerJoinAndSelect(
         'product.product_measurements',
@@ -369,7 +380,9 @@ export class ProductService {
         'category_subCategory',
       )
       .leftJoin('category_subCategory.section_category', 'section_category')
+      .orderBy('productSubCategory.order_by', 'ASC')
       .orderBy(productsSort)
+
       .skip(skip)
       .take(limit);
 
@@ -396,6 +409,14 @@ export class ProductService {
           category_sub_category_id,
         },
       );
+      query = query.andWhere('product.is_active = true');
+      query = query.andWhere('product_sub_categories.is_active = true');
+      query = query.andWhere(
+        'product_sub_categories.category_sub_category_id = :category_sub_category_id',
+        {
+          category_sub_category_id,
+        },
+      );
       const categorySubcategory = await this.categorySubcategory_repo.findOne({
         where: { id: category_sub_category_id },
       });
@@ -407,6 +428,11 @@ export class ProductService {
     // Conditional where clause based on section
     if (section_id) {
       query = query.andWhere('section_category.section_id = :section_id', {
+        section_id,
+      });
+      query = query.andWhere('product.is_active = true');
+      query = query.andWhere('product_sub_categories.is_active = true');
+      query = query.andWhere('product_section_category.section_id = :section_id', {
         section_id,
       });
     }

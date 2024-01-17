@@ -1,6 +1,7 @@
 import {
   Body,
   ClassSerializerInterceptor,
+  ConflictException,
   Controller,
   Delete,
   Get,
@@ -169,14 +170,14 @@ export class ProductController {
 
     const { products, total } =
       await this.productService.getAllProductsForClient(productClientFilter);
-    console.log('products clients', products);
     const productsResponse = products.map((product) => {
       const productResponse = plainToClass(ProductResponse, product);
-      productResponse.totalQuantity =
-        productResponse.warehouses_products.reduce(
-          (acc, cur) => acc + cur.quantity,
-          0,
-        );
+      productResponse.totalQuantity = product.warehouses_products.reduce(
+        (acc, cur) => acc + cur.quantity,
+        0,
+      );
+
+      productResponse.order_by = product.product_sub_categories[0].order_by;
       return productResponse;
     });
     const pageMetaDto = new PageMetaDto(page, limit, total);
@@ -273,7 +274,9 @@ export class ProductController {
       singleProductClientQuery,
     );
     const productResponse = plainToClass(ProductResponse, product);
-    if (productResponse.warehouses_products) {
+    if (productResponse?.warehouses_products == null) {
+      throw new ConflictException('Product is not available In Warehouse');
+    } else {
       productResponse.totalQuantity =
         productResponse.warehouses_products.reduce(
           (acc, cur) => acc + cur.quantity,
