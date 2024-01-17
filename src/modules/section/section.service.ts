@@ -147,7 +147,7 @@ export class SectionService extends BaseService<Section> {
       });
     });
 
-    return this._fileService.exportExcel(flattenedData, 'sections', 'sections');
+    return await this._fileService.exportExcel(flattenedData, 'sections', 'sections');
   }
 
   async importSections(req: any) {
