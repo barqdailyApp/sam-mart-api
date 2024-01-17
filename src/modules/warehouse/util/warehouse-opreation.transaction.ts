@@ -48,7 +48,7 @@ export class WarehouseOperationTransaction extends BaseTransaction<
     context: EntityManager,
   ): Promise<WarehouseOperations> {
     const warehouseOperation = plainToInstance(WarehouseOperations, request);
-    warehouseOperation.user_id=this.request.user.id
+    warehouseOperation.user_id = this.request.user.id;
     const product_measurement = await context.find(ProductMeasurement, {
       where: {
         product_id: request.product_id,
@@ -66,34 +66,41 @@ export class WarehouseOperationTransaction extends BaseTransaction<
       passed_measurement == base_measurement
         ? request.quantity
         : passed_measurement.conversion_factor * request.quantity;
-quantity=operationType.IMPORT==request.type?quantity:quantity*-1
-        
-    warehouseOperation.quantity =
- quantity;
+    quantity = operationType.IMPORT == request.type ? quantity : quantity * -1;
+
+    warehouseOperation.quantity = quantity;
 
     warehouseOperation.product_measurement_id = base_measurement.id;
     await context.save(warehouseOperation);
 
+    const warehouseProducts = await context.findOne(WarehouseProducts, {
+      where: {
+        warehouse_id: request.warehouse_id,
+        product_id: request.product_id,
+      },
+    });
+    if (
+      (warehouseProducts == null && quantity < 0) || warehouseProducts == null
+        ? 0
+        : warehouseProducts.quantity + quantity < 0
+    ) {
+      throw new BadRequestException('warehouse doesnt have enough products');
+    }
 
-const warehouseProducts= await context.findOne(WarehouseProducts,{where:{warehouse_id:request.warehouse_id,product_id:request.product_id}})
-if( warehouseProducts==null && quantity<0 || warehouseProducts==null?0: warehouseProducts.quantity+quantity<0)
-{
-    throw new BadRequestException('warehouse doesnt have enough products')
-}
+    if (warehouseProducts) {
+      warehouseProducts.quantity = warehouseProducts.quantity + quantity;
+      await context.save(warehouseProducts);
+    } else {
+      await context.save(
+        new WarehouseProducts({
+          warehouse_id: request.warehouse_id,
+          product_id: request.product_id,
+          quantity: quantity,
+          product_measurement_id: base_measurement.id,
+        }),
+      );
+    }
 
-
-if(warehouseProducts)
-{
-    warehouseProducts.quantity=warehouseProducts.quantity+quantity
-    await context.save(warehouseProducts)
-}
-else 
-{
-
-   
-    await context.save(new WarehouseProducts({warehouse_id:request.warehouse_id,product_id:request.product_id,quantity:quantity,product_measurement_id:base_measurement.id}))
-}
-
-    return warehouseOperation
+    return warehouseOperation;
   }
 }
