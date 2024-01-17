@@ -18,6 +18,7 @@ import { SupportTicketModule } from "./support-ticket/suuport-ticket.module";
 import { UserModule } from "./user/user.module";
 import { WarehouseModule } from "./warehouse/warehouse.module";
 import { SlotModule } from './slot/slot.module';
+import { OrderModule } from './order/order.module';
 
 
 @Module({
@@ -40,7 +41,8 @@ import { SlotModule } from './slot/slot.module';
     SupportTicketModule,
     StaticPageModule,
     CartModule,
-    SlotModule
+    SlotModule,
+    OrderModule
 
   ],
   exports: [],

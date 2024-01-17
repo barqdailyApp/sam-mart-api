@@ -44,6 +44,7 @@ export class SectionService extends BaseService<Section> {
         ? null
         : await this.user_repo.findOne({ where: { id: user_id } });
     const sections = await this.section_repo.find({
+      where: { is_active: true },
       order: { order_by: 'ASC' },
     });
 
@@ -51,7 +52,8 @@ export class SectionService extends BaseService<Section> {
       return sections.filter((section) =>
         section.allowed_roles.includes(Role.CLIENT),
       );
-    if (user.roles.includes(Role.ADMIN)) return sections
+    if (user.roles.includes(Role.ADMIN))
+      return await this.section_repo.find({ order: { order_by: 'ASC' } });
     return sections.filter((section) => {
       return user.roles.includes(section.allowed_roles[0]);
     });

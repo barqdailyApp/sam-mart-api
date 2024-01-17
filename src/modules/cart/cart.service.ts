@@ -54,7 +54,9 @@ export class CartService extends BaseService<CartProduct> {
     const product_price = await this.productCategoryPrice.findOne({
       where: { id: req.product_category_price_id },
       relations: {
+        product_measurement: true,
         product_offer: true,
+        product_sub_category:{category_subCategory:{section_category:true}}
       },
     });
     console.log('product_price', product_price);
@@ -90,10 +92,13 @@ export class CartService extends BaseService<CartProduct> {
     return this.cartProductRepository.save(
       new CartProduct({
         cart_id: cart.id,
-
+        section_id:product_price.product_sub_category.category_subCategory.section_category.section_id,
         quantity: req.quantity,
+        product_id: product_price.product_sub_category.product_id,
         product_category_price_id: req.product_category_price_id,
         price: Number(product_price.price) * req.quantity,
+        conversion_factor:product_price.product_measurement.conversion_factor,
+        main_measurement_id:product_price.product_measurement.base_unit_id
       }),
     );
   }
