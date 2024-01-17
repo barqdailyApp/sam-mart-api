@@ -1,4 +1,4 @@
-import { Body, ClassSerializerInterceptor, Controller, Delete, Get, Param, Post, Put, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, ClassSerializerInterceptor, Controller, Delete, Get, Header, Param, Post, Put, Query, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiConsumes, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { ActionResponse } from 'src/core/base/responses/action.response';
@@ -16,6 +16,10 @@ import { RolesGuard } from '../authentication/guards/roles.guard';
 import { Roles } from '../authentication/guards/roles.decorator';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { UpdateCategoryRequest } from '../category/dto/requests/update-category-request';
+import { Response } from 'express';
+import { ImportCategoryRequest } from '../category/dto/requests/import-category-request';
+import { plainToInstance } from 'class-transformer';
+import { MostHitSubCategoryResponse, MostHitSubcategoryReponseWithInfo } from './dto/response/most-hit-subcategory.response';
 
 @ApiHeader({
   name: 'Accept-Language',
@@ -62,9 +66,12 @@ export class SubcategoryController {
 
   @Get('/most-hit-subcategory')
   async getMostHitSubcategory(@Query() query: QueryHitsSubCategoryRequest) {
-    return new ActionResponse(
-      await this.subcategoryService.getMostHitSubcategory(query),
+    const subcategories = await this.subcategoryService.getMostHitSubcategory(query);
+    const result = plainToInstance(MostHitSubcategoryReponseWithInfo, subcategories,
+      { excludeExtraneousValues: true }
     );
+
+    return new ActionResponse<MostHitSubcategoryReponseWithInfo[]>(this._i18nResponse.entity(result));
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -86,5 +93,31 @@ export class SubcategoryController {
   @Delete("/:sub_category_id")
   async delete(@Param('sub_category_id') id: string) {
     return new ActionResponse(await this.subcategoryService.deleteSubCategory(id));
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @Get('/export')
+  @Header('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+  async exportSubCategory(@Res() res: Response) {
+    const File = await this.subcategoryService.exportSubCategory();
+    res.download(`${File}`);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @Post("/import")
+  async importSubCategory(
+    @Body() req: ImportCategoryRequest,
+    @UploadedFile(new UploadValidator().build())
+    file: Express.Multer.File
+  ) {
+    req.file = file;
+    const result = await this.subcategoryService.importSubCategory(req);
+    return new ActionResponse(result);
   }
 }

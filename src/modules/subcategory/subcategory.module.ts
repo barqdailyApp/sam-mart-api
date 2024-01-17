@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
 import { SubcategoryController } from './subcategory.controller';
 import { SubcategoryService } from './subcategory.service';
+import { FileService } from '../file/file.service';
 
 @Module({
+  providers: [SubcategoryService, FileService],
   controllers: [SubcategoryController],
-  providers: [SubcategoryService]
+  imports: [],
 })
-export class SubcategoryModule {}
+export class SubcategoryModule { }
