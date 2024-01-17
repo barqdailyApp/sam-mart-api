@@ -18,6 +18,8 @@ import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { UpdateCategoryRequest } from '../category/dto/requests/update-category-request';
 import { Response } from 'express';
 import { ImportCategoryRequest } from '../category/dto/requests/import-category-request';
+import { plainToInstance } from 'class-transformer';
+import { MostHitSubCategoryResponse, MostHitSubcategoryReponseWithInfo } from './dto/response/most-hit-subcategory.response';
 
 @ApiHeader({
   name: 'Accept-Language',
@@ -62,9 +64,12 @@ export class SubcategoryController {
 
   @Get('/most-hit-subcategory')
   async getMostHitSubcategory(@Query() query: QueryHitsSubCategoryRequest) {
-    return new ActionResponse(
-      await this.subcategoryService.getMostHitSubcategory(query),
+    const subcategories = await this.subcategoryService.getMostHitSubcategory(query);
+    const result = plainToInstance(MostHitSubcategoryReponseWithInfo, subcategories,
+      { excludeExtraneousValues: true }
     );
+
+    return new ActionResponse<MostHitSubcategoryReponseWithInfo[]>(this._i18nResponse.entity(result));
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

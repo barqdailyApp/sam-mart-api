@@ -117,7 +117,12 @@ export class SubcategoryService extends BaseService<Subcategory> {
       take: limit,
     };
 
-    return await this.mostHitSubcategoryRepository.find(queryOptions);
+    const mostHitSubCategories = await this.mostHitSubcategoryRepository.find(queryOptions);
+    const total_count = await this.mostHitSubcategoryRepository.count();
+    return {
+      mostHitSubCategories,
+      total_count
+    }
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
