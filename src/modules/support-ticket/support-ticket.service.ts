@@ -31,7 +31,7 @@ export class SupportTicketService extends BaseService<SupportTicket> {
         if (file) {
             const tempImage = await this._fileService.upload(
                 file,
-                `support-tickets/${this.currentUser.id}`,
+                `support-tickets`,
             );
 
             const createAttachedFile = this.ticketAttachmentRepository.create({

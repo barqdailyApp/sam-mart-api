@@ -54,7 +54,7 @@ export class BanarService extends BaseService<Banar> {
         if (banar.banar) {
             tempImage = await this._fileService.upload(
                 banar.banar,
-                `banars/`,
+                `banars`,
             );
         }
 
