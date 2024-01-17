@@ -49,15 +49,16 @@ export class TicketCommentService extends BaseService<TicketComment> {
             throw new UnauthorizedException('You are not allowed to add comment to this ticket')
         }
 
-        const savedComment = await this.ticketCommentRepository.create({
+        const newComment = await this.ticketCommentRepository.create({
             comment_text,
             user: this.currentUser,
             ticket,
             attachment: attachedFile
         });
 
+        const savedComment = await this.ticketCommentRepository.save(newComment);
         this.supportTicketGateway.handleSendMessage({ supportTicket: ticket, ticketComment: savedComment, action: 'ADD_COMMENT' });
-        return await this.ticketCommentRepository.save(savedComment);
+        return savedComment;
     }
 
     async getCommentsByChunk(ticketId: string, offset: number, limit: number): Promise<TicketComment[]> {
