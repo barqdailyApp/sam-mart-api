@@ -12,11 +12,14 @@ import { CreateSectionRequest } from './dto/requests/create-section.request';
 import { ImageManager } from 'src/integration/sharp/image.manager';
 import * as sharp from 'sharp';
 import { StorageManager } from 'src/integration/storage/storage.manager';
-import { plainToInstance } from 'class-transformer';
+import { plainToClass, plainToInstance } from 'class-transformer';
 import { SectionCategoryRequest } from './dto/requests/create-section-category.request';
 import { UpdateSectionRequest } from './dto/requests/update-section.request';
 import { FileService } from '../file/file.service';
 import { UpdateSectionCategoryRequest } from './dto/requests/update-section-category.request';
+import { toUrl } from 'src/core/helpers/file.helper';
+import { CreateSectionExcelRequest, CreateSectionsExcelRequest } from './dto/requests/create-sections-excel.request';
+import { validate } from 'class-validator';
 
 @Injectable()
 export class SectionService extends BaseService<Section> {
@@ -115,5 +118,75 @@ export class SectionService extends BaseService<Section> {
 
   async deleteSectionCategory(id: string) {
     return await this.section_category_repo.delete(id);
+  }
+
+  async exportSections() {
+    const sections = await this._repo.find({
+      relations: {
+        section_categories: {
+          category: true,
+        },
+      },
+    });
+
+    const flattenedData = [];
+    sections.forEach((section) => {
+      section.section_categories.forEach((category) => {
+        flattenedData.push({
+          section_name_ar: section.name_ar,
+          section_name_en: section.name_en,
+          section_logo: toUrl(section.logo),
+          section_is_active: section.is_active,
+          section_order_by: section.order_by,
+          section_min_order_price: section.min_order_price,
+          section_delivery_type: section.delivery_type,
+          section_delivery_price: section.delivery_price,
+          section_allowed_roles: section.allowed_roles,
+          category_name_ar: category.category.name_ar,
+          category_name_en: category.category.name_en,
+          category_logo: toUrl(category.category.logo),
+        });
+      });
+    });
+
+    return await this._fileService.exportExcel(flattenedData, 'sections', 'sections');
+  }
+
+  async importSections(req: any) {
+    const file = await this.storageManager.store(req.file, { path: 'category-export' });
+    const jsonData = await this._fileService.importExcel(file);
+    const CreateSectionRequest = plainToClass(CreateSectionsExcelRequest, { sections: jsonData });
+    const validationErrors = await validate(CreateSectionRequest);
+    if (validationErrors.length > 0) {
+      throw new BadRequestException(JSON.stringify(validationErrors));
+    }
+
+    const newSections = jsonData.map((sectionData) => {
+      const {
+        name_ar,
+        name_en,
+        order_by,
+        min_order_price,
+        allowed_roles,
+        delivery_price,
+        delivery_type,
+        is_active,
+        logo,
+      } = plainToClass(CreateSectionExcelRequest, sectionData)
+
+      return this._repo.create({
+        name_ar,
+        name_en,
+        order_by,
+        min_order_price,
+        allowed_roles,
+        delivery_price,
+        delivery_type,
+        is_active,
+        logo
+      });
+    })
+
+    return await this._repo.save(newSections);
   }
 }

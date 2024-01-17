@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from 'src/infrastructure/entities/product/product.entity';
 import { DeleteResult, IsNull, Not, Repository } from 'typeorm';
@@ -30,6 +30,11 @@ import { ProductClientQuery } from './dto/filter/products-client.query';
 import { SingleProductClientQuery } from './dto/filter/single-product-client.query';
 import { ProductCategoryPrice } from 'src/infrastructure/entities/product/product-category-price.entity';
 import { DiscountType } from 'src/infrastructure/data/enums/discount-type.enum';
+import { FileService } from '../file/file.service';
+import { plainToClass } from 'class-transformer';
+import { validate } from 'class-validator';
+import { CreateProductExcelRequest, CreateProductsExcelRequest } from './dto/request/create-products-excel.request';
+import { toUrl } from 'src/core/helpers/file.helper';
 
 @Injectable()
 export class ProductService {
@@ -69,7 +74,9 @@ export class ProductService {
     @Inject(StorageManager) private readonly storageManager: StorageManager,
 
     @Inject(ImageManager) private readonly imageManager: ImageManager,
-  ) {}
+
+    @Inject(FileService) private _fileService: FileService,
+  ) { }
 
   async createProduct(
     createProductRequest: CreateProductRequest,
@@ -795,6 +802,101 @@ export class ProductService {
     return await this.productMeasurementRepository.delete({
       id: product_measurement_id,
     });
+  }
+
+  async exportProducts() {
+    const products = await this.productRepository.find({
+      relations: {
+        product_images: true,
+        warehouses_products: true,
+        product_measurements: true,
+        product_sub_categories: {
+          category_subCategory: {
+            section_category: {
+              category: true,
+              section: true
+            },
+            subcategory: true
+          }
+        },
+      }
+    })
+
+    // Create a flat structure for products
+    const flattenedProducts = products.map((product) => {
+      return {
+        productId: product.id,
+        createdAt: product.created_at,
+        updatedAt: product.updated_at,
+        name_ar: product.name_ar,
+        name_en: product.name_en,
+        description_ar: product.description_ar,
+        description_en: product.description_en,
+        is_active: product.is_active,
+        is_recovered: product.is_recovered,
+        product_images: product.product_images.map((image) => ({
+          url: toUrl(image.url),
+          is_logo: image.is_logo,
+        })),
+        warehousesProducts: product.warehouses_products,
+        productMeasurements: product.product_measurements.map((measurement) => ({
+          measuremen_id: measurement.id,
+          conversion_factor: measurement.conversion_factor,
+          product_id: measurement.product_id,
+          measurement_unit_id: measurement.measurement_unit_id,
+          base_unit_id: measurement.base_unit_id,
+          is_main_unit: measurement.is_main_unit,
+        })),
+        productSubCategories: product.product_sub_categories.map((subCategory) => ({
+          subCategory_id: subCategory.category_subCategory.subcategory.id,
+          subCategory_name_ar: subCategory.category_subCategory.subcategory.name_ar,
+          subCategory_name_en: subCategory.category_subCategory.subcategory.name_en,
+          category_id: subCategory.category_subCategory.section_category.category.id,
+          category_name_ar: subCategory.category_subCategory.section_category.category.name_ar,
+          category_name_en: subCategory.category_subCategory.section_category.category.name_en,
+          section_id: subCategory.category_subCategory.section_category.section.id,
+          section_name_ar: subCategory.category_subCategory.section_category.section.name_ar,
+          section_name_en: subCategory.category_subCategory.section_category.section.name_en,
+        })),
+      };
+    });
+
+    return await this._fileService.exportExcel(flattenedProducts, 'products', 'products')
+  }
+
+  async importProducts(req: any) {
+    const file = await this.storageManager.store(req.file, { path: 'product-export' });
+    const jsonData = await this._fileService.importExcel(file);
+
+    const CreateProductRequest = plainToClass(CreateProductsExcelRequest, { products: jsonData });
+    const validationErrors = await validate(CreateProductRequest);
+    if (validationErrors.length > 0) {
+      throw new BadRequestException(JSON.stringify(validationErrors));
+    }
+
+    const newProducts = jsonData.map((productData) => {
+      const {
+        name_ar,
+        name_en,
+        description_ar,
+        description_en,
+        is_active,
+        is_recovered,
+        product_images,
+      } = plainToClass(CreateProductExcelRequest, productData)
+
+      return this.productRepository.create({
+        name_ar,
+        name_en,
+        description_ar,
+        description_en,
+        is_active,
+        is_recovered,
+        product_images,
+      });
+    });
+
+    return await this.productRepository.save(newProducts);
   }
 
   private async singleProductImage(

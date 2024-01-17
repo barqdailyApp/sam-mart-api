@@ -4,11 +4,13 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   Inject,
   Param,
   Post,
   Put,
   Query,
+  Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -27,7 +29,7 @@ import { RolesGuard } from '../authentication/guards/roles.guard';
 import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
 import { plainToInstance } from 'class-transformer';
 import { CategoryResponse } from '../category/dto/response/category-response';
-import { query } from 'express';
+import { Response, query } from 'express';
 import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateSectionRequest } from './dto/requests/create-section.request';
@@ -39,6 +41,7 @@ import { UpdateSectionRequest } from './dto/requests/update-section.request';
 import { UpdateSectionCategoryRequest } from './dto/requests/update-section-category.request';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { Roles } from '../authentication/guards/roles.decorator';
+import { ImportCategoryRequest } from '../category/dto/requests/import-category-request';
 
 @ApiHeader({
   name: 'Accept-Language',
@@ -51,7 +54,7 @@ export class SectionController {
   constructor(
     private readonly sectionService: SectionService,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
-  ) {}
+  ) { }
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
@@ -108,8 +111,8 @@ export class SectionController {
     );
   }
   @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.ADMIN)
-@ApiBearerAuth()
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
   @Delete('/section-category/:id')
   async deleteSectionCategory(@Param('id') id: string) {
     return new ActionResponse(
@@ -120,7 +123,7 @@ export class SectionController {
   @Get()
   @ApiQuery({ name: 'user_id', type: String, required: false })
   async getSections(@Query('user_id') userId?: string) {
-    
+
     return new ActionResponse(
       this._i18nResponse.entity(
         (await this.sectionService.getSections(userId)).map((e) => {
@@ -149,5 +152,31 @@ export class SectionController {
           }),
       ),
     );
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @Get("/export")
+  @Header('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+  async exportSections(@Res() res: Response) {
+    const File = await this.sectionService.exportSections();
+    res.download(`${File}`);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @Post("/import")
+  async importSections(
+    @Body() req: ImportCategoryRequest,
+    @UploadedFile(new UploadValidator().build())
+    file: Express.Multer.File
+  ) {
+    req.file = file;
+    const jsonData = await this.sectionService.importSections(req);
+    return new ActionResponse(jsonData);
   }
 }

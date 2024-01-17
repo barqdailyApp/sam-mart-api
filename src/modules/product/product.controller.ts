@@ -1,16 +1,20 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   ConflictException,
   Controller,
   Delete,
   Get,
+  Header,
   Inject,
   Param,
   Post,
   Put,
   Query,
+  Res,
   UploadedFile,
   UploadedFiles,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
@@ -44,6 +48,13 @@ import { UpdateSingleImageRequest } from './dto/request/product-images/update-si
 import { CreateProductMeasurementRequest } from './dto/request/create-product-measurement.request';
 import { ProductClientQuery } from './dto/filter/products-client.query';
 import { SingleProductClientQuery } from './dto/filter/single-product-client.query';
+import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
+import { RolesGuard } from '../authentication/guards/roles.guard';
+import { Roles } from '../authentication/guards/roles.decorator';
+import { Role } from 'src/infrastructure/data/enums/role.enum';
+import { Response } from 'express';
+import { ImportCategoryRequest } from '../category/dto/requests/import-category-request';
+import { UploadValidator } from 'src/core/validators/upload.validator';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -56,7 +67,7 @@ export class ProductController {
   constructor(
     private readonly productService: ProductService,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
-  ) {}
+  ) { }
 
   @Post('create-product')
   async createProduct(@Body() createProductRequest: CreateProductRequest) {
@@ -319,4 +330,31 @@ export class ProductController {
     );
     return new ActionResponse(product);
   }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @Get("/export")
+  @Header('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+  async exportProducts(@Res() res: Response) {
+    const File = await this.productService.exportProducts();
+    res.download(`${File}`);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @Post('import')
+  async importProducts(
+    @Body() req: ImportCategoryRequest,
+    @UploadedFile(new UploadValidator().build())
+    file: Express.Multer.File
+  ) {
+    req.file = file;
+    const products = await this.productService.importProducts(req);
+    return new ActionResponse(products);
+  }
+
 }

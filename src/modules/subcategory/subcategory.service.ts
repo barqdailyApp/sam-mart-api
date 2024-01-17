@@ -1,6 +1,6 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { plainToInstance } from 'class-transformer';
+import { plainToClass, plainToInstance } from 'class-transformer';
 import * as sharp from 'sharp';
 import { BaseService } from 'src/core/base/service/service.base';
 import { Category } from 'src/infrastructure/entities/category/category.entity';
@@ -16,6 +16,10 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { QueryHitsSubCategoryRequest } from './dto/request/query-hits-subcategory.request';
 import { UpdateCategoryRequest } from '../category/dto/requests/update-category-request';
 import { FileService } from '../file/file.service';
+import { toUrl } from 'src/core/helpers/file.helper';
+import { ImportCategoryRequest } from '../category/dto/requests/import-category-request';
+import { CreateCategoriesExcelRequest, CreateCategoryExcelRequest } from '../category/dto/requests/create-categories-excel-request';
+import { validate } from 'class-validator';
 
 @Injectable()
 export class SubcategoryService extends BaseService<Subcategory> {
@@ -32,10 +36,6 @@ export class SubcategoryService extends BaseService<Subcategory> {
   ) {
     super(subcategory_repo);
   }
-
-
-
-
 
   async createSubcategory(req: CreateCategoryRequest): Promise<Subcategory> {
     const subcategory = this._repo.create(plainToInstance(Subcategory, req));
@@ -117,7 +117,12 @@ export class SubcategoryService extends BaseService<Subcategory> {
       take: limit,
     };
 
-    return await this.mostHitSubcategoryRepository.find(queryOptions);
+    const mostHitSubCategories = await this.mostHitSubcategoryRepository.find(queryOptions);
+    const total_count = await this.mostHitSubcategoryRepository.count();
+    return {
+      mostHitSubCategories,
+      total_count
+    }
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
@@ -164,4 +169,87 @@ export class SubcategoryService extends BaseService<Subcategory> {
     await this._fileService.delete(subcategory.logo)
     return await this.subcategory_repo.delete(id);
   }
+
+  async exportSubCategory() {
+    const subcategories = await this.categorySubCategoryRepository.find({
+      relations: {
+        subcategory: true,
+        section_category: {
+          section: true,
+          category: true
+        },
+      },
+    });
+
+    const flattenedData = subcategories.map((subcategory) => {
+      const {
+        id,
+        subcategory_id,
+        order_by,
+        is_active,
+        subcategory: {
+          name_ar: subcategory_name_ar,
+          name_en: subcategory_name_en,
+          logo: subcategory_logo
+        },
+        section_category: {
+          section: {
+            id: sectionId,
+            name_ar: section_name_ar,
+            name_en: section_name_en,
+            logo: section_logo,
+          },
+          category: {
+            id: categoryId,
+            name_ar: category_name_ar,
+            name_en: category_name_en,
+            logo: category_logo
+          }
+        }
+      } = subcategory;
+
+      return {
+        id,
+        subcategory_id,
+        order_by,
+        is_active,
+        subcategory_name_ar,
+        subcategory_name_en,
+        subcategory_logo: toUrl(subcategory_logo),
+        category_id: categoryId,
+        category_name_ar,
+        category_name_en,
+        category_logo: toUrl(category_logo),
+        section_id: sectionId,
+        section_name_ar,
+        section_name_en,
+        section_logo: toUrl(section_logo),
+      };
+    });
+
+    return await this._fileService.exportExcel(flattenedData, 'subcategories', 'subcategories');
+  }
+
+  async importSubCategory(req: ImportCategoryRequest) {
+    const file = await this.storageManager.store(req.file, { path: 'subcategory-export' });
+    const jsonData = await this._fileService.importExcel(file);
+    const subCategoriesRequest = plainToClass(CreateCategoriesExcelRequest, { categories: jsonData });
+    const validationErrors = await validate(subCategoriesRequest);
+
+    if (validationErrors.length > 0) {
+      throw new NotFoundException(JSON.stringify(validationErrors));
+    }
+
+    const newSubCategories = jsonData.map((subcategoryData) => {
+      const { name_ar, name_en, logo } = plainToClass(CreateCategoryExcelRequest, subcategoryData);
+      return this._repo.create({
+        name_ar,
+        name_en,
+        logo,
+      });
+    });
+
+    return await this._repo.save(newSubCategories);
+  }
+
 }
