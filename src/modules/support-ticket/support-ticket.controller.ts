@@ -29,6 +29,8 @@ import { ChangeTicketStatusRequest } from './dto/request/change-ticket-status.re
 import { SupportTicketStatus } from 'src/infrastructure/data/enums/support-ticket-status.enum';
 import { Roles } from '../authentication/guards/roles.decorator';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
+import { GetCommentQueryRequest } from './dto/request/get-comment-query.request';
+import { query } from 'express';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -85,13 +87,12 @@ export class SupportTicketController {
         return new ActionResponse<TicketCommentResponse>(result);
     }
 
-    @Get('/comments/:ticketId/:offset/:limit')
+    @Get('/comments/:ticketId')
     async getComments(
         @Param('ticketId') ticketId: string,
-        @Param("offset") offset: number,
-        @Param("limit") limit: number
+        @Query() query: GetCommentQueryRequest
     ): Promise<ActionResponse<TicketCommentResponse[]>> {
-        const comments = await this.ticketCommentService.getCommentsByChunk(ticketId, offset, limit);
+        const comments = await this.ticketCommentService.getCommentsByChunk(ticketId, query);
         const result = plainToInstance(TicketCommentResponse, comments, {
             excludeExtraneousValues: true,
         });
