@@ -22,6 +22,7 @@ import {
   ApiBearerAuth,
   ApiConsumes,
   ApiHeader,
+  ApiProperty,
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
@@ -54,7 +55,7 @@ export class SectionController {
   constructor(
     private readonly sectionService: SectionService,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
-  ) { }
+  ) {}
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
@@ -123,7 +124,6 @@ export class SectionController {
   @Get()
   @ApiQuery({ name: 'user_id', type: String, required: false })
   async getSections(@Query('user_id') userId?: string) {
-
     return new ActionResponse(
       this._i18nResponse.entity(
         (await this.sectionService.getSections(userId)).map((e) => {
@@ -134,10 +134,17 @@ export class SectionController {
     );
   }
 
+  @ApiProperty({required: false})
+  all?:boolean
   @Get(':section_id/categories')
-  async getSectionCategories(@Param('section_id') section_id: string) {
+  
+  async getSectionCategories(
+    @Param('section_id') section_id: string,
+    @Query("all") all?: boolean,
+  ) {
     const categories = await this.sectionService.getSectionCategories(
       section_id,
+      all,
     );
     const data = this._i18nResponse.entity(categories);
 
@@ -157,8 +164,11 @@ export class SectionController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
-  @Get("/export")
-  @Header('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+  @Get('/export')
+  @Header(
+    'Content-type',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  )
   async exportSections(@Res() res: Response) {
     const File = await this.sectionService.exportSections();
     res.download(`${File}`);
@@ -169,11 +179,11 @@ export class SectionController {
   @ApiBearerAuth()
   @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
-  @Post("/import")
+  @Post('/import')
   async importSections(
     @Body() req: ImportCategoryRequest,
     @UploadedFile(new UploadValidator().build())
-    file: Express.Multer.File
+    file: Express.Multer.File,
   ) {
     req.file = file;
     const jsonData = await this.sectionService.importSections(req);

@@ -130,8 +130,8 @@ export class CategoryController {
   }
 
   @Get('/:section_category_id/subcategories')
-  async getCAtegorySubcategory(@Param('section_category_id') id: string) {
-    const subcategories = await this.categoryService.getCategorySubcategory(id);
+  async getCAtegorySubcategory(@Param('section_category_id') id: string,  @Query("all") all?: boolean,) {
+    const subcategories = await this.categoryService.getCategorySubcategory(id,all);
     const data = this._i18nResponse.entity(subcategories);
     return new ActionResponse(
       data.map(
