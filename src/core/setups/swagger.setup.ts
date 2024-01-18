@@ -34,12 +34,6 @@ export default (app: INestApplication, config: ConfigService) => {
     .setTitle(`${config.get('APP_NAME')} API`)
     .setDescription(`${config.get('APP_NAME')} API description`)
     .setVersion('v1')
-    .setContact(
-      'Contact',
-      'https://github.com/mahkassem',
-      'mahmoud.ali.kassem@gmail.com',
-    )
-    .setLicense('Developed by Mahmoud Kassem', 'https://github.com/mahkassem')
     .addServer(config.get('APP_HOST'))
     .build();
 

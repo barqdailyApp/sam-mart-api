@@ -5,8 +5,8 @@ import { MeasurementUnitResponse } from 'src/modules/measurement-unit/dto/respon
 import { ProductMeasurementResponse } from './product-measurement.response';
 import { ProductImagesResponse } from './product-images.response';
 import { ProductWarehouseResponse } from './product-warehouse.response';
-import { SectionCategoryResponse } from './section-category.respnse';
 import { ProductSubCategory } from 'src/infrastructure/entities/product/product-sub-category.entity';
+import { ProductSubCategoryResponse } from './product-section/product-sub-categories.response';
 
 @Exclude()
 export class ProductResponse {
@@ -28,27 +28,55 @@ export class ProductResponse {
 
   @Expose() readonly updated_at: Date;
 
-  @Exclude()
-  readonly product_sub_categories: ProductSubCategory[];
-
-  @Expose()
-  totalQuantity: number;
-
-  @Expose()
-  order_by: number;
-
-  @Expose()
-  product_subcategory_is_active: boolean;
-
   @Transform(({ value }) => {
-    return plainToClass(ProductWarehouseResponse, value);
+    if (value === null || value === undefined) {
+      return plainToClass(ProductSubCategoryResponse, value);
+    }
+    return value.length === 1
+      ? plainToClass(ProductSubCategoryResponse, value[0])
+      : plainToClass(ProductSubCategoryResponse, value);
   })
   @Expose()
-  readonly warehouses_products: ProductWarehouseResponse[];
+  product_sub_categories:
+    | ProductSubCategoryResponse[]
+    | ProductSubCategoryResponse
+    | null;
+
+  @Expose()
+  @Transform(({ obj }) => {
+    if (!Array.isArray(obj.warehouses_products)) {
+      return 0;
+    }
+    return obj.warehouses_products.reduce((acc, cur) => acc + cur.quantity, 0);
+  })
+  totalQuantity: number | null;
+
+  @Expose()
+  @Transform(({ obj }) => {
+    return (
+      Array.isArray(obj.products_favorite) && obj.products_favorite.length === 1
+    );
+  })
+  is_fav: boolean;
+
+  // @Transform(
+  //   ({ value }) => {
+  //     const transformedValue = value.map((v) =>
+  //       plainToClass(ProductWarehouseResponse, v),
+  //     );
+  //     return transformedValue.length === 1
+  //       ? transformedValue[0]
+  //       : transformedValue;
+  //   },
+  // )
+  // @Expose()
+  // readonly warehouses_products:
+  //   | ProductWarehouseResponse[]
+  //   | ProductWarehouseResponse;
 
   @Transform(({ value }) => plainToClass(ProductMeasurementResponse, value))
   @Expose()
-  readonly product_measurements: ProductMeasurementResponse;
+  readonly product_measurements: ProductMeasurementResponse[];
 
   @Transform(({ value }) => plainToClass(ProductImagesResponse, value))
   @Expose()

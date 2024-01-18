@@ -5,6 +5,7 @@ import { ProductMeasurement } from './product-measurement.entity';
 import { ProductSubCategory } from './product-sub-category.entity';
 import { WarehouseOperations } from '../warehouse/warehouse-opreations.entity';
 import { WarehouseProducts } from '../warehouse/warehouse-products.entity';
+import { ProductFavorite } from './product-favorite.entity';
 
 @Entity()
 export class Product extends AuditableEntity {
@@ -46,4 +47,10 @@ export class Product extends AuditableEntity {
     (warehouseProducts) => warehouseProducts.product,
   )
   warehouses_products: WarehouseProducts[];
+
+  @OneToMany(
+    () => ProductFavorite,
+    (productFavorite) => productFavorite.product,
+  )
+  products_favorite: ProductFavorite[];
 }

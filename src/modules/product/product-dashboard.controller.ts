@@ -17,7 +17,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ProductService } from './product.service';
+import { ProductDashboardService } from './product-dashboard.service';
 import { I18nResponse } from 'src/core/helpers/i18n.helper';
 import { CreateProductRequest } from './dto/request/create-product.request';
 import {
@@ -55,6 +55,7 @@ import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { Response } from 'express';
 import { ImportCategoryRequest } from '../category/dto/requests/import-category-request';
 import { UploadValidator } from 'src/core/validators/upload.validator';
+import { ProductClientService } from './product-client.service';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -63,15 +64,17 @@ import { UploadValidator } from 'src/core/validators/upload.validator';
 })
 @ApiTags('Product')
 @Controller('product')
-export class ProductController {
+export class ProductDashboardController {
   constructor(
-    private readonly productService: ProductService,
+    private readonly productDashboardService: ProductDashboardService,
+    private readonly productClientService: ProductClientService,
+
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
-  ) { }
+  ) {}
 
   @Post('create-product')
   async createProduct(@Body() createProductRequest: CreateProductRequest) {
-    const product = await this.productService.createProduct(
+    const product = await this.productDashboardService.createProduct(
       createProductRequest,
     );
     const productResponse = plainToClass(ProductResponse, product);
@@ -84,7 +87,7 @@ export class ProductController {
     @Param('product_category_price_id') product_category_price_id: string,
     @Body() createProductOfferRequest: CreateProductOfferRequest,
   ) {
-    const product = await this.productService.createProductOffer(
+    const product = await this.productDashboardService.createProductOffer(
       product_category_price_id,
       createProductOfferRequest,
     );
@@ -100,7 +103,7 @@ export class ProductController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     createSingleImageRequest.file = file;
-    const product = await this.productService.addProductImage(
+    const product = await this.productDashboardService.addProductImage(
       id,
       createSingleImageRequest,
     );
@@ -112,7 +115,7 @@ export class ProductController {
     @Param('product_id') product_id: string,
     @Body() createProductMeasurementRequest: CreateProductMeasurementRequest,
   ) {
-    const product = await this.productService.addProductMeasurement(
+    const product = await this.productDashboardService.addProductMeasurement(
       product_id,
       createProductMeasurementRequest,
     );
@@ -124,7 +127,7 @@ export class ProductController {
     @Param('product_id') product_id: string,
     @Body() updateProductRequest: UpdateProductRequest,
   ) {
-    const product = await this.productService.updateProduct(
+    const product = await this.productDashboardService.updateProduct(
       product_id,
       updateProductRequest,
     );
@@ -138,7 +141,7 @@ export class ProductController {
     @Param('product_measurement_unit_id') product_measurement_unit_id: string,
     @Body() updateProductMeasurementRequest: UpdateProductMeasurementRequest,
   ) {
-    const product = await this.productService.updateProductMeasurement(
+    const product = await this.productDashboardService.updateProductMeasurement(
       product_id,
       product_measurement_unit_id,
       updateProductMeasurementRequest,
@@ -156,60 +159,12 @@ export class ProductController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     updateSingleImageRequest.file = file;
-    const product = await this.productService.updateProductImage(
+    const product = await this.productDashboardService.updateProductImage(
       product_id,
       image_id,
       updateSingleImageRequest,
     );
     return new ActionResponse(product);
-  }
-
-  @Get('all-products-for-client')
-  async allProductsForClient(@Query() productClientFilter: ProductClientQuery) {
-    const { limit, page } = productClientFilter;
-
-    const { products, total } =
-      await this.productService.getAllProductsForClient(productClientFilter);
-    const productsResponse = products.map((product) => {
-      const productResponse = plainToClass(ProductResponse, product);
-      productResponse.totalQuantity = product.warehouses_products.reduce(
-        (acc, cur) => acc + cur.quantity,
-        0,
-      );
-
-      productResponse.order_by = product.product_sub_categories[0].order_by;
-      return productResponse;
-    });
-    const pageMetaDto = new PageMetaDto(page, limit, total);
-    const data = this._i18nResponse.entity(productsResponse);
-    const pageDto = new PageDto(data, pageMetaDto);
-
-    return new ActionResponse(pageDto);
-  }
-  @Get('all-products-offers-for-client')
-  async allProductsOffersForClient(
-    @Query() productClientFilter: ProductClientQuery,
-  ) {
-    const { limit, page } = productClientFilter;
-
-    const { products, total } =
-      await this.productService.getAllProductsOffersForClient(
-        productClientFilter,
-      );
-    const productsResponse = products.map((product) => {
-      const productResponse = plainToClass(ProductResponse, product);
-      productResponse.totalQuantity =
-        productResponse.warehouses_products.reduce(
-          (acc, cur) => acc + cur.quantity,
-          0,
-        );
-      return productResponse;
-    });
-    const pageMetaDto = new PageMetaDto(page, limit, total);
-    const data = this._i18nResponse.entity(productsResponse);
-    const pageDto = new PageDto(data, pageMetaDto);
-
-    return new ActionResponse(pageDto);
   }
 
   @Get('all-products-for-dashboard')
@@ -219,16 +174,11 @@ export class ProductController {
     const { limit, page } = productsDashboardQuery;
 
     const { products, total } =
-      await this.productService.getAllProductsForDashboard(
+      await this.productDashboardService.getAllProductsForDashboard(
         productsDashboardQuery,
       );
     const productsResponse = products.map((product) => {
       const productResponse = plainToClass(ProductResponse, product);
-      productResponse.totalQuantity =
-        productResponse.warehouses_products.reduce(
-          (acc, cur) => acc + cur.quantity,
-          0,
-        );
       return productResponse;
     });
     const pageMetaDto = new PageMetaDto(page, limit, total);
@@ -245,16 +195,11 @@ export class ProductController {
     const { limit, page } = productsDashboardQuery;
 
     const { products, total } =
-      await this.productService.getAllProductsOffersForDashboard(
+      await this.productDashboardService.getAllProductsOffersForDashboard(
         productsDashboardQuery,
       );
     const productsResponse = products.map((product) => {
       const productResponse = plainToClass(ProductResponse, product);
-      productResponse.totalQuantity =
-        productResponse.warehouses_products.reduce(
-          (acc, cur) => acc + cur.quantity,
-          0,
-        );
       return productResponse;
     });
     const pageMetaDto = new PageMetaDto(page, limit, total);
@@ -264,47 +209,18 @@ export class ProductController {
     return new ActionResponse(pageDto);
   }
 
-  @Get('single-product-client/:product_id')
-  async singleProductClient(
-    @Param('product_id') id: string,
-    @Query() singleProductClientQuery: SingleProductClientQuery,
-  ) {
-    const product = await this.productService.getSingleProductForClient(
-      id,
-      singleProductClientQuery,
-    );
-    const productResponse = plainToClass(ProductResponse, product);
-    if (productResponse?.warehouses_products == null) {
-      throw new ConflictException('Product is not available In Warehouse');
-    } else {
-      productResponse.totalQuantity =
-        productResponse.warehouses_products.reduce(
-          (acc, cur) => acc + cur.quantity,
-          0,
-        );
-    }
-
-    return new ActionResponse(this._i18nResponse.entity(productResponse));
-  }
-
   @Get('single-product-dashboard/:product_id')
   async singleProductDashboard(@Param('product_id') id: string) {
-    const product = await this.productService.getSingleProductForDashboard(id);
+    const product =
+      await this.productDashboardService.getSingleProductForDashboard(id);
     const productResponse = plainToClass(ProductResponse, product);
-    if (productResponse.warehouses_products) {
-      productResponse.totalQuantity =
-        productResponse.warehouses_products.reduce(
-          (acc, cur) => acc + cur.quantity,
-          0,
-        );
-    }
 
     return new ActionResponse(this._i18nResponse.entity(productResponse));
   }
 
   @Delete('delete-Product/:product_id')
   async deleteProduct(@Param('product_id') id: string) {
-    const product = await this.productService.deleteProduct(id);
+    const product = await this.productDashboardService.deleteProduct(id);
     return new ActionResponse(product);
   }
 
@@ -313,7 +229,7 @@ export class ProductController {
     @Param('product_id') product_id: string,
     @Param('image_id') image_id: string,
   ) {
-    const product = await this.productService.deleteProductImage(
+    const product = await this.productDashboardService.deleteProductImage(
       product_id,
       image_id,
     );
@@ -324,7 +240,7 @@ export class ProductController {
     @Param('product_id') product_id: string,
     @Param('product_measurement_id') product_measurement_id: string,
   ) {
-    const product = await this.productService.deleteProductMeasurement(
+    const product = await this.productDashboardService.deleteProductMeasurement(
       product_id,
       product_measurement_id,
     );
@@ -334,10 +250,13 @@ export class ProductController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
-  @Get("/export")
-  @Header('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+  @Get('/export')
+  @Header(
+    'Content-type',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  )
   async exportProducts(@Res() res: Response) {
-    const File = await this.productService.exportProducts();
+    const File = await this.productDashboardService.exportProducts();
     res.download(`${File}`);
   }
 
@@ -350,11 +269,10 @@ export class ProductController {
   async importProducts(
     @Body() req: ImportCategoryRequest,
     @UploadedFile(new UploadValidator().build())
-    file: Express.Multer.File
+    file: Express.Multer.File,
   ) {
     req.file = file;
-    const products = await this.productService.importProducts(req);
+    const products = await this.productDashboardService.importProducts(req);
     return new ActionResponse(products);
   }
-
 }
