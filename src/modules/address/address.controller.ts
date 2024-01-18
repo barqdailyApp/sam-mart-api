@@ -31,7 +31,7 @@ export class AddressController {
         const result = await this.addressService.findAll(query);
         const response = plainToInstance(AddressResponse, result, { excludeExtraneousValues: true });
         if (query.page && query.limit) {
-            const total = await this.addressService.count();
+            const total = await this.addressService.count(query);
             return new PaginatedResponse<AddressResponse[]>(response, { meta: { total, ...query } });
         } else {
             return new ActionResponse<AddressResponse[]>(response);

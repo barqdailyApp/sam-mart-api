@@ -11,6 +11,7 @@ import { SupportTicket } from 'src/infrastructure/entities/support-ticket/suppor
 import { TicketComment } from 'src/infrastructure/entities/support-ticket/ticket-comment.entity';
 import { SocketAuthMiddleware } from './middlewares/ws-auth';
 import { SupportTicketPrivacyMiddleware } from './middlewares/ws-support-ticket-privacy';
+import { toUrl } from 'src/core/helpers/file.helper';
 
 @WebSocketGateway({ namespace: Gateways.SupportTicket.Namespace, cors: { origin: '*' } })
 @UseGuards(WsJwtAuthGuard)
@@ -32,7 +33,12 @@ export class SupportTicketGateway {
     handleSendMessage(payload: { supportTicket: SupportTicket, ticketComment: TicketComment, action: string }) {
         const ticketOwnerId = payload.supportTicket.user_id;
         const connectedSockets: any = this.server.sockets
-       
+
+        if (payload.ticketComment && payload.ticketComment.attachment) {
+            payload.ticketComment.attachment.file_url = toUrl(payload.ticketComment.attachment.file_url);
+        }
+
+
         connectedSockets.forEach(socket => {
             if (socket.user && (socket.user.id === ticketOwnerId || socket.user.roles.includes('ADMIN'))) {
                 socket.emit(`support_ticket_${payload.supportTicket.id}`, payload);

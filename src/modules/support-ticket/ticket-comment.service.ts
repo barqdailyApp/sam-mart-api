@@ -11,6 +11,7 @@ import { AddTicketCommentRequest } from './dto/request/add-ticket-comment.reques
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { TicketAttachment } from 'src/infrastructure/entities/support-ticket/ticket-attachement.entity';
 import { SupportTicketGateway } from 'src/integration/gateways/support-ticket.gateway';
+import { GetCommentQueryRequest } from './dto/request/get-comment-query.request';
 
 
 @Injectable()
@@ -31,7 +32,7 @@ export class TicketCommentService extends BaseService<TicketComment> {
         if (file) {
             const tempImage = await this._fileService.upload(
                 file,
-                `support-tickets/${this.currentUser.id}`,
+                `support-tickets`,
             );
 
             const createAttachedFile = this.ticketAttachmentRepository.create({
@@ -61,7 +62,9 @@ export class TicketCommentService extends BaseService<TicketComment> {
         return savedComment;
     }
 
-    async getCommentsByChunk(ticketId: string, offset: number, limit: number): Promise<TicketComment[]> {
+    async getCommentsByChunk(ticketId: string, query: GetCommentQueryRequest): Promise<TicketComment[]> {
+        const { limit = 10, offset = 0 } = query;
+
         const supportTicket = await this.supportTicketRepository.findOne({ where: { id: ticketId } })
         if (!supportTicket)
             throw new BadRequestException('Ticket not found');

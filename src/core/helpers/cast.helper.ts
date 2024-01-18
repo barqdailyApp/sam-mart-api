@@ -15,6 +15,9 @@ export function toLowerCase(value: string): string {
     return value.toLowerCase() || '';
 }
 
+export function calculateSum(numbers: number[]): number {
+    return numbers.reduce((sum, num) => sum + num, 0);
+  }
 export function trim(value: string): string {
     return value.trim();
 }

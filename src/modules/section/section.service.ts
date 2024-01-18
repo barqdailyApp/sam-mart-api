@@ -18,8 +18,12 @@ import { UpdateSectionRequest } from './dto/requests/update-section.request';
 import { FileService } from '../file/file.service';
 import { UpdateSectionCategoryRequest } from './dto/requests/update-section-category.request';
 import { toUrl } from 'src/core/helpers/file.helper';
-import { CreateSectionExcelRequest, CreateSectionsExcelRequest } from './dto/requests/create-sections-excel.request';
+import {
+  CreateSectionExcelRequest,
+  CreateSectionsExcelRequest,
+} from './dto/requests/create-sections-excel.request';
 import { validate } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 @Injectable()
 export class SectionService extends BaseService<Section> {
@@ -44,6 +48,7 @@ export class SectionService extends BaseService<Section> {
         ? null
         : await this.user_repo.findOne({ where: { id: user_id } });
     const sections = await this.section_repo.find({
+      where: { is_active: true },
       order: { order_by: 'ASC' },
     });
 
@@ -51,7 +56,8 @@ export class SectionService extends BaseService<Section> {
       return sections.filter((section) =>
         section.allowed_roles.includes(Role.CLIENT),
       );
-    if (user.roles.includes(Role.ADMIN)) return sections
+    if (user.roles.includes(Role.ADMIN))
+      return await this.section_repo.find({ order: { order_by: 'ASC' } });
     return sections.filter((section) => {
       return user.roles.includes(section.allowed_roles[0]);
     });
@@ -87,9 +93,12 @@ export class SectionService extends BaseService<Section> {
     return plainToInstance(Section, req);
   }
 
-  async getSectionCategories(section_id: string): Promise<SectionCategory[]> {
+  async getSectionCategories(
+    section_id: string,
+    all: boolean,
+  ): Promise<SectionCategory[]> {
     return await this.section_category_repo.find({
-      where: { section_id, is_active: true },
+      where: { section_id, is_active: all == true ? null : true },
       relations: { category: true },
       order: { order_by: 'ASC' },
     });
@@ -147,13 +156,21 @@ export class SectionService extends BaseService<Section> {
       });
     });
 
-    return await this._fileService.exportExcel(flattenedData, 'sections', 'sections');
+    return await this._fileService.exportExcel(
+      flattenedData,
+      'sections',
+      'sections',
+    );
   }
 
   async importSections(req: any) {
-    const file = await this.storageManager.store(req.file, { path: 'category-export' });
+    const file = await this.storageManager.store(req.file, {
+      path: 'category-export',
+    });
     const jsonData = await this._fileService.importExcel(file);
-    const CreateSectionRequest = plainToClass(CreateSectionsExcelRequest, { sections: jsonData });
+    const CreateSectionRequest = plainToClass(CreateSectionsExcelRequest, {
+      sections: jsonData,
+    });
     const validationErrors = await validate(CreateSectionRequest);
     if (validationErrors.length > 0) {
       throw new BadRequestException(JSON.stringify(validationErrors));
@@ -170,7 +187,7 @@ export class SectionService extends BaseService<Section> {
         delivery_type,
         is_active,
         logo,
-      } = plainToClass(CreateSectionExcelRequest, sectionData)
+      } = plainToClass(CreateSectionExcelRequest, sectionData);
 
       return this._repo.create({
         name_ar,
@@ -181,9 +198,9 @@ export class SectionService extends BaseService<Section> {
         delivery_price,
         delivery_type,
         is_active,
-        logo
+        logo,
       });
-    })
+    });
 
     return await this._repo.save(newSections);
   }
