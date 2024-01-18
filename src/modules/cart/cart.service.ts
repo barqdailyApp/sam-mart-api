@@ -9,6 +9,8 @@ import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { Product } from 'src/infrastructure/entities/product/product.entity';
 import { ProductCategoryPrice } from 'src/infrastructure/entities/product/product-category-price.entity';
+import { In } from 'typeorm';
+import { calculateSum } from 'src/core/helpers/cast.helper';
 
 @Injectable()
 export class CartService extends BaseService<CartProduct> {
@@ -49,19 +51,27 @@ export class CartService extends BaseService<CartProduct> {
 
   async addToCart(req: AddToCartRequest) {
     const cart = await this.getCart();
-
-
+    const additions = req.additions || [];
+    console.log(additions);
     const product_price = await this.productCategoryPrice.findOne({
-      where: { id: req.product_category_price_id },
+      where: {
+        id: req.product_category_price_id,
+        product_additional_services: {
+          id: additions.length != 0 ? In(additions) : null,
+        },
+      },
       relations: {
         product_measurement: true,
         product_offer: true,
-        product_sub_category:{category_subCategory:{section_category:true}}
+        product_additional_services: true,
+        product_sub_category: {
+          category_subCategory: { section_category: true },
+        },
       },
     });
-    console.log('product_price', product_price);
-    
-    if (product_price.product_offer !=null) {
+    console.log(product_price);
+
+    if (product_price.product_offer != null) {
       product_price.min_order_quantity =
         product_price.product_offer.min_offer_quantity;
       product_price.max_order_quantity =
@@ -79,6 +89,17 @@ export class CartService extends BaseService<CartProduct> {
           product_price.max_order_quantity,
       );
     }
+
+    if (additions.length > 0) {
+      const additional_cost = calculateSum(
+        product_price.product_additional_services.map((e) => {
+          return Number (e.price);
+        }),
+        
+      );
+      product_price.price = Number(product_price.price) + Number(additional_cost);
+
+    }
     const cart_product = await this.cartProductRepository.findOne({
       where: {
         cart_id: cart.id,
@@ -86,19 +107,23 @@ export class CartService extends BaseService<CartProduct> {
       },
     });
     if (cart_product) {
+    
       cart_product.quantity += req.quantity;
       return this.cartProductRepository.save(cart_product);
     }
     return this.cartProductRepository.save(
       new CartProduct({
+        additions:additions,
         cart_id: cart.id,
-        section_id:product_price.product_sub_category.category_subCategory.section_category.section_id,
+        section_id:
+          product_price.product_sub_category.category_subCategory
+            .section_category.section_id,
         quantity: req.quantity,
         product_id: product_price.product_sub_category.product_id,
         product_category_price_id: req.product_category_price_id,
-        price: Number(product_price.price) * req.quantity,
-        conversion_factor:product_price.product_measurement.conversion_factor,
-        main_measurement_id:product_price.product_measurement.base_unit_id
+        price: product_price.price ,
+        conversion_factor: product_price.product_measurement.conversion_factor,
+        main_measurement_id: product_price.product_measurement.base_unit_id,
       }),
     );
   }

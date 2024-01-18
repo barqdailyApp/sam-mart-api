@@ -8,6 +8,7 @@ import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
 import { RolesGuard } from '../authentication/guards/roles.guard';
 import { CartProductRespone } from './dto/respone/cart-product-repspone';
 import { I18nResponse } from 'src/core/helpers/i18n.helper';
+import { ActionResponse } from 'src/core/base/responses/action.response';
 
 @ApiTags('Cart')
 @ApiHeader({
@@ -31,14 +32,14 @@ export class CartController {
       await this.cartService.getCartProducts(cart.id),
     );
 
-    return cart_products.map(
+    return new ActionResponse( cart_products.map(
       (e) =>
         new CartProductRespone({
-          total_price: e.price,
+          price: e.price,
           quantity: e.quantity,
           product: e.product_category_price,
         }),
-    );
+     ) );
   }
 
   @Post('/add')

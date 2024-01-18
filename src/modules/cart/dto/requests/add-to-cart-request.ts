@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
-import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsArray, IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 export class AddToCartRequest{
 
@@ -13,5 +13,12 @@ product_category_price_id:string
 @IsNumber()
 @Transform(({value})=>Number(value))
 quantity:number
+
+
+@ApiProperty({required:false})
+
+additions:string[]
+
+
 
 }

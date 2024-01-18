@@ -41,6 +41,9 @@ product_category_price_id:string
 @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
 price:number;
 
+@Column({type:"simple-array",nullable:true})
+additions:string[]
+
 constructor(data: Partial<CartProduct>) {
     super();
     Object.assign(this, data);
