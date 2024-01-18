@@ -93,18 +93,16 @@ export class SectionService extends BaseService<Section> {
     return plainToInstance(Section, req);
   }
 
-
   async getSectionCategories(
     section_id: string,
     all: boolean,
   ): Promise<SectionCategory[]> {
     return await this.section_category_repo.find({
-      where: { section_id, is_active: all==true ? null : true },
+      where: { section_id, is_active: all == true ? null : true },
       relations: { category: true },
       order: { order_by: 'ASC' },
     });
   }
-
 
   async addCategoryToSection(req: SectionCategoryRequest) {
     const section = await this.section_repo.findOne({
