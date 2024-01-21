@@ -3,7 +3,6 @@ import { IsEnum, IsNotEmpty, IsString, ValidateIf } from 'class-validator';
 import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
 import { PaymentMethod } from 'src/infrastructure/data/enums/payment-method';
 
-
 export class OrderSlotRequest {
   @ApiProperty()
   @IsNotEmpty()
@@ -14,7 +13,6 @@ export class OrderSlotRequest {
   @IsNotEmpty()
   @IsString()
   day: string;
-
 }
 
 export class MakeOrderRequest {
@@ -36,7 +34,6 @@ export class MakeOrderRequest {
   @IsNotEmpty()
   payment_method: PaymentMethod;
 
-
   @ApiProperty({
     type: 'enum',
     enum: [DeliveryType.FAST, DeliveryType.SCHEDULED],
@@ -47,11 +44,7 @@ export class MakeOrderRequest {
 
   @ApiProperty()
   @IsNotEmpty()
-  @ValidateIf((obj) => obj.delivery_type === DeliveryType.SCHEDULED)
- 
-
-  slot_day:OrderSlotRequest
   
- 
-
+  @ValidateIf((obj) => obj.delivery_type === DeliveryType.SCHEDULED)
+  slot_day: OrderSlotRequest;
 }
