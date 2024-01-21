@@ -101,11 +101,11 @@ export class CategoryService extends BaseService<Category> {
       // set avatar path
       category.logo = logo;
     }
-    await this._repo.update(category.id, {
+  const result=  await this._repo.update(category.id, {
       ...plainToInstance(Category, req),
       logo: category.logo,
     });
-    return plainToInstance(Category, req);
+    return plainToInstance(Category, result);
   }
   async addSubcategoryToCategory(req: CategorySubcategoryRequest) {
     const category = await this.category_subcategory_repo.findOne({
