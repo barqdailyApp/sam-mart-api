@@ -59,21 +59,6 @@ export class ProductResponse {
   })
   is_fav: boolean;
 
-  // @Transform(
-  //   ({ value }) => {
-  //     const transformedValue = value.map((v) =>
-  //       plainToClass(ProductWarehouseResponse, v),
-  //     );
-  //     return transformedValue.length === 1
-  //       ? transformedValue[0]
-  //       : transformedValue;
-  //   },
-  // )
-  // @Expose()
-  // readonly warehouses_products:
-  //   | ProductWarehouseResponse[]
-  //   | ProductWarehouseResponse;
-
   @Transform(({ value }) => plainToClass(ProductMeasurementResponse, value))
   @Expose()
   readonly product_measurements: ProductMeasurementResponse[];

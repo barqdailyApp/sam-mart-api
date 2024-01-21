@@ -8,6 +8,7 @@ import { AdditionalServiceResponse } from 'src/modules/additional-service/dto/re
 
 @Exclude()
 export class ProductAdditionalServiceResponse {
+  @Expose() readonly id: string;
   @Expose() readonly product_category_price_id: string;
   @Expose() readonly additional_service_id: string;
   @Expose() readonly price: number;

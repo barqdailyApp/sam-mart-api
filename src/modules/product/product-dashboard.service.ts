@@ -172,8 +172,12 @@ export class ProductDashboardService {
       product_id,
     });
     //* Set Main Unit
-    if (is_main_unit) {
-      productMeasurement.base_unit_id = measurement_unit_id;
+    if (!is_main_unit) {
+      const mainProductMeasurement =
+        await this.productMeasurementRepository.findOne({
+          where: { product_id, is_main_unit: true },
+        });
+      productMeasurement.base_unit_id = mainProductMeasurement.id;
     }
     return await this.productMeasurementRepository.save(productMeasurement);
   }
@@ -212,34 +216,60 @@ export class ProductDashboardService {
       where: { id: product_id },
     });
   }
+
   async updateProductMeasurement(
     product_id: string,
     product_measurement_unit_id: string,
     updateProductMeasurementRequest: UpdateProductMeasurementRequest,
   ) {
     const { conversion_factor, is_main_unit } = updateProductMeasurementRequest;
+
+    // Check if the product exists
     const product = await this.productRepository.findOne({
       where: { id: product_id },
     });
     if (!product) {
-      throw new NotFoundException('message_product_not_found');
+      throw new NotFoundException('Product not found');
     }
+
+    // Check if the product measurement exists
     const productMeasurement = await this.productMeasurementRepository.findOne({
       where: { id: product_measurement_unit_id },
     });
     if (!productMeasurement) {
-      throw new NotFoundException('message_product_measurement_not_found');
+      throw new NotFoundException('Product measurement not found');
     }
-    const updateData: any = { conversion_factor, is_main_unit };
 
-    //* Update base unit
-    if (is_main_unit != undefined || is_main_unit != null) {
+    // Prepare the update data
+    const updateData: any = { conversion_factor, is_main_unit };
+    // If the unit is marked as the main unit, ensure the conversion factor is 1
+    if (
+      conversion_factor !== undefined &&
+      conversion_factor !== null &&
+      conversion_factor !== 1
+    ) {
+      throw new BadRequestException(
+        'The conversion factor must be 1 for the main unit',
+      );
+    }
+    // Update base unit logic
+    if (is_main_unit !== undefined && is_main_unit !== null) {
       if (is_main_unit) {
-        updateData.base_unit_id = product_measurement_unit_id;
-      } else {
         updateData.base_unit_id = null;
+      } else {
+        // If the unit is not the main unit, link it to the main unit
+        const mainProductMeasurement =
+          await this.productMeasurementRepository.findOne({
+            where: { product_id, is_main_unit: true },
+          });
+        if (!mainProductMeasurement) {
+          throw new NotFoundException('Main product measurement not found');
+        }
+        updateData.base_unit_id = mainProductMeasurement.id;
       }
     }
+
+    // Perform the update and return the updated product measurement
     await this.productMeasurementRepository.update(
       { id: product_measurement_unit_id },
       updateData,

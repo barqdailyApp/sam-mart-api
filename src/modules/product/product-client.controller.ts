@@ -84,7 +84,6 @@ export class ProductClientController {
       id,
       singleProductClientQuery,
     );
-    console.log('product single', product);
     const productResponse = plainToClass(ProductResponse, product);
     if (product?.warehouses_products == null) {
       throw new ConflictException('Product is not available In Warehouse');
