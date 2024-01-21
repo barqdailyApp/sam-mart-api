@@ -16,6 +16,7 @@ import { SupportTicket } from '../support-ticket/support-ticket.entity';
 import { TicketComment } from '../support-ticket/ticket-comment.entity';
 
 import { Order } from '../order/order.entity';
+import { ProductFavorite } from '../product/product-favorite.entity';
 
 @Entity()
 export class User extends AuditableEntity {
@@ -67,6 +68,11 @@ export class User extends AuditableEntity {
   @OneToMany(() => Order, (order) => order.user)
   orders: Order[];
 
+  @OneToMany(
+    () => ProductFavorite,
+    (productFavorite) => productFavorite.user,
+  )
+  products_favorite: ProductFavorite[];
   constructor(partial: Partial<User>) {
     super();
     Object.assign(this, partial);

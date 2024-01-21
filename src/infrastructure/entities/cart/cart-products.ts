@@ -2,7 +2,6 @@ import { AuditableEntity } from "src/infrastructure/base/auditable.entity";
 import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
 import { Cart } from "./cart.entity";
 import { ProductCategoryPrice } from "../product/product-category-price.entity";
-import { Col } from "sequelize/types/utils";
 
 @Entity()
 

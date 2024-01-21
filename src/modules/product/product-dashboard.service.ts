@@ -1,4 +1,9 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from 'src/infrastructure/entities/product/product.entity';
 import { DeleteResult, IsNull, Not, Repository } from 'typeorm';
@@ -33,11 +38,14 @@ import { DiscountType } from 'src/infrastructure/data/enums/discount-type.enum';
 import { FileService } from '../file/file.service';
 import { plainToClass } from 'class-transformer';
 import { validate } from 'class-validator';
-import { CreateProductExcelRequest, CreateProductsExcelRequest } from './dto/request/create-products-excel.request';
+import {
+  CreateProductExcelRequest,
+  CreateProductsExcelRequest,
+} from './dto/request/create-products-excel.request';
 import { toUrl } from 'src/core/helpers/file.helper';
 
 @Injectable()
-export class ProductService {
+export class ProductDashboardService {
   constructor(
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
@@ -76,7 +84,7 @@ export class ProductService {
     @Inject(ImageManager) private readonly imageManager: ImageManager,
 
     @Inject(FileService) private _fileService: FileService,
-  ) { }
+  ) {}
 
   async createProduct(
     createProductRequest: CreateProductRequest,
@@ -164,8 +172,12 @@ export class ProductService {
       product_id,
     });
     //* Set Main Unit
-    if (is_main_unit) {
-      productMeasurement.base_unit_id = measurement_unit_id;
+    if (!is_main_unit) {
+      const mainProductMeasurement =
+        await this.productMeasurementRepository.findOne({
+          where: { product_id, is_main_unit: true },
+        });
+      productMeasurement.base_unit_id = mainProductMeasurement.id;
     }
     return await this.productMeasurementRepository.save(productMeasurement);
   }
@@ -204,34 +216,60 @@ export class ProductService {
       where: { id: product_id },
     });
   }
+
   async updateProductMeasurement(
     product_id: string,
     product_measurement_unit_id: string,
     updateProductMeasurementRequest: UpdateProductMeasurementRequest,
   ) {
     const { conversion_factor, is_main_unit } = updateProductMeasurementRequest;
+
+    // Check if the product exists
     const product = await this.productRepository.findOne({
       where: { id: product_id },
     });
     if (!product) {
-      throw new NotFoundException('message_product_not_found');
+      throw new NotFoundException('Product not found');
     }
+
+    // Check if the product measurement exists
     const productMeasurement = await this.productMeasurementRepository.findOne({
       where: { id: product_measurement_unit_id },
     });
     if (!productMeasurement) {
-      throw new NotFoundException('message_product_measurement_not_found');
+      throw new NotFoundException('Product measurement not found');
     }
-    const updateData: any = { conversion_factor, is_main_unit };
 
-    //* Update base unit
-    if (is_main_unit != undefined || is_main_unit != null) {
+    // Prepare the update data
+    const updateData: any = { conversion_factor, is_main_unit };
+    // If the unit is marked as the main unit, ensure the conversion factor is 1
+    if (
+      conversion_factor !== undefined &&
+      conversion_factor !== null &&
+      conversion_factor !== 1
+    ) {
+      throw new BadRequestException(
+        'The conversion factor must be 1 for the main unit',
+      );
+    }
+    // Update base unit logic
+    if (is_main_unit !== undefined && is_main_unit !== null) {
       if (is_main_unit) {
-        updateData.base_unit_id = product_measurement_unit_id;
-      } else {
         updateData.base_unit_id = null;
+      } else {
+        // If the unit is not the main unit, link it to the main unit
+        const mainProductMeasurement =
+          await this.productMeasurementRepository.findOne({
+            where: { product_id, is_main_unit: true },
+          });
+        if (!mainProductMeasurement) {
+          throw new NotFoundException('Main product measurement not found');
+        }
+        updateData.base_unit_id = mainProductMeasurement.id;
       }
     }
+
+    // Perform the update and return the updated product measurement
     await this.productMeasurementRepository.update(
       { id: product_measurement_unit_id },
       updateData,
@@ -293,270 +331,6 @@ export class ProductService {
     });
   }
 
-  //* Get All Products For Client
-  async getAllProductsForClient(productClientQuery: ProductClientQuery) {
-    const {
-      page,
-      limit,
-      longitude,
-      latitude,
-      section_id,
-      category_sub_category_id,
-      product_name,
-      sort,
-    } = productClientQuery;
-    const skip = (page - 1) * limit;
-
-    let productsSort = {};
-
-    switch (sort) {
-      case 'lowest_price':
-        // Convert price to a numeric type before sorting
-        (productsSort = 'product_category_prices.price'), 'ASC';
-        break;
-      case 'highest_price':
-        (productsSort = 'product_category_prices.price'), 'DESC';
-        break;
-      case 'new':
-        (productsSort = 'product.created_at'), 'DESC';
-        break;
-      // handle other sort cases if needed
-    }
-    // For guests and individuals, orders are taken from the nearest warehouse
-
-    let warehouse: Warehouse;
-    if (latitude && longitude) {
-      warehouse = await this.warehouse_repo
-        .createQueryBuilder('warehouse')
-        .orderBy(
-          `ST_Distance_Sphere(
-             ST_SRID(point(${latitude}, ${longitude}), 4326),
-             warehouse.location
-         )`,
-        )
-        .getOne();
-    }
-
-    // Start building the query
-    let query = this.productRepository
-      .createQueryBuilder('product')
-
-      .leftJoinAndSelect('product.product_images', 'product_images')
-      .leftJoinAndSelect(
-        'product.product_sub_categories',
-        'product_sub_categories',
-      )
-      .leftJoin(
-        'product_sub_categories.category_subCategory',
-        'product_category_subCategory',
-      )
-      .leftJoin(
-        'product_category_subCategory.section_category',
-        'product_section_category',
-      )
-      .innerJoinAndSelect('product.warehouses_products', 'warehousesProduct')
-      .innerJoinAndSelect(
-        'product.product_measurements',
-        'product_measurements',
-      )
-      .innerJoinAndSelect(
-        'product_measurements.measurement_unit',
-        'measurement_unit',
-      )
-      .innerJoinAndSelect(
-        'product_measurements.product_category_prices',
-        'product_category_prices',
-      )
-      .leftJoinAndSelect(
-        'product_category_prices.product_offer',
-        'product_offer',
-      )
-      .leftJoin(
-        'product_category_prices.product_sub_category',
-        'product_sub_category',
-      )
-      .leftJoin(
-        'product_sub_category.category_subCategory',
-        'category_subCategory',
-      )
-      .leftJoin('category_subCategory.section_category', 'section_category')
-      .orderBy('productSubCategory.order_by', 'ASC')
-      .orderBy(productsSort)
-
-      .skip(skip)
-      .take(limit);
-
-    // Modify condition if warehouse is defined
-    if (warehouse) {
-      query = query.andWhere('warehousesProduct.warehouse_id = :warehouseId', {
-        warehouseId: warehouse.id,
-      });
-    }
-
-    // Add search term condition if provided
-    if (product_name) {
-      query = query.andWhere(
-        'product.name_ar LIKE :product_name OR product.name_en LIKE :product_name',
-        { product_name: `%${product_name}%` },
-      );
-    }
-
-    // Conditional where clause based on sub category
-    if (category_sub_category_id) {
-      query = query.andWhere(
-        'product_sub_category.category_sub_category_id = :category_sub_category_id',
-        {
-          category_sub_category_id,
-        },
-      );
-      query = query.andWhere('product.is_active = true');
-      query = query.andWhere('product_sub_categories.is_active = true');
-      query = query.andWhere(
-        'product_sub_categories.category_sub_category_id = :category_sub_category_id',
-        {
-          category_sub_category_id,
-        },
-      );
-      const categorySubcategory = await this.categorySubcategory_repo.findOne({
-        where: { id: category_sub_category_id },
-      });
-      await this.subCategoryService.updateMostHitSubCategory({
-        sub_category_id: categorySubcategory.subcategory_id,
-      });
-    }
-
-    // Conditional where clause based on section
-    if (section_id) {
-      query = query.andWhere('section_category.section_id = :section_id', {
-        section_id,
-      });
-      query = query.andWhere('product.is_active = true');
-      query = query.andWhere('product_sub_categories.is_active = true');
-      query = query.andWhere('product_section_category.section_id = :section_id', {
-        section_id,
-      });
-    }
-
-    const [products, total] = await query.getManyAndCount();
-    return { products, total };
-  }
-
-  //* Get All Products Offers  For Client
-  async getAllProductsOffersForClient(productClientQuery: ProductClientQuery) {
-    const {
-      page,
-      limit,
-      longitude,
-      latitude,
-      section_id,
-      category_sub_category_id,
-      product_name,
-      sort,
-    } = productClientQuery;
-    const skip = (page - 1) * limit;
-
-    let productsSort = {};
-
-    switch (sort) {
-      case 'lowest_price':
-        // Convert price to a numeric type before sorting
-        (productsSort = 'product_offer.price'), 'ASC';
-        break;
-      case 'highest_price':
-        (productsSort = 'product_offer.price'), 'DESC';
-        break;
-      case 'new':
-        (productsSort = 'product_offer.created_at'), 'DESC';
-        break;
-      // handle other sort cases if needed
-    }
-
-    // For guests and individuals, orders are taken from the nearest warehouse
-    let warehouse: Warehouse;
-    if (latitude && longitude) {
-      warehouse = await this.warehouse_repo
-        .createQueryBuilder('warehouse')
-        .orderBy(
-          `ST_Distance_Sphere(
-             ST_SRID(point(${latitude}, ${longitude}), 4326),
-             warehouse.location
-         )`,
-        )
-        .getOne();
-    }
-
-    // Start building the query
-    let query = this.productRepository
-      .createQueryBuilder('product')
-      .leftJoinAndSelect('product.product_images', 'product_images')
-
-      .innerJoinAndSelect('product.warehouses_products', 'warehousesProduct')
-      .innerJoinAndSelect(
-        'product.product_measurements',
-        'product_measurements',
-      )
-      .innerJoinAndSelect(
-        'product_measurements.measurement_unit',
-        'measurement_unit',
-      )
-      .innerJoinAndSelect(
-        'product_measurements.product_category_prices',
-        'product_category_prices',
-      )
-      .innerJoinAndSelect(
-        'product_category_prices.product_offer',
-        'product_offer',
-      )
-      .leftJoin(
-        'product_category_prices.product_sub_category',
-        'product_sub_category',
-      )
-      .leftJoin(
-        'product_sub_category.category_subCategory',
-        'category_subCategory',
-      )
-      .leftJoin('category_subCategory.section_category', 'section_category')
-      .orderBy(productsSort)
-
-      .skip(skip)
-      .take(limit);
-
-    // Modify condition if warehouse is defined
-    if (warehouse) {
-      query = query.andWhere('warehousesProduct.warehouse_id = :warehouseId', {
-        warehouseId: warehouse.id,
-      });
-    }
-
-    // Add search term condition if provided
-    if (product_name) {
-      query = query.andWhere(
-        'product.name_ar LIKE :product_name OR product.name_en LIKE :product_name',
-        { product_name: `%${product_name}%` },
-      );
-    }
-
-    // Conditional where clause based on sub category
-    if (category_sub_category_id) {
-      query = query.andWhere(
-        'product_sub_category.category_sub_category_id = :category_sub_category_id',
-        {
-          category_sub_category_id,
-        },
-      );
-    }
-
-    // Conditional where clause based on section
-    if (section_id) {
-      query = query.andWhere('section_category.section_id = :section_id', {
-        section_id,
-      });
-    }
-
-    const [products, total] = await query.getManyAndCount();
-    return { products, total };
-  }
-
   //* Get All Products For DashBoard
   async getAllProductsForDashboard(
     productsDashboardQuery: ProductsDashboardQuery,
@@ -616,93 +390,6 @@ export class ProductService {
       .take(limit);
     const [products, total] = await query.getManyAndCount();
     return { products, total };
-  }
-
-  //* Get Single Product For Client
-  async getSingleProductForClient(
-    product_id: string,
-    singleProductClientFilter: SingleProductClientQuery,
-  ) {
-    const { latitude, longitude, section_id, category_sub_category_id } =
-      singleProductClientFilter;
-    // For guests and individuals, orders are taken from the nearest warehouse
-    let warehouse: Warehouse;
-    if (latitude && longitude) {
-      warehouse = await this.warehouse_repo
-        .createQueryBuilder('warehouse')
-        .orderBy(
-          `ST_Distance_Sphere(
-             ST_SRID(point(${latitude}, ${longitude}), 4326),
-             warehouse.location
-         )`,
-        )
-        .getOne();
-    }
-    // Start building the query
-    let query = this.productRepository
-      .createQueryBuilder('product')
-      .leftJoinAndSelect('product.product_images', 'product_images')
-
-      .innerJoinAndSelect('product.warehouses_products', 'warehousesProduct')
-      .innerJoinAndSelect(
-        'product.product_measurements',
-        'product_measurements',
-      )
-      .innerJoinAndSelect(
-        'product_measurements.measurement_unit',
-        'measurement_unit',
-      )
-      .innerJoinAndSelect(
-        'product_measurements.product_category_prices',
-        'product_category_prices',
-      )
-      .leftJoinAndSelect(
-        'product_category_prices.product_offer',
-        'product_offer',
-      )
-      .leftJoinAndSelect(
-        'product_category_prices.product_additional_services',
-        'product_additional_services',
-      )
-      .leftJoinAndSelect(
-        'product_additional_services.additional_service',
-        'additional_service',
-      )
-      .leftJoin(
-        'product_category_prices.product_sub_category',
-        'product_sub_category',
-      )
-      .leftJoin(
-        'product_sub_category.category_subCategory',
-        'category_subCategory',
-      )
-      .leftJoin('category_subCategory.section_category', 'section_category');
-
-    // Get single product
-    query = query.where('product.id = :product_id', { product_id });
-    // Initial condition to ensure product is in at least one warehouse
-    if (warehouse) {
-      query = query.andWhere('warehousesProduct.warehouse_id = :warehouseId', {
-        warehouseId: warehouse.id,
-      });
-    }
-    // Conditional where clause based on sub category
-    if (category_sub_category_id) {
-      query = query.andWhere(
-        'product_sub_category.category_sub_category_id = :category_sub_category_id',
-        {
-          category_sub_category_id,
-        },
-      );
-    }
-
-    // Conditional where clause based on section
-    if (section_id) {
-      query = query.andWhere('section_category.section_id = :section_id', {
-        section_id,
-      });
-    }
-    return await query.getOne();
   }
 
   //* Get Single Product For Dashboard
@@ -814,13 +501,13 @@ export class ProductService {
           category_subCategory: {
             section_category: {
               category: true,
-              section: true
+              section: true,
             },
-            subcategory: true
-          }
+            subcategory: true,
+          },
         },
-      }
-    })
+      },
+    });
 
     // Create a flat structure for products
     const flattenedProducts = products.map((product) => {
@@ -839,36 +526,58 @@ export class ProductService {
           is_logo: image.is_logo,
         })),
         warehousesProducts: product.warehouses_products,
-        productMeasurements: product.product_measurements.map((measurement) => ({
-          measuremen_id: measurement.id,
-          conversion_factor: measurement.conversion_factor,
-          product_id: measurement.product_id,
-          measurement_unit_id: measurement.measurement_unit_id,
-          base_unit_id: measurement.base_unit_id,
-          is_main_unit: measurement.is_main_unit,
-        })),
-        productSubCategories: product.product_sub_categories.map((subCategory) => ({
-          subCategory_id: subCategory.category_subCategory.subcategory.id,
-          subCategory_name_ar: subCategory.category_subCategory.subcategory.name_ar,
-          subCategory_name_en: subCategory.category_subCategory.subcategory.name_en,
-          category_id: subCategory.category_subCategory.section_category.category.id,
-          category_name_ar: subCategory.category_subCategory.section_category.category.name_ar,
-          category_name_en: subCategory.category_subCategory.section_category.category.name_en,
-          section_id: subCategory.category_subCategory.section_category.section.id,
-          section_name_ar: subCategory.category_subCategory.section_category.section.name_ar,
-          section_name_en: subCategory.category_subCategory.section_category.section.name_en,
-        })),
+        productMeasurements: product.product_measurements.map(
+          (measurement) => ({
+            measuremen_id: measurement.id,
+            conversion_factor: measurement.conversion_factor,
+            product_id: measurement.product_id,
+            measurement_unit_id: measurement.measurement_unit_id,
+            base_unit_id: measurement.base_unit_id,
+            is_main_unit: measurement.is_main_unit,
+          }),
+        ),
+        productSubCategories: product.product_sub_categories.map(
+          (subCategory) => ({
+            subCategory_id: subCategory.category_subCategory.subcategory.id,
+            subCategory_name_ar:
+              subCategory.category_subCategory.subcategory.name_ar,
+            subCategory_name_en:
+              subCategory.category_subCategory.subcategory.name_en,
+            category_id:
+              subCategory.category_subCategory.section_category.category.id,
+            category_name_ar:
+              subCategory.category_subCategory.section_category.category
+                .name_ar,
+            category_name_en:
+              subCategory.category_subCategory.section_category.category
+                .name_en,
+            section_id:
+              subCategory.category_subCategory.section_category.section.id,
+            section_name_ar:
+              subCategory.category_subCategory.section_category.section.name_ar,
+            section_name_en:
+              subCategory.category_subCategory.section_category.section.name_en,
+          }),
+        ),
       };
     });
 
-    return await this._fileService.exportExcel(flattenedProducts, 'products', 'products')
+    return await this._fileService.exportExcel(
+      flattenedProducts,
+      'products',
+      'products',
+    );
   }
 
   async importProducts(req: any) {
-    const file = await this.storageManager.store(req.file, { path: 'product-export' });
+    const file = await this.storageManager.store(req.file, {
+      path: 'product-export',
+    });
     const jsonData = await this._fileService.importExcel(file);
 
-    const CreateProductRequest = plainToClass(CreateProductsExcelRequest, { products: jsonData });
+    const CreateProductRequest = plainToClass(CreateProductsExcelRequest, {
+      products: jsonData,
+    });
     const validationErrors = await validate(CreateProductRequest);
     if (validationErrors.length > 0) {
       throw new BadRequestException(JSON.stringify(validationErrors));
@@ -883,7 +592,7 @@ export class ProductService {
         is_active,
         is_recovered,
         product_images,
-      } = plainToClass(CreateProductExcelRequest, productData)
+      } = plainToClass(CreateProductExcelRequest, productData);
 
       return this.productRepository.create({
         name_ar,

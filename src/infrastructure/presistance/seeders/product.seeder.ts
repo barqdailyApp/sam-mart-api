@@ -21,6 +21,7 @@ import { AdditionalService } from 'src/infrastructure/entities/product/additiona
 import { CategorySubCategory } from 'src/infrastructure/entities/category/category-subcategory.entity';
 import { Section } from 'src/infrastructure/entities/section/section.entity';
 import { SectionCategory } from 'src/infrastructure/entities/section/section-category.entity';
+import { Category } from 'src/infrastructure/entities/category/category.entity';
 
 @Injectable()
 export class ProductSeeder implements Seeder {
@@ -35,15 +36,7 @@ export class ProductSeeder implements Seeder {
     private readonly productMeasurement_repo: Repository<ProductMeasurement>,
     @InjectRepository(MeasurementUnit)
     private readonly measurementUnit_repo: Repository<MeasurementUnit>,
-    @InjectRepository(SectionCategory)
-    private readonly sectionCategory_repo: Repository<SectionCategory>,
 
-    @InjectRepository(Subcategory)
-    private readonly subCategory_repo: Repository<Subcategory>,
-
-    @InjectRepository(CategorySubCategory)
-    private readonly categorySubCategory_repo: Repository<CategorySubCategory>,
-    //
     @InjectRepository(ProductSubCategory)
     private readonly productSubCategory_repo: Repository<ProductSubCategory>,
     @InjectRepository(ProductCategoryPrice)
@@ -78,7 +71,31 @@ export class ProductSeeder implements Seeder {
         });
         await this.productImage_repo.save(createProductImage);
       }
-      for (const measurement of product.product_measurements) {
+
+      //* Create Primary Product Measurement
+      const primaryUnit = product.product_measurements.find(
+        (measurement) => measurement.is_main_unit,
+      );
+      const primaryMeasurement = await this.measurementUnit_repo.findOne({
+        where: { name_en: primaryUnit.measurement_unit.name_en },
+      });
+      const createPrimaryProductMeasurement =
+        this.productMeasurement_repo.create({
+          conversion_factor: primaryUnit.conversion_factor,
+          measurement_unit_id: primaryMeasurement.id,
+          product_id: productSaved.id,
+          is_main_unit: primaryUnit.is_main_unit,
+        });
+      const primaryProductMeasurement = await this.productMeasurement_repo.save(
+        createPrimaryProductMeasurement,
+      );
+
+      //* Create Secondary Product Measurements
+      const secondaryMeasurements = product.product_measurements.filter(
+        (measurement) => !measurement.is_main_unit,
+      );
+
+      for (const measurement of secondaryMeasurements) {
         const measurement_unit = await this.measurementUnit_repo.findOne({
           where: { name_en: measurement.measurement_unit.name_en },
         });
@@ -89,8 +106,8 @@ export class ProductSeeder implements Seeder {
           is_main_unit: measurement.is_main_unit,
         });
 
-        if (measurement.is_main_unit == true) {
-          createProductMeasurement.base_unit_id = measurement_unit.id;
+        if (measurement.is_main_unit == false) {
+          createProductMeasurement.base_unit_id = primaryProductMeasurement.id;
         }
 
         await this.productMeasurement_repo.save(createProductMeasurement);
@@ -116,7 +133,7 @@ export class ProductSeeder implements Seeder {
         await this.productSubCategory_repo.save(createProductSubCategory);
       }
     }
-  
+
     //* Link Product Sub Category with product measurement and price
     const productSubCategory = await this.productSubCategory_repo.find();
     for (let i = 0; i < productSubCategory.length; i++) {
@@ -138,23 +155,38 @@ export class ProductSeeder implements Seeder {
     //* Add Additional Services To Product Measurement
     const additionalService = await this.additionalService_repo.find();
 
-
-    const productCategoryPriceFull = await this.productCategoryPrice_repo.find();
+    const productCategoryPriceFull =
+      await this.productCategoryPrice_repo.find();
     for (let index = 0; index < productCategoryPriceFull.length; index++) {
       const createProductAdditionalService = this.productService_repo.create({
         product_category_price_id: productCategoryPriceFull[index].id,
-  
+
         additional_service_id: additionalService[0].id,
         price: Math.floor(Math.random() * 100) + 1,
       });
-  
+
       await this.productService_repo.save(createProductAdditionalService);
-      
     }
- 
   }
 
   async drop(): Promise<any> {
+    // Delete ProductCategoryPrice records related to products
+    await this.productCategoryPrice_repo.delete({});
+  
+    // Delete ProductSubCategory records related to products
+    await this.productSubCategory_repo.delete({});
+  
+    // Delete ProductMeasurement records related to products
+    await this.productMeasurement_repo.delete({});
+  
+    // Delete ProductImage records related to products
+    await this.productImage_repo.delete({});
+  
+    // Delete ProductService records related to products
+    await this.productService_repo.delete({});
+  
+    // Finally, delete Product records
     return await this.product_repo.delete({});
   }
+  
 }

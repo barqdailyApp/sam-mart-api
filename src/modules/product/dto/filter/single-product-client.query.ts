@@ -23,4 +23,8 @@ export class SingleProductClientQuery {
   @IsString()
   category_sub_category_id: string;
 
+  @ApiProperty({ nullable: true, required: false })
+  @IsOptional()
+  @IsString()
+  user_id: string;
 }
