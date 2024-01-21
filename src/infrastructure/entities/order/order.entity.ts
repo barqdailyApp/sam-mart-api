@@ -39,23 +39,27 @@ export class Order extends OwnedEntity {
   @Column()
   section_id: string;
 
-  @Column({nullable:true})
+  @Column({ nullable: true })
   total_price: number;
 
   @Column()
   payment_method: PaymentMethod;
 
+  @Column({default:false})
+  is_paid: boolean;
+
   @Column()
   delivery_type: DeliveryType;
 
-  @Column({nullable:true})
+  @Column({ nullable: true })
   estimated_delivery_time: Date;
 
   @ManyToOne(() => Slot, (slot) => slot.orders)
   @JoinColumn()
   slot: Slot;
 
-
+  @Column({ nullable: true })
+  delivery_day: string;
 
   @Column({ nullable: true })
   slot_id: string;

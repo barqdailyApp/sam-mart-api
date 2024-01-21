@@ -35,6 +35,8 @@ export class CartController {
     return new ActionResponse( cart_products.map(
       (e) =>
         new CartProductRespone({
+          id: e.id, 
+          additional_services : e.additions,
           price: e.price,
           quantity: e.quantity,
           product: e.product_category_price,

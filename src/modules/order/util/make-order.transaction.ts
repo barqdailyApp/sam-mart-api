@@ -14,7 +14,7 @@ import { MakeOrderRequest } from '../dto/make-order-request';
 import { Order } from 'src/infrastructure/entities/order/order.entity';
 import { Warehouse } from 'src/infrastructure/entities/warehouse/warehouse.entity';
 import { Address } from 'src/infrastructure/entities/user/address.entity';
-import { where } from 'sequelize';
+import { or, where } from 'sequelize';
 import { Cart } from 'src/infrastructure/entities/cart/cart.entity';
 import { CartProduct } from 'src/infrastructure/entities/cart/cart-products';
 import { plainToInstance } from 'class-transformer';
@@ -23,6 +23,7 @@ import { ShipmentProduct } from 'src/infrastructure/entities/order/shipment-prod
 import { WarehouseOperations } from 'src/infrastructure/entities/warehouse/warehouse-opreations.entity';
 import { operationType } from 'src/infrastructure/data/enums/operation-type.enum';
 import { WarehouseProducts } from 'src/infrastructure/entities/warehouse/warehouse-products.entity';
+import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
 @Injectable()
 export class MakeOrderTransaction extends BaseTransaction<
   MakeOrderRequest,
@@ -46,6 +47,7 @@ export class MakeOrderTransaction extends BaseTransaction<
         where: [{ id: req.address_id, user_id: user.id }],
       });
       const cart = await context.findOne(Cart, { where: { user_id: user.id } });
+      console.log(user.id);
       const cart_products = await context.find(CartProduct, {
         where: { cart_id: cart.id, section_id: req.section_id },
       });
@@ -66,6 +68,7 @@ export class MakeOrderTransaction extends BaseTransaction<
         ...plainToInstance(Order, req),
         user_id: user.id,
         warehouse_id: nearst_warehouse.id,
+
       });
       const shipment = await context.save(Shipment, {
         order_id: order.id,
@@ -112,6 +115,9 @@ export class MakeOrderTransaction extends BaseTransaction<
           }),
         );
       }
+
+
+      
       return order;
     } catch (error) {
       console.log(error);
