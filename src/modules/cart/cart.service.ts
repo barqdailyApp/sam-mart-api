@@ -35,12 +35,16 @@ export class CartService extends BaseService<CartProduct> {
 
   async getCartProducts(cart_id: string) {
     return await this.cartProductRepository.find({
-      where: { cart_id: cart_id },
+      where: { cart_id: cart_id ,},
       relations: {
+        
         product_category_price: {
-          product_measurement: { measurement_unit: true },
+          product_additional_services:{additional_service:true},
+         
+          product_measurement: { measurement_unit: true, },
 
           product_sub_category: {
+            
             product: { product_images: true },
             category_subCategory: { section_category: true },
           },
@@ -69,7 +73,6 @@ export class CartService extends BaseService<CartProduct> {
         },
       },
     });
-    console.log(product_price);
 
     if (product_price.product_offer != null) {
       product_price.min_order_quantity =
@@ -93,12 +96,11 @@ export class CartService extends BaseService<CartProduct> {
     if (additions.length > 0) {
       const additional_cost = calculateSum(
         product_price.product_additional_services.map((e) => {
-          return Number (e.price);
+          return Number(e.price);
         }),
-        
       );
-      product_price.price = Number(product_price.price) + Number(additional_cost);
-
+      product_price.price =
+        Number(product_price.price) + Number(additional_cost);
     }
     const cart_product = await this.cartProductRepository.findOne({
       where: {
@@ -107,13 +109,12 @@ export class CartService extends BaseService<CartProduct> {
       },
     });
     if (cart_product) {
-    
       cart_product.quantity += req.quantity;
       return this.cartProductRepository.save(cart_product);
     }
     return this.cartProductRepository.save(
       new CartProduct({
-        additions:additions,
+        additions: additions,
         cart_id: cart.id,
         section_id:
           product_price.product_sub_category.category_subCategory
@@ -121,9 +122,9 @@ export class CartService extends BaseService<CartProduct> {
         quantity: req.quantity,
         product_id: product_price.product_sub_category.product_id,
         product_category_price_id: req.product_category_price_id,
-        price: product_price.price ,
+        price: product_price.price,
         conversion_factor: product_price.product_measurement.conversion_factor,
-        main_measurement_id: product_price.product_measurement.base_unit_id,
+        main_measurement_id:product_price.product_measurement.is_main_unit==true?product_price.product_measurement.measurement_unit_id: product_price.product_measurement.base_unit_id,
       }),
     );
   }

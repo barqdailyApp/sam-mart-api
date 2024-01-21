@@ -5,6 +5,7 @@ import { toRightNumber } from 'src/core/helpers/cast.helper';
 import {
   LessThan,
   LessThanOrEqual,
+  Like,
   MoreThan,
   MoreThanOrEqual,
   Not,
@@ -101,6 +102,15 @@ export class PaginatedRequest {
             whereFilter = { ...whereFilter, [key]: Not(value) };
             break;
           default:
+            case ':=:':
+              whereFilter = { ...whereFilter, [key]: Like(`%${value}%`) };
+              break;
+            case '=:':
+              whereFilter = { ...whereFilter, [key]: Like(`${value}%`) };
+              break;
+            case ':=':
+              whereFilter = { ...whereFilter, [key]: Like(`%${value}`) };
+              break;
             whereFilter = { ...whereFilter, [key]: value };
             break;
         }
@@ -168,6 +178,9 @@ export class PaginatedRequest {
     if (statement.includes('<')) return '<';
     if (statement.includes('>')) return '>';
     if (statement.includes('!=')) return '!=';
+    if (statement.includes(':=:')) return ':=:';
+    if (statement.includes('=:')) return '=:';
+    if (statement.includes(':=')) return ':=';
     return '=';
   }
 }

@@ -8,8 +8,10 @@ export class CartProductRespone {
   quantity: number;
   price: number;
   unit: string;
+  additional_services: any;
   constructor(data: any) {
-   return {
+    console.log(data.ad);
+    return {
       id: data.product.id,
 
       name: data.product.product_sub_category.product.name,
@@ -21,8 +23,15 @@ export class CartProductRespone {
       quantity: data.quantity,
       unit: data.product.product_measurement.measurement_unit.name,
       is_recovered: data.product.is_recovered,
-      image: data.product.product_sub_category.product.product_images.find(
-        (e) => toUrl( e.is_logo),
+
+      additional_services: data.product.product_additional_services.map((e) => {
+        if (data.additional_services.includes(e.id))
+          return e.additional_service;
+      }),
+      image: toUrl(
+        data.product.product_sub_category.product.product_images.find(
+          (e) => e.is_logo,
+        ).url,
       ),
     } as any;
   }
