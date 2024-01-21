@@ -86,11 +86,11 @@ export class SectionService extends BaseService<Section> {
       // set avatar path
       section.logo = logo;
     }
-    await this._repo.update(section.id, {
+   const result= await this._repo.update(section.id, {
       ...plainToInstance(Section, req),
       logo: section.logo,
     });
-    return plainToInstance(Section, req);
+    return plainToInstance(Section, result);
   }
 
   async getSectionCategories(

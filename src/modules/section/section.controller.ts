@@ -134,13 +134,12 @@ export class SectionController {
     );
   }
 
-  @ApiProperty({required: false})
-  all?:boolean
+  @ApiProperty({ required: false })
+  all?: boolean;
   @Get(':section_id/categories')
-  
   async getSectionCategories(
     @Param('section_id') section_id: string,
-    @Query("all") all?: boolean,
+    @Query('all') all?: boolean,
   ) {
     const categories = await this.sectionService.getSectionCategories(
       section_id,
