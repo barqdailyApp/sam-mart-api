@@ -15,8 +15,7 @@ export class UpdateCategoryRequest extends CreateCategoryRequest {
     @IsString()
     name_ar: string;
 
-    @ApiProperty({ required: false })
-    is_active: boolean;
+
     
     @ApiProperty({required  : false})
     @IsOptional()
