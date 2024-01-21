@@ -110,26 +110,50 @@ export class CreateProductTransaction extends BaseTransaction<
         throw new NotFoundException('message.there_must_be_a_primary_unit');
       }
 
-      for (let index = 0; index < measurements.length; index++) {
-        //* Check Measurement Units
+      //* Create Primary Product Measurement
+      const primaryUnit = measurements.find(
+        (measurement) => measurement.is_main_unit,
+      );
+      if (primaryUnit.conversion_factor != 1) {
+        throw new BadRequestException(
+          'message.primary_unit_conversion_factor_must_be_1',
+        );
+      }
+      const createPrimaryProductMeasurement = context.create(
+        ProductMeasurement,
+        {
+          conversion_factor: primaryUnit.conversion_factor,
+          measurement_unit_id: primaryUnit.measurement_unit_id,
+          product_id: saveProduct.id,
+        },
+      );
+      const primaryProductMeasurement = await context.save(
+        createPrimaryProductMeasurement,
+      );
+
+      //* Create Secondary Product Measurements
+      const secondaryMeasurements = measurements.filter(
+        (measurement) => !measurement.is_main_unit,
+      );
+      for (let index = 0; index < secondaryMeasurements.length; index++) {
+        // Check Measurement Units
         await this.measurementUnitService.single(
-          measurements[index].measurement_unit_id,
+          secondaryMeasurements[index].measurement_unit_id,
         );
 
-        //* Create Product Measurement
+        // Create Product Measurement
         const createProductMeasurement = context.create(ProductMeasurement, {
-          conversion_factor: measurements[index].conversion_factor,
-          measurement_unit_id: measurements[index].measurement_unit_id,
+          conversion_factor: secondaryMeasurements[index].conversion_factor,
+          measurement_unit_id: secondaryMeasurements[index].measurement_unit_id,
           product_id: saveProduct.id,
         });
 
-        //* Set Main Unit
-        if (measurements[index].is_main_unit) {
-          createProductMeasurement.base_unit_id =
-            measurements[index].measurement_unit_id;
+        // Set Main Unit
+        if (secondaryMeasurements[index].is_main_unit == false) {
+          createProductMeasurement.base_unit_id = primaryProductMeasurement.measurement_unit_id;
         }
 
-        //* Save Product Measurement
+        // Save Product Measurement
 
         await context.save(createProductMeasurement);
       }

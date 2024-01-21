@@ -2,7 +2,6 @@ import { Column, ManyToOne, JoinColumn, Entity } from 'typeorm';
 import { ProductCategoryPrice } from '../product/product-category-price.entity';
 import { AuditableEntity } from 'src/infrastructure/base/auditable.entity';
 import { Shipment } from './shipment.entity';
-import { Order } from 'sequelize/types/model';
 @Entity()
 export class ShipmentProduct extends AuditableEntity {
   @ManyToOne(() => Shipment, (shipment) => shipment.shipment_products)

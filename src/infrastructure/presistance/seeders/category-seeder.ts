@@ -102,11 +102,11 @@ export class CategorySeeder implements Seeder {
   }
 
   async drop(): Promise<any> {
-    this.subcategory_repo.delete({});
-    this.section_category_repo.delete({});
+    await  this.subcategory_repo.delete({});
+    await this.section_category_repo.delete({});
 
-    this.categorySubCategory.delete({});
-    this.section_repo.delete({});
-    return this.category_repo.delete({});
+    await  this.categorySubCategory.delete({});
+    await  this.section_repo.delete({});
+    return await this.category_repo.delete({});
   }
 }
