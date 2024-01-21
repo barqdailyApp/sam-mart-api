@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { WarehouseService } from './warehouse.service';
 import { WarehouseOperationRequest } from './dto/requests/warehouse-operation.request';
 import { ApiBearerAuth, ApiTags, ApiHeader } from '@nestjs/swagger';
@@ -14,6 +14,7 @@ import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 import { applyQueryIncludes } from 'src/core/helpers/service-related.helper';
 import { Region } from 'src/infrastructure/entities/region/region.entity';
 import { UpdateWarehouseRequest } from './dto/requests/update-warehouse.request';
+import { WarehouseTransferProductRequest } from './dto/requests/warehouse-transfer-product.request';
 
 @ApiBearerAuth()
 @ApiTags('Warehouse')
@@ -73,4 +74,16 @@ export class WarehouseController {
       await this.warehouseService.updateWarehouse(id, request),
     );
   }
+
+  @Patch("/:warehouse_product_id/transfer/:to_warehouse_id")
+  async transferWarehouseProducts(
+    @Param("warehouse_product_id") warehouse_product_id: string,
+    @Param("to_warehouse_id") to_warehouse_id: string,
+    @Body() body: WarehouseTransferProductRequest
+  ) {
+    return new ActionResponse(
+      await this.warehouseService.transferWarehouseProducts(warehouse_product_id, to_warehouse_id, body),
+    );
+  }
+
 }
