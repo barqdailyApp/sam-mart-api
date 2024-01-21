@@ -150,7 +150,7 @@ export class CreateProductTransaction extends BaseTransaction<
 
         // Set Main Unit
         if (secondaryMeasurements[index].is_main_unit == false) {
-          createProductMeasurement.base_unit_id = primaryProductMeasurement.id;
+          createProductMeasurement.base_unit_id = primaryProductMeasurement.measurement_unit_id;
         }
 
         // Save Product Measurement

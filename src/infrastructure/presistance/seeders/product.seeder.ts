@@ -76,13 +76,13 @@ export class ProductSeeder implements Seeder {
       const primaryUnit = product.product_measurements.find(
         (measurement) => measurement.is_main_unit,
       );
-      const primaryMeasurement = await this.measurementUnit_repo.findOne({
+      const main_measurement_unit = await this.measurementUnit_repo.findOne({
         where: { name_en: primaryUnit.measurement_unit.name_en },
       });
       const createPrimaryProductMeasurement =
         this.productMeasurement_repo.create({
           conversion_factor: primaryUnit.conversion_factor,
-          measurement_unit_id: primaryMeasurement.id,
+          measurement_unit_id:main_measurement_unit.id,
           product_id: productSaved.id,
           is_main_unit: primaryUnit.is_main_unit,
         });
@@ -107,7 +107,7 @@ export class ProductSeeder implements Seeder {
         });
 
         if (measurement.is_main_unit == false) {
-          createProductMeasurement.base_unit_id = primaryProductMeasurement.id;
+          createProductMeasurement.base_unit_id = main_measurement_unit.id;
         }
 
         await this.productMeasurement_repo.save(createProductMeasurement);
