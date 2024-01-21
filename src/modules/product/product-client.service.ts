@@ -305,6 +305,14 @@ export class ProductClientService {
           category_sub_category_id,
         },
       );
+      query = query.andWhere('product.is_active = true');
+      query = query.andWhere('product_sub_categories.is_active = true');
+      query = query.andWhere(
+        'product_sub_categories.category_sub_category_id = :category_sub_category_id',
+        {
+          category_sub_category_id,
+        },
+      );
     }
 
     // Conditional where clause based on section
@@ -312,6 +320,14 @@ export class ProductClientService {
       query = query.andWhere('section_category.section_id = :section_id', {
         section_id,
       });
+      query = query.andWhere('product.is_active = true');
+      query = query.andWhere('product_sub_categories.is_active = true');
+      query = query.andWhere(
+        'product_section_category.section_id = :section_id',
+        {
+          section_id,
+        },
+      );
     }
 
     const [products, total] = await query.getManyAndCount();
