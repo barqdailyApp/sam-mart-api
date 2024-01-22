@@ -59,19 +59,10 @@ export class ProductResponse {
   })
   is_fav: boolean;
 
-  @Transform(({ value }) => {
-    if (value === null || value === undefined) {
-      return plainToClass(ProductMeasurementResponse, value);
-    }
-    return value.length === 1
-      ? plainToClass(ProductMeasurementResponse, value[0])
-      : plainToClass(ProductMeasurementResponse, value);
-  })
+  @Transform(({ value }) => plainToClass(ProductMeasurementResponse, value))
   @Expose()
-  product_measurements:
-    | ProductMeasurementResponse[]
-    | ProductMeasurementResponse
-    | null;
+  readonly product_measurements: ProductMeasurementResponse[];
+
 
 
   @Transform(({ value }) => plainToClass(ProductImagesResponse, value))
