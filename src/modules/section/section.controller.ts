@@ -71,6 +71,13 @@ export class SectionController {
     req.logo = logo;
     return new ActionResponse(await this.sectionService.createSection(req));
   }
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @Roles(Role.ADMIN)
+  // @ApiBearerAuth()
+  @Get('/:id')
+  async findSection(@Param('id') id: string) {
+    return new ActionResponse(await this.sectionService.findOne(id));
+  }
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
