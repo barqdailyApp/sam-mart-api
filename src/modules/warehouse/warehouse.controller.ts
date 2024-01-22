@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { WarehouseService } from './warehouse.service';
 import { WarehouseOperationRequest } from './dto/requests/warehouse-operation.request';
 import { ApiBearerAuth, ApiTags, ApiHeader } from '@nestjs/swagger';
@@ -13,6 +13,8 @@ import { I18nResponse } from 'src/core/helpers/i18n.helper';
 import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 import { applyQueryIncludes } from 'src/core/helpers/service-related.helper';
 import { Region } from 'src/infrastructure/entities/region/region.entity';
+import { UpdateWarehouseRequest } from './dto/requests/update-warehouse.request';
+import { WarehouseTransferProductRequest } from './dto/requests/warehouse-transfer-product.request';
 
 @ApiBearerAuth()
 @ApiTags('Warehouse')
@@ -26,28 +28,28 @@ import { Region } from 'src/infrastructure/entities/region/region.entity';
 export class WarehouseController {
   constructor(private readonly warehouseService: WarehouseService,
     private readonly _i18nResponse: I18nResponse,
-    ) {}
+  ) { }
 
-@Get()
-async get(@Query() query: PaginatedRequest) {
-  applyQueryIncludes(query, "region");
-  applyQueryIncludes(query, "region.city");
-  applyQueryIncludes(query, "region.city.country");
-  const warehouses = this._i18nResponse.entity(
-    await this.warehouseService.findAll(query),
-  );
+  @Get()
+  async get(@Query() query: PaginatedRequest) {
+    applyQueryIncludes(query, "region");
+    applyQueryIncludes(query, "region.city");
+    applyQueryIncludes(query, "region.city.country");
+    const warehouses = this._i18nResponse.entity(
+      await this.warehouseService.findAll(query),
+    );
 
 
-  if (query.page && query.limit) {
-    const total = await this.warehouseService.count(query);
-    return new PaginatedResponse(warehouses, {
-      meta: { total, ...query },
-    });
-  } else {
-    return new ActionResponse(warehouses);
+    if (query.page && query.limit) {
+      const total = await this.warehouseService.count(query);
+      return new PaginatedResponse(warehouses, {
+        meta: { total, ...query },
+      });
+    } else {
+      return new ActionResponse(warehouses);
+    }
+
   }
-
-}
 
   @Post()
   async create(@Body() request: CreateWarehouseRequest) {
@@ -62,4 +64,26 @@ async get(@Query() query: PaginatedRequest) {
       await this.warehouseService.CreateWAarehouseOperation(request),
     );
   }
+
+  @Patch("/:id")
+  async update(
+    @Body() request: UpdateWarehouseRequest,
+    @Query("id") id: string
+  ) {
+    return new ActionResponse(
+      await this.warehouseService.updateWarehouse(id, request),
+    );
+  }
+
+  @Patch("/:warehouse_product_id/transfer/:to_warehouse_id")
+  async transferWarehouseProducts(
+    @Param("warehouse_product_id") warehouse_product_id: string,
+    @Param("to_warehouse_id") to_warehouse_id: string,
+    @Body() body: WarehouseTransferProductRequest
+  ) {
+    return new ActionResponse(
+      await this.warehouseService.transferWarehouseProducts(warehouse_product_id, to_warehouse_id, body),
+    );
+  }
+
 }
