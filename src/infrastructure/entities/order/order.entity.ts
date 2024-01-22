@@ -9,7 +9,7 @@ import { PaymentMethod } from 'src/infrastructure/data/enums/payment-method';
 
 import { Slot } from './slot.entity';
 import { Shipment } from './shipment.entity';
-import { ShipmentStatus } from './shipment-status.entity';
+
 @Entity()
 export class Order extends OwnedEntity {
   @ManyToOne(() => User, (user) => user.orders)
