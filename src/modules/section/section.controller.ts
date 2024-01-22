@@ -74,6 +74,17 @@ export class SectionController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
+  @Get('/:id')
+  async findSection(@Param('id') id: string) {
+    const section=await this.sectionService.findOne(id);
+    section.logo=toUrl(section.logo);
+    return new ActionResponse(
+      this._i18nResponse.entity(section),
+    );
+  }
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
   @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('logo'))
   @ApiConsumes('multipart/form-data')
   @Put()

@@ -21,6 +21,7 @@ export class OrderService extends BaseUserService<Order> {
     return await this.makeOrdrTransacton.run(req);
   }
 
-  
-
+  async getClientOrders() {
+    return await this.orderRepository.find();
+  }
 }
