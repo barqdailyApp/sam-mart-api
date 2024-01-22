@@ -24,6 +24,7 @@ import { WarehouseOperations } from 'src/infrastructure/entities/warehouse/wareh
 import { operationType } from 'src/infrastructure/data/enums/operation-type.enum';
 import { WarehouseProducts } from 'src/infrastructure/entities/warehouse/warehouse-products.entity';
 import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
+import { Section } from 'src/infrastructure/entities/section/section.entity';
 @Injectable()
 export class MakeOrderTransaction extends BaseTransaction<
   MakeOrderRequest,
@@ -42,6 +43,9 @@ export class MakeOrderTransaction extends BaseTransaction<
     context: EntityManager,
   ): Promise<Order> {
     try {
+      const section = await context.findOne(Section, {
+        where: { id: req.section_id },
+      });
       const user = this.request.user;
       const address = await context.findOne(Address, {
         where: [{ id: req.address_id, user_id: user.id }],
@@ -51,8 +55,8 @@ export class MakeOrderTransaction extends BaseTransaction<
       const cart_products = await context.find(CartProduct, {
         where: { cart_id: cart.id, section_id: req.section_id },
       });
-      if(cart_products.length == 0){
-        throw new BadRequestException("Cart is empty");
+      if (cart_products.length == 0) {
+        throw new BadRequestException('Cart is empty');
       }
       const nearst_warehouse = await context
         .createQueryBuilder(Warehouse, 'warehouse')
@@ -68,13 +72,28 @@ export class MakeOrderTransaction extends BaseTransaction<
         ...plainToInstance(Order, req),
         user_id: user.id,
         warehouse_id: nearst_warehouse.id,
-
       });
+
+      if (order.delivery_type == DeliveryType.FAST) {
+        const currentDate = new Date();
+
+        // Add 40 minutes
+        currentDate.setMinutes(currentDate.getMinutes() + 40);
+        order.delivery_day = currentDate.toISOString().slice(0, 10);
+        order.estimated_delivery_time = currentDate;
+      } else {
+        order.delivery_day = req.slot_day.day;
+        order.slot_id = req.slot_day.slot_id;
+        
+      }
+      console.log(order);
+      await context.save(Order,order);
+
       const shipment = await context.save(Shipment, {
         order_id: order.id,
         warehouse_id: nearst_warehouse.id,
       });
-    
+
       const shipment_products = cart_products.map(
         (e) => new ShipmentProduct({ shipment_id: shipment.id, ...e }),
       );
@@ -116,8 +135,6 @@ export class MakeOrderTransaction extends BaseTransaction<
         );
       }
 
-
-      
       return order;
     } catch (error) {
       console.log(error);
