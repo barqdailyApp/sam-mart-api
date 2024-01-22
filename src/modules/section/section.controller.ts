@@ -82,6 +82,7 @@ export class SectionController {
       this._i18nResponse.entity(section),
     );
   }
+  
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()

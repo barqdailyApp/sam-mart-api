@@ -36,7 +36,6 @@ import { Order } from '../entities/order/order.entity';
 import { Slot } from '../entities/order/slot.entity';
 import { Shipment } from '../entities/order/shipment.entity';
 import { ShipmentProduct } from '../entities/order/shipment-product.entity';
-import { ShipmentStatus } from '../entities/order/shipment-status.entity';
 import { ProductFavorite } from '../entities/product/product-favorite.entity';
 
 export const DB_ENTITIES = [
@@ -78,7 +77,6 @@ export const DB_ENTITIES = [
   Slot,
   Shipment,
   ShipmentProduct,
-  ShipmentStatus,
   ProductFavorite
   
 

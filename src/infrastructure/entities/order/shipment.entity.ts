@@ -1,10 +1,10 @@
 import { AuditableEntity } from 'src/infrastructure/base/auditable.entity';
-import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany, OneToOne } from 'typeorm';
 import { Driver } from '../driver/driver.entity';
 import { Order } from './order.entity';
 import { Warehouse } from '../warehouse/warehouse.entity';
-import { ShipmentStatus } from './shipment-status.entity';
 import { ShipmentProduct } from './shipment-product.entity';
+import { ShipmentStatusEnum } from 'src/infrastructure/data/enums/shipment_status.enum';
 
 @Entity()
 export class Shipment extends AuditableEntity {
@@ -24,9 +24,19 @@ export class Shipment extends AuditableEntity {
 
   @Column()
   warehouse_id: string;
+  @Column({default:ShipmentStatusEnum.PENDING})
+  status: ShipmentStatusEnum;
+  @Column({ nullable: true })
+  order_confirmed_at: Date;
 
-  @OneToMany(() => ShipmentStatus, (shipmentStatus) => shipmentStatus.shipment)
-  status: ShipmentStatus[];
+  @Column({ nullable: true })
+  order_on_processed_at: Date;
+
+  @Column({ nullable: true })
+  order_shipped_at: Date;
+
+  @Column({ nullable: true })
+  order_delivered_at: Date;
 
   @OneToMany(
     () => ShipmentProduct,
