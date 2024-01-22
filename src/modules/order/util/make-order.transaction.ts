@@ -25,6 +25,7 @@ import { operationType } from 'src/infrastructure/data/enums/operation-type.enum
 import { WarehouseProducts } from 'src/infrastructure/entities/warehouse/warehouse-products.entity';
 import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
 import { Section } from 'src/infrastructure/entities/section/section.entity';
+import { Slot } from 'src/infrastructure/entities/order/slot.entity';
 @Injectable()
 export class MakeOrderTransaction extends BaseTransaction<
   MakeOrderRequest,
@@ -84,10 +85,13 @@ export class MakeOrderTransaction extends BaseTransaction<
       } else {
         order.delivery_day = req.slot_day.day;
         order.slot_id = req.slot_day.slot_id;
-        
+        const slot= await context.findOne(Slot, {where: {id: req.slot_day.slot_id, }})
+        order.estimated_delivery_time = new Date(
+          req.slot_day.day + 'T' + slot.start_time,
+        );
       }
+
       console.log(order);
-      await context.save(Order,order);
 
       const shipment = await context.save(Shipment, {
         order_id: order.id,
@@ -98,6 +102,9 @@ export class MakeOrderTransaction extends BaseTransaction<
         (e) => new ShipmentProduct({ shipment_id: shipment.id, ...e }),
       );
       await context.save(shipment_products);
+      order.total_price = shipment_products.reduce((a, b) => a + b.price*b.quantity, 0);
+
+      await context.save(Order, order);
       await context.delete(CartProduct, cart_products);
 
       //warehouse opreation
