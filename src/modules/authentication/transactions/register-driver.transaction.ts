@@ -49,6 +49,7 @@ export class RegisterDriverTransaction extends BaseTransaction<
         email,
         phone,
         birth_date,
+        name: username,
       });
 
       //* encrypt password
