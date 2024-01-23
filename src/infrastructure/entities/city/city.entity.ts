@@ -11,6 +11,7 @@ import { Country } from '../country/country.entity';
 import { WorkingArea } from '../working-area/working-area.entity';
 import { Region } from '../region/region.entity';
 import { Driver } from '../driver/driver.entity';
+import { Employee } from '../employee/employee.entity';
 
 @Entity()
 export class City extends AuditableEntity {
@@ -20,7 +21,7 @@ export class City extends AuditableEntity {
   @Column()
   name_en: string;
 
-  @ManyToOne(() => Country, (country) => country.cities,{
+  @ManyToOne(() => Country, (country) => country.cities, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'country_id' })
@@ -31,11 +32,15 @@ export class City extends AuditableEntity {
 
   @OneToMany(() => WorkingArea, (workingArea) => workingArea.city)
   WorkingAreas: WorkingArea[];
-  
+
 
   @OneToMany(() => Region, (region) => region.city)
   regions: Region[];
 
   @OneToMany(() => Driver, (driver) => driver.city)
   drivers: Driver[]
+
+  @OneToMany(() => Employee, (employee) => employee.city)
+  employees: Employee[]
+  
 }
