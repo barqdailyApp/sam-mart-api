@@ -30,6 +30,9 @@ import { UserInfoResponse } from '../user/dto/responses/profile.response';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { DriverRegisterRequest } from './dto/requests/driver-register.dto';
+import { Role } from 'src/infrastructure/data/enums/role.enum';
+import { Roles } from './guards/roles.decorator';
+import { UpdateDriverStatusRequest } from './dto/requests/update-driver-status.request';
 
 @ApiTags(Router.Auth.ApiTag)
 @Controller(Router.Auth.Base)
@@ -37,7 +40,7 @@ export class AuthenticationController {
   constructor(
     @Inject(AuthenticationService)
     private readonly authService: AuthenticationService,
-  ) {}
+  ) { }
 
   @Post(Router.Auth.Signin)
   async signin(
@@ -93,16 +96,27 @@ export class AuthenticationController {
     if (files.avatarFile) {
       req.avatarFile = files.avatarFile[0];
     }
-    
-      req.id_card_image = files.id_card_image[0];
-      req.license_image = files.license_image[0];
 
-    
+    req.id_card_image = files.id_card_image[0];
+    req.license_image = files.license_image[0];
+
+
     const user = await this.authService.driverRegister(req);
     const result = plainToInstance(RegisterResponse, user, {
       excludeExtraneousValues: true,
     });
-    return new ActionResponse<RegisterResponse>(result )
+    return new ActionResponse<RegisterResponse>(result)
+  }
+
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @Post(Router.Auth.UpdateDriverStatus)
+  async updateDriverStatus(@Body() req: UpdateDriverStatusRequest) {
+    const data = await this.authService.updateDriverStatus(req);
+
+    return new ActionResponse(data);
   }
 
   @Post(Router.Auth.SendOtp)
@@ -121,6 +135,7 @@ export class AuthenticationController {
     });
     return new ActionResponse<AuthResponse>(result);
   }
+
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Post(Router.Auth.VerifyPhone)
@@ -141,4 +156,5 @@ export class AuthenticationController {
 
     return new ActionResponse(data);
   }
+
 }

@@ -22,8 +22,11 @@ export abstract class Router {
     /** * verify-phone */
     static VerifyPhone = 'verify-phone';
 
-       /** * verify-otp */
-       static DeleteAccount = 'delete-account';
+    /** * verify-otp */
+    static DeleteAccount = 'delete-account';
+
+    /** * update-driver-status */
+    static UpdateDriverStatus = 'update-driver-status';
   };
 
   /**

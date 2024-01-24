@@ -1,24 +1,34 @@
 import { AuditableEntity } from 'src/infrastructure/base/auditable.entity';
-import { BeforeInsert, BeforeUpdate, Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
+import {
+  BeforeInsert,
+  BeforeUpdate,
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToOne,
+} from 'typeorm';
 import { User } from '../user/user.entity';
 import { Country } from '../country/country.entity';
 import { Region } from '../region/region.entity';
 import { vehicle_types } from 'src/infrastructure/data/enums/vehicle_type.enum';
 import { City } from '../city/city.entity';
 import { Shipment } from '../order/shipment.entity';
+import { DriverStatus } from 'src/infrastructure/data/enums/driver-status.enum';
+import { Warehouse } from '../warehouse/warehouse.entity';
 
 @Entity()
 export class Driver extends AuditableEntity {
-  @OneToOne(() => User,{
+  @OneToOne(() => User, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'user_id' })
   user: User;
 
   @Column()
-  user_id:string;
+  user_id: string;
 
-  @ManyToOne(() => Country, (country) => country.drivers,{
+  @ManyToOne(() => Country, (country) => country.drivers, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'country_id' })
@@ -27,9 +37,14 @@ export class Driver extends AuditableEntity {
   @Column()
   country_id: string;
 
+  @ManyToOne(() => Warehouse, (warehouse) => warehouse.drivers, {})
+  @JoinColumn({ name: 'warehouse_id' })
+  warehouse: Warehouse;
 
-  
-  @ManyToOne(() => City, (city) => city.drivers,{
+  @Column({ nullable: true })
+  warehouse_id: string;
+
+  @ManyToOne(() => City, (city) => city.drivers, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'city_id' })
@@ -38,8 +53,7 @@ export class Driver extends AuditableEntity {
   @Column()
   city_id: string;
 
-  
-  @ManyToOne(() => Region, (region) => region.drivers,{
+  @ManyToOne(() => Region, (region) => region.drivers, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'region_id' })
@@ -48,8 +62,15 @@ export class Driver extends AuditableEntity {
   @Column()
   region_id: string;
 
-  @Column({ default: false })
-  is_verified:boolean;
+  @Column({
+    type: 'enum',
+    default: DriverStatus.PENDING,
+    enum: DriverStatus
+  })
+  status: DriverStatus;
+
+  @Column({ nullable: true })
+  status_reason: string;
 
   @Column({
     type: 'geometry',
@@ -59,36 +80,35 @@ export class Driver extends AuditableEntity {
   })
   location: string;
 
-  @Column({ type: 'float', precision: 10, scale: 6,nullable: true, })
+  @Column({ type: 'float', precision: 10, scale: 6, nullable: true })
   latitude: number;
 
-  @Column({ type: 'float', precision: 11, scale: 6,nullable: true, })
+  @Column({ type: 'float', precision: 11, scale: 6, nullable: true })
   longitude: number;
 
   @Column()
   id_card_number: string;
 
   @Column()
-  id_card_image:string;
+  id_card_image: string;
 
   @Column()
-  license_number:string;
+  license_number: string;
 
   @Column()
-  license_image:string;
+  license_image: string;
 
   @Column()
-  vehicle_color:string;
+  vehicle_color: string;
 
   @Column()
-  vehicle_model:string;
+  vehicle_model: string;
 
-  @Column({  type: 'enum', enum: vehicle_types })
-  vehicle_type:vehicle_types
-  
+  @Column({ type: 'enum', enum: vehicle_types })
+  vehicle_type: vehicle_types;
 
-  @ManyToOne(()=>Shipment,Shipment=>Shipment.driver)
-  shipments:Shipment[]
+  @ManyToOne(() => Shipment, (Shipment) => Shipment.driver)
+  shipments: Shipment[];
   constructor(partial?: Partial<Driver>) {
     super();
     Object.assign(this, partial);
@@ -96,11 +116,17 @@ export class Driver extends AuditableEntity {
 
   @BeforeInsert()
   saveLocation() {
-    this.location =this.latitude==null?null: `POINT(${this.latitude} ${this.longitude})`;
+    this.location =
+      this.latitude == null
+        ? null
+        : `POINT(${this.latitude} ${this.longitude})`;
   }
 
   @BeforeUpdate()
   updateLocation() {
-    this.location =this.latitude==null?null: `POINT(${this.latitude} ${this.longitude})`;
+    this.location =
+      this.latitude == null
+        ? null
+        : `POINT(${this.latitude} ${this.longitude})`;
   }
 }

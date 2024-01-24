@@ -9,10 +9,7 @@ export class AddToCartRequest{
 @IsNotEmpty()
 product_category_price_id:string
 
-@ApiProperty()
-@IsNumber()
-@Transform(({value})=>Number(value))
-quantity:number
+
 
 
 @ApiProperty({required:false})

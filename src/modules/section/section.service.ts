@@ -24,6 +24,7 @@ import {
 } from './dto/requests/create-sections-excel.request';
 import { validate } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { I18nResponse } from 'src/core/helpers/i18n.helper';
 
 @Injectable()
 export class SectionService extends BaseService<Section> {
@@ -36,6 +37,7 @@ export class SectionService extends BaseService<Section> {
     @Inject(StorageManager) private readonly storageManager: StorageManager,
     @Inject(ImageManager) private readonly imageManager: ImageManager,
     @Inject(FileService) private _fileService: FileService,
+    @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
 
     @Inject(REQUEST) readonly request: Request,
   ) {
@@ -53,14 +55,19 @@ export class SectionService extends BaseService<Section> {
     });
 
     if (!user)
-      return sections.filter((section) =>
-        section.allowed_roles.includes(Role.CLIENT),
+      return this._i18nResponse.entity(
+        sections.filter((section) =>
+          section.allowed_roles.includes(Role.CLIENT),
+        ),
       );
     if (user.roles.includes(Role.ADMIN))
       return await this.section_repo.find({ order: { order_by: 'ASC' } });
-    return sections.filter((section) => {
-      return user.roles.includes(section.allowed_roles[0]);
-    });
+
+    return this._i18nResponse.entity(
+      sections.filter((section) => {
+        return user.roles.includes(section.allowed_roles[0]);
+      }),
+    );
   }
 
   async createSection(req: CreateSectionRequest): Promise<Section> {
@@ -86,7 +93,7 @@ export class SectionService extends BaseService<Section> {
       // set avatar path
       section.logo = logo;
     }
-   const result= await this._repo.update(section.id, {
+    const result = await this._repo.update(section.id, {
       ...plainToInstance(Section, req),
       logo: section.logo,
     });

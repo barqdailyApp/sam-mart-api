@@ -10,9 +10,8 @@ export class CartProductRespone {
   unit: string;
   additional_services: any;
   constructor(data: any) {
-    console.log(data.ad);
     return {
-      id: data.product.id,
+      id: data.id,
 
       name: data.product.product_sub_category.product.name,
       section_id:
@@ -24,9 +23,11 @@ export class CartProductRespone {
       unit: data.product.product_measurement.measurement_unit.name,
       is_recovered: data.product.is_recovered,
 
-      additional_services: data.product.product_additional_services.map((e) => {
-        if (data.additional_services.includes(e.id))
+      additional_services: data.product.product_additional_services.filter((e) => {
+        if (data.additional_services.includes(e.id)) {
+          e.additional_service.id = e.id;
           return e.additional_service;
+        }
       }),
       image: toUrl(
         data.product.product_sub_category.product.product_images.find(
