@@ -55,7 +55,8 @@ export class SectionController {
   constructor(
     private readonly sectionService: SectionService,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
-  ) {}
+  ) { }
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
@@ -67,10 +68,39 @@ export class SectionController {
     @UploadedFile(new UploadValidator().build())
     logo: Express.Multer.File,
   ) {
-    console.log(req);
     req.logo = logo;
     return new ActionResponse(await this.sectionService.createSection(req));
   }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @Get('/export')
+  @Header(
+    'Content-type',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  )
+  async exportSections(@Res() res: Response) {
+    const File = await this.sectionService.exportSections();
+    res.download(`${File}`);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @Post('/import')
+  async importSections(
+    @Body() req: ImportCategoryRequest,
+    @UploadedFile(new UploadValidator().build())
+    file: Express.Multer.File,
+  ) {
+    req.file = file;
+    const jsonData = await this.sectionService.importSections(req);
+    return new ActionResponse(jsonData);
+  }
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
@@ -96,6 +126,7 @@ export class SectionController {
     req.logo = logo;
     return new ActionResponse(await this.sectionService.updateSection(req));
   }
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
@@ -103,6 +134,7 @@ export class SectionController {
   async deleteSection(@Param('id') id: string) {
     return new ActionResponse(await this.sectionService.delete(id));
   }
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
@@ -112,6 +144,7 @@ export class SectionController {
       await this.sectionService.addCategoryToSection(req),
     );
   }
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
@@ -121,6 +154,7 @@ export class SectionController {
       await this.sectionService.updatSectionCategory(req),
     );
   }
+  
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
@@ -168,32 +202,4 @@ export class SectionController {
     );
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  @ApiBearerAuth()
-  @Get('/export')
-  @Header(
-    'Content-type',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  )
-  async exportSections(@Res() res: Response) {
-    const File = await this.sectionService.exportSections();
-    res.download(`${File}`);
-  }
-
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  @ApiBearerAuth()
-  @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('file'))
-  @ApiConsumes('multipart/form-data')
-  @Post('/import')
-  async importSections(
-    @Body() req: ImportCategoryRequest,
-    @UploadedFile(new UploadValidator().build())
-    file: Express.Multer.File,
-  ) {
-    req.file = file;
-    const jsonData = await this.sectionService.importSections(req);
-    return new ActionResponse(jsonData);
-  }
 }
