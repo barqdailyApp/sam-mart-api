@@ -10,7 +10,6 @@ export class CartProductRespone {
   unit: string;
   additional_services: any;
   constructor(data: any) {
-
     return {
       id: data.id,
 
@@ -24,9 +23,11 @@ export class CartProductRespone {
       unit: data.product.product_measurement.measurement_unit.name,
       is_recovered: data.product.is_recovered,
 
-      additional_services: data.product.product_additional_services.map((e) => {
-        if (data.additional_services.includes(e.id))
+      additional_services: data.product.product_additional_services.filter((e) => {
+        if (data.additional_services.includes(e.id)) {
+          e.additional_service.id = e.id;
           return e.additional_service;
+        }
       }),
       image: toUrl(
         data.product.product_sub_category.product.product_images.find(
