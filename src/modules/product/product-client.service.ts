@@ -572,19 +572,6 @@ export class ProductClientService {
       .innerJoinAndSelect('product_favorite.product', 'product')
 
       .innerJoinAndSelect('product.product_images', 'product_images')
-      .innerJoinAndSelect(
-        'product.product_sub_categories',
-        'product_sub_categories',
-      )
-      .innerJoinAndSelect(
-        'product_sub_categories.category_subCategory',
-        'product_category_subCategory',
-      )
-      .innerJoinAndSelect(
-        'product_category_subCategory.section_category',
-        'product_section_category',
-      )
-      .innerJoinAndSelect('product_section_category.section', 'product_section')
 
       .innerJoinAndSelect('product.warehouses_products', 'warehousesProduct')
       .innerJoinAndSelect(
