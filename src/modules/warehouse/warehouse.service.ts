@@ -44,7 +44,11 @@ export class WarehouseService extends BaseService<Warehouse> {
     async transferWarehouseProducts(from_warehouse_product_id: string, to_warehouse_id: string, transfered_product: WarehouseTransferProductRequest) {
         const { quantity } = transfered_product;
 
-        const from_warehouse_product = await this.warehouseProducts_repo.findOne({ where: { id: from_warehouse_product_id } });
+        const from_warehouse_product = await this.warehouseProducts_repo.findOne({
+            where: {
+                id: from_warehouse_product_id
+            }
+        });
 
         if (!from_warehouse_product) {
             throw new NotFoundException("Warehouse product not found");

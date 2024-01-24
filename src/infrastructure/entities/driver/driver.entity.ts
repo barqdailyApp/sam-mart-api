@@ -14,6 +14,7 @@ import { Region } from '../region/region.entity';
 import { vehicle_types } from 'src/infrastructure/data/enums/vehicle_type.enum';
 import { City } from '../city/city.entity';
 import { Shipment } from '../order/shipment.entity';
+import { DriverStatus } from 'src/infrastructure/data/enums/driver-status.enum';
 import { Warehouse } from '../warehouse/warehouse.entity';
 
 @Entity()
@@ -61,8 +62,15 @@ export class Driver extends AuditableEntity {
   @Column()
   region_id: string;
 
-  @Column({ default: false })
-  is_verified: boolean;
+  @Column({
+    type: 'enum',
+    default: DriverStatus.PENDING,
+    enum: DriverStatus
+  })
+  status: DriverStatus;
+
+  @Column({ nullable: true })
+  status_reason: string;
 
   @Column({
     type: 'geometry',

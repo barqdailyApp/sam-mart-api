@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,7 +6,7 @@ import { BaseTransaction } from 'src/core/base/database/base.transaction';
 import { jwtSignOptions } from 'src/core/setups/jwt.setup';
 import { Otp } from 'src/infrastructure/entities/auth/otp.entity';
 import { UserService } from 'src/modules/user/user.service';
-import { DataSource, EntityManager } from 'typeorm';
+import { DataSource, EntityManager, Repository } from 'typeorm';
 import { VerifyOtpRequest } from '../dto/requests/verify-otp.dto';
 import { AuthResponse } from '../dto/responses/auth.response';
 import { User } from 'src/infrastructure/entities/user/user.entity';
@@ -14,6 +14,9 @@ import { RegisterUserTransaction } from './register-user.transaction';
 import { RegisterRequest } from '../dto/requests/register.dto';
 import { Request } from 'express';
 import { REQUEST } from '@nestjs/core';
+import { Role } from 'src/infrastructure/data/enums/role.enum';
+import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
+import { DriverStatus } from 'src/infrastructure/data/enums/driver-status.enum';
 @Injectable()
 export class VerifyOtpTransaction extends BaseTransaction<
   VerifyOtpRequest,
@@ -28,6 +31,7 @@ export class VerifyOtpTransaction extends BaseTransaction<
     @Inject(RegisterUserTransaction)
     private readonly registerUserTransaction: RegisterUserTransaction,
     @Inject(REQUEST) readonly request: Request,
+    @InjectRepository(Driver) private readonly driverRepository: Repository<Driver>,
   ) {
     super(dataSource);
   }
@@ -68,6 +72,18 @@ export class VerifyOtpTransaction extends BaseTransaction<
       await this.otpsRepo.remove(otp);
 
       const payload = { username: user.username, sub: user.id };
+      if (user.roles.includes(Role.DRIVER)) {
+        const driver = await this.driverRepository.findOne({
+          where: { user_id: user.id },
+        });
+
+        if (!driver) throw new UnauthorizedException('invalid_driver');
+
+        if (driver.status !== DriverStatus.VERIFIED) {
+          throw new UnauthorizedException(`You're not verified driver yet, your account is ${driver.status} now reason: ${driver.status_reason??'no reason specified'}`);
+        }
+      }
+
       return {
         ...user,
         access_token: this.jwtService.sign(
@@ -79,7 +95,7 @@ export class VerifyOtpTransaction extends BaseTransaction<
       throw new BadRequestException(
         this._config.get('app.env') !== 'prod'
           ? error
-          : 'message.invalid_credentials',  
+          : 'message.invalid_credentials',
       );
     }
   }

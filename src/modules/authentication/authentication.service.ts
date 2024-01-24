@@ -16,6 +16,10 @@ import { VerifyPhoneTransaction } from './transactions/edit-phone.transaction';
 import { DeleteAccountTransaction } from './transactions/delete-account.transaction';
 import { RegisterDriverTransaction } from './transactions/register-driver.transaction';
 import { DriverRegisterRequest } from './dto/requests/driver-register.dto';
+import { UpdateDriverStatusRequest } from './dto/requests/update-driver-status.request';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class AuthenticationService {
@@ -23,6 +27,7 @@ export class AuthenticationService {
     @Inject(UserService) private readonly userService: UserService,
     @Inject(RegisterUserTransaction) private readonly registerUserTransaction: RegisterUserTransaction,
     @Inject(RegisterDriverTransaction) private readonly registerDriverTransaction: RegisterDriverTransaction,
+    @InjectRepository(Driver) private readonly driverRepository: Repository<Driver>,
 
     @Inject(SendOtpTransaction) private readonly sendOtpTransaction: SendOtpTransaction,
     @Inject(VerifyOtpTransaction) private readonly verifyOtpTransaction: VerifyOtpTransaction,
@@ -62,15 +67,30 @@ export class AuthenticationService {
 
   async register(req: RegisterRequest) {
     const user = await this.registerUserTransaction.run(req);
-    
+
     return user;
   }
 
   async driverRegister(req: DriverRegisterRequest) {
     const user = await this.registerDriverTransaction.run(req);
-    
+
     return user;
   }
+
+  async updateDriverStatus(req: UpdateDriverStatusRequest) {
+    const driver = await this.driverRepository.findOne({
+      where: { id: req.driver_id },
+    });
+
+    if (!driver) throw new BadRequestException('driver not found');
+
+    driver.status = req.status;
+    driver.status_reason = req.status_reason;
+
+    await this.driverRepository.save(driver);
+    return driver;
+  }
+
   async sendOtp(req: SendOtpRequest) {
     return await this.sendOtpTransaction.run(req);
   }
@@ -86,6 +106,4 @@ export class AuthenticationService {
   async deleteAccount(req: VerifyOtpRequest) {
     return await this.deleteAccountTransaction.run(req);
   }
-
-
 }
