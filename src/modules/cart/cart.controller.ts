@@ -19,6 +19,7 @@ import { CartProductRespone } from './dto/respone/cart-product-repspone';
 import { I18nResponse } from 'src/core/helpers/i18n.helper';
 import { ActionResponse } from 'src/core/base/responses/action.response';
 import { UpdateCartProductRequest } from './dto/requests/update-cart-request';
+import { AddRemoveCartProductServiceRequest } from './dto/requests/add-remove-service-request';
 
 @ApiTags('Cart')
 @ApiHeader({
@@ -58,16 +59,23 @@ export class CartController {
 
   @Post('/add')
   async createCart(@Body() req: AddToCartRequest) {
-    return await this.cartService.addToCart(req);
+    return new ActionResponse(await this.cartService.addToCart(req));
   }
 
   @Delete('/delete/:cart_product_id')
   async deleteCartProduct(@Param('cart_product_id') cart_product_id: string) {
-    return await this.cartService.deleteCartProduct(cart_product_id);
+    return new ActionResponse(
+      await this.cartService.deleteCartProduct(cart_product_id),
+    );
   }
 
   @Put('/update/:cart-product')
   async updateCartProduct(@Body() req: UpdateCartProductRequest) {
-    return await this.cartService.updatecartProduct(req);
+    return new ActionResponse(await this.cartService.updatecartProduct(req));
+  }
+
+  @Put('/update/:cart-product/service')
+  async addRemoveService(@Body() req: AddRemoveCartProductServiceRequest) {
+    return new ActionResponse(await this.cartService.addRemoveService(req));
   }
 }

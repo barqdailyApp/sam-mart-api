@@ -148,9 +148,22 @@ export class CartService extends BaseService<CartProduct> {
         product_category_price.product_offer.max_offer_quantity;
       product_category_price.price = product_category_price.product_offer.price;
     }
-    if (req.add)
+    if (req.add == true) {
+      if (
+        cart_product.quantity + product_category_price.min_order_quantity >
+        product_category_price.max_order_quantity
+      )
+        cart_product.quantity = product_category_price.max_order_quantity;
+
       cart_product.quantity += product_category_price.min_order_quantity;
-    else cart_product.quantity -= product_category_price.min_order_quantity;
+    } else {
+      if (
+        cart_product.quantity - product_category_price.min_order_quantity <
+        product_category_price.min_order_quantity
+      )
+        cart_product.quantity = product_category_price.min_order_quantity;
+      cart_product.quantity -= product_category_price.min_order_quantity;
+    }
 
     return this.cartProductRepository.save(cart_product);
   }
@@ -172,23 +185,25 @@ export class CartService extends BaseService<CartProduct> {
     });
 
     if (req.additions && req.additions.length > 0) {
+      cart_product.price = Number(cart_product.price);
       req.additions.forEach((e) => {
         const service = product_category_price.product_additional_services.find(
           (s) => s.id == e,
         );
 
-        if (cart_product.additions.includes) {
+        if (cart_product.additions.includes(e)) {
           const index = cart_product.additions.indexOf(e);
           if (index > -1) {
             cart_product.additions.splice(index, 1);
 
-            cart_product.price -= service.price;
+            cart_product.price -= Number(service.price);
           }
         } else {
           cart_product.additions.push(e);
-          cart_product.price += service.price;
+          cart_product.price += Number(service.price);
         }
       });
     }
+    return this.cartProductRepository.save(cart_product);
   }
 }
