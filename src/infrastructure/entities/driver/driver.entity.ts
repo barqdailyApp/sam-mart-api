@@ -72,9 +72,6 @@ export class Driver extends AuditableEntity {
   @Column({ nullable: true })
   status_reason: string;
 
-  @Column({ default: false })
-  is_verified: boolean;
-
   @Column({
     type: 'geometry',
     spatialFeatureType: 'Point',
