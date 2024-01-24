@@ -18,10 +18,10 @@ export class ShipmentProduct extends AuditableEntity {
   quantity: number;
 
   @Column()
-main_measurement_id:string
+  main_measurement_id: string;
 
-@Column()
-conversion_factor :number
+  @Column()
+  conversion_factor: number;
 
   @ManyToOne(
     () => ProductCategoryPrice,
@@ -35,6 +35,9 @@ conversion_factor :number
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   price: number;
+  
+  @Column({ type: 'simple-array', nullable: true })
+  additions: string[];
 
   constructor(partial?: Partial<ShipmentProduct>) {
     super();
