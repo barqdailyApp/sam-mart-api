@@ -76,13 +76,11 @@ export class SectionController {
   @ApiBearerAuth()
   @Get('/:id')
   async findSection(@Param('id') id: string) {
-    const section=await this.sectionService.findOne(id);
-    section.logo=toUrl(section.logo);
-    return new ActionResponse(
-      this._i18nResponse.entity(section),
-    );
+    const section = await this.sectionService.findOne(id);
+    section.logo = toUrl(section.logo);
+    return new ActionResponse(section);
   }
-  
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
@@ -137,12 +135,10 @@ export class SectionController {
   @ApiQuery({ name: 'user_id', type: String, required: false })
   async getSections(@Query('user_id') userId?: string) {
     return new ActionResponse(
-      this._i18nResponse.entity(
-        (await this.sectionService.getSections(userId)).map((e) => {
-          e.logo = toUrl(e.logo);
-          return e;
-        }),
-      ),
+      (await this.sectionService.getSections(userId)).map((e) => {
+        e.logo = toUrl(e.logo);
+        return e;
+      }),
     );
   }
 

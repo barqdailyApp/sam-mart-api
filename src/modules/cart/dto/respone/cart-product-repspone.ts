@@ -10,9 +10,9 @@ export class CartProductRespone {
   unit: string;
   additional_services: any;
   constructor(data: any) {
-    console.log(data.ad);
+
     return {
-      id: data.product.id,
+      id: data.id,
 
       name: data.product.product_sub_category.product.name,
       section_id:
