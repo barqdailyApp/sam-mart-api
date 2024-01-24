@@ -15,6 +15,7 @@ import { Region } from '../region/region.entity';
 
 import { Order, } from '../order/order.entity';
 import { Shipment } from '../order/shipment.entity';
+import { Driver } from '../driver/driver.entity';
 
 @Entity()
 export class Warehouse extends AuditableEntity {
@@ -48,6 +49,9 @@ export class Warehouse extends AuditableEntity {
     srid: 4326,
   })
   location: string;
+
+  @OneToMany(()=>Driver,(driver)=>driver.warehouse)
+  drivers:Driver[]
 
   // latitude
   @Column({ type: 'float', precision: 10, scale: 6 })

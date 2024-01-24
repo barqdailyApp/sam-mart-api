@@ -11,6 +11,8 @@ import { Product } from 'src/infrastructure/entities/product/product.entity';
 import { ProductCategoryPrice } from 'src/infrastructure/entities/product/product-category-price.entity';
 import { In } from 'typeorm';
 import { calculateSum } from 'src/core/helpers/cast.helper';
+import { UpdateCartProductRequest } from './dto/requests/update-cart-request';
+import { AddRemoveCartProductServiceRequest } from './dto/requests/add-remove-service-request';
 
 @Injectable()
 export class CartService extends BaseService<CartProduct> {
@@ -35,16 +37,14 @@ export class CartService extends BaseService<CartProduct> {
 
   async getCartProducts(cart_id: string) {
     return await this.cartProductRepository.find({
-      where: { cart_id: cart_id ,},
+      where: { cart_id: cart_id },
       relations: {
-        
         product_category_price: {
-          product_additional_services:{additional_service:true},
-         
-          product_measurement: { measurement_unit: true, },
+          product_additional_services: { additional_service: true },
+
+          product_measurement: { measurement_unit: true },
 
           product_sub_category: {
-            
             product: { product_images: true },
             category_subCategory: { section_category: true },
           },
@@ -81,17 +81,6 @@ export class CartService extends BaseService<CartProduct> {
         product_price.product_offer.max_offer_quantity;
       product_price.price = product_price.product_offer.price;
     }
-    if (
-      req.quantity < product_price.min_order_quantity ||
-      req.quantity > product_price.max_order_quantity
-    ) {
-      throw new BadRequestException(
-        'Quantity should be between ' +
-          product_price.min_order_quantity +
-          ' and ' +
-          product_price.max_order_quantity,
-      );
-    }
 
     if (additions.length > 0) {
       const additional_cost = calculateSum(
@@ -109,8 +98,7 @@ export class CartService extends BaseService<CartProduct> {
       },
     });
     if (cart_product) {
-      cart_product.quantity += req.quantity;
-      return this.cartProductRepository.save(cart_product);
+      this.cartProductRepository.remove(cart_product);
     }
     return this.cartProductRepository.save(
       new CartProduct({
@@ -119,13 +107,88 @@ export class CartService extends BaseService<CartProduct> {
         section_id:
           product_price.product_sub_category.category_subCategory
             .section_category.section_id,
-        quantity: req.quantity,
+        quantity: product_price.min_order_quantity,
         product_id: product_price.product_sub_category.product_id,
         product_category_price_id: req.product_category_price_id,
         price: product_price.price,
         conversion_factor: product_price.product_measurement.conversion_factor,
-        main_measurement_id:product_price.product_measurement.is_main_unit==true?product_price.product_measurement.measurement_unit_id: product_price.product_measurement.base_unit_id,
+        main_measurement_id:
+          product_price.product_measurement.is_main_unit == true
+            ? product_price.product_measurement.measurement_unit_id
+            : product_price.product_measurement.base_unit_id,
       }),
     );
+  }
+
+  async deleteCartProduct(cart_product_id: string) {
+    return await this.cartProductRepository.delete({
+      id: cart_product_id,
+    });
+  }
+
+  async updatecartProduct(req: UpdateCartProductRequest) {
+    const cart_product = await this.cartProductRepository.findOne({
+      where: { id: req.cart_product_id },
+    });
+    const product_category_price = await this.productCategoryPrice.findOne({
+      where: { id: cart_product.product_category_price_id },
+      relations: {
+        product_measurement: true,
+        product_offer: true,
+        product_additional_services: true,
+        product_sub_category: {
+          category_subCategory: { section_category: true },
+        },
+      },
+    });
+    if (product_category_price.product_offer != null) {
+      product_category_price.min_order_quantity =
+        product_category_price.product_offer.min_offer_quantity;
+      product_category_price.max_order_quantity =
+        product_category_price.product_offer.max_offer_quantity;
+      product_category_price.price = product_category_price.product_offer.price;
+    }
+    if (req.add)
+      cart_product.quantity += product_category_price.min_order_quantity;
+    else cart_product.quantity -= product_category_price.min_order_quantity;
+
+    return this.cartProductRepository.save(cart_product);
+  }
+
+  async addRemoveService(req: AddRemoveCartProductServiceRequest) {
+    const cart_product = await this.cartProductRepository.findOne({
+      where: { id: req.cart_product_id },
+    });
+    const product_category_price = await this.productCategoryPrice.findOne({
+      where: { id: cart_product.product_category_price_id },
+      relations: {
+        product_measurement: true,
+        product_offer: true,
+        product_additional_services: true,
+        product_sub_category: {
+          category_subCategory: { section_category: true },
+        },
+      },
+    });
+
+    if (req.additions && req.additions.length > 0) {
+      req.additions.forEach((e) => {
+        const service = product_category_price.product_additional_services.find(
+          (s) => s.id == e,
+        );
+
+        if (cart_product.additions.includes) {
+          const index = cart_product.additions.indexOf(e);
+          if (index > -1) {
+            cart_product.additions.splice(index, 1);
+
+            cart_product.price -= service.price;
+          }
+        } else {
+          cart_product.additions.push(e);
+          cart_product.price += service.price;
+        }
+      });
+    }
   }
 }
