@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { CartService } from './cart.service';
 import { AddToCartRequest } from './dto/requests/add-to-cart-request';
 import { plainToInstance } from 'class-transformer';
@@ -9,6 +18,7 @@ import { RolesGuard } from '../authentication/guards/roles.guard';
 import { CartProductRespone } from './dto/respone/cart-product-repspone';
 import { I18nResponse } from 'src/core/helpers/i18n.helper';
 import { ActionResponse } from 'src/core/base/responses/action.response';
+import { UpdateCartProductRequest } from './dto/requests/update-cart-request';
 
 @ApiTags('Cart')
 @ApiHeader({
@@ -32,20 +42,32 @@ export class CartController {
       await this.cartService.getCartProducts(cart.id),
     );
 
-    return new ActionResponse( cart_products.map(
-      (e) =>
-        new CartProductRespone({
-          id: e.id, 
-          additional_services : e.additions,
-          price: e.price,
-          quantity: e.quantity,
-          product: e.product_category_price,
-        }),
-     ) );
+    return new ActionResponse(
+      cart_products.map(
+        (e) =>
+          new CartProductRespone({
+            id: e.id,
+            additional_services: e.additions,
+            price: e.price,
+            quantity: e.quantity,
+            product: e.product_category_price,
+          }),
+      ),
+    );
   }
 
   @Post('/add')
   async createCart(@Body() req: AddToCartRequest) {
     return await this.cartService.addToCart(req);
+  }
+
+  @Delete('/delete/:cart_product_id')
+  async deleteCartProduct(@Param('cart_product_id') cart_product_id: string) {
+    return await this.cartService.deleteCartProduct(cart_product_id);
+  }
+
+  @Put('/update/:cart-product')
+  async updateCartProduct(@Body() req: UpdateCartProductRequest) {
+    return await this.cartService.updatecartProduct(req);
   }
 }
