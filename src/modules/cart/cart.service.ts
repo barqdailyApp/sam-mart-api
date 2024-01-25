@@ -150,7 +150,7 @@ export class CartService extends BaseService<CartProduct> {
     }
     if (req.add == true) {
       if (
-        cart_product.quantity + product_category_price.min_order_quantity >
+        cart_product.quantity + product_category_price.min_order_quantity >=
         product_category_price.max_order_quantity
       )
         cart_product.quantity = product_category_price.max_order_quantity;
@@ -158,7 +158,7 @@ export class CartService extends BaseService<CartProduct> {
       cart_product.quantity += product_category_price.min_order_quantity;
     } else {
       if (
-        cart_product.quantity - product_category_price.min_order_quantity <
+        cart_product.quantity - product_category_price.min_order_quantity <=
         product_category_price.min_order_quantity
       )
         cart_product.quantity = product_category_price.min_order_quantity;
