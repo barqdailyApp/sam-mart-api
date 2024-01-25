@@ -113,7 +113,7 @@ export class SectionService extends BaseService<Section> {
       take: limit,
       order: { order_by: 'ASC' },
     });
-    const total = await this.section_category_repo.count();
+    const total = await this.section_category_repo.countBy({section_id:section_id});
     return { section_categories, total, page, limit };
   }
 
