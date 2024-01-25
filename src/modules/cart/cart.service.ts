@@ -154,7 +154,7 @@ export class CartService extends BaseService<CartProduct> {
         product_category_price.max_order_quantity
       )
         cart_product.quantity = product_category_price.max_order_quantity;
-
+else
       cart_product.quantity += product_category_price.min_order_quantity;
     } else {
       if (
@@ -162,14 +162,14 @@ export class CartService extends BaseService<CartProduct> {
         product_category_price.min_order_quantity
       )
         cart_product.quantity = product_category_price.min_order_quantity;
+        else
       cart_product.quantity -= product_category_price.min_order_quantity;
     }
 
     return {
-      ... await this.cartProductRepository.save(cart_product),
+      ...(await this.cartProductRepository.save(cart_product)),
       min_order_quantity: product_category_price.min_order_quantity,
       max_order_quantity: product_category_price.max_order_quantity,
-      
     };
   }
 
