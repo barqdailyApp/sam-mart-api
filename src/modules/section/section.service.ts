@@ -147,18 +147,15 @@ export class SectionService extends BaseService<Section> {
     sections.forEach((section) => {
       section.section_categories.forEach((category) => {
         flattenedData.push({
-          section_name_ar: section.name_ar,
-          section_name_en: section.name_en,
-          section_logo: toUrl(section?.logo),
-          section_is_active: section.is_active,
-          section_order_by: section.order_by,
-          section_min_order_price: section.min_order_price,
-          section_delivery_type: section.delivery_type,
-          section_delivery_price: section.delivery_price,
-          section_allowed_roles: section.allowed_roles,
-          category_name_ar: category?.category.name_ar,
-          category_name_en: category?.category.name_en,
-          category_logo: toUrl(category?.category.logo),
+          name_ar: section.name_ar,
+          name_en: section.name_en,
+          logo: toUrl(section?.logo),
+          is_active: section.is_active,
+          order_by: section.order_by,
+          min_order_price: section.min_order_price,
+          delivery_type: section.delivery_type,
+          delivery_price: section.delivery_price,
+          allowed_roles: section.allowed_roles,
         });
       });
     });
