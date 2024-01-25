@@ -125,10 +125,22 @@ export class CategoryService extends BaseService<Category> {
   }
 
   async updateCategorySubcategory(req: UpdateSectionCategoryRequest) {
+    const subcategory= await this.category_subcategory_repo.findOne({
+      where: {
+        id: req.id
+      }
+    })
+    if(!subcategory) throw new BadRequestException('subcategory not found')
     return await this.category_subcategory_repo.update(req.id, req);
   }
 
   async deleteCategorySubcategory(id: string) {
+    const subcategory= await this.category_subcategory_repo.findOne({
+      where: {
+        id: id
+      }
+    })
+    if(!subcategory) throw new BadRequestException('subcategory not found')
     return await this.category_subcategory_repo.delete(id);
   }
 

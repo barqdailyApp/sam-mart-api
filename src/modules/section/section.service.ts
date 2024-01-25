@@ -113,7 +113,9 @@ export class SectionService extends BaseService<Section> {
       take: limit,
       order: { order_by: 'ASC' },
     });
-    const total = await this.section_category_repo.countBy({section_id:section_id});
+    const total = await this.section_category_repo.countBy({
+      section_id: section_id,
+    });
     return { section_categories, total, page, limit };
   }
 
@@ -133,10 +135,22 @@ export class SectionService extends BaseService<Section> {
   }
 
   async updatSectionCategory(req: UpdateSectionCategoryRequest) {
+    const section_category = await this.section_category_repo.findOne({
+      where: { id: req.id },
+    });
+    if (!section_category) {
+      throw new BadRequestException('category not found');
+    }
     return await this.section_category_repo.update(req.id, req);
   }
 
   async deleteSectionCategory(id: string) {
+    const section_category = await this.section_category_repo.findOne({
+      where: { id: id },
+    });
+    if (!section_category) {
+      throw new BadRequestException('category not found');
+    }
     return await this.section_category_repo.delete(id);
   }
 
@@ -180,10 +194,15 @@ export class SectionService extends BaseService<Section> {
     }
 
     const newSections = jsonData.map(async (sectionData) => {
-      const importedSection = plainToClass(CreateSectionExcelRequest, sectionData);
+      const importedSection = plainToClass(
+        CreateSectionExcelRequest,
+        sectionData,
+      );
 
       if (importedSection.id) {
-        const existingSection = await this._repo.findOne({ where: { id: importedSection.id } });
+        const existingSection = await this._repo.findOne({
+          where: { id: importedSection.id },
+        });
         if (!existingSection) {
           throw new BadRequestException('Section not found');
         }
