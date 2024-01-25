@@ -135,28 +135,21 @@ export class SectionService extends BaseService<Section> {
   }
 
   async exportSections() {
-    const sections = await this._repo.find({
-      relations: {
-        section_categories: {
-          category: true,
-        },
-      },
-    });
+    const sections = await this._repo.find({});
 
     const flattenedData = [];
     sections.forEach((section) => {
-      section.section_categories.forEach((category) => {
-        flattenedData.push({
-          name_ar: section.name_ar,
-          name_en: section.name_en,
-          logo: toUrl(section?.logo),
-          is_active: section.is_active,
-          order_by: section.order_by,
-          min_order_price: section.min_order_price,
-          delivery_type: section.delivery_type,
-          delivery_price: section.delivery_price,
-          allowed_roles: section.allowed_roles,
-        });
+      flattenedData.push({
+        id: section.id,
+        name_ar: section.name_ar,
+        name_en: section.name_en,
+        logo: toUrl(section?.logo),
+        is_active: section.is_active,
+        order_by: section.order_by,
+        min_order_price: section.min_order_price,
+        delivery_type: section.delivery_type,
+        delivery_price: section.delivery_price,
+        allowed_roles: section.allowed_roles,
       });
     });
 
@@ -180,32 +173,25 @@ export class SectionService extends BaseService<Section> {
       throw new BadRequestException(JSON.stringify(validationErrors));
     }
 
-    const newSections = jsonData.map((sectionData) => {
-      const {
-        name_ar,
-        name_en,
-        order_by,
-        min_order_price,
-        allowed_roles,
-        delivery_price,
-        delivery_type,
-        is_active,
-        logo,
-      } = plainToClass(CreateSectionExcelRequest, sectionData);
+    const newSections = jsonData.map(async (sectionData) => {
+      const importedSection = plainToClass(CreateSectionExcelRequest, sectionData);
 
-      return this._repo.create({
-        name_ar,
-        name_en,
-        order_by,
-        min_order_price,
-        allowed_roles,
-        delivery_price,
-        delivery_type,
-        is_active,
-        logo,
-      });
+      if (importedSection.id) {
+        const existingSection = await this._repo.findOne({ where: { id: importedSection.id } });
+        if (!existingSection) {
+          throw new BadRequestException('Section not found');
+        }
+
+        if (existingSection) {
+          Object.assign(existingSection, importedSection);
+          await this._repo.save(existingSection);
+        }
+      } else {
+        const savedSection = await this._repo.create(importedSection);
+        await this._repo.save(savedSection);
+      }
     });
 
-    return await this._repo.save(newSections);
+    await Promise.all(newSections);
   }
 }
