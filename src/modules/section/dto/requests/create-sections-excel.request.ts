@@ -1,5 +1,5 @@
 import { Transform, Type } from "class-transformer";
-import { IsArray, IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Validate, ValidateNested } from "class-validator";
+import { IsArray, IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID, Validate, ValidateNested } from "class-validator";
 import { DeliveryType } from "src/infrastructure/data/enums/delivery-type.enum";
 import { Role } from "src/infrastructure/data/enums/role.enum";
 import { CreateCategoryExcelRequest } from "src/modules/category/dto/requests/create-categories-excel-request";
@@ -12,6 +12,10 @@ export class CreateSectionsExcelRequest {
 }
 
 export class CreateSectionExcelRequest extends CreateCategoryExcelRequest {
+    @IsOptional()
+    @IsUUID()
+    id: string;
+
     @IsNotEmpty()
     @IsNumber()
     @Transform(({ value }) => Number(value))
