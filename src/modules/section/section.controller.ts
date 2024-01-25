@@ -43,6 +43,7 @@ import { UpdateSectionCategoryRequest } from './dto/requests/update-section-cate
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { Roles } from '../authentication/guards/roles.decorator';
 import { ImportCategoryRequest } from '../category/dto/requests/import-category-request';
+import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 
 @ApiHeader({
   name: 'Accept-Language',
@@ -147,16 +148,35 @@ export class SectionController {
   @Get(':section_id/categories')
   async getSectionCategories(
     @Param('section_id') section_id: string,
+    @Query('limit') limit = 100,
+    @Query('page') page = 1,
     @Query('all') all?: boolean,
   ) {
     const categories = await this.sectionService.getSectionCategories(
       section_id,
       all,
+      limit,
+      page,
     );
     const data = this._i18nResponse.entity(categories);
+    if (all == true)
+      return new PaginatedResponse(
+        data.section_categories.map(
+          (e) =>
+            new CategoryResponse({
+              ...e,
+              logo: e.category.logo,
+              name: e.category.name,
+              category_id: e.category_id,
+            }),
+        ),
+        {
+          meta: { total: data.total, limit: limit, page: page },
+        },
+      );
 
     return new ActionResponse(
-      data.map(
+      data.section_categories.map(
         (e) =>
           new CategoryResponse({
             ...e,

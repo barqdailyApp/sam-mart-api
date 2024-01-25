@@ -103,12 +103,18 @@ export class SectionService extends BaseService<Section> {
   async getSectionCategories(
     section_id: string,
     all: boolean,
-  ): Promise<SectionCategory[]> {
-    return await this.section_category_repo.find({
+    limit?: number,
+    page?: number,
+  ) {
+    const section_categories = await this.section_category_repo.find({
       where: { section_id, is_active: all == true ? null : true },
       relations: { category: true },
+      skip: limit * (page - 1),
+      take: limit,
       order: { order_by: 'ASC' },
     });
+    const total = await this.section_category_repo.count();
+    return { section_categories, total, page, limit };
   }
 
   async addCategoryToSection(req: SectionCategoryRequest) {
