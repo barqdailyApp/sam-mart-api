@@ -8,10 +8,16 @@ import { Repository } from 'typeorm';
 import { MakeOrderRequest } from './dto/make-order-request';
 import { MakeOrderTransaction } from './util/make-order.transaction';
 import { OrderClientQuery } from './filter/order-client.query';
+import { SingleOrderQuery } from './filter/single-order.query';
+import { Shipment } from 'src/infrastructure/entities/order/shipment.entity';
+import { DriverShipmentsQuery } from './filter/driver-shipment.query';
 @Injectable()
 export class OrderService extends BaseUserService<Order> {
   constructor(
     @InjectRepository(Order) private orderRepository: Repository<Order>,
+    @InjectRepository(Shipment)
+    private shipmentRepository: Repository<Shipment>,
+
     @Inject(REQUEST) request: Request,
     private readonly makeOrdrTransacton: MakeOrderTransaction,
   ) {
@@ -23,26 +29,174 @@ export class OrderService extends BaseUserService<Order> {
   }
 
   async getAllOrders(orderClientQuery: OrderClientQuery) {
-    const { limit, page } = orderClientQuery;
+    const { limit, page, client_id } = orderClientQuery;
     const skip = (page - 1) * limit;
 
     let query = this.orderRepository
       .createQueryBuilder('order')
+
       .leftJoinAndSelect('order.user', 'user')
       .leftJoinAndSelect('order.section', 'section_order')
       .leftJoinAndSelect('order.warehouse', 'warehouse_order')
       .leftJoinAndSelect('order.address', 'address')
       .leftJoinAndSelect('order.shipments', 'shipments')
+
       .leftJoinAndSelect('shipments.driver', 'driver')
       .leftJoinAndSelect('shipments.warehouse', 'warehouse_shipment')
       .leftJoinAndSelect('shipments.shipment_products', 'shipment_products')
 
-     .leftJoinAndSelect('shipment_products.product_category_price','product_category_price')
+      .leftJoinAndSelect(
+        'shipment_products.product_category_price',
+        'product_category_price',
+      )
+      .leftJoinAndSelect(
+        'product_category_price.product_sub_category',
+        'product_sub_category',
+      )
 
+      .leftJoinAndSelect(
+        'product_category_price.product_measurement',
+        'product_measurement',
+      )
+      .leftJoinAndSelect(
+        'product_measurement.measurement_unit',
+        'measurement_unit',
+      )
+
+      .leftJoinAndSelect('product_sub_category.product', 'product')
+      .leftJoinAndSelect('product.product_images', 'product_images')
       .skip(skip)
       .take(limit);
 
+    if (client_id) {
+      query = query.where('order.user_id = :user_id', { user_id: client_id });
+    }
     const [orders, total] = await query.getManyAndCount();
     return { orders, total };
+  }
+
+  async getSingleOrder(order_id: string) {
+    let query = this.orderRepository
+      .createQueryBuilder('order')
+
+      .leftJoinAndSelect('order.user', 'user')
+      .leftJoinAndSelect('order.section', 'section_order')
+      .leftJoinAndSelect('order.warehouse', 'warehouse_order')
+      .leftJoinAndSelect('order.address', 'address')
+      .leftJoinAndSelect('order.shipments', 'shipments')
+
+      .leftJoinAndSelect('shipments.driver', 'driver')
+      .leftJoinAndSelect('shipments.warehouse', 'warehouse_shipment')
+      .leftJoinAndSelect('shipments.shipment_products', 'shipment_products')
+
+      .leftJoinAndSelect(
+        'shipment_products.product_category_price',
+        'product_category_price',
+      )
+      .leftJoinAndSelect(
+        'product_category_price.product_sub_category',
+        'product_sub_category',
+      )
+
+      .leftJoinAndSelect(
+        'product_category_price.product_measurement',
+        'product_measurement',
+      )
+      .leftJoinAndSelect(
+        'product_measurement.measurement_unit',
+        'measurement_unit',
+      )
+
+      .leftJoinAndSelect('product_sub_category.product', 'product')
+      .leftJoinAndSelect('product.product_images', 'product_images');
+
+    //  single order
+    query = query.where('order.id = :id', { id: order_id });
+
+    return query.getOne();
+  }
+
+  async getDriverShipments(driverShipmentsQuery: DriverShipmentsQuery) {
+    const { limit, page, driver_id, status } = driverShipmentsQuery;
+    const skip = (page - 1) * limit;
+    let query = this.shipmentRepository
+      .createQueryBuilder('shipments')
+      .leftJoinAndSelect('shipments.order', 'order')
+
+      .leftJoinAndSelect('shipments.driver', 'driver')
+      .leftJoinAndSelect('driver.user', 'user')
+
+      .leftJoinAndSelect('shipments.warehouse', 'warehouse_shipment')
+      .leftJoinAndSelect('shipments.shipment_products', 'shipment_products')
+
+      .leftJoinAndSelect(
+        'shipment_products.product_category_price',
+        'product_category_price',
+      )
+      .leftJoinAndSelect(
+        'product_category_price.product_sub_category',
+        'product_sub_category',
+      )
+
+      .leftJoinAndSelect(
+        'product_category_price.product_measurement',
+        'product_measurement',
+      )
+      .leftJoinAndSelect(
+        'product_measurement.measurement_unit',
+        'measurement_unit',
+      )
+
+      .leftJoinAndSelect('product_sub_category.product', 'product')
+      .leftJoinAndSelect('product.product_images', 'product_images')
+      .skip(skip)
+      .take(limit);
+
+    if (driver_id) {
+      query = query.where('driver.id = :id', { id: driver_id });
+    }
+    if (status) {
+      query = query.where('shipments.status = :status', { status });
+    }
+    const [orders, total] = await query.getManyAndCount();
+    return { orders, total };
+  }
+
+  async getSingleShipment(shipment_id: string) {
+    let query = this.shipmentRepository
+      .createQueryBuilder('shipments')
+      .leftJoinAndSelect('shipments.order', 'order')
+
+      .leftJoinAndSelect('shipments.driver', 'driver')
+      .leftJoinAndSelect('driver.user', 'user')
+
+      .leftJoinAndSelect('shipments.warehouse', 'warehouse_shipment')
+      .leftJoinAndSelect('shipments.shipment_products', 'shipment_products')
+
+      .leftJoinAndSelect(
+        'shipment_products.product_category_price',
+        'product_category_price',
+      )
+      .leftJoinAndSelect(
+        'product_category_price.product_sub_category',
+        'product_sub_category',
+      )
+
+      .leftJoinAndSelect(
+        'product_category_price.product_measurement',
+        'product_measurement',
+      )
+      .leftJoinAndSelect(
+        'product_measurement.measurement_unit',
+        'measurement_unit',
+      )
+
+      .leftJoinAndSelect('product_sub_category.product', 'product')
+      .leftJoinAndSelect('product.product_images', 'product_images');
+
+    //  single order
+    query = query.where('shipments.id = :id', { id: shipment_id });
+
+    return query.getOne();
   }
 }

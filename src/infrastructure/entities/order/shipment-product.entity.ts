@@ -9,9 +9,6 @@ export class ShipmentProduct extends AuditableEntity {
 
   @Column()
   shipment_id: string;
-
-
-
   @Column()
   product_id: string;
   @Column({ nullable: true })

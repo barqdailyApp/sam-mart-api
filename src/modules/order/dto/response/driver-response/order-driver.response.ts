@@ -7,10 +7,9 @@ import { SectionResponse } from 'src/modules/section/dto/response/section.respon
 import { ProfileResponse } from 'src/modules/user/dto/responses/profile.response';
 import { UserResponse } from 'src/modules/user/dto/responses/user.response';
 import { WarehouseResponse } from 'src/modules/warehouse/dto/response/warehouse.response';
-import { ShipmentResponse } from './shipment.response';
 
 @Exclude()
-export class OrderResponse {
+export class OrderDriverResponse {
   @Expose() readonly id: string;
 
   @Transform(({ value }) => plainToClass(UserResponse, value))
@@ -29,18 +28,6 @@ export class OrderResponse {
   @Expose()
   readonly section: SectionResponse;
 
-  @Transform(({ value }) => plainToClass(ShipmentResponse, value))
-  @Expose()
-  readonly shipments: ShipmentResponse[];
-
-  @Transform(({ obj }) => {
-    return obj.shipments.reduce(
-      (acc, shipment) => acc + shipment.shipment_products.length,
-      0,
-    );
-  })
-  @Expose()
-  readonly order_products: number;
 
   @Expose() readonly total_price: number;
 
