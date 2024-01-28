@@ -1,5 +1,13 @@
 import { AuditableEntity } from 'src/infrastructure/base/auditable.entity';
-import { BeforeInsert, BeforeUpdate, Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
+import {
+  BeforeInsert,
+  BeforeUpdate,
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToOne,
+} from 'typeorm';
 import { User } from '../user/user.entity';
 import { Country } from '../country/country.entity';
 import { Region } from '../region/region.entity';
@@ -7,6 +15,7 @@ import { vehicle_types } from 'src/infrastructure/data/enums/vehicle_type.enum';
 import { City } from '../city/city.entity';
 import { Shipment } from '../order/shipment.entity';
 import { DriverStatus } from 'src/infrastructure/data/enums/driver-status.enum';
+import { Warehouse } from '../warehouse/warehouse.entity';
 
 @Entity()
 export class Driver extends AuditableEntity {
@@ -28,7 +37,12 @@ export class Driver extends AuditableEntity {
   @Column()
   country_id: string;
 
+  @ManyToOne(() => Warehouse, (warehouse) => warehouse.drivers, {})
+  @JoinColumn({ name: 'warehouse_id' })
+  warehouse: Warehouse;
 
+  @Column({ nullable: true })
+  warehouse_id: string;
 
   @ManyToOne(() => City, (city) => city.drivers, {
     onDelete: 'CASCADE',
@@ -38,7 +52,6 @@ export class Driver extends AuditableEntity {
 
   @Column()
   city_id: string;
-
 
   @ManyToOne(() => Region, (region) => region.drivers, {
     onDelete: 'CASCADE',
@@ -67,10 +80,10 @@ export class Driver extends AuditableEntity {
   })
   location: string;
 
-  @Column({ type: 'float', precision: 10, scale: 6, nullable: true, })
+  @Column({ type: 'float', precision: 10, scale: 6, nullable: true })
   latitude: number;
 
-  @Column({ type: 'float', precision: 11, scale: 6, nullable: true, })
+  @Column({ type: 'float', precision: 11, scale: 6, nullable: true })
   longitude: number;
 
   @Column()
@@ -92,11 +105,10 @@ export class Driver extends AuditableEntity {
   vehicle_model: string;
 
   @Column({ type: 'enum', enum: vehicle_types })
-  vehicle_type: vehicle_types
+  vehicle_type: vehicle_types;
 
-
-  @ManyToOne(() => Shipment, Shipment => Shipment.driver)
-  shipments: Shipment[]
+  @ManyToOne(() => Shipment, (Shipment) => Shipment.driver)
+  shipments: Shipment[];
   constructor(partial?: Partial<Driver>) {
     super();
     Object.assign(this, partial);
@@ -104,11 +116,17 @@ export class Driver extends AuditableEntity {
 
   @BeforeInsert()
   saveLocation() {
-    this.location = this.latitude == null ? null : `POINT(${this.latitude} ${this.longitude})`;
+    this.location =
+      this.latitude == null
+        ? null
+        : `POINT(${this.latitude} ${this.longitude})`;
   }
 
   @BeforeUpdate()
   updateLocation() {
-    this.location = this.latitude == null ? null : `POINT(${this.latitude} ${this.longitude})`;
+    this.location =
+      this.latitude == null
+        ? null
+        : `POINT(${this.latitude} ${this.longitude})`;
   }
 }

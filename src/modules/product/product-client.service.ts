@@ -13,6 +13,7 @@ import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { ProductFavorite } from 'src/infrastructure/entities/product/product-favorite.entity';
 import { Section } from 'src/infrastructure/entities/section/section.entity';
+import { ProductFavQuery } from './dto/filter/product-fav.query';
 @Injectable()
 export class ProductClientService {
   constructor(
@@ -339,8 +340,13 @@ export class ProductClientService {
     product_id: string,
     singleProductClientFilter: SingleProductClientQuery,
   ) {
-    const { latitude, longitude, section_id, category_sub_category_id,user_id } =
-      singleProductClientFilter;
+    const {
+      latitude,
+      longitude,
+      section_id,
+      category_sub_category_id,
+      user_id,
+    } = singleProductClientFilter;
     // For guests and individuals, orders are taken from the nearest warehouse
     let warehouse: Warehouse;
     if (latitude && longitude) {
@@ -432,12 +438,13 @@ export class ProductClientService {
           category_sub_category_id,
         },
       );
-   
+
       if (user_id) {
-        const category_subCategory = await this.categorySubcategory_repo.findOne({
-          where: { id: category_sub_category_id },
-          relations: { section_category: true },
-        });
+        const category_subCategory =
+          await this.categorySubcategory_repo.findOne({
+            where: { id: category_sub_category_id },
+            relations: { section_category: true },
+          });
         const favorite = await this.productFavorite_repo.findOne({
           where: {
             product_id,
@@ -451,7 +458,6 @@ export class ProductClientService {
           });
         }
       }
-
     }
 
     // Conditional where clause based on section
@@ -521,17 +527,16 @@ export class ProductClientService {
 
   //* Get All Products Favorite
 
-  async getAllProductsFavorite(productClientQuery: ProductClientQuery) {
+  async getAllProductsFavorite(productFavQuery: ProductFavQuery) {
     const {
       page,
       limit,
       longitude,
       latitude,
       section_id,
-      category_sub_category_id,
-      product_name,
       sort,
-    } = productClientQuery;
+      user_id,
+    } = productFavQuery;
     const skip = (page - 1) * limit;
 
     let productsSort = {};
@@ -567,25 +572,24 @@ export class ProductClientService {
     // Start building the query
     let query = this.productFavorite_repo
       .createQueryBuilder('product_favorite')
-      .innerJoinAndSelect('product_favorite.section', 'section')
 
       .innerJoinAndSelect('product_favorite.product', 'product')
+      .innerJoinAndSelect('product_favorite.user', 'user')
+      .innerJoinAndSelect('product_favorite.section', 'section')
 
       .innerJoinAndSelect('product.product_images', 'product_images')
-      .innerJoinAndSelect(
+      .innerJoin(
         'product.product_sub_categories',
         'product_sub_categories',
       )
-      .innerJoinAndSelect(
+      .innerJoin(
         'product_sub_categories.category_subCategory',
         'product_category_subCategory',
       )
-      .innerJoinAndSelect(
+      .innerJoin(
         'product_category_subCategory.section_category',
         'product_section_category',
       )
-      .innerJoinAndSelect('product_section_category.section', 'product_section')
-
       .innerJoinAndSelect('product.warehouses_products', 'warehousesProduct')
       .innerJoinAndSelect(
         'product.product_measurements',
@@ -625,37 +629,9 @@ export class ProductClientService {
       });
     }
 
-    // Add search term condition if provided
-    if (product_name) {
-      query = query.andWhere(
-        'product.name_ar LIKE :product_name OR product.name_en LIKE :product_name',
-        { product_name: `%${product_name}%` },
-      );
-    }
+   
 
-    // Conditional where clause based on sub category
-    if (category_sub_category_id) {
-      query = query.andWhere(
-        'product_sub_category.category_sub_category_id = :category_sub_category_id',
-        {
-          category_sub_category_id,
-        },
-      );
-      query = query.andWhere('product.is_active = true');
-      query = query.andWhere('product_sub_categories.is_active = true');
-      query = query.andWhere(
-        'product_sub_categories.category_sub_category_id = :category_sub_category_id',
-        {
-          category_sub_category_id,
-        },
-      );
-      const categorySubcategory = await this.categorySubcategory_repo.findOne({
-        where: { id: category_sub_category_id },
-      });
-      await this.subCategoryService.updateMostHitSubCategory({
-        sub_category_id: categorySubcategory.subcategory_id,
-      });
-    }
+
 
     // Conditional where clause based on section
     if (section_id) {
@@ -672,6 +648,9 @@ export class ProductClientService {
       );
     }
 
+    query = query.andWhere('product_favorite.user_id = :user_id', {
+      user_id,
+    });
     const [products_favorite, total] = await query.getManyAndCount();
     return { products_favorite, total };
   }

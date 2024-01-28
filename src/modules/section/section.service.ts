@@ -24,6 +24,7 @@ import {
 } from './dto/requests/create-sections-excel.request';
 import { validate } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { I18nResponse } from 'src/core/helpers/i18n.helper';
 
 @Injectable()
 export class SectionService extends BaseService<Section> {
@@ -36,6 +37,7 @@ export class SectionService extends BaseService<Section> {
     @Inject(StorageManager) private readonly storageManager: StorageManager,
     @Inject(ImageManager) private readonly imageManager: ImageManager,
     @Inject(FileService) private _fileService: FileService,
+    @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
 
     @Inject(REQUEST) readonly request: Request,
   ) {
@@ -53,14 +55,19 @@ export class SectionService extends BaseService<Section> {
     });
 
     if (!user)
-      return sections.filter((section) =>
-        section.allowed_roles.includes(Role.CLIENT),
+      return this._i18nResponse.entity(
+        sections.filter((section) =>
+          section.allowed_roles.includes(Role.CLIENT),
+        ),
       );
     if (user.roles.includes(Role.ADMIN))
       return await this.section_repo.find({ order: { order_by: 'ASC' } });
-    return sections.filter((section) => {
-      return user.roles.includes(section.allowed_roles[0]);
-    });
+
+    return this._i18nResponse.entity(
+      sections.filter((section) => {
+        return user.roles.includes(section.allowed_roles[0]);
+      }),
+    );
   }
 
   async createSection(req: CreateSectionRequest): Promise<Section> {
@@ -86,7 +93,7 @@ export class SectionService extends BaseService<Section> {
       // set avatar path
       section.logo = logo;
     }
-   const result= await this._repo.update(section.id, {
+    const result = await this._repo.update(section.id, {
       ...plainToInstance(Section, req),
       logo: section.logo,
     });
@@ -96,12 +103,20 @@ export class SectionService extends BaseService<Section> {
   async getSectionCategories(
     section_id: string,
     all: boolean,
-  ): Promise<SectionCategory[]> {
-    return await this.section_category_repo.find({
+    limit?: number,
+    page?: number,
+  ) {
+    const section_categories = await this.section_category_repo.find({
       where: { section_id, is_active: all == true ? null : true },
       relations: { category: true },
+      skip: limit * (page - 1),
+      take: limit,
       order: { order_by: 'ASC' },
     });
+    const total = await this.section_category_repo.countBy({
+      section_id: section_id,
+    });
+    return { section_categories, total, page, limit };
   }
 
   async addCategoryToSection(req: SectionCategoryRequest) {
@@ -120,39 +135,41 @@ export class SectionService extends BaseService<Section> {
   }
 
   async updatSectionCategory(req: UpdateSectionCategoryRequest) {
+    const section_category = await this.section_category_repo.findOne({
+      where: { id: req.id },
+    });
+    if (!section_category) {
+      throw new BadRequestException('category not found');
+    }
     return await this.section_category_repo.update(req.id, req);
   }
 
   async deleteSectionCategory(id: string) {
+    const section_category = await this.section_category_repo.findOne({
+      where: { id: id },
+    });
+    if (!section_category) {
+      throw new BadRequestException('category not found');
+    }
     return await this.section_category_repo.delete(id);
   }
 
   async exportSections() {
-    const sections = await this._repo.find({
-      relations: {
-        section_categories: {
-          category: true,
-        },
-      },
-    });
+    const sections = await this._repo.find({});
 
     const flattenedData = [];
     sections.forEach((section) => {
-      section.section_categories.forEach((category) => {
-        flattenedData.push({
-          section_name_ar: section.name_ar,
-          section_name_en: section.name_en,
-          section_logo: toUrl(section.logo),
-          section_is_active: section.is_active,
-          section_order_by: section.order_by,
-          section_min_order_price: section.min_order_price,
-          section_delivery_type: section.delivery_type,
-          section_delivery_price: section.delivery_price,
-          section_allowed_roles: section.allowed_roles,
-          category_name_ar: category.category.name_ar,
-          category_name_en: category.category.name_en,
-          category_logo: toUrl(category.category.logo),
-        });
+      flattenedData.push({
+        id: section.id,
+        name_ar: section.name_ar,
+        name_en: section.name_en,
+        logo: toUrl(section?.logo),
+        is_active: section.is_active,
+        order_by: section.order_by,
+        min_order_price: section.min_order_price,
+        delivery_type: section.delivery_type,
+        delivery_price: section.delivery_price,
+        allowed_roles: section.allowed_roles,
       });
     });
 
@@ -176,32 +193,30 @@ export class SectionService extends BaseService<Section> {
       throw new BadRequestException(JSON.stringify(validationErrors));
     }
 
-    const newSections = jsonData.map((sectionData) => {
-      const {
-        name_ar,
-        name_en,
-        order_by,
-        min_order_price,
-        allowed_roles,
-        delivery_price,
-        delivery_type,
-        is_active,
-        logo,
-      } = plainToClass(CreateSectionExcelRequest, sectionData);
+    const newSections = jsonData.map(async (sectionData) => {
+      const importedSection = plainToClass(
+        CreateSectionExcelRequest,
+        sectionData,
+      );
 
-      return this._repo.create({
-        name_ar,
-        name_en,
-        order_by,
-        min_order_price,
-        allowed_roles,
-        delivery_price,
-        delivery_type,
-        is_active,
-        logo,
-      });
+      if (importedSection.id) {
+        const existingSection = await this._repo.findOne({
+          where: { id: importedSection.id },
+        });
+        if (!existingSection) {
+          throw new BadRequestException('Section not found');
+        }
+
+        if (existingSection) {
+          Object.assign(existingSection, importedSection);
+          await this._repo.save(existingSection);
+        }
+      } else {
+        const savedSection = await this._repo.create(importedSection);
+        await this._repo.save(savedSection);
+      }
     });
 
-    return await this._repo.save(newSections);
+    await Promise.all(newSections);
   }
 }
