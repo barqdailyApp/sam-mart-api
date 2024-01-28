@@ -20,6 +20,8 @@ import { ProductResponse } from './dto/response/product.response';
 import { ProductClientService } from './product-client.service';
 import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
 import { RolesGuard } from '../authentication/guards/roles.guard';
+import { ProductFavResponse } from './dto/response/product-fav.response';
+import { ProductFavQuery } from './dto/filter/product-fav.query';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -93,18 +95,16 @@ export class ProductClientController {
   }
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Get('all-Product-favorite')
-  async allProductFavorite(@Query() productClientFilter: ProductClientQuery) {
-    const { limit, page } = productClientFilter;
+  async allProductFavorite(@Query() productFavQuery: ProductFavQuery) {
+    const { limit, page } = productFavQuery;
 
     const { products_favorite, total } =
       await this.productClientService.getAllProductsFavorite(
-        productClientFilter,
+        productFavQuery,
       );
+      console.log(products_favorite)
     const productsResponse = products_favorite.map((product_fav) => {
-      const productResponse = plainToClass(
-        ProductResponse,
-        product_fav.product,
-      );
+      const productResponse = plainToClass(ProductFavResponse, product_fav);
 
       return productResponse;
     });

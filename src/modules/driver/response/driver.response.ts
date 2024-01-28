@@ -1,5 +1,5 @@
 import { Exclude, Expose, Transform, plainToClass } from "class-transformer";
-import { UserResponse } from "./user.response";
+import { UserResponse } from "../../user/dto/responses/user.response";
 
 @Exclude()
 
