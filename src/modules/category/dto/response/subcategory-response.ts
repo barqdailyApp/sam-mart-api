@@ -15,6 +15,8 @@ export class SubcategoryResponse {
     @Expose()
     logo:string
 
+    
+
     constructor(data:Partial<SubcategoryResponse>){
        
 this.id=data.id

@@ -150,22 +150,27 @@ export class CartService extends BaseService<CartProduct> {
     }
     if (req.add == true) {
       if (
-        cart_product.quantity + product_category_price.min_order_quantity >
+        cart_product.quantity + product_category_price.min_order_quantity >=
         product_category_price.max_order_quantity
       )
         cart_product.quantity = product_category_price.max_order_quantity;
-
+else
       cart_product.quantity += product_category_price.min_order_quantity;
     } else {
       if (
-        cart_product.quantity - product_category_price.min_order_quantity <
+        cart_product.quantity - product_category_price.min_order_quantity <=
         product_category_price.min_order_quantity
       )
         cart_product.quantity = product_category_price.min_order_quantity;
+        else
       cart_product.quantity -= product_category_price.min_order_quantity;
     }
 
-    return this.cartProductRepository.save(cart_product);
+    return {
+      ...(await this.cartProductRepository.save(cart_product)),
+      min_order_quantity: product_category_price.min_order_quantity,
+      max_order_quantity: product_category_price.max_order_quantity,
+    };
   }
 
   async addRemoveService(req: AddRemoveCartProductServiceRequest) {

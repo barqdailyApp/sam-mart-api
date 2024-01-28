@@ -43,6 +43,7 @@ import { UpdateSectionCategoryRequest } from './dto/requests/update-section-cate
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { Roles } from '../authentication/guards/roles.decorator';
 import { ImportCategoryRequest } from '../category/dto/requests/import-category-request';
+import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 
 @ApiHeader({
   name: 'Accept-Language',
@@ -55,7 +56,8 @@ export class SectionController {
   constructor(
     private readonly sectionService: SectionService,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
-  ) {}
+  ) { }
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
@@ -67,105 +69,8 @@ export class SectionController {
     @UploadedFile(new UploadValidator().build())
     logo: Express.Multer.File,
   ) {
-    console.log(req);
     req.logo = logo;
     return new ActionResponse(await this.sectionService.createSection(req));
-  }
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  @ApiBearerAuth()
-  @Get('/:id')
-  async findSection(@Param('id') id: string) {
-    const section = await this.sectionService.findOne(id);
-    section.logo = toUrl(section.logo);
-    return new ActionResponse(section);
-  }
-
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  @ApiBearerAuth()
-  @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('logo'))
-  @ApiConsumes('multipart/form-data')
-  @Put()
-  async update(
-    @Body() req: UpdateSectionRequest,
-    @UploadedFile(new UploadValidator().build())
-    logo: Express.Multer.File,
-  ) {
-    console.log(req);
-    req.logo = logo;
-    return new ActionResponse(await this.sectionService.updateSection(req));
-  }
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  @ApiBearerAuth()
-  @Delete('/:id')
-  async deleteSection(@Param('id') id: string) {
-    return new ActionResponse(await this.sectionService.delete(id));
-  }
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  @ApiBearerAuth()
-  @Post('/add-category')
-  async addCategoryToSection(@Body() req: SectionCategoryRequest) {
-    return new ActionResponse(
-      await this.sectionService.addCategoryToSection(req),
-    );
-  }
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  @ApiBearerAuth()
-  @Put('/section-category')
-  async updateSectionCategory(@Body() req: UpdateSectionCategoryRequest) {
-    return new ActionResponse(
-      await this.sectionService.updatSectionCategory(req),
-    );
-  }
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  @ApiBearerAuth()
-  @Delete('/section-category/:id')
-  async deleteSectionCategory(@Param('id') id: string) {
-    return new ActionResponse(
-      await this.sectionService.deleteSectionCategory(id),
-    );
-  }
-
-  @Get()
-  @ApiQuery({ name: 'user_id', type: String, required: false })
-  async getSections(@Query('user_id') userId?: string) {
-    return new ActionResponse(
-      (await this.sectionService.getSections(userId)).map((e) => {
-        e.logo = toUrl(e.logo);
-        return e;
-      }),
-    );
-  }
-
-  @ApiProperty({ required: false })
-  all?: boolean;
-  @Get(':section_id/categories')
-  async getSectionCategories(
-    @Param('section_id') section_id: string,
-    @Query('all') all?: boolean,
-  ) {
-    const categories = await this.sectionService.getSectionCategories(
-      section_id,
-      all,
-    );
-    const data = this._i18nResponse.entity(categories);
-
-    return new ActionResponse(
-      data.map(
-        (e) =>
-          new CategoryResponse({
-            ...e,
-            logo: e.category.logo,
-            name: e.category.name,
-            category_id: e.category_id,
-          }),
-      ),
-    );
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -196,4 +101,125 @@ export class SectionController {
     const jsonData = await this.sectionService.importSections(req);
     return new ActionResponse(jsonData);
   }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @Get('/:id')
+  async findSection(@Param('id') id: string) {
+    const section = await this.sectionService.findOne(id);
+    section.logo = toUrl(section.logo);
+    return new ActionResponse(section);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('logo'))
+  @ApiConsumes('multipart/form-data')
+  @Put()
+  async update(
+    @Body() req: UpdateSectionRequest,
+    @UploadedFile(new UploadValidator().build())
+    logo: Express.Multer.File,
+  ) {
+    console.log(req);
+    req.logo = logo;
+    return new ActionResponse(await this.sectionService.updateSection(req));
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @Delete('/:id')
+  async deleteSection(@Param('id') id: string) {
+    return new ActionResponse(await this.sectionService.delete(id));
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @Post('/add-category')
+  async addCategoryToSection(@Body() req: SectionCategoryRequest) {
+    return new ActionResponse(
+      await this.sectionService.addCategoryToSection(req),
+    );
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @Put('/section-category')
+  async updateSectionCategory(@Body() req: UpdateSectionCategoryRequest) {
+    return new ActionResponse(
+      await this.sectionService.updatSectionCategory(req),
+    );
+  }
+  
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @Delete('/section-category/:id')
+  async deleteSectionCategory(@Param('id') id: string) {
+    return new ActionResponse(
+      await this.sectionService.deleteSectionCategory(id),
+    );
+  }
+
+  @Get()
+  @ApiQuery({ name: 'user_id', type: String, required: false })
+  async getSections(@Query('user_id') userId?: string) {
+    return new ActionResponse(
+      (await this.sectionService.getSections(userId)).map((e) => {
+        e.logo = toUrl(e.logo);
+        return e;
+      }),
+    );
+  }
+
+  @ApiProperty({ required: false })
+  all?: boolean;
+  @Get(':section_id/categories')
+  async getSectionCategories(
+    @Param('section_id') section_id: string,
+    @Query('limit') limit = 100,
+    @Query('page') page = 1,
+    @Query('all') all?: boolean,
+  ) {
+    const categories = await this.sectionService.getSectionCategories(
+      section_id,
+      all,
+      limit,
+      page,
+    );
+    const data = this._i18nResponse.entity(categories);
+    if (all == true)
+      return new PaginatedResponse(
+        data.section_categories.map(
+          (e) =>
+            new CategoryResponse({
+              ...e,
+              logo: e.category.logo,
+              name: e.category.name,
+              category_id: e.category_id,
+            }),
+        ),
+        {
+          meta: { total: data.total, limit: limit, page: page },
+        },
+      );
+
+    return new ActionResponse(
+      data.section_categories.map(
+        (e) =>
+          new CategoryResponse({
+            ...e,
+            logo: e.category.logo,
+            name: e.category.name,
+            category_id: e.category_id,
+          }),
+      ),
+    );
+  }
+
 }
