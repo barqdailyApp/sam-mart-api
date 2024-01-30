@@ -104,7 +104,7 @@ export class ProductClientController {
         productFavQuery,
       );
     const productsResponse = products_favorite.map((product_fav) => {
-      const productResponse = plainToClass(ProductFavResponse, product_fav);
+      const productResponse = plainToClass(ProductResponse, product_fav.product);
 
       return productResponse;
     });
