@@ -20,6 +20,7 @@ import { Response } from 'express';
 import { ImportCategoryRequest } from '../category/dto/requests/import-category-request';
 import { plainToInstance } from 'class-transformer';
 import { MostHitSubCategoryResponse, MostHitSubcategoryReponseWithInfo } from './dto/response/most-hit-subcategory.response';
+import { toUrl } from 'src/core/helpers/file.helper';
 
 @ApiHeader({
   name: 'Accept-Language',
@@ -62,6 +63,15 @@ export class SubcategoryController {
     } else {
       return new ActionResponse(categoriesRespone);
     }
+  }
+  @Get("/:id")
+  async getSubcategory(@Param('id') id: string) {
+    const category = this._i18nResponse.entity(
+      await this.subcategoryService.findOne(id),
+    );
+    category.logo = toUrl( category.logo);
+    return new ActionResponse(category);
+    
   }
 
   @Get('/most-hit-subcategory')
