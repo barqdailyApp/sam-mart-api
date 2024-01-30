@@ -50,9 +50,8 @@ export class SubcategoryController {
 
   @Get()
   async getCategories(@Query() query: PaginatedRequest) {
-    const categories = this._i18nResponse.entity(
-      await this.subcategoryService.findAll(query),
-    );
+    const categories =
+      await this.subcategoryService.findAll(query);
     const categoriesRespone = categories.map((e) => new CategoryResponse(e));
 
     if (query.page && query.limit) {
@@ -77,9 +76,8 @@ export class SubcategoryController {
   }
   @Get("/:id")
   async getSubcategory(@Param('id') id: string) {
-    const category = this._i18nResponse.entity(
-      await this.subcategoryService.findOne(id),
-    );
+    const category = 
+      await this.subcategoryService.findOne(id);
     category.logo = toUrl( category.logo);
     return new ActionResponse(category);
     

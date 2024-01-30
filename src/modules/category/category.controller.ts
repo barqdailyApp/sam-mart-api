@@ -91,9 +91,8 @@ export class CategoryController {
   @ApiBearerAuth()
   @Get()
   async getCategories(@Query() query: PaginatedRequest) {
-    const categories = this._i18nResponse.entity(
-      await this.categoryService.findAll(query),
-    );
+    const categories = 
+      await this.categoryService.findAll(query);
     const categoriesRespone = categories.map((e) => new CategoryResponse(e));
 
     if (query.page && query.limit) {
@@ -140,9 +139,8 @@ export class CategoryController {
   @ApiBearerAuth()
   @Get('/:id')
   async getCategory(@Param('id') id: string) {
-    const category = this._i18nResponse.entity(
-      await this.categoryService.findOne(id),
-    );
+    const category = 
+      await this.categoryService.findOne(id);
     category.logo = toUrl(category.logo);
 
     return new ActionResponse(category);
