@@ -8,8 +8,11 @@ export class CartProductRespone {
   quantity: number;
   price: number;
   unit: string;
+
   additional_services: any;
   constructor(data: any) {
+    console.log(data.product.product_offer);
+    console.log(data.product);
     return {
       id: data.id,
 
@@ -22,13 +25,21 @@ export class CartProductRespone {
       quantity: data.quantity,
       unit: data.product.product_measurement.measurement_unit.name,
       is_recovered: data.product.is_recovered,
+      min_order_quantity: data.product.product_offer
+        ? data.product.product_offer.min_quantity
+        : data.product.min_order_quantity,
+      max_order_quantity: data.product.product_offer
+        ? data.product.product_offer.max_quantity
+        : data.product.max_order_quantity,
 
-      additional_services: data.product.product_additional_services.filter((e) => {
-        if (data.additional_services.includes(e.id)) {
-          e.additional_service.id = e.id;
-          return e.additional_service;
-        }
-      }),
+      additional_services: data.product.product_additional_services.filter(
+        (e) => {
+          if (data.additional_services.includes(e.id)) {
+            e.additional_service.id = e.id;
+            return e.additional_service;
+          }
+        },
+      ),
       image: toUrl(
         data.product.product_sub_category.product.product_images.find(
           (e) => e.is_logo,
