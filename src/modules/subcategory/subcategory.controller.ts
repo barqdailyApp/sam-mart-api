@@ -64,15 +64,7 @@ export class SubcategoryController {
       return new ActionResponse(categoriesRespone);
     }
   }
-  @Get("/:id")
-  async getSubcategory(@Param('id') id: string) {
-    const category = this._i18nResponse.entity(
-      await this.subcategoryService.findOne(id),
-    );
-    category.logo = toUrl( category.logo);
-    return new ActionResponse(category);
-    
-  }
+
 
   @Get('/most-hit-subcategory')
   async getMostHitSubcategory(@Query() query: QueryHitsSubCategoryRequest) {
@@ -82,6 +74,15 @@ export class SubcategoryController {
     );
 
     return new ActionResponse<MostHitSubcategoryReponseWithInfo[]>(this._i18nResponse.entity(result));
+  }
+  @Get("/:id")
+  async getSubcategory(@Param('id') id: string) {
+    const category = this._i18nResponse.entity(
+      await this.subcategoryService.findOne(id),
+    );
+    category.logo = toUrl( category.logo);
+    return new ActionResponse(category);
+    
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
