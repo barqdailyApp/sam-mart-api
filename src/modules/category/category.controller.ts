@@ -147,7 +147,7 @@ export class CategoryController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
-  @Get('/:id')
+  @Delete('/:id')
   async deleteCategory(@Param('id') id: string) {
     const category = await this.categoryService.softDelete(id);
 
