@@ -119,7 +119,7 @@ export class ProductClientService {
         'product_category_prices.product_offer',
         'product_offer',
       )
-      
+     
       .innerJoin(
         'product_category_prices.product_sub_category',
         'product_sub_category',
@@ -136,6 +136,16 @@ export class ProductClientService {
       .take(limit);
 
     if (user_id) {
+      query = query.leftJoinAndSelect(
+        'product_category_prices.cart_products',
+        'cart_products'
+      );
+      query = query.leftJoin(
+        'cart_products.cart',
+        'cart',
+        'cart.user_id = :user_id',
+        { user_id },
+      );
       query = query.leftJoinAndSelect(
         'product.products_favorite',
         'products_favorite',
@@ -211,7 +221,7 @@ export class ProductClientService {
       section_id,
       category_sub_category_id,
       product_name,
-      sort,
+      sort,user_id
     } = productClientQuery;
     const skip = (page - 1) * limit;
 
@@ -294,6 +304,24 @@ export class ProductClientService {
       .skip(skip)
       .take(limit);
 
+      if (user_id) {
+        query = query.leftJoinAndSelect(
+          'product_category_prices.cart_products',
+          'cart_products'
+        );
+        query = query.leftJoin(
+          'cart_products.cart',
+          'cart',
+          'cart.user_id = :user_id',
+          { user_id },
+        );
+        query = query.leftJoinAndSelect(
+          'product.products_favorite',
+          'products_favorite',
+          'products_favorite.user_id = :user_id',
+          { user_id },
+        );
+      }
     // Modify condition if warehouse is defined
     if (warehouse) {
       query = query.andWhere('warehousesProduct.warehouse_id = :warehouseId', {
@@ -407,6 +435,10 @@ export class ProductClientService {
         'product_offer',
       )
       .leftJoinAndSelect(
+        'product_category_prices.cart_products',
+        'cart_products',
+      )
+      .leftJoinAndSelect(
         'product_category_prices.product_additional_services',
         'product_additional_services',
       )
@@ -433,6 +465,16 @@ export class ProductClientService {
       });
     }
     if (user_id) {
+      query = query.leftJoinAndSelect(
+        'product_category_prices.cart_products',
+        'cart_products'
+      );
+      query = query.leftJoin(
+        'cart_products.cart',
+        'cart',
+        'cart.user_id = :user_id',
+        { user_id },
+      );
       query = query.leftJoinAndSelect(
         'product.products_favorite',
         'products_favorite',
