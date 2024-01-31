@@ -7,6 +7,7 @@ import { ProductImagesResponse } from './product-images.response';
 import { ProductWarehouseResponse } from './product-warehouse.response';
 import { ProductSubCategory } from 'src/infrastructure/entities/product/product-sub-category.entity';
 import { ProductSubCategoryResponse } from './product-section/product-sub-categories.response';
+import { CartProduct } from 'src/infrastructure/entities/cart/cart-products';
 
 @Exclude()
 export class ProductResponse {
@@ -78,6 +79,7 @@ export class ProductResponse {
   @Transform(({ value }) => plainToClass(ProductImagesResponse, value))
   @Expose()
   readonly product_images: ProductImagesResponse;
+
 
   constructor(data: Partial<ProductResponse>) {
     Object.assign(this, data);

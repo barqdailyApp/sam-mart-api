@@ -16,4 +16,24 @@ export class ProductsDashboardQuery {
   })
   @IsNumber()
   limit: number;
+
+  @ApiProperty({ nullable: true, required: false })
+  @IsOptional()
+  @IsString()
+  section_id: string;
+
+  @ApiProperty({ nullable: true, required: false })
+  @IsOptional()
+  @IsString()
+  section_category_id: string;
+  
+  @ApiProperty({ nullable: true, required: false })
+  @IsOptional()
+  @IsString()
+  category_sub_category_id: string;
+
+  @ApiProperty({ nullable: true, required: false })
+  @IsOptional()
+  @IsString()
+  product_name: string;
 }

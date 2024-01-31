@@ -182,8 +182,8 @@ export class ProductDashboardController {
       return productResponse;
     });
     const pageMetaDto = new PageMetaDto(page, limit, total);
-    const data = this._i18nResponse.entity(productsResponse);
-    const pageDto = new PageDto(data, pageMetaDto);
+   // const data = this._i18nResponse.entity(productsResponse);
+    const pageDto = new PageDto(productsResponse, pageMetaDto);
 
     return new ActionResponse(pageDto);
   }
@@ -203,8 +203,8 @@ export class ProductDashboardController {
       return productResponse;
     });
     const pageMetaDto = new PageMetaDto(page, limit, total);
-    const data = this._i18nResponse.entity(productsResponse);
-    const pageDto = new PageDto(data, pageMetaDto);
+    // const data = this._i18nResponse.entity(productsResponse);
+    const pageDto = new PageDto(productsResponse, pageMetaDto);
 
     return new ActionResponse(pageDto);
   }
@@ -214,8 +214,9 @@ export class ProductDashboardController {
     const product =
       await this.productDashboardService.getSingleProductForDashboard(id);
     const productResponse = plainToClass(ProductResponse, product);
+    // const data = this._i18nResponse.entity(productsResponse);
 
-    return new ActionResponse(this._i18nResponse.entity(productResponse));
+    return new ActionResponse(productResponse);
   }
 
   @Delete('delete-Product/:product_id')
