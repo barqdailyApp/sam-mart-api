@@ -335,16 +335,19 @@ export class ProductDashboardService {
   async getAllProductsForDashboard(
     productsDashboardQuery: ProductsDashboardQuery,
   ) {
-    const { limit, page, category_sub_category_id, product_name, section_id ,section_category_id} =
-      productsDashboardQuery;
+    const {
+      limit,
+      page,
+      category_sub_category_id,
+      product_name,
+      section_id,
+      section_category_id,
+    } = productsDashboardQuery;
     const skip = (page - 1) * limit;
 
     let query = this.productRepository
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.product_images', 'product_images')
-
-      .leftJoinAndSelect('product.warehouses_products', 'warehousesProduct')
-      .leftJoinAndSelect('product.product_measurements', 'product_measurements')
 
       .leftJoinAndSelect(
         'product.product_sub_categories',
@@ -352,14 +355,16 @@ export class ProductDashboardService {
       )
       .leftJoinAndSelect(
         'product_sub_categories.category_subCategory',
-        'category_subCategory',
+        'product_category_subCategory',
       )
       .leftJoinAndSelect(
-        'category_subCategory.section_category',
-        'section_category',
+        'product_category_subCategory.section_category',
+        'product_section_category',
       )
-      .leftJoinAndSelect('section_category.section', 'section')
+      .leftJoinAndSelect('product_section_category.section', 'product_section')
 
+      .leftJoinAndSelect('product.warehouses_products', 'warehousesProduct')
+      .leftJoinAndSelect('product.product_measurements', 'product_measurements')
       .leftJoinAndSelect(
         'product_measurements.measurement_unit',
         'measurement_unit',
@@ -368,6 +373,15 @@ export class ProductDashboardService {
         'product_measurements.product_category_prices',
         'product_category_prices',
       )
+      .leftJoin(
+        'product_category_prices.product_sub_category',
+        'product_sub_category',
+      )
+      .leftJoin(
+        'product_sub_category.category_subCategory',
+        'category_subCategory',
+      )
+      .leftJoin('category_subCategory.section_category', 'section_category')
       .skip(skip)
       .take(limit);
     // Add search term condition if provided
@@ -386,11 +400,24 @@ export class ProductDashboardService {
           category_sub_category_id,
         },
       );
+      query = query.andWhere(
+        'product_sub_category.category_sub_category_id = :category_sub_category_id',
+        {
+          category_sub_category_id,
+        },
+      );
     }
-   
+
     if (section_category_id) {
       query = query.andWhere(
         'category_subCategory.section_category_id = :section_category_id',
+        {
+          section_category_id,
+        },
+      );
+
+      query = query.andWhere(
+        'product_category_subCategory.section_category_id = :section_category_id',
         {
           section_category_id,
         },
@@ -400,6 +427,12 @@ export class ProductDashboardService {
       query = query.andWhere('section_category.section_id = :section_id', {
         section_id,
       });
+      query = query.andWhere(
+        'product_section_category.section_id = :section_id',
+        {
+          section_id,
+        },
+      );
     }
     const [products, total] = await query.getManyAndCount();
     return { products, total };
@@ -409,8 +442,14 @@ export class ProductDashboardService {
   async getAllProductsOffersForDashboard(
     productsDashboardQuery: ProductsDashboardQuery,
   ) {
-    const { limit, page, category_sub_category_id, product_name, section_id,section_category_id } =
-      productsDashboardQuery;
+    const {
+      limit,
+      page,
+      category_sub_category_id,
+      product_name,
+      section_id,
+      section_category_id,
+    } = productsDashboardQuery;
     const skip = (page - 1) * limit;
 
     let query = this.productRepository
@@ -422,14 +461,13 @@ export class ProductDashboardService {
       )
       .leftJoinAndSelect(
         'product_sub_categories.category_subCategory',
-        'category_subCategory',
+        'product_category_subCategory',
       )
       .leftJoinAndSelect(
-        'category_subCategory.section_category',
-        'section_category',
+        'product_category_subCategory.section_category',
+        'product_section_category',
       )
-      .leftJoinAndSelect('section_category.section', 'section')
-
+      .leftJoinAndSelect('product_section_category.section', 'product_section')
       .leftJoinAndSelect('product.warehouses_products', 'warehousesProduct')
       .innerJoinAndSelect(
         'product.product_measurements',
@@ -447,6 +485,15 @@ export class ProductDashboardService {
         'product_category_prices.product_offer',
         'product_offer',
       )
+      .leftJoin(
+        'product_category_prices.product_sub_category',
+        'product_sub_category',
+      )
+      .leftJoin(
+        'product_sub_category.category_subCategory',
+        'category_subCategory',
+      )
+      .leftJoin('category_subCategory.section_category', 'section_category')
       .skip(skip)
       .take(limit);
     // Add search term condition if provided
@@ -465,10 +512,24 @@ export class ProductDashboardService {
           category_sub_category_id,
         },
       );
+      query = query.andWhere(
+        'product_sub_category.category_sub_category_id = :category_sub_category_id',
+        {
+          category_sub_category_id,
+        },
+      );
     }
+
     if (section_category_id) {
       query = query.andWhere(
         'category_subCategory.section_category_id = :section_category_id',
+        {
+          section_category_id,
+        },
+      );
+
+      query = query.andWhere(
+        'product_category_subCategory.section_category_id = :section_category_id',
         {
           section_category_id,
         },
@@ -478,6 +539,12 @@ export class ProductDashboardService {
       query = query.andWhere('section_category.section_id = :section_id', {
         section_id,
       });
+      query = query.andWhere(
+        'product_section_category.section_id = :section_id',
+        {
+          section_id,
+        },
+      );
     }
     const [products, total] = await query.getManyAndCount();
     return { products, total };
@@ -496,13 +563,13 @@ export class ProductDashboardService {
       )
       .leftJoinAndSelect(
         'product_sub_categories.category_subCategory',
-        'category_subCategory',
+        'product_category_subCategory',
       )
       .leftJoinAndSelect(
-        'category_subCategory.section_category',
-        'section_category',
+        'product_category_subCategory.section_category',
+        'product_section_category',
       )
-      .leftJoinAndSelect('section_category.section', 'section')
+      .leftJoinAndSelect('product_section_category.section', 'product_section')
       .leftJoinAndSelect('product.warehouses_products', 'warehousesProduct')
 
       .leftJoinAndSelect('product.product_measurements', 'product_measurements')
@@ -527,7 +594,15 @@ export class ProductDashboardService {
         'product_additional_services.additional_service',
         'additional_service',
       )
-
+      .leftJoin(
+        'product_category_prices.product_sub_category',
+        'product_sub_category',
+      )
+      .leftJoin(
+        'product_sub_category.category_subCategory',
+        'category_subCategory',
+      )
+      .leftJoin('category_subCategory.section_category', 'section_category');
 
     // Get single product
     query = query.where('product.id = :product_id', { product_id });
