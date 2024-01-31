@@ -258,21 +258,21 @@ export class OrderService extends BaseUserService<Order> {
       .skip(skip)
       .take(limit);
 
-      if (status) {
-        if (status == ShipmentStatusEnum.ACTIVE) {
-          console.log('status', status);
-          // i want all shipments have status DELIVERED or CONFIRMED or PROCESSING
-          query = query.andWhere('shipments.status IN (:...statuses)', {
-            statuses: [
-              ShipmentStatusEnum.DELIVERED,
-              ShipmentStatusEnum.CONFIRMED,
-              ShipmentStatusEnum.PROCESSING,
-            ],
-          });
-        } else {
-          query = query.andWhere('shipments.status = :status', { status });
-        }
+    if (status) {
+      if (status == ShipmentStatusEnum.ACTIVE) {
+        console.log('status', status);
+        // i want all shipments have status DELIVERED or CONFIRMED or PROCESSING
+        query = query.andWhere('shipments.status IN (:...statuses)', {
+          statuses: [
+            ShipmentStatusEnum.DELIVERED,
+            ShipmentStatusEnum.CONFIRMED,
+            ShipmentStatusEnum.PROCESSING,
+          ],
+        });
+      } else {
+        query = query.andWhere('shipments.status = :status', { status });
       }
+    }
     const [orders, total] = await query.getManyAndCount();
     return { orders, total };
   }
