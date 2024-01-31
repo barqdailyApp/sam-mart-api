@@ -83,6 +83,15 @@ export class SubcategoryController {
     
   }
 
+  @Get("/:id")
+  async deleteSubcategory(@Param('id') id: string) {
+    const subcategory = 
+      await this.subcategoryService.softDelete(id);
+   
+    return new ActionResponse(subcategory);
+    
+  }
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('logo'))

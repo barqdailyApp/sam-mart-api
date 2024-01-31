@@ -3,9 +3,10 @@ import { Column, Entity, OneToMany } from 'typeorm';
 import { Subcategory } from './subcategory.entity';
 import { SectionCategory } from '../section/section-category.entity';
 import { CategorySubCategory } from './category-subcategory.entity';
+import { AuditableEntity } from 'src/infrastructure/base/auditable.entity';
 
 @Entity()
-export class Category extends BaseEntity {
+export class Category extends AuditableEntity {
   @Column()
   name_ar: string;
   @Column()
