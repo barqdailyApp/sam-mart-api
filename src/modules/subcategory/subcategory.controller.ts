@@ -20,6 +20,7 @@ import { Response } from 'express';
 import { ImportCategoryRequest } from '../category/dto/requests/import-category-request';
 import { plainToInstance } from 'class-transformer';
 import { MostHitSubCategoryResponse, MostHitSubcategoryReponseWithInfo } from './dto/response/most-hit-subcategory.response';
+import { toUrl } from 'src/core/helpers/file.helper';
 
 @ApiHeader({
   name: 'Accept-Language',
@@ -49,9 +50,8 @@ export class SubcategoryController {
 
   @Get()
   async getCategories(@Query() query: PaginatedRequest) {
-    const categories = this._i18nResponse.entity(
-      await this.subcategoryService.findAll(query),
-    );
+    const categories =
+      await this.subcategoryService.findAll(query);
     const categoriesRespone = categories.map((e) => new CategoryResponse(e));
 
     if (query.page && query.limit) {
@@ -64,6 +64,7 @@ export class SubcategoryController {
     }
   }
 
+
   @Get('/most-hit-subcategory')
   async getMostHitSubcategory(@Query() query: QueryHitsSubCategoryRequest) {
     const subcategories = await this.subcategoryService.getMostHitSubcategory(query);
@@ -72,6 +73,23 @@ export class SubcategoryController {
     );
 
     return new ActionResponse<MostHitSubcategoryReponseWithInfo[]>(this._i18nResponse.entity(result));
+  }
+  @Get("/:id")
+  async getSubcategory(@Param('id') id: string) {
+    const category = 
+      await this.subcategoryService.findOne(id);
+    category.logo = toUrl( category.logo);
+    return new ActionResponse(category);
+    
+  }
+
+  @Get("/:id")
+  async deleteSubcategory(@Param('id') id: string) {
+    const subcategory = 
+      await this.subcategoryService.softDelete(id);
+   
+    return new ActionResponse(subcategory);
+    
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
