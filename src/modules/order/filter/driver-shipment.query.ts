@@ -18,10 +18,7 @@ export class DriverShipmentsQuery {
   @IsNumber()
   limit: number;
 
-  @ApiProperty({ nullable: true, required: false })
-  @IsOptional()
-  @IsString()
-  driver_id: string;
+
 
   @ApiProperty({
     nullable: true,

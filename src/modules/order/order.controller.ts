@@ -47,7 +47,26 @@ export class OrderController {
   @Get('client-orders')
   async getClientOrders(@Query() orderClientQuery: OrderClientQuery) {
     const { page, limit } = orderClientQuery;
-    const { orders, total } = await this.orderService.getAllOrders(
+    const { orders, total } = await this.orderService.getAllClientOrders(
+      orderClientQuery,
+    );
+
+    const ordersResponse = orders.map((order) => {
+      const orderResponse = plainToClass(OrderResponse, order);
+
+      return orderResponse;
+    });
+    const pageMetaDto = new PageMetaDto(page, limit, total);
+    const data = this._i18nResponse.entity(ordersResponse);
+
+    const pageDto = new PageDto(data, pageMetaDto);
+
+    return new ActionResponse(pageDto);
+  }
+  @Get('dashboard-orders')
+  async getDashboardOrders(@Query() orderClientQuery: OrderClientQuery) {
+    const { page, limit } = orderClientQuery;
+    const { orders, total } = await this.orderService.getAllDashboardOrders(
       orderClientQuery,
     );
 
@@ -64,7 +83,7 @@ export class OrderController {
     return new ActionResponse(pageDto);
   }
 
-  @Get('single-client-order/:order_id')
+  @Get('single-order/:order_id')
   async getSingleClientOrder(@Param('order_id') order_id: string) {
     const order = await this.orderService.getSingleOrder(order_id);
 
@@ -72,8 +91,33 @@ export class OrderController {
     return new ActionResponse(orderResponse);
   }
 
+  @Get('dashboard-shipments')
+  async getShipmentsDashboard(
+    @Query() driverShipmentsQuery: DriverShipmentsQuery,
+  ) {
+    const { page, limit } = driverShipmentsQuery;
+
+    const { orders, total } = await this.orderService.getDashboardShipments(
+      driverShipmentsQuery,
+    );
+
+    const shipmentsResponse = orders.map((order) => {
+      const shipmentResponse = plainToClass(ShipmentDriverResponse, order);
+
+      return shipmentResponse;
+    });
+    const pageMetaDto = new PageMetaDto(page, limit, total);
+    const data = this._i18nResponse.entity(shipmentsResponse);
+
+    const pageDto = new PageDto(data, pageMetaDto);
+
+    return new ActionResponse(pageDto);
+  }
+
   @Get('driver-shipments')
-  async getDriverOrders(@Query() driverShipmentsQuery: DriverShipmentsQuery) {
+  async getDriverShipments(
+    @Query() driverShipmentsQuery: DriverShipmentsQuery,
+  ) {
     const { page, limit } = driverShipmentsQuery;
 
     const { orders, total } = await this.orderService.getDriverShipments(

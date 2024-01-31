@@ -15,35 +15,31 @@ import { ShipmentStatusEnum } from 'src/infrastructure/data/enums/shipment_statu
 export class ShipmentService extends BaseService<Shipment> {
   constructor(
     @InjectRepository(Driver) private driverRepository: Repository<Driver>,
-    @InjectRepository(Shipment) private shipmentRepository: Repository<Shipment>,
-    @Inject(REQUEST)private readonly request: Request,
-  
+    @InjectRepository(Shipment)
+    private shipmentRepository: Repository<Shipment>,
+    @Inject(REQUEST) private readonly request: Request,
   ) {
     super(shipmentRepository);
   }
 
-
-  async getDriver(){
+  async getDriver() {
     return await this.driverRepository.findOne({
-      where:{
-       user_id:this.request.user.id
-      }
-    })
+      where: {
+        user_id: this.request.user.id,
+      },
+    });
   }
-  async acceptShipment(id:string) {
-    const driver=await this.getDriver()
-   const shipment= await this.shipmentRepository.findOne({
-     where:{
-       id:id,
-       warehouse_id:driver.warehouse_id
-       
-     }
-
-   })
-   shipment.order_confirmed_at=new Date();
-   shipment.status=ShipmentStatusEnum.CONFERMED;
-   await this.shipmentRepository.save(shipment)
-   return shipment;
-
+  async acceptShipment(id: string) {
+    const driver = await this.getDriver();
+    const shipment = await this.shipmentRepository.findOne({
+      where: {
+        id: id,
+        warehouse_id: driver.warehouse_id,
+      },
+    });
+    shipment.order_confirmed_at = new Date();
+    shipment.status = ShipmentStatusEnum.CONFIRMED;
+    await this.shipmentRepository.save(shipment);
+    return shipment;
   }
 }

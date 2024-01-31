@@ -119,6 +119,7 @@ export class ProductClientService {
         'product_category_prices.product_offer',
         'product_offer',
       )
+      
       .innerJoin(
         'product_category_prices.product_sub_category',
         'product_sub_category',

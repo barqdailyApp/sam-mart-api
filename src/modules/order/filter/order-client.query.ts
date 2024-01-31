@@ -17,8 +17,5 @@ export class OrderClientQuery {
   @IsNumber()
   limit: number;
 
-  @ApiProperty({ nullable: true, required: false })
-  @IsOptional()
-  @IsString()
-  client_id: string;
+
 }
