@@ -182,6 +182,7 @@ export class SectionController {
   @Get(':section_id/categories')
   async getSectionCategories(
     @Param('section_id') section_id: string,
+    @Query('name') name="",
     @Query('limit') limit = 100,
     @Query('page') page = 1,
     @Query('all') all?: boolean,
@@ -189,6 +190,7 @@ export class SectionController {
     const categories = await this.sectionService.getSectionCategories(
       section_id,
       all,
+      name,
       limit,
       page,
     );

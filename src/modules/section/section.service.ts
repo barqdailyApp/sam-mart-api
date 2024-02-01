@@ -103,11 +103,23 @@ export class SectionService extends BaseService<Section> {
   async getSectionCategories(
     section_id: string,
     all: boolean,
+    name: string,
     limit?: number,
     page?: number,
   ) {
     const section_categories = await this.section_category_repo.find({
-      where: { section_id, is_active: all == true ? null : true },
+      where: [
+        {
+          section_id,
+          is_active: all == true ? null : true,
+          category: { name_en: Like(`%${name}%`) },
+        },
+        {
+          section_id,
+          is_active: all == true ? null : true,
+          category: { name_ar: Like(`%${name}%`) },
+        },
+      ],
       relations: { category: true },
       skip: limit * (page - 1),
       take: limit,

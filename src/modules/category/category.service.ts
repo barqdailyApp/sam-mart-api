@@ -13,7 +13,7 @@ import { CategorySubCategory } from 'src/infrastructure/entities/category/catego
 import { Category } from 'src/infrastructure/entities/category/category.entity';
 import { Section } from 'src/infrastructure/entities/section/section.entity';
 import { ImageManager } from 'src/integration/sharp/image.manager';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { CreateSectionRequest } from '../section/dto/requests/create-section.request';
 import { StorageManager } from 'src/integration/storage/storage.manager';
 import { CreateCategoryRequest } from './dto/requests/create-category-request';
@@ -52,15 +52,23 @@ export class CategoryService extends BaseService<Category> {
     super(category_repo);
   }
 
-  async getCategorySubcategory(section_category_id: string, all: boolean) {
+  async getCategorySubcategory(section_category_id: string, all: boolean,name?:string) {
     await this.subCategoryService.updateMostHitSubCategory({
       section_category_id,
     });
     return await this.category_subcategory_repo.find({
-      where: {
+      where: [{
         section_category_id: section_category_id,
         is_active: all == true ? null : true,
+        subcategory:{name_ar:Like(`%${name}%`)}
       },
+      {
+        section_category_id: section_category_id,
+        is_active: all == true ? null : true,
+        subcategory:{name_en:Like(`%${name}%`)}
+      }
+    
+    ],
       relations: { subcategory: true },
       order: { order_by: 'ASC' },
     });
