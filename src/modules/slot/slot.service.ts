@@ -30,7 +30,6 @@ export class SlotService {
       .createQueryBuilder('slot')
       .orderBy('slot.order_by', 'ASC')
       .getMany();
-
   }
 
   async update(
