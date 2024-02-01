@@ -25,7 +25,7 @@ export class SlotService {
     }
     return slot;
   }
-  async findAll(date: Date): Promise<Slot[]> {
+  async findAll(): Promise<Slot[]> {
     return await this.slotRepository
       .createQueryBuilder('slot')
       .orderBy('slot.order_by', 'ASC')
