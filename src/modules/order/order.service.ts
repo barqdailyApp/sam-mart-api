@@ -200,8 +200,8 @@ export class OrderService extends BaseUserService<Order> {
       .leftJoinAndSelect('product.product_images', 'product_images')
       .skip(skip)
       .take(limit);
-
-    query = query.where('driver.user_id = :user_id', { user_id: user.id });
+      query = query.where('driver.warehouse_id = shipments.warehouse_id');
+    query = query.andWhere('driver.user_id = :user_id', { user_id: user.id });
 
     if (status) {
       if (status == ShipmentStatusEnum.ACTIVE) {

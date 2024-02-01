@@ -5,6 +5,7 @@ import { UserResponse } from "../../user/dto/responses/user.response";
 
 export class DriverResponse {
     @Expose() id: string;
+    @Expose() warehouse_id: string;
 
     @Expose() latitude : string;
 
