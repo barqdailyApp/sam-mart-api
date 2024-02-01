@@ -38,14 +38,12 @@ export class ProductCategoryPriceResponse {
   @Transform(({ value }) => {
     if (value === null || value === undefined) {
       return null;
+    }else{
+      return plainToClass(CartProduct, value[0])
     }
-    return value.length === 1
-      ? plainToClass(CartProduct, value[0])
-      : plainToClass(CartProduct, value);
   })
   @Expose()
   cart_products:
-    | CartProduct[]
     | CartProduct
     | null;
 }
