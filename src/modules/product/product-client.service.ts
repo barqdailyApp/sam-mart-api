@@ -14,6 +14,7 @@ import { Request } from 'express';
 import { ProductFavorite } from 'src/infrastructure/entities/product/product-favorite.entity';
 import { Section } from 'src/infrastructure/entities/section/section.entity';
 import { ProductFavQuery } from './dto/filter/product-fav.query';
+import { Cart } from 'src/infrastructure/entities/cart/cart.entity';
 @Injectable()
 export class ProductClientService {
   constructor(
@@ -34,6 +35,9 @@ export class ProductClientService {
 
     @InjectRepository(Section)
     private readonly section_repo: Repository<Section>,
+
+    @InjectRepository(Cart)
+    private readonly cart_repo: Repository<Cart>,
 
     @Inject(REQUEST) private readonly request: Request,
   ) {}
@@ -135,18 +139,18 @@ export class ProductClientService {
       .take(limit);
 
     if (user_id) {
+      const cartUser = await this.cart_repo.findOne({ where: { user_id } });
+      if (!cartUser) {
+        throw new NotFoundException('user not found');
+      }
+
       query = query.leftJoinAndSelect(
         'product_category_prices.cart_products',
         'cart_products',
-      );
-      query = query.leftJoin(
-        'cart_products.cart',
-        'cart',
-        'cart.user_id = :user_id',
-        { user_id },
+        'cart_products.cart_id = :cart_id',
+        { cart_id: cartUser.id },
       );
 
-      
       query = query.leftJoinAndSelect(
         'product.products_favorite',
         'products_favorite',
@@ -222,7 +226,8 @@ export class ProductClientService {
       section_id,
       category_sub_category_id,
       product_name,
-      sort,user_id
+      sort,
+      user_id,
     } = productClientQuery;
     const skip = (page - 1) * limit;
 
@@ -306,15 +311,16 @@ export class ProductClientService {
       .take(limit);
 
     if (user_id) {
+      const cartUser = await this.cart_repo.findOne({ where: { user_id } });
+      if (!cartUser) {
+        throw new NotFoundException('user not found');
+      }
+
       query = query.leftJoinAndSelect(
         'product_category_prices.cart_products',
         'cart_products',
-      );
-      query = query.leftJoin(
-        'cart_products.cart',
-        'cart',
-        'cart.user_id = :user_id',
-        { user_id },
+        'cart_products.cart_id = :cart_id',
+        { cart_id: cartUser.id },
       );
       query = query.leftJoinAndSelect(
         'product.products_favorite',
@@ -462,15 +468,16 @@ export class ProductClientService {
       });
     }
     if (user_id) {
+      const cartUser = await this.cart_repo.findOne({ where: { user_id } });
+      if (!cartUser) {
+        throw new NotFoundException('user not found');
+      }
+
       query = query.leftJoinAndSelect(
         'product_category_prices.cart_products',
         'cart_products',
-      );
-      query = query.leftJoin(
-        'cart_products.cart',
-        'cart',
-        'cart.user_id = :user_id',
-        { user_id },
+        'cart_products.cart_id = :cart_id',
+        { cart_id: cartUser.id },
       );
       query = query.leftJoinAndSelect(
         'product.products_favorite',
@@ -495,7 +502,6 @@ export class ProductClientService {
           category_sub_category_id,
         },
       );
-
     }
 
     // Conditional where clause based on section
@@ -511,7 +517,6 @@ export class ProductClientService {
           section_id,
         },
       );
-  
     }
     return await query.getOne();
   }
@@ -596,7 +601,10 @@ export class ProductClientService {
       .innerJoinAndSelect('product_favorite.section', 'section')
 
       .innerJoinAndSelect('product.product_images', 'product_images')
-      .innerJoinAndSelect('product.product_sub_categories', 'product_sub_categories')
+      .innerJoinAndSelect(
+        'product.product_sub_categories',
+        'product_sub_categories',
+      )
       .innerJoinAndSelect(
         'product_sub_categories.category_subCategory',
         'product_category_subCategory',
@@ -644,6 +652,17 @@ export class ProductClientService {
       });
     }
     if (user_id) {
+      const cartUser = await this.cart_repo.findOne({ where: { user_id } });
+      if (!cartUser) {
+        throw new NotFoundException('user not found');
+      }
+
+      query = query.leftJoinAndSelect(
+        'product_category_prices.cart_products',
+        'cart_products',
+        'cart_products.cart_id = :cart_id',
+        { cart_id: cartUser.id },
+      );
       query = query.leftJoinAndSelect(
         'product.products_favorite',
         'products_favorite',
