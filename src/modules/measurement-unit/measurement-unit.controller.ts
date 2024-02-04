@@ -37,9 +37,8 @@ export class MeasurementUnitController {
     const measurementUnitsResponse = measurementUnits.map((measurementUnit) =>
       plainToClass(MeasurementUnitResponse, measurementUnit),
     );
-    return new ActionResponse(
-      this._i18nResponse.entity(measurementUnitsResponse),
-    );
+    const dataTranslate = this._i18nResponse.entity(measurementUnitsResponse);
+    return new ActionResponse(measurementUnitsResponse);
   }
   @Get(':measurement_unit_id/measurement-unit')
   async singleMeasurementUnit(@Param('measurement_unit_id') id: string) {
@@ -48,7 +47,9 @@ export class MeasurementUnitController {
       MeasurementUnitResponse,
       measurementUnit,
     );
-    return new ActionResponse(this._i18nResponse.entity(measurementUnitResponse));
+    const dataTranslate = this._i18nResponse.entity(measurementUnitResponse);
+
+    return new ActionResponse(measurementUnitResponse);
   }
 
   @Post('create-measurement-unit')

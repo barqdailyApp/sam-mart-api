@@ -145,6 +145,8 @@ export class ProductClientService {
         'cart.user_id = :user_id',
         { user_id },
       );
+
+      
       query = query.leftJoinAndSelect(
         'product.products_favorite',
         'products_favorite',

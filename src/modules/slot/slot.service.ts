@@ -27,9 +27,10 @@ export class SlotService {
   }
   async findAll(delivery_day: string): Promise<Slot[]> {
     const slots = await this.slotRepository.find({
-      relations: { orders: true },order:{
-        order_by:"ASC"
-      }
+      relations: { orders: true },
+      order: {
+        order_by: 'ASC',
+      },
     });
     const availableSlots = [];
     for (let i = 0; i < slots.length; i++) {
