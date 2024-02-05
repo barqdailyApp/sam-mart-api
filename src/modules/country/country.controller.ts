@@ -47,6 +47,13 @@ export class CountryController {
     const countryResponse = plainToClass(CountryResponse, country);
     return new ActionResponse(this._i18nResponse.entity(countryResponse));
   }
+
+  @Get(':country_id/single-country-dashboard')
+  async singleDashboard(@Param('country_id') id: string) {
+    const country = await this.countryService.single(id);
+    const countryResponse = plainToClass(CountryResponse, country);
+    return new ActionResponse(countryResponse);
+  }
   @Get('all-countries')
   async allCountries() {
     const countries = await this.countryService.findAll();
@@ -54,6 +61,14 @@ export class CountryController {
       plainToClass(CountryResponse, country),
     );
     return new ActionResponse(this._i18nResponse.entity(countriesResponse));
+  }
+  @Get('all-countries-dashboard')
+  async allCountriesDashboard() {
+    const countries = await this.countryService.findAll();
+    const countriesResponse = countries.map((country) =>
+      plainToClass(CountryResponse, country),
+    );
+    return new ActionResponse(countriesResponse);
   }
 
   @Put(':country_id/update-country')
