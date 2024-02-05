@@ -18,8 +18,6 @@ export class DriverShipmentsQuery {
   @IsNumber()
   limit: number;
 
-
-
   @ApiProperty({
     nullable: true,
     required: false,
@@ -28,4 +26,10 @@ export class DriverShipmentsQuery {
   @IsOptional()
   @IsEnum(ShipmentStatusEnum)
   status: ShipmentStatusEnum;
+
+
+  @ApiProperty({ nullable: true, required: false ,example: "2024-05-23"})
+  @IsOptional()
+  @IsString()
+  order_date: string;
 }

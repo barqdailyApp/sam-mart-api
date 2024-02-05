@@ -170,7 +170,7 @@ export class OrderService extends BaseUserService<Order> {
     const user = this.currentUser;
 
     // Destructure the query parameters for easier access.
-    const { limit, page, status } = driverShipmentsQuery;
+    const { limit, page, status,order_date } = driverShipmentsQuery;
     const skip = (page - 1) * limit; // Calculate the offset for pagination.
 
     // Start building the query with necessary joins to fetch related entities.
@@ -207,9 +207,12 @@ export class OrderService extends BaseUserService<Order> {
       delivery_type: DeliveryType.FAST,
     });
     // Filter orders that are being delivered today.
-    query = query.andWhere('order.delivery_day = :delivery_day', {
-      delivery_day: new Date().toISOString().slice(0, 10),
-    });
+    if(order_date){
+      query = query.andWhere('order.delivery_day = :delivery_day', {
+        delivery_day: order_date,
+      });
+    }
+ 
 
     // Apply filters based on the shipment status.
     if (status) {
