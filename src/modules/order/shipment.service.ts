@@ -17,6 +17,9 @@ import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { FileService } from '../file/file.service';
 import { ShipmentChatAttachment } from 'src/infrastructure/entities/order/shipment-chat-attachment.entity';
 import { GetCommentQueryRequest } from '../support-ticket/dto/request/get-comment-query.request';
+import { ShipmentChatGateway } from 'src/integration/gateways/shipment-chat-gateway';
+import { plainToInstance } from 'class-transformer';
+import { UserResponse } from '../user/dto/responses/user.response';
 @Injectable()
 export class ShipmentService extends BaseService<Shipment> {
   constructor(
@@ -28,6 +31,8 @@ export class ShipmentService extends BaseService<Shipment> {
     private shipmentChatRepository: Repository<ShipmentChat>,
     @InjectRepository(ShipmentChatAttachment)
     private shipmentChatAttachmentRepository: Repository<ShipmentChatAttachment>,
+
+    private readonly shipmentChatGateway: ShipmentChatGateway,
 
     @Inject(REQUEST) private readonly request: Request,
     @Inject(FileService) private _fileService: FileService,
@@ -81,7 +86,6 @@ export class ShipmentService extends BaseService<Shipment> {
     });
 
     if (!shipment) throw new NotFoundException('Shipment not found');
-    console.log(shipment);
 
     if (
       shipment.driver.user_id !== this.currentUser.id &&
@@ -112,13 +116,25 @@ export class ShipmentService extends BaseService<Shipment> {
       shipment_id: shipment.id,
       attachment: attachedFile
     });
-    return await this.shipmentChatRepository.save(newMessage);
+    const savedMessage = await this.shipmentChatRepository.save(newMessage);
 
+    const userInfo = plainToInstance(UserResponse, this.currentUser, {
+      excludeExtraneousValues: true
+    })
+
+    this.shipmentChatGateway.handleSendMessage({
+      shipment,
+      shipmentChat: savedMessage,
+      user: userInfo,
+      action: 'ADD_MESSAGE'
+    });
+
+    return savedMessage;
   }
 
   async getMessagesByShipmentId(shipment_id: string, query: GetCommentQueryRequest) {
     const { limit = 10, offset = 0 } = query;
-    
+
     const shipment = await this.shipmentRepository.findOne({
       where: { id: shipment_id },
       relations: ['order', 'driver']
