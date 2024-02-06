@@ -3,6 +3,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from "typeorm";
 import { User } from "../user/user.entity";
 import { Driver } from "../driver/driver.entity";
 import { ShipmentChatAttachment } from "./shipment-chat-attachment.entity";
+import { Shipment } from "./shipment.entity";
 
 @Entity()
 export class ShipmentChat extends AuditableEntity {
@@ -13,20 +14,20 @@ export class ShipmentChat extends AuditableEntity {
     @JoinColumn({ name: 'user_id' })
     user: User;
 
-    @Column({ nullable: false })
+    @Column({ nullable: true })
     user_id: string;
 
-    @ManyToOne(() => Driver, (driver) => driver.shipment_chats, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'driver_id' })
-    driver: Driver;
-
-    @Column({ nullable: false })
-    driver_id: string;
-
-    @OneToOne(()=>ShipmentChatAttachment, (attachment) => attachment.shipment_chat, { cascade: true })
+    @OneToOne(() => ShipmentChatAttachment, (attachment) => attachment.shipment_chat, { cascade: true })
     @JoinColumn({ name: 'attachment_id' })
     attachment: ShipmentChatAttachment;
 
     @Column({ nullable: true })
     attachment_id: string;
+
+    @ManyToOne(() => Shipment, (shipment) => shipment.shipment_chats, { onDelete: 'CASCADE' })
+    @JoinColumn({ name: 'shipment_id' })
+    shipment: Shipment;
+
+    @Column({ nullable: false })
+    shipment_id: string;
 }

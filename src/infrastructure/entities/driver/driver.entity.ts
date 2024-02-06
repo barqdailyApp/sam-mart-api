@@ -116,9 +116,6 @@ export class Driver extends AuditableEntity {
     Object.assign(this, partial);
   }
 
-  @OneToMany(() => ShipmentChat, (shipmentChat) => shipmentChat.driver, { cascade: true })
-  shipment_chats: ShipmentChat[];
-
   @BeforeInsert()
   saveLocation() {
     this.location =
