@@ -15,7 +15,4 @@ export class ShipmentChatAttachment extends AuditableEntity {
 
     @OneToOne(() => ShipmentChat, (shipment_chat) => shipment_chat.attachment, { onDelete: 'CASCADE' })
     shipment_chat: ShipmentChat;
-
-    @Column({ nullable: false })
-    shipment_chat_id: string;
 }
