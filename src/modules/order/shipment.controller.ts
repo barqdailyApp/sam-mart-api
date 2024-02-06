@@ -2,9 +2,11 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
+  Get,
   Inject,
   Param,
   Post,
+  Query,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -23,6 +25,7 @@ import { Roles } from '../authentication/guards/roles.decorator';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { ShipmentMessageResponse } from './dto/response/shipment-message.response';
 import { plainToInstance } from 'class-transformer';
+import { GetCommentQueryRequest } from '../support-ticket/dto/request/get-comment-query.request';
 
 @ApiTags('Shipment')
 @ApiHeader({
@@ -59,4 +62,17 @@ export class ShipmentController {
     return new ActionResponse<ShipmentMessageResponse>(result);
   }
 
+  @Get('get-messages/:shipment_id')
+  async getMessagesByShipmentId(
+    @Param('shipment_id') shipment_id: string,
+    @Query() query: GetCommentQueryRequest
+  ): Promise<ActionResponse<ShipmentMessageResponse[]>> {
+
+    const messages = await this.shipmentService.getMessagesByShipmentId(shipment_id, query);
+    const result = plainToInstance(ShipmentMessageResponse, messages, {
+      excludeExtraneousValues: true
+    });
+    return new ActionResponse<ShipmentMessageResponse[]>(result);
+    
+  }
 }
