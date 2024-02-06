@@ -1,7 +1,7 @@
 import {
     Body,
     ClassSerializerInterceptor,
-    Controller, Post, UploadedFile, UseGuards, UseInterceptors,
+    Controller, Get, Post, Query, UploadedFile, UseGuards, UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { EmployeeService } from './employee.service';
@@ -15,6 +15,9 @@ import { UploadValidator } from 'src/core/validators/upload.validator';
 import { plainToClass, plainToInstance } from 'class-transformer';
 import { EmployeeResponse } from './dto/response/employee.response';
 import { ActionResponse } from 'src/core/base/responses/action.response';
+import { query } from 'express';
+import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
+import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -40,9 +43,27 @@ export class EmployeeController {
         avatar_file: Express.Multer.File,
     ): Promise<ActionResponse<EmployeeResponse>> {
         req.avatar_file = avatar_file;
+
         const employee = await this.employeeService.createEmployee(req);
+
         const response = plainToClass(EmployeeResponse, employee, { excludeExtraneousValues: true });
         return new ActionResponse<EmployeeResponse>(response);
     }
 
+    @Roles(Role.ADMIN)
+    @Get("all")
+    async allEmployees(
+        @Query() query: PaginatedRequest,
+    ): Promise<ActionResponse<EmployeeResponse[]>> {
+        const employees = await this.employeeService.findAllEmployees(query);
+        const response = plainToInstance(EmployeeResponse, employees, { excludeExtraneousValues: true });
+        if (query.page && query.limit) {
+            const total = await this.employeeService.count(query);
+            return new PaginatedResponse<EmployeeResponse[]>(response, {
+                meta: { total, ...query },
+            });
+        } else {
+            return new ActionResponse<EmployeeResponse[]>(response);
+        }
+    }
 }
