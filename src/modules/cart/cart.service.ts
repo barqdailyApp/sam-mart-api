@@ -57,7 +57,7 @@ export class CartService extends BaseService<CartProduct> {
   async addToCart(req: AddToCartRequest) {
     const cart = await this.getCart();
     const additions = req.additions || [];
-   
+
     const product_price = await this.productCategoryPrice.findOne({
       where: {
         id: req.product_category_price_id,
@@ -122,9 +122,26 @@ export class CartService extends BaseService<CartProduct> {
   }
 
   async deleteCartProduct(cart_product_id: string) {
-    return await this.cartProductRepository.delete({
+    const cart_product = await this.cartProductRepository.findOne({
+      where: { id: cart_product_id },
+      relations: {
+        product_category_price: {
+          product_additional_services: { additional_service: true },
+
+          product_measurement: { measurement_unit: true },
+
+          product_offer: true,
+          product_sub_category: {
+            product: { product_images: true },
+            category_subCategory: { section_category: true },
+          },
+        },
+      },
+    });
+    await this.cartProductRepository.delete({
       id: cart_product_id,
     });
+    return cart_product;
   }
 
   async updatecartProduct(req: UpdateCartProductRequest) {

@@ -38,18 +38,19 @@ export class RegionController {
   ) {}
 
   @Post('create-region')
-  async create(
-    @Body() createRegionRequest: CreateRegionRequest,
-  ){
-    return new ActionResponse( await this.regionService.create(createRegionRequest));
+  async create(@Body() createRegionRequest: CreateRegionRequest) {
+    return new ActionResponse(
+      await this.regionService.create(createRegionRequest),
+    );
   }
 
   @Get(':region_id/single-region')
   async single(@Param('region_id') id: string) {
     const region = await this.regionService.single(id);
     const regionResponse = plainToClass(RegionResponse, region);
-    return new ActionResponse( this._i18nResponse.entity(regionResponse));
+    return new ActionResponse(this._i18nResponse.entity(regionResponse));
   }
+
   @Get(':city_id/all-regions')
   async allRegions(@Param('city_id') id: string) {
     const regions = await this.regionService.allRegionsCity(id);
@@ -57,6 +58,22 @@ export class RegionController {
       plainToClass(RegionResponse, region),
     );
     return new ActionResponse(this._i18nResponse.entity(regionsResponse));
+  }
+
+  @Get(':region_id/single-region-dashboard')
+  async singleDashboard(@Param('region_id') id: string) {
+    const region = await this.regionService.single(id);
+    const regionResponse = plainToClass(RegionResponse, region);
+    return new ActionResponse(regionResponse);
+  }
+
+  @Get(':city_id/all-regions-dashboard')
+  async allRegionsDashboard(@Param('city_id') id: string) {
+    const regions = await this.regionService.allRegionsCity(id);
+    const regionsResponse = regions.map((region) =>
+      plainToClass(RegionResponse, region),
+    );
+    return new ActionResponse(regionsResponse);
   }
 
   @Put(':region_id/update-region')

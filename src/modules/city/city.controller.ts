@@ -58,6 +58,27 @@ export class CityController {
     return new ActionResponse(this._i18nResponse.entity(cityResponse));
   }
 
+
+  @Get(':country_id/all-cities-dashboard')
+  async allCitiesDashboard(@Param('country_id') country_id: string) {
+    const cities = await this.cityService.allCitiesCountry(country_id);
+    const citiesResponse = cities.map((city) =>
+      plainToClass(CityResponse, city),
+    );
+    return new ActionResponse(citiesResponse);
+  }
+  @Get(':city_id/single-city-dashboard')
+  async singleDashboard(@Param('city_id') id: string) {
+    const city = await this.cityService.single(id);
+    const cityResponse = plainToClass(CityResponse, city);
+    return new ActionResponse(cityResponse);
+  }
+
+
+
+
+
+
   @Put(':city_id/update-city')
   async update(
     @Param('city_id') id: string,
