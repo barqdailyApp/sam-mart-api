@@ -10,7 +10,7 @@ import { DataSource, EntityManager, UpdateResult } from 'typeorm';
 import { Request } from 'express';
 import { REQUEST } from '@nestjs/core';
 import { UserInfoResponse } from 'src/modules/user/dto/responses/profile.response';
-import { MakeOrderRequest } from '../dto/make-order-request';
+import { MakeOrderRequest } from '../dto/request/make-order-request';
 import { Order } from 'src/infrastructure/entities/order/order.entity';
 import { Warehouse } from 'src/infrastructure/entities/warehouse/warehouse.entity';
 import { Address } from 'src/infrastructure/entities/user/address.entity';

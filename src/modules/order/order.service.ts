@@ -5,7 +5,7 @@ import { Request } from 'express';
 import { REQUEST } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { MakeOrderRequest } from './dto/make-order-request';
+import { MakeOrderRequest } from './dto/request/make-order-request';
 import { MakeOrderTransaction } from './util/make-order.transaction';
 import { OrderClientQuery } from './filter/order-client.query';
 import { SingleOrderQuery } from './filter/single-order.query';

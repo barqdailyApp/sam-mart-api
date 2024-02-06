@@ -9,7 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
-import { MakeOrderRequest } from './dto/make-order-request';
+import { MakeOrderRequest } from './dto/request/make-order-request';
 import { ActionResponse } from 'src/core/base/responses/action.response';
 import { ApiTags, ApiHeader, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
