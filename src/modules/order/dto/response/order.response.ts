@@ -55,4 +55,7 @@ export class OrderResponse {
   @Expose() readonly slot_id: string;
 
   @Expose() readonly delivery_day: string;
+  @Expose() readonly number: string;
+  @Expose() readonly delivery_fee: number;
+
 }
