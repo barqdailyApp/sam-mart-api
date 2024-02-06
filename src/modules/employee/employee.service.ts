@@ -15,6 +15,12 @@ import { ConfigService } from '@nestjs/config';
 import { buffer } from 'stream/consumers';
 import { CityService } from '../city/city.service';
 import { CountryService } from '../country/country.service';
+import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
+import { REQUEST } from '@nestjs/core';
+import { Request } from 'express';
+import { BaseUserService } from 'src/core/base/service/user-service.base';
+import { applyQueryFilters, applyQueryIncludes } from 'src/core/helpers/service-related.helper';
+
 
 @Injectable()
 export class EmployeeService extends BaseService<Employee> {
@@ -26,8 +32,10 @@ export class EmployeeService extends BaseService<Employee> {
         @Inject(ConfigService) private readonly _config: ConfigService,
         @Inject(StorageManager) private readonly storageManager: StorageManager,
         @Inject(ImageManager) private readonly imageManager: ImageManager,
+        @Inject(REQUEST) request: Request,
     ) {
         super(employeeRepository);
+        // super(employeeRepository, request);
     }
 
     async createEmployee(req: CreateEmployeeRequest) {
@@ -88,7 +96,7 @@ export class EmployeeService extends BaseService<Employee> {
             country_id,
             qualification,
             departements,
-            status
+            is_active,
         } = req;
         await this.countryService.single(country_id);
 
@@ -102,9 +110,14 @@ export class EmployeeService extends BaseService<Employee> {
             country_id,
             qualification,
             departements,
-            status
+            is_active
         })
 
         return await this.employeeRepository.save(newEmployee);
+    }
+
+    async findAllEmployees(query: PaginatedRequest) {
+        applyQueryIncludes(query, 'user');
+        return await this.findAll(query);
     }
 }
