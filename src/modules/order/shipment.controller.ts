@@ -23,7 +23,7 @@ import { ShipmentService } from './shipment.service';
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('shipment')
-export class OrderController {
+export class ShipmentController {
   constructor(private readonly shipmentService: ShipmentService) {}
 
   @Post('accept/:id')
