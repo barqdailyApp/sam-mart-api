@@ -75,17 +75,19 @@ export class MakeOrderTransaction extends BaseTransaction<
         )
         .getOne();
 
+        const count = await context
+        .createQueryBuilder(Order, 'order')
+        .where('DATE(order.created_at) = CURDATE()')
+        .getCount();
       const order = await context.save(Order, {
         ...plainToInstance(Order, req),
         user_id: user.id,
         warehouse_id: nearst_warehouse.id,
         delivery_fee: section.delivery_price,
+        number:generateOrderNumber(count)
       });
-      const count = await context
-        .createQueryBuilder(Order, 'order')
-        .where('DATE(order.created_at) = CURDATE()')
-        .getCount();
-      order.number = generateOrderNumber(count);
+ 
+ 
 
       if (order.delivery_type == DeliveryType.FAST) {
         const currentDate = new Date();
@@ -129,7 +131,7 @@ export class MakeOrderTransaction extends BaseTransaction<
 
       //warehouse opreation
 
-       for (let index = 0; index < shipment_products.length; index++) {
+      for (let index = 0; index < shipment_products.length; index++) {
         const warehouse_product = await context.findOne(WarehouseProducts, {
           where: {
             warehouse_id: nearst_warehouse.id,
