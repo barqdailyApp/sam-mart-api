@@ -6,7 +6,7 @@ export class EmployeeResponse{
     @Expose() name_ar: string;
     @Expose() name_en: string;
     @Expose() qualification: string;
-    @Expose() status: string;
+    @Expose() is_active: boolean;
     @Expose() departements: string[];
     @Expose() user_id: string;
     @Expose() country_id: string;

@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Transform, Type } from "class-transformer";
-import { IsArray, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsArray, IsBoolean, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator";
 import { Json } from "sequelize/types/utils";
 import { IsEnumArray } from "src/core/validators/is-enum-array.validator";
 import { Unique } from "src/core/validators/unique-constraints.validator";
@@ -57,10 +57,13 @@ export class CreateEmployeeRequest {
     @IsEnum(Gender)
     gender: Gender;
 
-    @ApiProperty({enum:[EmployeeStatus.ACTIVE, EmployeeStatus.INACTIVE], default: EmployeeStatus.INACTIVE})
-    @IsNotEmpty()
-    @IsEnum(EmployeeStatus)
-    status: EmployeeStatus;
+    @ApiProperty({ nullable: true, required: false, default: true })
+    @IsOptional()
+    @Transform(({ value }) => {
+        return value === 'true' || value === true;
+    })
+    @IsBoolean()
+    is_active: boolean;
 
     @ApiProperty({ enum: EmployeeDepartement, isArray: true })
     @Transform(({ value }) => JSON.parse(value))

@@ -17,8 +17,8 @@ export class Employee extends AuditableEntity {
     @Column()
     qualification: string;
 
-    @Column({ type: 'enum', enum: EmployeeStatus, default: EmployeeStatus.INACTIVE })
-    status: EmployeeStatus
+    @Column()
+    is_active: boolean;
 
     @Column({ type: 'set', enum: EmployeeDepartement })
     departements: EmployeeDepartement[]
