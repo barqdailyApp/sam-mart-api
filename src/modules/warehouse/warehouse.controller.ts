@@ -15,6 +15,8 @@ import { applyQueryIncludes } from 'src/core/helpers/service-related.helper';
 import { Region } from 'src/infrastructure/entities/region/region.entity';
 import { UpdateWarehouseRequest } from './dto/requests/update-warehouse.request';
 import { WarehouseTransferProductRequest } from './dto/requests/warehouse-transfer-product.request';
+import { Roles } from '../authentication/guards/roles.decorator';
+import { Role } from 'src/infrastructure/data/enums/role.enum';
 
 @ApiBearerAuth()
 @ApiTags('Warehouse')
@@ -86,4 +88,14 @@ export class WarehouseController {
     );
   }
 
+  @Roles(Role.ADMIN)
+  @Post("/attach-driver/:warehouse_id/:driver_id")
+  async attachDriverToWarehouse(
+    @Param("warehouse_id") warehouse_id: string,
+    @Param("driver_id") driver_id: string
+  ) {
+    return new ActionResponse(
+      await this.warehouseService.attachDriverToWarehouse(driver_id, warehouse_id),
+    );
+  }
 }

@@ -11,6 +11,7 @@ import { RegionService } from '../region/region.service';
 import { WarehouseTransferProductRequest } from './dto/requests/warehouse-transfer-product.request';
 import { WarehouseProducts } from 'src/infrastructure/entities/warehouse/warehouse-products.entity';
 import { operationType } from 'src/infrastructure/data/enums/operation-type.enum';
+import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
 
 @Injectable()
 export class WarehouseService extends BaseService<Warehouse> {
@@ -19,6 +20,7 @@ export class WarehouseService extends BaseService<Warehouse> {
         @InjectRepository(Warehouse) private readonly warehouse_repo: Repository<Warehouse>,
         private readonly warehouseOperationTransaction: WarehouseOperationTransaction,
         @Inject(RegionService) private readonly regionService: RegionService,
+        @InjectRepository(Driver) private readonly driver_repo: Repository<Driver>,
         @InjectRepository(WarehouseProducts) private readonly warehouseProducts_repo: Repository<WarehouseProducts>,
     ) {
         super(warehouse_repo);
@@ -71,5 +73,32 @@ export class WarehouseService extends BaseService<Warehouse> {
         });
 
         return { imported_warehouse, exported_warehouse };
+    }
+
+    async attachDriverToWarehouse(driver_id: string, warehouse_id: string) {
+        const warehouse = await this.warehouse_repo.findOne({
+            where: {
+                id: warehouse_id
+            },
+            relations: {
+                drivers: true
+            }
+        });
+        if (!warehouse) throw new NotFoundException("Warehouse not found");
+
+        const driver = await this.driver_repo.findOne({ where: { id: driver_id } });
+        if (!driver) throw new NotFoundException("Driver not found");
+
+        const isDriverAttached = warehouse.drivers.some(d => d.id === driver_id);
+        if (isDriverAttached) {
+            throw new BadRequestException("Driver already attached to warehouse");
+        }
+
+        if (driver.warehouse_id !== null) {
+            throw new BadRequestException("Driver already attached to warehouse");
+        }
+
+        warehouse.drivers.push(driver);
+        return await this.warehouse_repo.save(warehouse);
     }
 }
