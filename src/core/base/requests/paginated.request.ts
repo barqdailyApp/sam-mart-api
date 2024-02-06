@@ -82,26 +82,36 @@ export class PaginatedRequest {
       let whereFilter = {};
       const filterParts = filter.split(',');
       filterParts.forEach((filterPart) => {
-        const operator = this.getOperator(filterPart);
+        const subFilters = filterPart.split('.');
+        if (
+          subFilters.length > 1
+        ) {
+          const subFilter = subFilters.shift();
+          whereFilter = {
+            ...whereFilter,
+            [subFilter]: this.handleSubFilters(subFilters.join('.')),
+          };
+        } else {
+          const operator = this.getOperator(filterPart);
 
-        const [key, value] = filterPart.split(operator);
-        switch (operator) {
-          case '<':
-            whereFilter = { ...whereFilter, [key]: LessThan(value) };
-            break;
-          case '>':
-            whereFilter = { ...whereFilter, [key]: MoreThan(value) };
-            break;
-          case '<=':
-            whereFilter = { ...whereFilter, [key]: LessThanOrEqual(value) };
-            break;
-          case '>=':
-            whereFilter = { ...whereFilter, [key]: MoreThanOrEqual(value) };
-            break;
-          case '!=':
-            whereFilter = { ...whereFilter, [key]: Not(value) };
-            break;
-          default:
+          const [key, value] = filterPart.split(operator);
+          switch (operator) {
+            case '<':
+              whereFilter = { ...whereFilter, [key]: LessThan(value) };
+              break;
+            case '>':
+              whereFilter = { ...whereFilter, [key]: MoreThan(value) };
+              break;
+            case '<=':
+              whereFilter = { ...whereFilter, [key]: LessThanOrEqual(value) };
+              break;
+            case '>=':
+              whereFilter = { ...whereFilter, [key]: MoreThanOrEqual(value) };
+              break;
+            case '!=':
+              whereFilter = { ...whereFilter, [key]: Not(value) };
+              break;
+            default:
             case ':=:':
               whereFilter = { ...whereFilter, [key]: Like(`%${value}%`) };
               break;
@@ -111,8 +121,9 @@ export class PaginatedRequest {
             case ':=':
               whereFilter = { ...whereFilter, [key]: Like(`%${value}`) };
               break;
-            whereFilter = { ...whereFilter, [key]: value };
-            break;
+              whereFilter = { ...whereFilter, [key]: value };
+              break;
+          }
         }
       });
       whereFilters.push(whereFilter);
@@ -133,6 +144,16 @@ export class PaginatedRequest {
 
     // convert sortBy to order filters
     this.sortBy.forEach((sort) => {
+      const subSorts = sort.split('.');
+      if (subSorts.length > 1) {
+        const subSort = subSorts.shift();
+        orderFilters = {
+          ...orderFilters,
+          [subSort]: this.handleSubSorts(subSorts.join('.')),
+        };
+        return;
+      }
+
       const [key, value] = sort.split('=').slice(0, 2);
       orderFilters = {
         ...orderFilters,
@@ -171,6 +192,52 @@ export class PaginatedRequest {
       return { [include]: true };
     }
   }
+
+  // handle sub filters with level limit of x , key.subkey=value => { key: { subkey: value } }
+  private handleSubFilters(filter: string) {
+    const subFilters = filter.split('.');
+    if (
+      subFilters.length > 1 &&
+      subFilters[1] !== 'com'
+    ) {
+      const subFilter = subFilters.shift();
+      return { [subFilter]: this.handleSubFilters(subFilters.join('.')) };
+    } else {
+      const operator = this.getOperator(filter);
+
+      const [key, value] = filter.split(operator);
+      switch (operator) {
+        case '<':
+          return { [key]: LessThan(value) };
+        case '>':
+          return { [key]: MoreThan(value) };
+        case '<=':
+          return { [key]: LessThanOrEqual(value) };
+        case '>=':
+          return { [key]: MoreThanOrEqual(value) };
+        case '!=':
+          return { [key]: Not(value) };
+        default:
+          return { [key]: Like(`%${value}%`) };
+      }
+    }
+  }
+
+  // handle sub sorts with level limit of x , key.subkey=ASC|DESC => { key: { subkey: ASC|DESC } }
+  private handleSubSorts(sort: string) {
+    const subSorts = sort.split('.');
+    if (
+      subSorts.length > 1 &&
+      subSorts[1] !== 'com'
+    ) {
+      const subSort = subSorts.shift();
+      return { [subSort]: this.handleSubSorts(subSorts.join('.')) };
+    } else {
+      const [key, value] = sort.split('=').slice(0, 2);
+      return { [key]: value ? (value as SortHandle) : 'ASC' };
+    }
+  }
+
 
   private getOperator(statement: string): string {
     if (statement.includes('<=')) return '<=';
