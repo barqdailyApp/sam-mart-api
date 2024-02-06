@@ -8,14 +8,14 @@ export class CartProductRespone {
   quantity: number;
   price: number;
   unit: string;
+  product_id: string;
 
   additional_services: any;
   constructor(data: any) {
-    console.log(data.product.product_offer);
-    console.log(data.product);
+   
     return {
       id: data.id,
-
+      product_id: data.product.id,
       name: data.product.product_sub_category.product.name,
       section_id:
         data.product.product_sub_category.category_subCategory.section_category
