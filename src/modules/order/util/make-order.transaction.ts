@@ -14,7 +14,7 @@ import { MakeOrderRequest } from '../dto/make-order-request';
 import { Order } from 'src/infrastructure/entities/order/order.entity';
 import { Warehouse } from 'src/infrastructure/entities/warehouse/warehouse.entity';
 import { Address } from 'src/infrastructure/entities/user/address.entity';
-import { or, where } from 'sequelize';
+
 import { Cart } from 'src/infrastructure/entities/cart/cart.entity';
 import { CartProduct } from 'src/infrastructure/entities/cart/cart-products';
 import { plainToInstance } from 'class-transformer';
@@ -26,6 +26,7 @@ import { WarehouseProducts } from 'src/infrastructure/entities/warehouse/warehou
 import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
 import { Section } from 'src/infrastructure/entities/section/section.entity';
 import { Slot } from 'src/infrastructure/entities/order/slot.entity';
+import { ProductOffer } from 'src/infrastructure/entities/product/product-offer.entity';
 @Injectable()
 export class MakeOrderTransaction extends BaseTransaction<
   MakeOrderRequest,
@@ -65,6 +66,7 @@ export class MakeOrderTransaction extends BaseTransaction<
       if (cart_products.length == 0) {
         throw new BadRequestException('Cart is empty');
       }
+
       const nearst_warehouse = await context
         .createQueryBuilder(Warehouse, 'warehouse')
         .orderBy(
@@ -75,7 +77,7 @@ export class MakeOrderTransaction extends BaseTransaction<
         )
         .getOne();
 
-        const count = await context
+      const count = await context
         .createQueryBuilder(Order, 'order')
         .where('DATE(order.created_at) = CURDATE()')
         .getCount();
@@ -84,10 +86,8 @@ export class MakeOrderTransaction extends BaseTransaction<
         user_id: user.id,
         warehouse_id: nearst_warehouse.id,
         delivery_fee: section.delivery_price,
-        number:generateOrderNumber(count)
+        number: generateOrderNumber(count),
       });
- 
- 
 
       if (order.delivery_type == DeliveryType.FAST) {
         const currentDate = new Date();
@@ -112,8 +112,26 @@ export class MakeOrderTransaction extends BaseTransaction<
         warehouse_id: nearst_warehouse.id,
       });
 
-      const shipment_products = cart_products.map(
-        (e) => new ShipmentProduct({ shipment_id: shipment.id, ...e }),
+      const shipment_products = await Promise.all(
+        cart_products.map(async (e) => {
+          //handling offer
+          if (e.is_offer == true) {
+            const product_offer = await context.findOne(ProductOffer, {
+              where: { product_category_price_id: e.product_category_price_id },
+            });
+            if (
+              product_offer.offer_quantity - e.quantity < 0 ||
+              product_offer.end_date < new Date()
+            ) {
+              throw new BadRequestException('offer is not available');
+            }
+            product_offer.offer_quantity =
+              product_offer.offer_quantity - e.quantity;
+            await context.save(product_offer);
+          }
+
+          return new ShipmentProduct({ shipment_id: shipment.id, ...e });
+        }),
       );
       await context.save(shipment_products);
       order.total_price = shipment_products.reduce(
