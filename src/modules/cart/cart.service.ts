@@ -101,9 +101,16 @@ export class CartService extends BaseService<CartProduct> {
     if (cart_product) {
       this.cartProductRepository.remove(cart_product);
     }
+    const is_offer =
+      product_price.product_offer &&
+      product_price.product_offer.offer_quantity > 0 &&
+      product_price.product_offer.start_date < new Date() &&
+      new Date() < product_price.product_offer.end_date;
+
     return this.cartProductRepository.save(
       new CartProduct({
         additions: additions,
+        is_offer: is_offer,
         cart_id: cart.id,
         section_id:
           product_price.product_sub_category.category_subCategory

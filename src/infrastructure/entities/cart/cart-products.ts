@@ -36,6 +36,8 @@ product_category_price:ProductCategoryPrice
 @Column()
 product_category_price_id:string
 
+@Column({nullable:true,default:false})
+is_offer:boolean
 
 @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
 price:number;
