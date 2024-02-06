@@ -15,7 +15,7 @@ export class CartProductRespone {
    
     return {
       id: data.id,
-      product_id: data.product.id,
+      product_id: data.product.product_sub_category.product.id,
       name: data.product.product_sub_category.product.name,
       section_id:
         data.product.product_sub_category.category_subCategory.section_category
