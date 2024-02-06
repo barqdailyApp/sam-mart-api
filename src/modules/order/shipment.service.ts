@@ -16,6 +16,7 @@ import { AddShipmentChatMessageRequest } from './dto/request/add-shipment-chat-m
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { FileService } from '../file/file.service';
 import { ShipmentChatAttachment } from 'src/infrastructure/entities/order/shipment-chat-attachment.entity';
+import { GetCommentQueryRequest } from '../support-ticket/dto/request/get-comment-query.request';
 @Injectable()
 export class ShipmentService extends BaseService<Shipment> {
   constructor(
@@ -114,6 +115,33 @@ export class ShipmentService extends BaseService<Shipment> {
     return await this.shipmentChatRepository.save(newMessage);
 
   }
+
+  async getMessagesByShipmentId(shipment_id: string, query: GetCommentQueryRequest) {
+    const { limit = 10, offset = 0 } = query;
+    
+    const shipment = await this.shipmentRepository.findOne({
+      where: { id: shipment_id },
+      relations: ['order', 'driver']
+    });
+    if (!shipment) throw new NotFoundException('Shipment not found');
+
+    if (
+      shipment.driver.user_id !== this.currentUser.id &&
+      shipment.order.user_id !== this.currentUser.id &&
+      !this.currentUser.roles.includes(Role.ADMIN)
+    ) {
+      throw new UnauthorizedException('You are not allowed to view this shipment chat');
+    }
+
+    return await this.shipmentChatRepository.find({
+      where: { shipment_id },
+      relations: ['user', 'attachment'],
+      order: { created_at: 'DESC' },
+      skip: offset,
+      take: limit,
+    });
+  }
+
   get currentUser() {
     return this.request.user;
   }
