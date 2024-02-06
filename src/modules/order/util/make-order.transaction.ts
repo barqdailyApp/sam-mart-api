@@ -47,12 +47,18 @@ export class MakeOrderTransaction extends BaseTransaction<
       const section = await context.findOne(Section, {
         where: { id: req.section_id },
       });
+      if (!section.delivery_type.includes(req.delivery_type)) {
+        throw new BadRequestException(
+          'Section does not support this type of delivery',
+        );
+      }
+
       const user = this.request.user;
       const address = await context.findOne(Address, {
         where: [{ id: req.address_id, user_id: user.id }],
       });
       const cart = await context.findOne(Cart, { where: { user_id: user.id } });
-      console.log(user.id);
+
       const cart_products = await context.find(CartProduct, {
         where: { cart_id: cart.id, section_id: req.section_id },
       });
@@ -68,12 +74,18 @@ export class MakeOrderTransaction extends BaseTransaction<
              )`,
         )
         .getOne();
-      console.log(nearst_warehouse);
+
       const order = await context.save(Order, {
         ...plainToInstance(Order, req),
         user_id: user.id,
         warehouse_id: nearst_warehouse.id,
+        delivery_fee: section.delivery_price,
       });
+      const count = await context
+        .createQueryBuilder(Order, 'order')
+        .where('DATE(order.created_at) = CURDATE()')
+        .getCount();
+      order.number = generateOrderNumber(count);
 
       if (order.delivery_type == DeliveryType.FAST) {
         const currentDate = new Date();
@@ -85,13 +97,13 @@ export class MakeOrderTransaction extends BaseTransaction<
       } else {
         order.delivery_day = req.slot_day.day;
         order.slot_id = req.slot_day.slot_id;
-        const slot= await context.findOne(Slot, {where: {id: req.slot_day.slot_id, }})
+        const slot = await context.findOne(Slot, {
+          where: { id: req.slot_day.slot_id },
+        });
         order.estimated_delivery_time = new Date(
           req.slot_day.day + 'T' + slot.start_time,
         );
       }
-
-      console.log(order);
 
       const shipment = await context.save(Shipment, {
         order_id: order.id,
@@ -102,20 +114,31 @@ export class MakeOrderTransaction extends BaseTransaction<
         (e) => new ShipmentProduct({ shipment_id: shipment.id, ...e }),
       );
       await context.save(shipment_products);
-      order.total_price = shipment_products.reduce((a, b) => a + b.price*b.quantity, 0);
+      order.total_price = shipment_products.reduce(
+        (a, b) => a + b.price * b.quantity,
+        0,
+      );
+      if (order.total_price < section.min_order_price) {
+        throw new BadRequestException(
+          'total price is less than min order price',
+        );
+      }
 
       await context.save(Order, order);
       await context.delete(CartProduct, cart_products);
 
       //warehouse opreation
 
-      for (let index = 0; index < shipment_products.length; index++) {
+       for (let index = 0; index < shipment_products.length; index++) {
         const warehouse_product = await context.findOne(WarehouseProducts, {
           where: {
             warehouse_id: nearst_warehouse.id,
             product_id: shipment_products[index].product_id,
           },
         });
+        if (!warehouse_product) {
+          throw new BadRequestException('warehouse doesnt have product');
+        }
         warehouse_product.quantity =
           warehouse_product.quantity -
           shipment_products[index].quantity *
@@ -149,3 +172,15 @@ export class MakeOrderTransaction extends BaseTransaction<
     }
   }
 }
+export const generateOrderNumber = (count: number) => {
+  // number of digits matches ##-**-@@-&&&&, where ## is 100 - the year last 2 digits, ** is 100 - the month, @@ is 100 - the day, &&&& is the number of the order in that day
+  const date = new Date();
+  const year = date.getFullYear().toString().substr(-2);
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  // order number is the count of orders created today + 1 with 4 digits and leading zeros
+  const orderNumber = (count + 1).toString().padStart(4, '0');
+  return `${100 - parseInt(year)}${100 - parseInt(month)}${
+    100 - parseInt(day)
+  }${orderNumber}`;
+};

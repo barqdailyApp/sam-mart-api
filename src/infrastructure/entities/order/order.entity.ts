@@ -39,14 +39,20 @@ export class Order extends OwnedEntity {
   @Column()
   section_id: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   total_price: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  delivery_fee: number;
 
   @Column()
   payment_method: PaymentMethod;
 
   @Column({default:false})
   is_paid: boolean;
+
+  @Column({ length: 10, unique: true })
+  number: string;
 
   @Column()
   delivery_type: DeliveryType;
