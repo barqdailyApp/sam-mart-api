@@ -116,10 +116,6 @@ export class MakeOrderTransaction extends BaseTransaction<
             product_id: shipment_products[index].product_id,
           },
         });
-
-        if (!warehouse_product) {
-          throw new BadRequestException('warehouse doesnt have this product');
-        }
         
         warehouse_product.quantity =
           warehouse_product.quantity -
