@@ -11,6 +11,8 @@ export class SubcategoryResponse {
  
     @Expose()
     is_active: boolean;
+    @Expose()
+    order_by: number;
 
     @Expose()
     logo:string
@@ -22,6 +24,7 @@ export class SubcategoryResponse {
 this.id=data.id
 this.sub_category_id=data.sub_category_id
 this.name=data.name
+this.order_by=data.order_by
 this.logo= toUrl( data.logo)
 this.is_active=data.is_active
 
