@@ -68,13 +68,13 @@ export class CartController {
       cart_product_id,
     );
     return new ActionResponse(
-      new CartProductRespone({
+     this._i18nResponse.entity(  new CartProductRespone({
         id: cart_product.id,
         additional_services: cart_product.additions,
         price: cart_product.price,
         quantity: cart_product.quantity,
         product: cart_product.product_category_price,
-      }),
+      })),
     );
   }
 
