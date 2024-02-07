@@ -12,12 +12,13 @@ export class Category extends AuditableEntity {
   @Column()
   name_en: string;
 
-
   @Column({ nullable: true })
   logo: string;
 
-
-  @OneToMany(() => SectionCategory, sectionCategory => sectionCategory.category)
+  @OneToMany(
+    () => SectionCategory,
+    (sectionCategory) => sectionCategory.category,
+  )
   section_categories: SectionCategory[];
   constructor(partial?: Partial<Category>) {
     super();

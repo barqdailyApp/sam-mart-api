@@ -11,7 +11,8 @@ export class CategoryResponse {
 
     @Expose()
     name:string
-
+    @Expose()
+    order_by: number;
     @Expose()
     name_en:string
   
