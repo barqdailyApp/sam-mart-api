@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsBoolean, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsNumber, IsString, Validate } from 'class-validator';
+import { IsUnique } from 'src/core/validators/unique-constraints.validator';
 
 export class CategorySubcategoryRequest {
   @ApiProperty()
@@ -21,6 +22,7 @@ export class CategorySubcategoryRequest {
   @ApiProperty()
   @IsNotEmpty()
   @IsNumber()
+  @Validate(IsUnique, ['CategorySubCategory'])
   @Transform(({ value }) => Number(value))
   order_by: number;
 }

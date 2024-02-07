@@ -1,11 +1,11 @@
 import { BaseEntity } from "src/infrastructure/base/base.entity";
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, Unique } from "typeorm";
 import { Section } from "./section.entity";
 import { Category } from "../category/category.entity";
 import { CategorySubCategory } from "../category/category-subcategory.entity";
 
 @Entity()
-
+@Unique(["section_id", "order_by"])
 export class SectionCategory extends BaseEntity{
 
 @ManyToOne(() => Section, section => section.section_categories,{onDelete:"CASCADE"})
