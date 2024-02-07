@@ -6,6 +6,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   OneToOne,
 } from 'typeorm';
 import { User } from '../user/user.entity';
@@ -16,6 +17,7 @@ import { City } from '../city/city.entity';
 import { Shipment } from '../order/shipment.entity';
 import { DriverStatus } from 'src/infrastructure/data/enums/driver-status.enum';
 import { Warehouse } from '../warehouse/warehouse.entity';
+import { ShipmentChat } from '../order/shipment-chat.entity';
 
 @Entity()
 export class Driver extends AuditableEntity {
