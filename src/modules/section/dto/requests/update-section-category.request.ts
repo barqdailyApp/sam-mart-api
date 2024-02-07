@@ -14,7 +14,7 @@ export class UpdateSectionCategoryRequest {
 
   @ApiProperty({ required: false })
   // @IsNumber()
-  @Validate(IsUnique, ['SectionCategory'])
+
   @Transform(({ value }) => Number(value))
   order_by: number;
 }

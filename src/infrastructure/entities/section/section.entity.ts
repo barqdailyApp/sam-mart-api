@@ -17,7 +17,8 @@ export class Section extends BaseEntity {
   @Column()
   logo: string;
 
-  @Column()
+  @Column({unique:true})
+  
   order_by: number;
 
   @Column('decimal', { precision: 10, scale: 2 })

@@ -17,8 +17,11 @@ export class IsUnique implements ValidatorConstraintInterface {
         const [entityName, exceptField = null] = args.constraints;
         const [property] = args.property.split('.');
         const entity = this.dataSource.manager.getRepository(entityName);
-
-        const result = await entity.findOne({ where: { [property]: value } });
+       
+        
+       
+        
+        const result = await entity.findOne({ where: { [property]: value,[exceptField]: value } });
 
         if (!result) return true;
         // except field

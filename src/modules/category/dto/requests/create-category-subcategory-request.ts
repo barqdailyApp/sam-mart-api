@@ -22,7 +22,7 @@ export class CategorySubcategoryRequest {
   @ApiProperty()
   @IsNotEmpty()
   @IsNumber()
-  @Validate(IsUnique, ['CategorySubCategory'])
+ 
   @Transform(({ value }) => Number(value))
   order_by: number;
 }

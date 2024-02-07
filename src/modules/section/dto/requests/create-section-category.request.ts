@@ -31,7 +31,7 @@ export class SectionCategoryRequest {
   @ApiProperty()
   @IsNotEmpty()
   @IsNumber()
-  @Validate(IsUnique, ['SectionCategory'])
+
   @Transform(({ value }) => Number(value))
   order_by: number;
 }
