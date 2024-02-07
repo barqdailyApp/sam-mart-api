@@ -394,45 +394,46 @@ export class ProductDashboardService {
 
     // Conditional where clause based on sub category
     if (category_sub_category_id) {
+      console.log('category_sub_category_id = ', category_sub_category_id);
       query = query.andWhere(
         'product_sub_categories.category_sub_category_id = :category_sub_category_id',
         {
           category_sub_category_id,
         },
       );
-      query = query.andWhere(
-        'product_sub_category.category_sub_category_id = :category_sub_category_id',
-        {
-          category_sub_category_id,
-        },
-      );
+      // query = query.andWhere(
+      //   'product_sub_category.category_sub_category_id = :category_sub_category_id',
+      //   {
+      //     category_sub_category_id,
+      //   },
+      // );
     }
 
     if (section_category_id) {
-      query = query.andWhere(
-        'category_subCategory.section_category_id = :section_category_id',
-        {
-          section_category_id,
-        },
-      );
-
       query = query.andWhere(
         'product_category_subCategory.section_category_id = :section_category_id',
         {
           section_category_id,
         },
       );
+
+      // query = query.andWhere(
+      //   'category_subCategory.section_category_id = :section_category_id',
+      //   {
+      //     section_category_id,
+      //   },
+      // );
     }
     if (section_id) {
-      query = query.andWhere('section_category.section_id = :section_id', {
-        section_id,
-      });
       query = query.andWhere(
         'product_section_category.section_id = :section_id',
         {
           section_id,
         },
       );
+      // query = query.andWhere('section_category.section_id = :section_id', {
+      //   section_id,
+      // });
     }
     const [products, total] = await query.getManyAndCount();
     return { products, total };
@@ -506,45 +507,46 @@ export class ProductDashboardService {
 
     // Conditional where clause based on sub category
     if (category_sub_category_id) {
+      console.log('category_sub_category_id = ', category_sub_category_id);
       query = query.andWhere(
         'product_sub_categories.category_sub_category_id = :category_sub_category_id',
         {
           category_sub_category_id,
         },
       );
-      query = query.andWhere(
-        'product_sub_category.category_sub_category_id = :category_sub_category_id',
-        {
-          category_sub_category_id,
-        },
-      );
+      // query = query.andWhere(
+      //   'product_sub_category.category_sub_category_id = :category_sub_category_id',
+      //   {
+      //     category_sub_category_id,
+      //   },
+      // );
     }
 
     if (section_category_id) {
-      query = query.andWhere(
-        'category_subCategory.section_category_id = :section_category_id',
-        {
-          section_category_id,
-        },
-      );
-
       query = query.andWhere(
         'product_category_subCategory.section_category_id = :section_category_id',
         {
           section_category_id,
         },
       );
+
+      // query = query.andWhere(
+      //   'category_subCategory.section_category_id = :section_category_id',
+      //   {
+      //     section_category_id,
+      //   },
+      // );
     }
     if (section_id) {
-      query = query.andWhere('section_category.section_id = :section_id', {
-        section_id,
-      });
       query = query.andWhere(
         'product_section_category.section_id = :section_id',
         {
           section_id,
         },
       );
+      // query = query.andWhere('section_category.section_id = :section_id', {
+      //   section_id,
+      // });
     }
     const [products, total] = await query.getManyAndCount();
     return { products, total };
