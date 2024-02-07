@@ -37,6 +37,7 @@ import { Slot } from '../entities/order/slot.entity';
 import { Shipment } from '../entities/order/shipment.entity';
 import { ShipmentProduct } from '../entities/order/shipment-product.entity';
 import { ProductFavorite } from '../entities/product/product-favorite.entity';
+import { Employee } from '../entities/employee/employee.entity';
 import { ShipmentChat } from '../entities/order/shipment-chat.entity';
 import { ShipmentChatAttachment } from '../entities/order/shipment-chat-attachment.entity';
 
@@ -80,6 +81,7 @@ export const DB_ENTITIES = [
   Shipment,
   ShipmentProduct,
   ProductFavorite,
+  Employee,
   ShipmentChat,
   ShipmentChatAttachment
 ];

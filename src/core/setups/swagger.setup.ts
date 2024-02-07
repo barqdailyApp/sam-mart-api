@@ -12,6 +12,7 @@ import { CategoryModule } from 'src/modules/category/category.module';
 import { CityModule } from 'src/modules/city/city.module';
 import { CountryModule } from 'src/modules/country/country.module';
 import { DriverModule } from 'src/modules/driver/driver.module';
+import { EmployeeModule } from 'src/modules/employee/employee.module';
 import { FileModule } from 'src/modules/file/file.module';
 import { MeasurementUnitModule } from 'src/modules/measurement-unit/measurement-unit.module';
 import { OrderModule } from 'src/modules/order/order.module';
@@ -64,6 +65,7 @@ export default (app: INestApplication, config: ConfigService) => {
       StaticPageModule,
       SlotModule,
       OrderModule,
+      EmployeeModule,
       ShipmentController
     ],
     operationIdFactory,

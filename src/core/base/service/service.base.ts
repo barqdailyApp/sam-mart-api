@@ -41,11 +41,11 @@ export abstract class BaseService<T extends BaseEntity> implements IBaseService<
     let query: any;
     if (!isNaN(options.skip)) query = { skip: options.skip };
     if (!isNaN(options.take)) query = { ...query, take: options.take };
+    if (options.relations) query = { ...query, relations: options.relations };
     if (options.where && options.where.length) query = { ...query, where: options.where };
     if (options.order) query = { ...query, order: options.order };
-    if (options.relations) query = { ...query, relations: options.relations };
     if (options.select) query = { ...query, select: options.select };
-
+    
     return await this._repo.find(query);
   }
 
@@ -85,10 +85,10 @@ export abstract class BaseService<T extends BaseEntity> implements IBaseService<
     if (options.order) query = { ...query, order: options.order };
     if (options.relations) query = { ...query, relations: options.relations };
     if (options.select) query = { ...query, select: options.select };
-   
-    const result=await this._repo.findAndCount(query)
-   
-    
-    return  result[1];
+
+    const result = await this._repo.findAndCount(query)
+
+
+    return result[1];
   }
 }

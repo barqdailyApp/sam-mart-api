@@ -19,6 +19,7 @@ import { UserModule } from "./user/user.module";
 import { WarehouseModule } from "./warehouse/warehouse.module";
 import { SlotModule } from './slot/slot.module';
 import { OrderModule } from './order/order.module';
+import { EmployeeModule } from "./employee/employee.module";
 
 
 @Module({
@@ -42,8 +43,8 @@ import { OrderModule } from './order/order.module';
     StaticPageModule,
     CartModule,
     SlotModule,
-    OrderModule
-
+    OrderModule,
+    EmployeeModule
   ],
   exports: [],
   providers: [],
