@@ -20,6 +20,7 @@ import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { BaseUserService } from 'src/core/base/service/user-service.base';
 import { applyQueryFilters, applyQueryIncludes } from 'src/core/helpers/service-related.helper';
+import { UpdateEmployeeRequest } from './dto/request/update-employee.request';
 
 
 @Injectable()
@@ -120,4 +121,70 @@ export class EmployeeService extends BaseService<Employee> {
         applyQueryIncludes(query, 'user');
         return await this.findAll(query);
     }
+
+    async updateEmployee(req: UpdateEmployeeRequest, employee_id: string) {
+        const employee = await this.employeeRepository.findOne({
+            where: { id: employee_id },
+            relations: ['user']
+        });
+        if (!employee) {
+            throw new BadRequestException('Employee not found');
+        }
+
+        const {
+            name_en,
+            email,
+            phone,
+            country_id,
+            city_id,
+            avatar_file,
+            gender,
+        } = req;
+
+        if (email) employee.user.email = email;
+        if (phone) employee.user.phone = phone;
+        if (name_en) employee.user.name = name_en;
+        if (gender) employee.user.gender = gender;
+
+        if (avatar_file) {
+            const pathAvatar = await this.storageManager.store(
+                { buffer: avatar_file.buffer, originalname: avatar_file.originalname },
+                { path: 'avatars' }
+            )
+            employee.user.avatar = pathAvatar;
+            delete req.avatar_file;
+        }
+
+        if (country_id) await this.countryService.single(country_id);
+        if (city_id) await this.cityService.single(city_id);
+
+        Object.assign(employee, req);
+
+        employee.user = await this.userRepository.save(employee.user);
+        await this.employeeRepository.save(employee);
+        return employee;
+    }
+
+    async deleteEmployee(employee_id: string) {
+        const employee = await this.employeeRepository.findOne({
+            where: { id: employee_id },
+            relations: ['user']
+        });
+        if (!employee) {
+            throw new BadRequestException('Employee not found');
+        }
+
+        const timestamp = new Date().getTime();
+
+        // soft delete employee.user and deactive his credentials
+        employee.deleted_at = new Date();
+        employee.user.email = null;
+        employee.user.username = `${employee.user.username}_deleted_${timestamp}`;
+        employee.user.phone = 'user deleted';
+
+
+        await this.employeeRepository.softDelete(employee_id);
+        await this.userRepository.save(employee.user);
+    }
+
 }
