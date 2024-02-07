@@ -1,7 +1,7 @@
 import {
     Body,
     ClassSerializerInterceptor,
-    Controller, Get, Post, Query, UploadedFile, UseGuards, UseInterceptors,
+    Controller, Delete, Get, Param, Patch, Post, Put, Query, UploadedFile, UseGuards, UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { EmployeeService } from './employee.service';
@@ -18,6 +18,7 @@ import { ActionResponse } from 'src/core/base/responses/action.response';
 import { query } from 'express';
 import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
+import { UpdateEmployeeRequest } from './dto/request/update-employee.request';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -26,14 +27,14 @@ import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
     description: 'Language header: en, ar',
 })
 @ApiTags('Employee')
-// @UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN)
 @Controller('employee')
 export class EmployeeController {
     constructor(
         private readonly employeeService: EmployeeService,
     ) { }
 
-    @Roles(Role.ADMIN)
     @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('avatar_file'))
     @ApiConsumes('multipart/form-data')
     @Post("create")
@@ -50,12 +51,12 @@ export class EmployeeController {
         return new ActionResponse<EmployeeResponse>(response);
     }
 
-    @Roles(Role.ADMIN)
     @Get("all")
     async allEmployees(
         @Query() query: PaginatedRequest,
     ): Promise<ActionResponse<EmployeeResponse[]>> {
         const employees = await this.employeeService.findAllEmployees(query);
+
         const response = plainToInstance(EmployeeResponse, employees, { excludeExtraneousValues: true });
         if (query.page && query.limit) {
             const total = await this.employeeService.count(query);
@@ -65,5 +66,33 @@ export class EmployeeController {
         } else {
             return new ActionResponse<EmployeeResponse[]>(response);
         }
+    }
+
+
+    @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('avatar_file'))
+    @ApiConsumes('multipart/form-data')
+    @Patch("update/:employee_id")
+    async updateEmployee(
+        @Body() req: UpdateEmployeeRequest,
+        @Param("employee_id") employee_id: string,
+        @UploadedFile(new UploadValidator().build())
+        avatar_file: Express.Multer.File,
+    ): Promise<ActionResponse<EmployeeResponse>> {
+        req.avatar_file = avatar_file;
+
+        const employee = await this.employeeService.updateEmployee(req, employee_id);
+
+        const response = plainToClass(EmployeeResponse, employee, {
+            excludeExtraneousValues: true
+        });
+        return new ActionResponse<EmployeeResponse>(response);
+    }
+
+    @Delete("delete/:employee_id")
+    async deleteEmployee(
+        @Param("employee_id") employee_id: string,
+    ): Promise<ActionResponse<boolean>> {
+        await this.employeeService.deleteEmployee(employee_id);
+        return new ActionResponse<boolean>(true);
     }
 }
