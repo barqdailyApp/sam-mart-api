@@ -12,6 +12,8 @@ import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { TicketAttachment } from 'src/infrastructure/entities/support-ticket/ticket-attachement.entity';
 import { SupportTicketGateway } from 'src/integration/gateways/support-ticket.gateway';
 import { GetCommentQueryRequest } from './dto/request/get-comment-query.request';
+import { plainToInstance } from 'class-transformer';
+import { UserResponse } from '../user/dto/responses/user.response';
 
 
 @Injectable()
@@ -52,13 +54,22 @@ export class TicketCommentService extends BaseService<TicketComment> {
 
         const newComment = await this.ticketCommentRepository.create({
             comment_text,
-            user: this.currentUser,
+            user_id: this.currentUser.id,
             ticket,
             attachment: attachedFile
         });
 
         const savedComment = await this.ticketCommentRepository.save(newComment);
-        this.supportTicketGateway.handleSendMessage({ supportTicket: ticket, ticketComment: savedComment, action: 'ADD_COMMENT' });
+        const userInfo = plainToInstance(UserResponse, this.currentUser, {
+            excludeExtraneousValues: true
+        })
+
+        this.supportTicketGateway.handleSendMessage({
+            supportTicket: ticket,
+            ticketComment: savedComment,
+            user: userInfo,
+            action: 'ADD_COMMENT'
+        });
         return savedComment;
     }
 

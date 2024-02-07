@@ -5,6 +5,7 @@ import { Order } from './order.entity';
 import { Warehouse } from '../warehouse/warehouse.entity';
 import { ShipmentProduct } from './shipment-product.entity';
 import { ShipmentStatusEnum } from 'src/infrastructure/data/enums/shipment_status.enum';
+import { ShipmentChat } from './shipment-chat.entity';
 
 @Entity()
 export class Shipment extends AuditableEntity {
@@ -24,7 +25,7 @@ export class Shipment extends AuditableEntity {
 
   @Column()
   warehouse_id: string;
-  @Column({default:ShipmentStatusEnum.PENDING})
+  @Column({ default: ShipmentStatusEnum.PENDING })
   status: ShipmentStatusEnum;
   @Column({ nullable: true })
   order_confirmed_at: Date;
@@ -43,6 +44,9 @@ export class Shipment extends AuditableEntity {
     (shipmentProduct) => shipmentProduct.shipment,
   )
   shipment_products: ShipmentProduct[];
+
+  @OneToMany(() => ShipmentChat, shipmentChat => shipmentChat.shipment, { cascade: true })
+  shipment_chats: ShipmentChat[]
 
   constructor(partial?: Partial<Shipment>) {
     super();

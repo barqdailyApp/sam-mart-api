@@ -25,10 +25,42 @@ export class SlotService {
     }
     return slot;
   }
-  async findAll(): Promise<Slot[]> {
-    return await this.slotRepository.find({ order: { order_by: 'ASC' } });
-  }
+  async findAll(delivery_day: string): Promise<Slot[]> {
+    const slots = await this.slotRepository.find({
+      relations: { orders: true },
+      order: {
+        order_by: 'ASC',
+      },
+    });
+    const availableSlots = [];
+    for (let i = 0; i < slots.length; i++) {
+      const ordersDay = slots[i].orders.filter(
+        (order) => order.delivery_day === delivery_day,
+      );
+      if (ordersDay.length < 10) {
+        availableSlots.push(slots[i]);
+      }
+    }
 
+    return availableSlots;
+  }
+  // async findAll(delivery_day: string): Promise<Slot[]> {
+  //   return await this.slotRepository
+  //     .createQueryBuilder('slot')
+  //     .leftJoinAndSelect('slot.orders', 'order')
+  //     .where(qb => {
+  //       const subQuery = qb.subQuery()
+  //         .select('order.slotId')
+  //         .from(Order, 'order')
+  //         .where('order.delivery_day = :delivery_day', { delivery_day })
+  //         .groupBy('order.slotId')
+  //         .having('COUNT(order.id) < 10')
+  //         .getQuery();
+  //       return 'slot.id IN ' + subQuery;
+  //     })
+  //     .orderBy('slot.order_by', 'ASC')
+  //     .getMany();
+  // }
   async update(
     slot_id: string,
     updateSlotRequest: UpdateSlotRequest,

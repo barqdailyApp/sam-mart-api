@@ -45,6 +45,7 @@ export class ProductClientController {
       await this.productClientService.getAllProductsForClient(
         productClientFilter,
       );
+
     const productsResponse = products.map((product) => {
       const productResponse = plainToClass(ProductResponse, product);
 
@@ -102,9 +103,8 @@ export class ProductClientController {
       await this.productClientService.getAllProductsFavorite(
         productFavQuery,
       );
-      console.log(products_favorite)
     const productsResponse = products_favorite.map((product_fav) => {
-      const productResponse = plainToClass(ProductFavResponse, product_fav);
+      const productResponse = plainToClass(ProductResponse, product_fav.product);
 
       return productResponse;
     });

@@ -3,6 +3,8 @@ import { CategorySubCategoryResponse } from './category-sub-category.response';
 
 @Exclude()
 export class ProductSubCategoryResponse {
+  @Expose() id: string;
+
   @Expose() category_sub_category_id: string;
   @Expose() product_id: string;
   @Expose() order_by: number;

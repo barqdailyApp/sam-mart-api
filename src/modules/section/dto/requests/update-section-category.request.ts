@@ -1,21 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsBoolean, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { required } from 'joi';
 
 export class UpdateSectionCategoryRequest {
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @IsString()
-  @IsNotEmpty()
   id: string;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsBoolean()
+  @ApiProperty({ required: false })
+  // @IsBoolean()
   is_active: boolean;
 
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsNumber()
+  @ApiProperty({ required: false })
+  // @IsNumber()
   @Transform(({ value }) => Number(value))
   order_by: number;
 }

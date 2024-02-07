@@ -18,7 +18,10 @@ import { UpdateCategoryRequest } from '../category/dto/requests/update-category-
 import { FileService } from '../file/file.service';
 import { toUrl } from 'src/core/helpers/file.helper';
 import { ImportCategoryRequest } from '../category/dto/requests/import-category-request';
-import { CreateCategoriesExcelRequest, CreateCategoryExcelRequest } from '../category/dto/requests/create-categories-excel-request';
+import {
+  CreateCategoriesExcelRequest,
+  CreateCategoryExcelRequest,
+} from '../category/dto/requests/create-categories-excel-request';
 import { validate } from 'class-validator';
 
 @Injectable()
@@ -62,24 +65,28 @@ export class SubcategoryService extends BaseService<Subcategory> {
     return subcategory;
   }
 
-
-  async updateMostHitSubCategory(
-    { sub_category_id, section_category_id }: { sub_category_id?: string, section_category_id?: string }
-  ) {
-    const findCategorySubCategory = await this.categorySubCategoryRepository
-      .find({
+  async updateMostHitSubCategory({
+    sub_category_id,
+    section_category_id,
+  }: {
+    sub_category_id?: string;
+    section_category_id?: string;
+  }) {
+    const findCategorySubCategory =
+      await this.categorySubCategoryRepository.find({
         where: [
           { subcategory_id: sub_category_id },
-          { section_category_id: section_category_id }
-        ]
-      })
+          { section_category_id: section_category_id },
+        ],
+      });
 
     for (const categorySubCategory of findCategorySubCategory) {
-      const findMostHitSubCategory = await this.mostHitSubcategoryRepository.findOne({
-        where: {
-          category_sub_category_id: categorySubCategory.id,
-        },
-      });
+      const findMostHitSubCategory =
+        await this.mostHitSubcategoryRepository.findOne({
+          where: {
+            category_sub_category_id: categorySubCategory.id,
+          },
+        });
 
       if (findMostHitSubCategory) {
         findMostHitSubCategory.current_hit += 1;
@@ -94,52 +101,60 @@ export class SubcategoryService extends BaseService<Subcategory> {
     }
   }
 
-
   async getMostHitSubcategory(queryRequest: QueryHitsSubCategoryRequest) {
     let { page, limit, section_category_id, section_id } = queryRequest;
 
     page = page || 1;
     limit = limit || 10;
 
-
     const queryOptions: any = {
       where: {
         categorySubCategory: {
           section_category_id: section_category_id,
           section_category: {
-            section_id: section_id
-          }
-        }
+            section_id: section_id,
+          },
+        },
       },
-      relations: ['categorySubCategory', 'categorySubCategory.subcategory', 'categorySubCategory.section_category'],
+      relations: [
+        'categorySubCategory',
+        'categorySubCategory.subcategory',
+        'categorySubCategory.section_category',
+      ],
       order: { previous_hit: 'DESC', current_hit: 'DESC' },
       skip: (page - 1) * limit,
       take: limit,
     };
 
-    const mostHitSubCategories = await this.mostHitSubcategoryRepository.find(queryOptions);
+    const mostHitSubCategories = await this.mostHitSubcategoryRepository.find(
+      queryOptions,
+    );
     const total_count = await this.mostHitSubcategoryRepository.count();
     return {
       mostHitSubCategories,
-      total_count
-    }
+      total_count,
+    };
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async flushMostHitSubcategory() {
-    await this.mostHitSubcategoryRepository.update({}, { previous_hit: () => 'current_hit', current_hit: 0 });
+    await this.mostHitSubcategoryRepository.update(
+      {},
+      { previous_hit: () => 'current_hit', current_hit: 0 },
+    );
   }
 
   async updateSubCategory(req: UpdateCategoryRequest) {
-    const subcategory = await this.subcategory_repo.findOne({ where: { id: req.id } });
+    const subcategory = await this.subcategory_repo.findOne({
+      where: { id: req.id },
+    });
 
     if (!subcategory) {
       throw new NotFoundException('Subcategory not found');
     }
 
     if (req.logo) {
-
-      await this._fileService.delete(subcategory.logo)
+      await this._fileService.delete(subcategory.logo);
       const resizedImage = await this.imageManager.resize(req.logo, {
         size: { width: 300, height: 300 },
         options: {
@@ -166,7 +181,7 @@ export class SubcategoryService extends BaseService<Subcategory> {
     if (!subcategory) {
       throw new NotFoundException('Subcategory not found');
     }
-    await this._fileService.delete(subcategory.logo)
+    await this._fileService.delete(subcategory.logo);
     return await this.subcategory_repo.delete(id);
   }
 
@@ -176,7 +191,7 @@ export class SubcategoryService extends BaseService<Subcategory> {
         subcategory: true,
         section_category: {
           section: true,
-          category: true
+          category: true,
         },
       },
     });
@@ -190,7 +205,7 @@ export class SubcategoryService extends BaseService<Subcategory> {
         subcategory: {
           name_ar: subcategory_name_ar,
           name_en: subcategory_name_en,
-          logo: subcategory_logo
+          logo: subcategory_logo,
         },
         section_category: {
           section: {
@@ -203,9 +218,9 @@ export class SubcategoryService extends BaseService<Subcategory> {
             id: categoryId,
             name_ar: category_name_ar,
             name_en: category_name_en,
-            logo: category_logo
-          }
-        }
+            logo: category_logo,
+          },
+        },
       } = subcategory;
 
       return {
@@ -227,13 +242,21 @@ export class SubcategoryService extends BaseService<Subcategory> {
       };
     });
 
-    return await this._fileService.exportExcel(flattenedData, 'subcategories', 'subcategories');
+    return await this._fileService.exportExcel(
+      flattenedData,
+      'subcategories',
+      'subcategories',
+    );
   }
 
   async importSubCategory(req: ImportCategoryRequest) {
-    const file = await this.storageManager.store(req.file, { path: 'subcategory-export' });
+    const file = await this.storageManager.store(req.file, {
+      path: 'subcategory-export',
+    });
     const jsonData = await this._fileService.importExcel(file);
-    const subCategoriesRequest = plainToClass(CreateCategoriesExcelRequest, { categories: jsonData });
+    const subCategoriesRequest = plainToClass(CreateCategoriesExcelRequest, {
+      categories: jsonData,
+    });
     const validationErrors = await validate(subCategoriesRequest);
 
     if (validationErrors.length > 0) {
@@ -241,7 +264,10 @@ export class SubcategoryService extends BaseService<Subcategory> {
     }
 
     const newSubCategories = jsonData.map((subcategoryData) => {
-      const { name_ar, name_en, logo } = plainToClass(CreateCategoryExcelRequest, subcategoryData);
+      const { name_ar, name_en, logo } = plainToClass(
+        CreateCategoryExcelRequest,
+        subcategoryData,
+      );
       return this._repo.create({
         name_ar,
         name_en,
@@ -251,5 +277,4 @@ export class SubcategoryService extends BaseService<Subcategory> {
 
     return await this._repo.save(newSubCategories);
   }
-
 }

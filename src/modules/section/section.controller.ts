@@ -56,7 +56,7 @@ export class SectionController {
   constructor(
     private readonly sectionService: SectionService,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
-  ) { }
+  ) {}
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
@@ -155,7 +155,7 @@ export class SectionController {
       await this.sectionService.updatSectionCategory(req),
     );
   }
-  
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
@@ -182,6 +182,7 @@ export class SectionController {
   @Get(':section_id/categories')
   async getSectionCategories(
     @Param('section_id') section_id: string,
+    @Query('name') name = '',
     @Query('limit') limit = 100,
     @Query('page') page = 1,
     @Query('all') all?: boolean,
@@ -189,28 +190,15 @@ export class SectionController {
     const categories = await this.sectionService.getSectionCategories(
       section_id,
       all,
+      name,
       limit,
       page,
     );
     const data = this._i18nResponse.entity(categories);
-    if (all == true)
-      return new PaginatedResponse(
-        data.section_categories.map(
-          (e) =>
-            new CategoryResponse({
-              ...e,
-              logo: e.category.logo,
-              name: e.category.name,
-              category_id: e.category_id,
-            }),
-        ),
-        {
-          meta: { total: data.total, limit: limit, page: page },
-        },
-      );
+    
 
-    return new ActionResponse(
-      data.section_categories.map(
+    return new PaginatedResponse(
+      data.section_categories[0].map(
         (e) =>
           new CategoryResponse({
             ...e,
@@ -219,7 +207,9 @@ export class SectionController {
             category_id: e.category_id,
           }),
       ),
+      {
+        meta: { total: data.section_categories[1] || 0, limit: limit, page: page },
+      },
     );
   }
-
 }

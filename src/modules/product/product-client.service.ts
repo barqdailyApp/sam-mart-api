@@ -14,6 +14,7 @@ import { Request } from 'express';
 import { ProductFavorite } from 'src/infrastructure/entities/product/product-favorite.entity';
 import { Section } from 'src/infrastructure/entities/section/section.entity';
 import { ProductFavQuery } from './dto/filter/product-fav.query';
+import { Cart } from 'src/infrastructure/entities/cart/cart.entity';
 @Injectable()
 export class ProductClientService {
   constructor(
@@ -35,6 +36,9 @@ export class ProductClientService {
     @InjectRepository(Section)
     private readonly section_repo: Repository<Section>,
 
+    @InjectRepository(Cart)
+    private readonly cart_repo: Repository<Cart>,
+
     @Inject(REQUEST) private readonly request: Request,
   ) {}
 
@@ -49,6 +53,7 @@ export class ProductClientService {
       category_sub_category_id,
       product_name,
       sort,
+      user_id,
     } = productClientQuery;
     const skip = (page - 1) * limit;
 
@@ -85,6 +90,7 @@ export class ProductClientService {
     // Start building the query
     let query = this.productRepository
       .createQueryBuilder('product')
+      // .leftJoinAndSelect('product.products_favorite', 'products_favorite')
 
       .innerJoinAndSelect('product.product_images', 'product_images')
       .innerJoinAndSelect(
@@ -132,6 +138,26 @@ export class ProductClientService {
       .skip(skip)
       .take(limit);
 
+    if (user_id) {
+      const cartUser = await this.cart_repo.findOne({ where: { user_id } });
+      if (!cartUser) {
+        throw new NotFoundException('user not found');
+      }
+
+      query = query.leftJoinAndSelect(
+        'product_category_prices.cart_products',
+        'cart_products',
+        'cart_products.cart_id = :cart_id',
+        { cart_id: cartUser.id },
+      );
+
+      query = query.leftJoinAndSelect(
+        'product.products_favorite',
+        'products_favorite',
+        'products_favorite.user_id = :user_id',
+        { user_id },
+      );
+    }
     // Modify condition if warehouse is defined
     if (warehouse) {
       query = query.andWhere('warehousesProduct.warehouse_id = :warehouseId', {
@@ -201,6 +227,7 @@ export class ProductClientService {
       category_sub_category_id,
       product_name,
       sort,
+      user_id,
     } = productClientQuery;
     const skip = (page - 1) * limit;
 
@@ -283,6 +310,25 @@ export class ProductClientService {
       .skip(skip)
       .take(limit);
 
+    if (user_id) {
+      const cartUser = await this.cart_repo.findOne({ where: { user_id } });
+      if (!cartUser) {
+        throw new NotFoundException('user not found');
+      }
+
+      query = query.leftJoinAndSelect(
+        'product_category_prices.cart_products',
+        'cart_products',
+        'cart_products.cart_id = :cart_id',
+        { cart_id: cartUser.id },
+      );
+      query = query.leftJoinAndSelect(
+        'product.products_favorite',
+        'products_favorite',
+        'products_favorite.user_id = :user_id',
+        { user_id },
+      );
+    }
     // Modify condition if warehouse is defined
     if (warehouse) {
       query = query.andWhere('warehousesProduct.warehouse_id = :warehouseId', {
@@ -363,7 +409,6 @@ export class ProductClientService {
     // Start building the query
     let query = this.productRepository
       .createQueryBuilder('product')
-      .leftJoinAndSelect('product.products_favorite', 'products_favorite')
       .innerJoinAndSelect('product.product_images', 'product_images')
       .innerJoinAndSelect(
         'product.product_sub_categories',
@@ -422,6 +467,25 @@ export class ProductClientService {
         warehouseId: warehouse.id,
       });
     }
+    if (user_id) {
+      const cartUser = await this.cart_repo.findOne({ where: { user_id } });
+      if (!cartUser) {
+        throw new NotFoundException('user not found');
+      }
+
+      query = query.leftJoinAndSelect(
+        'product_category_prices.cart_products',
+        'cart_products',
+        'cart_products.cart_id = :cart_id',
+        { cart_id: cartUser.id },
+      );
+      query = query.leftJoinAndSelect(
+        'product.products_favorite',
+        'products_favorite',
+        'products_favorite.user_id = :user_id',
+        { user_id },
+      );
+    }
     // Conditional where clause based on sub category
     if (category_sub_category_id) {
       query = query.andWhere(
@@ -438,26 +502,6 @@ export class ProductClientService {
           category_sub_category_id,
         },
       );
-
-      if (user_id) {
-        const category_subCategory =
-          await this.categorySubcategory_repo.findOne({
-            where: { id: category_sub_category_id },
-            relations: { section_category: true },
-          });
-        const favorite = await this.productFavorite_repo.findOne({
-          where: {
-            product_id,
-            section_id: category_subCategory.section_category.section.id,
-            user_id,
-          },
-        });
-        if (favorite) {
-          query = query.andWhere('products_favorite.section_id= :section_id', {
-            section_id,
-          });
-        }
-      }
     }
 
     // Conditional where clause based on section
@@ -473,20 +517,6 @@ export class ProductClientService {
           section_id,
         },
       );
-      if (user_id) {
-        const favorite = await this.productFavorite_repo.findOne({
-          where: {
-            product_id,
-            section_id,
-            user_id,
-          },
-        });
-        if (favorite) {
-          query = query.andWhere('products_favorite.section_id= :section_id', {
-            section_id,
-          });
-        }
-      }
     }
     return await query.getOne();
   }
@@ -528,15 +558,8 @@ export class ProductClientService {
   //* Get All Products Favorite
 
   async getAllProductsFavorite(productFavQuery: ProductFavQuery) {
-    const {
-      page,
-      limit,
-      longitude,
-      latitude,
-      section_id,
-      sort,
-      user_id,
-    } = productFavQuery;
+    const { page, limit, longitude, latitude, section_id, sort, user_id } =
+      productFavQuery;
     const skip = (page - 1) * limit;
 
     let productsSort = {};
@@ -578,15 +601,15 @@ export class ProductClientService {
       .innerJoinAndSelect('product_favorite.section', 'section')
 
       .innerJoinAndSelect('product.product_images', 'product_images')
-      .innerJoin(
+      .innerJoinAndSelect(
         'product.product_sub_categories',
         'product_sub_categories',
       )
-      .innerJoin(
+      .innerJoinAndSelect(
         'product_sub_categories.category_subCategory',
         'product_category_subCategory',
       )
-      .innerJoin(
+      .innerJoinAndSelect(
         'product_category_subCategory.section_category',
         'product_section_category',
       )
@@ -628,11 +651,25 @@ export class ProductClientService {
         warehouseId: warehouse.id,
       });
     }
+    if (user_id) {
+      const cartUser = await this.cart_repo.findOne({ where: { user_id } });
+      if (!cartUser) {
+        throw new NotFoundException('user not found');
+      }
 
-   
-
-
-
+      query = query.leftJoinAndSelect(
+        'product_category_prices.cart_products',
+        'cart_products',
+        'cart_products.cart_id = :cart_id',
+        { cart_id: cartUser.id },
+      );
+      query = query.leftJoinAndSelect(
+        'product.products_favorite',
+        'products_favorite',
+        'products_favorite.user_id = :user_id',
+        { user_id },
+      );
+    }
     // Conditional where clause based on section
     if (section_id) {
       query = query.andWhere('section_category.section_id = :section_id', {

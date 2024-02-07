@@ -42,9 +42,9 @@ export class SlotController {
     const slotResponse = plainToClass(SlotResponse, slot);
     return new ActionResponse(this._i18nResponse.entity(slotResponse));
   }
-  @Get('all-slots')
-  async allCountries() {
-    const slots = await this.slotService.findAll();
+  @Get(':delivery_day/all-slots')
+  async allCountries(@Param('delivery_day') delivery_day: string) {
+    const slots = await this.slotService.findAll(delivery_day);
     const slotsResponse = slots.map((slot) => plainToClass(SlotResponse, slot));
     return new ActionResponse(this._i18nResponse.entity(slotsResponse));
   }

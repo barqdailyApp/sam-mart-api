@@ -17,6 +17,7 @@ import { TicketComment } from '../support-ticket/ticket-comment.entity';
 
 import { Order } from '../order/order.entity';
 import { ProductFavorite } from '../product/product-favorite.entity';
+import { ShipmentChat } from '../order/shipment-chat.entity';
 
 @Entity()
 export class User extends AuditableEntity {
@@ -67,6 +68,9 @@ export class User extends AuditableEntity {
 
   @OneToMany(() => Order, (order) => order.user)
   orders: Order[];
+
+  @OneToMany(() => ShipmentChat, (shipmentChat) => shipmentChat.user, { cascade: true })
+  shipment_chats: ShipmentChat[];
 
   @OneToMany(
     () => ProductFavorite,

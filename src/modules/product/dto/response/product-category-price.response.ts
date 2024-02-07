@@ -7,6 +7,7 @@ import { ProductImagesResponse } from './product-images.response';
 import { ProductAdditionalServiceResponse } from './product-additional-service.response';
 import { DiscountType } from 'src/infrastructure/data/enums/discount-type.enum';
 import { ProductOfferResponse } from './product-offer.response';
+import { CartProduct } from 'src/infrastructure/entities/cart/cart-products';
 
 @Exclude()
 export class ProductCategoryPriceResponse {
@@ -30,4 +31,19 @@ export class ProductCategoryPriceResponse {
   )
   @Expose()
   readonly product_additional_services: ProductAdditionalServiceResponse[];
+
+
+
+
+  @Transform(({ value }) => {
+    if (value === null || value === undefined) {
+      return null;
+    }else{
+      return plainToClass(CartProduct, value[0])
+    }
+  })
+  @Expose()
+  cart_products:
+    | CartProduct
+    | null;
 }

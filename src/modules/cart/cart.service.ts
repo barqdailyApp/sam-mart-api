@@ -44,6 +44,7 @@ export class CartService extends BaseService<CartProduct> {
 
           product_measurement: { measurement_unit: true },
 
+          product_offer: true,
           product_sub_category: {
             product: { product_images: true },
             category_subCategory: { section_category: true },
@@ -56,7 +57,7 @@ export class CartService extends BaseService<CartProduct> {
   async addToCart(req: AddToCartRequest) {
     const cart = await this.getCart();
     const additions = req.additions || [];
-    console.log(additions);
+
     const product_price = await this.productCategoryPrice.findOne({
       where: {
         id: req.product_category_price_id,
@@ -100,9 +101,16 @@ export class CartService extends BaseService<CartProduct> {
     if (cart_product) {
       this.cartProductRepository.remove(cart_product);
     }
+    const is_offer =
+      product_price.product_offer &&
+      product_price.product_offer.offer_quantity > 0 &&
+      product_price.product_offer.start_date < new Date() &&
+      new Date() < product_price.product_offer.end_date;
+
     return this.cartProductRepository.save(
       new CartProduct({
         additions: additions,
+        is_offer: is_offer,
         cart_id: cart.id,
         section_id:
           product_price.product_sub_category.category_subCategory
@@ -121,9 +129,26 @@ export class CartService extends BaseService<CartProduct> {
   }
 
   async deleteCartProduct(cart_product_id: string) {
-    return await this.cartProductRepository.delete({
+    const cart_product = await this.cartProductRepository.findOne({
+      where: { id: cart_product_id },
+      relations: {
+        product_category_price: {
+          product_additional_services: { additional_service: true },
+
+          product_measurement: { measurement_unit: true },
+
+          product_offer: true,
+          product_sub_category: {
+            product: { product_images: true },
+            category_subCategory: { section_category: true },
+          },
+        },
+      },
+    });
+    await this.cartProductRepository.delete({
       id: cart_product_id,
     });
+    return cart_product;
   }
 
   async updatecartProduct(req: UpdateCartProductRequest) {
@@ -154,16 +179,14 @@ export class CartService extends BaseService<CartProduct> {
         product_category_price.max_order_quantity
       )
         cart_product.quantity = product_category_price.max_order_quantity;
-else
-      cart_product.quantity += product_category_price.min_order_quantity;
+      else cart_product.quantity += product_category_price.min_order_quantity;
     } else {
       if (
         cart_product.quantity - product_category_price.min_order_quantity <=
         product_category_price.min_order_quantity
       )
         cart_product.quantity = product_category_price.min_order_quantity;
-        else
-      cart_product.quantity -= product_category_price.min_order_quantity;
+      else cart_product.quantity -= product_category_price.min_order_quantity;
     }
 
     return {

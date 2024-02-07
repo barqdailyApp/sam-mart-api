@@ -8,11 +8,14 @@ export class CartProductRespone {
   quantity: number;
   price: number;
   unit: string;
+  product_id: string;
+
   additional_services: any;
   constructor(data: any) {
+   
     return {
       id: data.id,
-
+      product_id: data.product.product_sub_category.product.id,
       name: data.product.product_sub_category.product.name,
       section_id:
         data.product.product_sub_category.category_subCategory.section_category
@@ -22,13 +25,21 @@ export class CartProductRespone {
       quantity: data.quantity,
       unit: data.product.product_measurement.measurement_unit.name,
       is_recovered: data.product.is_recovered,
+      min_order_quantity: data.product.product_offer
+        ? data.product.product_offer.min_quantity
+        : data.product.min_order_quantity,
+      max_order_quantity: data.product.product_offer
+        ? data.product.product_offer.max_quantity
+        : data.product.max_order_quantity,
 
-      additional_services: data.product.product_additional_services.filter((e) => {
-        if (data.additional_services.includes(e.id)) {
-          e.additional_service.id = e.id;
-          return e.additional_service;
-        }
-      }),
+      additional_services: data.product.product_additional_services.filter(
+        (e) => {
+          if (data.additional_services.includes(e.id)) {
+            e.additional_service.id = e.id;
+            return e.additional_service;
+          }
+        },
+      ),
       image: toUrl(
         data.product.product_sub_category.product.product_images.find(
           (e) => e.is_logo,

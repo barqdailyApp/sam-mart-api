@@ -16,6 +16,7 @@ import { EmployeeModule } from 'src/modules/employee/employee.module';
 import { FileModule } from 'src/modules/file/file.module';
 import { MeasurementUnitModule } from 'src/modules/measurement-unit/measurement-unit.module';
 import { OrderModule } from 'src/modules/order/order.module';
+import { ShipmentController } from 'src/modules/order/shipment.controller';
 import { ProductCategoryPriceModule } from 'src/modules/product-category-price/product-category-price.module';
 import { ProductModule } from 'src/modules/product/product.module';
 import { RegionModule } from 'src/modules/region/region.module';
@@ -64,7 +65,8 @@ export default (app: INestApplication, config: ConfigService) => {
       StaticPageModule,
       SlotModule,
       OrderModule,
-      EmployeeModule
+      EmployeeModule,
+      ShipmentController
     ],
     operationIdFactory,
   });

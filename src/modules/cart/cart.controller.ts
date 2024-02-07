@@ -64,8 +64,17 @@ export class CartController {
 
   @Delete('/delete/:cart_product_id')
   async deleteCartProduct(@Param('cart_product_id') cart_product_id: string) {
+    const cart_product = await this.cartService.deleteCartProduct(
+      cart_product_id,
+    );
     return new ActionResponse(
-      await this.cartService.deleteCartProduct(cart_product_id),
+      new CartProductRespone({
+        id: cart_product.id,
+        additional_services: cart_product.additions,
+        price: cart_product.price,
+        quantity: cart_product.quantity,
+        product: cart_product.product_category_price,
+      }),
     );
   }
 

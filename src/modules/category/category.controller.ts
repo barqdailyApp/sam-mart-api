@@ -19,7 +19,12 @@ import { CategoryService } from './category.service';
 import { I18nResponse } from 'src/core/helpers/i18n.helper';
 import { ActionResponse } from 'src/core/base/responses/action.response';
 import { SubcategoryResponse } from './dto/response/subcategory-response';
-import { ApiBearerAuth, ApiConsumes, ApiHeader, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiConsumes,
+  ApiHeader,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CreateCategoryRequest } from './dto/requests/create-category-request';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadValidator } from 'src/core/validators/upload.validator';
@@ -37,6 +42,7 @@ import { UpdateCategoryRequest } from './dto/requests/update-category-request';
 import { UpdateSectionCategoryRequest } from '../section/dto/requests/update-section-category.request';
 import { Response } from 'express';
 import { ImportCategoryRequest } from './dto/requests/import-category-request';
+import { toUrl } from 'src/core/helpers/file.helper';
 @ApiHeader({
   name: 'Accept-Language',
   required: false,
@@ -48,7 +54,7 @@ export class CategoryController {
   constructor(
     private readonly categoryService: CategoryService,
     private readonly _i18nResponse: I18nResponse,
-  ) { }
+  ) {}
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
@@ -68,7 +74,6 @@ export class CategoryController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
-
   @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('logo'))
   @ApiConsumes('multipart/form-data')
   @Put()
@@ -77,21 +82,16 @@ export class CategoryController {
     @UploadedFile(new UploadValidator().build())
     logo: Express.Multer.File,
   ) {
-
     req.logo = logo;
     return new ActionResponse(await this.categoryService.updateCategory(req));
   }
-
-
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
   @Get()
   async getCategories(@Query() query: PaginatedRequest) {
-    const categories = this._i18nResponse.entity(
-      await this.categoryService.findAll(query),
-    );
+    const categories = await this.categoryService.findAll(query);
     const categoriesRespone = categories.map((e) => new CategoryResponse(e));
 
     if (query.page && query.limit) {
@@ -107,8 +107,11 @@ export class CategoryController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
-  @Get("/export")
-  @Header('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+  @Get('/export')
+  @Header(
+    'Content-type',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  )
   async export(@Res() res: Response) {
     const File = await this.categoryService.exportCategories();
     res.download(`${File}`);
@@ -119,19 +122,48 @@ export class CategoryController {
   @ApiBearerAuth()
   @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
-  @Post("/import")
-  async import(@Body() req: ImportCategoryRequest,
+  @Post('/import')
+  async import(
+    @Body() req: ImportCategoryRequest,
     @UploadedFile(new UploadValidator().build())
-    file: Express.Multer.File
+    file: Express.Multer.File,
   ) {
     req.file = file;
     const jsonData = await this.categoryService.importCategories(req);
     return new ActionResponse(jsonData);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @Get('/:id')
+  async getCategory(@Param('id') id: string) {
+    const category = await this.categoryService.findOne(id);
+    category.logo = toUrl(category.logo);
+
+    return new ActionResponse(category);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @Delete('/:id')
+  async deleteCategory(@Param('id') id: string) {
+    const category = await this.categoryService.softDelete(id);
+
+    return new ActionResponse(category);
+  }
   @Get('/:section_category_id/subcategories')
-  async getCAtegorySubcategory(@Param('section_category_id') id: string,  @Query("all") all?: boolean,) {
-    const subcategories = await this.categoryService.getCategorySubcategory(id,all);
+  async getCAtegorySubcategory(
+    @Param('section_category_id') id: string,
+    @Query('name') name="",
+    @Query('all') all?: boolean,
+  ) {
+    const subcategories = await this.categoryService.getCategorySubcategory(
+      id,
+      all,
+      name
+    );
     const data = this._i18nResponse.entity(subcategories);
     return new ActionResponse(
       data.map(
