@@ -17,6 +17,7 @@ import { ProductAdditionalServiceRequest } from './dto/request/product-additiona
 import { ProductAdditionalService } from 'src/infrastructure/entities/product/product-additional-service.entity';
 import { CategorySubCategory } from 'src/infrastructure/entities/category/category-subcategory.entity';
 import { CreateLinkProductSubcategoryRequest } from './dto/request/create-link-product-subcateory.request';
+import { UpdateLinkProductSubcategoryRequest } from './dto/request/update-link-product-subcateory.request';
 
 @Injectable()
 export class ProductCategoryPriceService {
@@ -95,6 +96,19 @@ export class ProductCategoryPriceService {
       order_by
     });
     return await this.productSubCategory_repo.save(productSubCategoryCreate);
+  }
+
+  async updateLinkProductSubcategory(
+    product_sub_category_id : string,
+    updateLinkProductSubcategoryRequest: UpdateLinkProductSubcategoryRequest,
+  ) {
+    const { order_by, is_active } = updateLinkProductSubcategoryRequest;
+    return await this.productSubCategory_repo.update(
+      {
+        id: product_sub_category_id,
+      },
+      { order_by, is_active },
+    );
   }
 
   async getLinkProductSubcategory(
