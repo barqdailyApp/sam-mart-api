@@ -1,7 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Transform, Type } from "class-transformer";
 import { IsArray, IsBoolean, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator";
-import { Json } from "sequelize/types/utils";
 import { IsEnumArray } from "src/core/validators/is-enum-array.validator";
 import { Unique } from "src/core/validators/unique-constraints.validator";
 import { EmployeeDepartement } from "src/infrastructure/data/enums/employee-department.enum";
