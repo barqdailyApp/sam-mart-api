@@ -15,6 +15,7 @@ import { ProductFavorite } from 'src/infrastructure/entities/product/product-fav
 import { Section } from 'src/infrastructure/entities/section/section.entity';
 import { ProductFavQuery } from './dto/filter/product-fav.query';
 import { Cart } from 'src/infrastructure/entities/cart/cart.entity';
+
 @Injectable()
 export class ProductClientService {
   constructor(
@@ -42,6 +43,9 @@ export class ProductClientService {
     @Inject(REQUEST) private readonly request: Request,
   ) {}
 
+  isArabic(text: string): boolean {
+    return /[\u0600-\u06FF]/.test(text);
+  }
   //* Get All Products For Client
   async getAllProductsForClient(productClientQuery: ProductClientQuery) {
     const {
@@ -122,6 +126,10 @@ export class ProductClientService {
       .leftJoinAndSelect(
         'product_category_prices.product_offer',
         'product_offer',
+        'product_offer.offer_quantity > 0 AND product_offer.start_date <= :current_date AND product_offer.end_date >= :current_date',
+        {
+          current_date: new Date(),
+        },
       )
       .innerJoin(
         'product_category_prices.product_sub_category',
@@ -156,7 +164,7 @@ export class ProductClientService {
         'cart_product_category_price.product_offer',
         'cart_product_offer',
       );
-      
+
       query = query.leftJoinAndSelect(
         'cart_products.cart',
         'cart',
@@ -180,10 +188,23 @@ export class ProductClientService {
 
     // Add search term condition if provided
     if (product_name) {
-      query = query.andWhere(
-        'product.name_ar LIKE :product_name OR product.name_en LIKE :product_name',
-        { product_name: `%${product_name}%` },
-      );
+      // Determine if the product_name is Arabic
+      const isProductNameArabic = this.isArabic(product_name); // Implement or use a library to check if the text is Arabic
+
+      // Build the query conditionally based on the language of product_name
+      if (isProductNameArabic) {
+        query = query.andWhere('product.name_ar LIKE :product_name', {
+          product_name: `%${product_name}%`,
+        });
+      } else {
+        query = query.andWhere('product.name_en LIKE :product_name', {
+          product_name: `%${product_name}%`,
+        });
+      }
+      //  query = query.andWhere(
+      //       'product.name_ar LIKE :product_name OR product.name_en LIKE :product_name',
+      //       { product_name: `%${product_name}%` },
+      //     );
     }
 
     // Conditional where clause based on sub category
@@ -350,12 +371,26 @@ export class ProductClientService {
     }
 
     // Add search term condition if provided
-    if (product_name) {
-      query = query.andWhere(
-        'product.name_ar LIKE :product_name OR product.name_en LIKE :product_name',
-        { product_name: `%${product_name}%` },
-      );
+   // Add search term condition if provided
+   if (product_name) {
+    // Determine if the product_name is Arabic
+    const isProductNameArabic = this.isArabic(product_name); // Implement or use a library to check if the text is Arabic
+
+    // Build the query conditionally based on the language of product_name
+    if (isProductNameArabic) {
+      query = query.andWhere('product.name_ar LIKE :product_name', {
+        product_name: `%${product_name}%`,
+      });
+    } else {
+      query = query.andWhere('product.name_en LIKE :product_name', {
+        product_name: `%${product_name}%`,
+      });
     }
+    //  query = query.andWhere(
+    //       'product.name_ar LIKE :product_name OR product.name_en LIKE :product_name',
+    //       { product_name: `%${product_name}%` },
+    //     );
+  }
 
     // Conditional where clause based on sub category
     if (category_sub_category_id) {
