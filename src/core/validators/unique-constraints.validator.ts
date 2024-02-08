@@ -21,7 +21,7 @@ export class IsUnique implements ValidatorConstraintInterface {
         
        
         
-        const result = await entity.findOne({ where: { [property]: value,[exceptField]: value } });
+        const result = await entity.findOne({ where: { [property]: value} });
 
         if (!result) return true;
         // except field
