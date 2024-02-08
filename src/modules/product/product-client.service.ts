@@ -147,8 +147,21 @@ export class ProductClientService {
       query = query.leftJoinAndSelect(
         'product_category_prices.cart_products',
         'cart_products',
-        'cart_products.cart_id = :cart_id',
-        { cart_id: cartUser.id },
+      );
+      query = query.leftJoinAndSelect(
+        'cart_products.product_category_price',
+        'cart_product_category_price',
+      );
+      query = query.leftJoinAndSelect(
+        'cart_product_category_price.product_offer',
+        'cart_product_offer',
+      );
+      
+      query = query.leftJoinAndSelect(
+        'cart_products.cart',
+        'cart',
+        'cart.user_id = :user_id',
+        { user_id },
       );
 
       query = query.leftJoinAndSelect(
@@ -175,12 +188,12 @@ export class ProductClientService {
 
     // Conditional where clause based on sub category
     if (category_sub_category_id) {
-      // query = query.andWhere(
-      //   'product_sub_category.category_sub_category_id = :category_sub_category_id',
-      //   {
-      //     category_sub_category_id,
-      //   },
-      // );
+      query = query.andWhere(
+        'product_sub_category.category_sub_category_id = :category_sub_category_id',
+        {
+          category_sub_category_id,
+        },
+      );
       query = query.andWhere('product.is_active = true');
       query = query.andWhere('product_sub_categories.is_active = true');
       query = query.andWhere(
@@ -199,9 +212,9 @@ export class ProductClientService {
 
     // Conditional where clause based on section
     if (section_id) {
-      // query = query.andWhere('section_category.section_id = :section_id', {
-      //   section_id,
-      // });
+      query = query.andWhere('section_category.section_id = :section_id', {
+        section_id,
+      });
       query = query.andWhere('product.is_active = true');
       query = query.andWhere('product_sub_categories.is_active = true');
       query = query.andWhere(
@@ -211,7 +224,6 @@ export class ProductClientService {
         },
       );
     }
-   
 
     const [products, total] = await query.getManyAndCount();
     return { products, total };
@@ -347,12 +359,12 @@ export class ProductClientService {
 
     // Conditional where clause based on sub category
     if (category_sub_category_id) {
-      // query = query.andWhere(
-      //   'product_sub_category.category_sub_category_id = :category_sub_category_id',
-      //   {
-      //     category_sub_category_id,
-      //   },
-      // );
+      query = query.andWhere(
+        'product_sub_category.category_sub_category_id = :category_sub_category_id',
+        {
+          category_sub_category_id,
+        },
+      );
       query = query.andWhere('product.is_active = true');
       query = query.andWhere('product_sub_categories.is_active = true');
       query = query.andWhere(
@@ -365,9 +377,9 @@ export class ProductClientService {
 
     // Conditional where clause based on section
     if (section_id) {
-      // query = query.andWhere('section_category.section_id = :section_id', {
-      //   section_id,
-      // });
+      query = query.andWhere('section_category.section_id = :section_id', {
+        section_id,
+      });
       query = query.andWhere('product.is_active = true');
       query = query.andWhere('product_sub_categories.is_active = true');
       query = query.andWhere(
@@ -489,12 +501,12 @@ export class ProductClientService {
     }
     // Conditional where clause based on sub category
     if (category_sub_category_id) {
-      // query = query.andWhere(
-      //   'product_sub_category.category_sub_category_id = :category_sub_category_id',
-      //   {
-      //     category_sub_category_id,
-      //   },
-      // );
+      query = query.andWhere(
+        'product_sub_category.category_sub_category_id = :category_sub_category_id',
+        {
+          category_sub_category_id,
+        },
+      );
       query = query.andWhere('product.is_active = true');
       query = query.andWhere('product_sub_categories.is_active = true');
       query = query.andWhere(
@@ -507,9 +519,9 @@ export class ProductClientService {
 
     // Conditional where clause based on section
     if (section_id) {
-      // query = query.andWhere('section_category.section_id = :section_id', {
-      //   section_id,
-      // });
+      query = query.andWhere('section_category.section_id = :section_id', {
+        section_id,
+      });
       query = query.andWhere('product.is_active = true');
       query = query.andWhere('product_sub_categories.is_active = true');
       query = query.andWhere(
@@ -673,9 +685,9 @@ export class ProductClientService {
     }
     // Conditional where clause based on section
     if (section_id) {
-      // query = query.andWhere('section_category.section_id = :section_id', {
-      //   section_id,
-      // });
+      query = query.andWhere('section_category.section_id = :section_id', {
+        section_id,
+      });
       query = query.andWhere('product.is_active = true');
       query = query.andWhere('product_sub_categories.is_active = true');
       query = query.andWhere(
