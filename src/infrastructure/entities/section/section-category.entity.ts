@@ -5,7 +5,7 @@ import { Category } from "../category/category.entity";
 import { CategorySubCategory } from "../category/category-subcategory.entity";
 
 @Entity()
-@Unique(["section_id", "order_by"])
+// @Unique(["section_id", "order_by"])
 export class SectionCategory extends BaseEntity{
 
 @ManyToOne(() => Section, section => section.section_categories,{onDelete:"CASCADE"})
