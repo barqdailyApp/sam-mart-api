@@ -8,6 +8,7 @@ import { ProductAdditionalServiceResponse } from './product-additional-service.r
 import { DiscountType } from 'src/infrastructure/data/enums/discount-type.enum';
 import { ProductOfferResponse } from './product-offer.response';
 import { CartProduct } from 'src/infrastructure/entities/cart/cart-products';
+import { CartProductResponse } from './cart-product.response';
 
 @Exclude()
 export class ProductCategoryPriceResponse {
@@ -39,11 +40,11 @@ export class ProductCategoryPriceResponse {
     if (value === null || value === undefined) {
       return null;
     }else{
-      return plainToClass(CartProduct, value[0])
+      return plainToClass(CartProductResponse, value[0])
     }
   })
   @Expose()
   cart_products:
-    | CartProduct
+    | CartProductResponse
     | null;
 }
