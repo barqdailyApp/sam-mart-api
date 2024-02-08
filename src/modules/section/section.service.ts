@@ -2,7 +2,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Section } from 'src/infrastructure/entities/section/section.entity';
-import { Any, In, Like, Repository } from 'typeorm';
+import { Any, In, Like, Repository, getConnection } from 'typeorm';
 import { Request } from 'express';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { User } from 'src/infrastructure/entities/user/user.entity';
@@ -25,6 +25,7 @@ import {
 import { validate } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { I18nResponse } from 'src/core/helpers/i18n.helper';
+import { or } from 'sequelize';
 
 @Injectable()
 export class SectionService extends BaseService<Section> {
@@ -78,6 +79,7 @@ export class SectionService extends BaseService<Section> {
       // set avatar path
       section.logo = logo;
     }
+ 
     await this._repo.save(section);
     return section;
   }
@@ -139,6 +141,7 @@ export class SectionService extends BaseService<Section> {
     ) {
       throw new BadRequestException('category already exist');
     }
+    await this.orderItems(req.section_id);
     return await this.section_category_repo.save({
       ...req,
     });
@@ -151,6 +154,8 @@ export class SectionService extends BaseService<Section> {
     if (!section_category) {
       throw new BadRequestException('category not found');
     }
+  
+    this.orderItems(section_category.section_id);
     return await this.section_category_repo.update(req.id, req);
   }
 
@@ -161,6 +166,7 @@ export class SectionService extends BaseService<Section> {
     if (!section_category) {
       throw new BadRequestException('category not found');
     }
+    this.orderItems(section_category.section_id);
     return await this.section_category_repo.delete(id);
   }
 
@@ -228,5 +234,33 @@ export class SectionService extends BaseService<Section> {
     });
 
     await Promise.all(newSections);
+  }
+
+
+  async orderItems(section_id: string) {
+    try {
+      const itemsToUpdate = await this.section_category_repo.find({
+        where: {
+          section_id
+        },
+        order: {
+          order_by: "ASC"
+        }
+      });
+  
+      let order = 1;
+      for (const item of itemsToUpdate) {
+        item.order_by = order++;
+      }
+  
+      await this.section_category_repo.save(itemsToUpdate);
+  
+      console.log("Section categories reordered successfully.");
+    } catch (error) {
+      console.error("Error occurred:", error.message);
+    }
+  
+  
+  
   }
 }

@@ -13,7 +13,7 @@ import { CategorySubCategory } from 'src/infrastructure/entities/category/catego
 import { Category } from 'src/infrastructure/entities/category/category.entity';
 import { Section } from 'src/infrastructure/entities/section/section.entity';
 import { ImageManager } from 'src/integration/sharp/image.manager';
-import { Like, Repository } from 'typeorm';
+import { Like, Repository, getConnection } from 'typeorm';
 import { CreateSectionRequest } from '../section/dto/requests/create-section.request';
 import { StorageManager } from 'src/integration/storage/storage.manager';
 import { CreateCategoryRequest } from './dto/requests/create-category-request';
@@ -46,29 +46,32 @@ export class CategoryService extends BaseService<Category> {
     @Inject(ImageManager) private readonly imageManager: ImageManager,
     @Inject(FileService) private _fileService: FileService,
     @Inject(SubcategoryService)
-    private readonly subCategoryService: SubcategoryService,
-  ) // @Inject(ImportExportService) private readonly importExportService: ImportExportService,
-  {
+    private readonly subCategoryService: SubcategoryService, // @Inject(ImportExportService) private readonly importExportService: ImportExportService,
+  ) {
     super(category_repo);
   }
 
-  async getCategorySubcategory(section_category_id: string, all: boolean,name?:string) {
+  async getCategorySubcategory(
+    section_category_id: string,
+    all: boolean,
+    name?: string,
+  ) {
     await this.subCategoryService.updateMostHitSubCategory({
       section_category_id,
     });
     return await this.category_subcategory_repo.find({
-      where: [{
-        section_category_id: section_category_id,
-        is_active: all == true ? null : true,
-        subcategory:{name_ar:Like(`%${name}%`)}
-      },
-      {
-        section_category_id: section_category_id,
-        is_active: all == true ? null : true,
-        subcategory:{name_en:Like(`%${name}%`)}
-      }
-    
-    ],
+      where: [
+        {
+          section_category_id: section_category_id,
+          is_active: all == true ? null : true,
+          subcategory: { name_ar: Like(`%${name}%`) },
+        },
+        {
+          section_category_id: section_category_id,
+          is_active: all == true ? null : true,
+          subcategory: { name_en: Like(`%${name}%`) },
+        },
+      ],
       relations: { subcategory: true },
       order: { order_by: 'ASC' },
     });
@@ -109,7 +112,7 @@ export class CategoryService extends BaseService<Category> {
       // set avatar path
       category.logo = logo;
     }
-  const result=  await this._repo.update(category.id, {
+    const result = await this._repo.update(category.id, {
       ...plainToInstance(Category, req),
       logo: category.logo,
     });
@@ -126,29 +129,31 @@ export class CategoryService extends BaseService<Category> {
 
     if (category != null)
       throw new BadRequestException('subcategory already exist');
-
+    this.orderItems(req.section_category_id);
     return await this.category_subcategory_repo.save({
       ...req,
     });
   }
 
   async updateCategorySubcategory(req: UpdateSectionCategoryRequest) {
-    const subcategory= await this.category_subcategory_repo.findOne({
+    const subcategory = await this.category_subcategory_repo.findOne({
       where: {
-        id: req.id
-      }
-    })
-    if(!subcategory) throw new BadRequestException('subcategory not found')
+        id: req.id,
+      },
+    });
+    if (!subcategory) throw new BadRequestException('subcategory not found');
+    this.orderItems(subcategory.section_category_id);
     return await this.category_subcategory_repo.update(req.id, req);
   }
 
   async deleteCategorySubcategory(id: string) {
-    const subcategory= await this.category_subcategory_repo.findOne({
+    const subcategory = await this.category_subcategory_repo.findOne({
       where: {
-        id: id
-      }
-    })
-    if(!subcategory) throw new BadRequestException('subcategory not found')
+        id: id,
+      },
+    });
+    if (!subcategory) throw new BadRequestException('subcategory not found');
+    this.orderItems(subcategory.section_category_id);
     return await this.category_subcategory_repo.delete(id);
   }
 
@@ -225,5 +230,29 @@ export class CategoryService extends BaseService<Category> {
     });
 
     return await this._repo.save(newCategories);
+  }
+
+  async orderItems(section_category_id: string) {
+    try {
+      const itemsToUpdate = await this.category_subcategory_repo.find({
+        where: {
+          section_category_id,
+        },
+        order: {
+          order_by: 'ASC',
+        },
+      });
+
+      let order = 1;
+      for (const item of itemsToUpdate) {
+        item.order_by = order++;
+      }
+
+      await this.category_subcategory_repo.save(itemsToUpdate);
+
+      console.log('Section categories reordered successfully.');
+    } catch (error) {
+      console.error('Error occurred:', error.message);
+    }
   }
 }
