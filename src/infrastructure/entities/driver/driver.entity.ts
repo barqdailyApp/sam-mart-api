@@ -18,6 +18,7 @@ import { Shipment } from '../order/shipment.entity';
 import { DriverStatus } from 'src/infrastructure/data/enums/driver-status.enum';
 import { Warehouse } from '../warehouse/warehouse.entity';
 import { ShipmentChat } from '../order/shipment-chat.entity';
+import { ShipmentFeedback } from '../order/shipment-feedback.entity';
 
 @Entity()
 export class Driver extends AuditableEntity {
@@ -67,7 +68,7 @@ export class Driver extends AuditableEntity {
   @Column({
     type: 'enum',
     default: DriverStatus.PENDING,
-    enum: DriverStatus
+    enum: DriverStatus,
   })
   status: DriverStatus;
 
@@ -111,6 +112,9 @@ export class Driver extends AuditableEntity {
 
   @ManyToOne(() => Shipment, (Shipment) => Shipment.driver)
   shipments: Shipment[];
+
+  @OneToMany(() => ShipmentFeedback, (orderFeedback) => orderFeedback.driver)
+  order_feedbacks: ShipmentFeedback[];
   constructor(partial?: Partial<Driver>) {
     super();
     Object.assign(this, partial);

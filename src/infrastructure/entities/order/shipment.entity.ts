@@ -6,9 +6,12 @@ import { Warehouse } from '../warehouse/warehouse.entity';
 import { ShipmentProduct } from './shipment-product.entity';
 import { ShipmentStatusEnum } from 'src/infrastructure/data/enums/shipment_status.enum';
 import { ShipmentChat } from './shipment-chat.entity';
+import { ShipmentFeedback } from './shipment-feedback.entity';
 
 @Entity()
 export class Shipment extends AuditableEntity {
+  @OneToOne(() => ShipmentFeedback, (orderFeedback) => orderFeedback.shipment)
+  order_feedback: ShipmentFeedback;
   @ManyToOne(() => Driver, (driver) => driver.shipments)
   driver: Driver;
   @Column({ nullable: true })

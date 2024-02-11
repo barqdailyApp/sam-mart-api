@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Inject,
   Injectable,
   NotFoundException,
@@ -25,6 +26,8 @@ import { GetCommentQueryRequest } from '../support-ticket/dto/request/get-commen
 import { ShipmentChatGateway } from 'src/integration/gateways/shipment-chat-gateway';
 import { plainToInstance } from 'class-transformer';
 import { UserResponse } from '../user/dto/responses/user.response';
+import { ShipmentFeedback } from 'src/infrastructure/entities/order/shipment-feedback.entity';
+import { AddShipmentFeedBackRequest } from './dto/request/add-shipment-feedback.request';
 @Injectable()
 export class ShipmentService extends BaseService<Shipment> {
   constructor(
@@ -40,7 +43,8 @@ export class ShipmentService extends BaseService<Shipment> {
     private shipmentChatAttachmentRepository: Repository<ShipmentChatAttachment>,
 
     private readonly shipmentChatGateway: ShipmentChatGateway,
-
+    @InjectRepository(ShipmentFeedback)
+    private orderFeedBackRepository: Repository<ShipmentFeedback>,
     @Inject(REQUEST) private readonly request: Request,
     @Inject(FileService) private _fileService: FileService,
   ) {
@@ -250,7 +254,48 @@ export class ShipmentService extends BaseService<Shipment> {
       take: limit,
     });
   }
+  async addShipmentFeedBack(
+    addOrderFeedBackRequest: AddShipmentFeedBackRequest,
+  ) {
+    const { driver_id, delivery_time, packaging, communication, shipment_id } =
+      addOrderFeedBackRequest;
+    const user = this.currentUser;
 
+    const driver = await this.driverRepository.findOne({
+      where: { id: driver_id },
+    });
+    if (!driver) {
+      throw new BadRequestException('Driver not found');
+    }
+
+    const shipment = await this.shipmentRepository.findOne({
+      where: { id: shipment_id },
+    });
+    if (!shipment) {
+      throw new BadRequestException('Shipment not found');
+    }
+
+    if (shipment.status !== ShipmentStatusEnum.DELIVERED) {
+      throw new BadRequestException('Shipment is not delivered');
+    }
+
+    const shipmentFeedBack = await this.orderFeedBackRepository.findOne({
+      where: { driver_id, user_id: user.id, shipment_id },
+    });
+    if (shipmentFeedBack) {
+      throw new BadRequestException('Feedback already added');
+    }
+
+    const shipmentFeedBackCreated = this.orderFeedBackRepository.create({
+      driver_id,
+      user_id: user.id,
+      shipment_id,
+      delivery_time,
+      packaging,
+      communication,
+    });
+    return this.orderFeedBackRepository.save(shipmentFeedBackCreated);
+  }
   get currentUser() {
     return this.request.user;
   }

@@ -18,6 +18,7 @@ import { TicketComment } from '../support-ticket/ticket-comment.entity';
 import { Order } from '../order/order.entity';
 import { ProductFavorite } from '../product/product-favorite.entity';
 import { ShipmentChat } from '../order/shipment-chat.entity';
+import { ShipmentFeedback } from '../order/shipment-feedback.entity';
 
 @Entity()
 export class User extends AuditableEntity {
@@ -69,13 +70,15 @@ export class User extends AuditableEntity {
   @OneToMany(() => Order, (order) => order.user)
   orders: Order[];
 
-  @OneToMany(() => ShipmentChat, (shipmentChat) => shipmentChat.user, { cascade: true })
+  @OneToMany(() => ShipmentChat, (shipmentChat) => shipmentChat.user, {
+    cascade: true,
+  })
   shipment_chats: ShipmentChat[];
 
-  @OneToMany(
-    () => ProductFavorite,
-    (productFavorite) => productFavorite.user,
-  )
+  @OneToMany(() => ShipmentFeedback, (orderFeedback) => orderFeedback.user)
+  order_feedbacks: ShipmentFeedback[];
+
+  @OneToMany(() => ProductFavorite, (productFavorite) => productFavorite.user)
   products_favorite: ProductFavorite[];
   constructor(partial: Partial<User>) {
     super();

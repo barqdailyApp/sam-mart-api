@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { BaseUserService } from 'src/core/base/service/user-service.base';
 import { Order } from 'src/infrastructure/entities/order/order.entity';
 import { Request } from 'express';
@@ -14,10 +14,14 @@ import { DriverShipmentsQuery } from './filter/driver-shipment.query';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { ShipmentStatusEnum } from 'src/infrastructure/data/enums/shipment_status.enum';
 import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
+import { AddShipmentFeedBackRequest } from './dto/request/add-shipment-feedback.request';
+import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
+import { ShipmentFeedback } from 'src/infrastructure/entities/order/shipment-feedback.entity';
 @Injectable()
 export class OrderService extends BaseUserService<Order> {
   constructor(
     @InjectRepository(Order) private orderRepository: Repository<Order>,
+
     @InjectRepository(Shipment)
     private shipmentRepository: Repository<Shipment>,
 
