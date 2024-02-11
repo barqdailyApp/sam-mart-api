@@ -45,8 +45,10 @@ export class Shipment extends AuditableEntity {
   )
   shipment_products: ShipmentProduct[];
 
-  @OneToMany(() => ShipmentChat, shipmentChat => shipmentChat.shipment, { cascade: true })
-  shipment_chats: ShipmentChat[]
+  @OneToMany(() => ShipmentChat, (shipmentChat) => shipmentChat.shipment, {
+    cascade: true,
+  })
+  shipment_chats: ShipmentChat[];
 
   constructor(partial?: Partial<Shipment>) {
     super();

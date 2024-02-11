@@ -1,4 +1,9 @@
-import { Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { BaseUserService } from 'src/core/base/service/user-service.base';
 import { Order } from 'src/infrastructure/entities/order/order.entity';
 import { Request } from 'express';
@@ -47,6 +52,73 @@ export class ShipmentService extends BaseService<Shipment> {
       },
     });
   }
+  async deliverShipment(id: string) {
+    const driver = await this.getDriver();
+    if (!driver) {
+      throw new NotFoundException('Driver not found');
+    }
+    const shipment = await this.shipmentRepository.findOne({
+      where: {
+        id: id,
+        warehouse_id: driver.warehouse_id,
+      },
+    });
+    if (!shipment || shipment.status !== ShipmentStatusEnum.PICKED_UP) {
+      throw new NotFoundException('Shipment not found');
+    }
+
+    shipment.order_delivered_at = new Date();
+    shipment.status = ShipmentStatusEnum.DELIVERED;
+
+    await this.shipmentRepository.save(shipment);
+
+    return shipment;
+  }
+  async pickupShipment(id: string) {
+    const driver = await this.getDriver();
+    if (!driver) {
+      throw new NotFoundException('Driver not found');
+    }
+    const shipment = await this.shipmentRepository.findOne({
+      where: {
+        id: id,
+        warehouse_id: driver.warehouse_id,
+      },
+    });
+    if (!shipment || shipment.status !== ShipmentStatusEnum.PROCESSING) {
+      throw new NotFoundException('Shipment not found');
+    }
+
+    shipment.order_shipped_at = new Date();
+    shipment.status = ShipmentStatusEnum.PICKED_UP;
+
+    await this.shipmentRepository.save(shipment);
+
+    return shipment;
+  }
+
+  async prepareShipment(id: string) {
+    const driver = await this.getDriver();
+    if (!driver) {
+      throw new NotFoundException('Driver not found');
+    }
+    const shipment = await this.shipmentRepository.findOne({
+      where: {
+        id: id,
+        warehouse_id: driver.warehouse_id,
+      },
+    });
+    if (!shipment || shipment.status !== ShipmentStatusEnum.CONFIRMED) {
+      throw new NotFoundException('Shipment not found');
+    }
+
+    shipment.order_on_processed_at = new Date();
+    shipment.status = ShipmentStatusEnum.PROCESSING;
+
+    await this.shipmentRepository.save(shipment);
+
+    return shipment;
+  }
   async acceptShipment(id: string) {
     const driver = await this.getDriver();
     if (!driver) {
@@ -79,10 +151,13 @@ export class ShipmentService extends BaseService<Shipment> {
     return shipment;
   }
 
-  async addChatMessage(shipment_id: string, req: AddShipmentChatMessageRequest) {
+  async addChatMessage(
+    shipment_id: string,
+    req: AddShipmentChatMessageRequest,
+  ) {
     const shipment = await this.shipmentRepository.findOne({
       where: { id: shipment_id },
-      relations: ['order', 'driver']
+      relations: ['order', 'driver'],
     });
 
     if (!shipment) throw new NotFoundException('Shipment not found');
@@ -92,7 +167,9 @@ export class ShipmentService extends BaseService<Shipment> {
       shipment.order.user_id !== this.currentUser.id &&
       !this.currentUser.roles.includes(Role.ADMIN)
     ) {
-      throw new UnauthorizedException('You are not allowed to add chat message to this shipment');
+      throw new UnauthorizedException(
+        'You are not allowed to add chat message to this shipment',
+      );
     }
 
     let attachedFile = null;
@@ -106,38 +183,43 @@ export class ShipmentService extends BaseService<Shipment> {
         file_url: tempImage,
         file_name: req.file.originalname,
         file_type: req.file.mimetype,
-      })
-      attachedFile = await this.shipmentChatAttachmentRepository.save(createAttachedFile);
+      });
+      attachedFile = await this.shipmentChatAttachmentRepository.save(
+        createAttachedFile,
+      );
     }
 
     const newMessage = this.shipmentChatRepository.create({
       message: req.message,
       user_id: this.currentUser.id,
       shipment_id: shipment.id,
-      attachment: attachedFile
+      attachment: attachedFile,
     });
     const savedMessage = await this.shipmentChatRepository.save(newMessage);
 
     const userInfo = plainToInstance(UserResponse, this.currentUser, {
-      excludeExtraneousValues: true
-    })
+      excludeExtraneousValues: true,
+    });
 
     this.shipmentChatGateway.handleSendMessage({
       shipment,
       shipmentChat: savedMessage,
       user: userInfo,
-      action: 'ADD_MESSAGE'
+      action: 'ADD_MESSAGE',
     });
 
     return savedMessage;
   }
 
-  async getMessagesByShipmentId(shipment_id: string, query: GetCommentQueryRequest) {
+  async getMessagesByShipmentId(
+    shipment_id: string,
+    query: GetCommentQueryRequest,
+  ) {
     const { limit = 10, offset = 0 } = query;
 
     const shipment = await this.shipmentRepository.findOne({
       where: { id: shipment_id },
-      relations: ['order', 'driver']
+      relations: ['order', 'driver'],
     });
     if (!shipment) throw new NotFoundException('Shipment not found');
 
@@ -146,7 +228,9 @@ export class ShipmentService extends BaseService<Shipment> {
       shipment.order.user_id !== this.currentUser.id &&
       !this.currentUser.roles.includes(Role.ADMIN)
     ) {
-      throw new UnauthorizedException('You are not allowed to view this shipment chat');
+      throw new UnauthorizedException(
+        'You are not allowed to view this shipment chat',
+      );
     }
 
     return await this.shipmentChatRepository.find({
@@ -161,5 +245,4 @@ export class ShipmentService extends BaseService<Shipment> {
   get currentUser() {
     return this.request.user;
   }
-
 }
