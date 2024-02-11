@@ -43,7 +43,8 @@ export class ProductClientService {
     @Inject(REQUEST) private readonly request: Request,
   ) {}
 
-  isArabic(text: string): boolean {
+
+   isArabic(text: string): boolean {
     return /[\u0600-\u06FF]/.test(text);
   }
   //* Get All Products For Client
@@ -201,10 +202,6 @@ export class ProductClientService {
           product_name: `%${product_name}%`,
         });
       }
-      //  query = query.andWhere(
-      //       'product.name_ar LIKE :product_name OR product.name_en LIKE :product_name',
-      //       { product_name: `%${product_name}%` },
-      //     );
     }
 
     // Conditional where clause based on sub category
@@ -326,9 +323,13 @@ export class ProductClientService {
       )
       .innerJoinAndSelect('product_section_category.section', 'product_section')
 
-      .innerJoinAndSelect(
+      .leftJoinAndSelect(
         'product_category_prices.product_offer',
         'product_offer',
+        'product_offer.offer_quantity > 0 AND product_offer.start_date <= :current_date AND product_offer.end_date >= :current_date',
+        {
+          current_date: new Date(),
+        },
       )
       .innerJoin(
         'product_category_prices.product_sub_category',
@@ -344,25 +345,39 @@ export class ProductClientService {
       .skip(skip)
       .take(limit);
 
-    if (user_id) {
-      const cartUser = await this.cart_repo.findOne({ where: { user_id } });
-      if (!cartUser) {
-        throw new NotFoundException('user not found');
+      if (user_id) {
+        const cartUser = await this.cart_repo.findOne({ where: { user_id } });
+        if (!cartUser) {
+          throw new NotFoundException('user not found');
+        }
+  
+        query = query.leftJoinAndSelect(
+          'product_category_prices.cart_products',
+          'cart_products',
+        );
+        query = query.leftJoinAndSelect(
+          'cart_products.product_category_price',
+          'cart_product_category_price',
+        );
+        query = query.leftJoinAndSelect(
+          'cart_product_category_price.product_offer',
+          'cart_product_offer',
+        );
+  
+        query = query.leftJoinAndSelect(
+          'cart_products.cart',
+          'cart',
+          'cart.user_id = :user_id',
+          { user_id },
+        );
+  
+        query = query.leftJoinAndSelect(
+          'product.products_favorite',
+          'products_favorite',
+          'products_favorite.user_id = :user_id',
+          { user_id },
+        );
       }
-
-      query = query.leftJoinAndSelect(
-        'product_category_prices.cart_products',
-        'cart_products',
-        'cart_products.cart_id = :cart_id',
-        { cart_id: cartUser.id },
-      );
-      query = query.leftJoinAndSelect(
-        'product.products_favorite',
-        'products_favorite',
-        'products_favorite.user_id = :user_id',
-        { user_id },
-      );
-    }
     // Modify condition if warehouse is defined
     if (warehouse) {
       query = query.andWhere('warehousesProduct.warehouse_id = :warehouseId', {
@@ -386,10 +401,7 @@ export class ProductClientService {
         product_name: `%${product_name}%`,
       });
     }
-    //  query = query.andWhere(
-    //       'product.name_ar LIKE :product_name OR product.name_en LIKE :product_name',
-    //       { product_name: `%${product_name}%` },
-    //     );
+   
   }
 
     // Conditional where clause based on sub category
@@ -488,6 +500,10 @@ export class ProductClientService {
       .leftJoinAndSelect(
         'product_category_prices.product_offer',
         'product_offer',
+        'product_offer.offer_quantity > 0 AND product_offer.start_date <= :current_date AND product_offer.end_date >= :current_date',
+        {
+          current_date: new Date(),
+        },
       )
       .leftJoinAndSelect(
         'product_category_prices.product_additional_services',
@@ -524,9 +540,23 @@ export class ProductClientService {
       query = query.leftJoinAndSelect(
         'product_category_prices.cart_products',
         'cart_products',
-        'cart_products.cart_id = :cart_id',
-        { cart_id: cartUser.id },
       );
+      query = query.leftJoinAndSelect(
+        'cart_products.product_category_price',
+        'cart_product_category_price',
+      );
+      query = query.leftJoinAndSelect(
+        'cart_product_category_price.product_offer',
+        'cart_product_offer',
+      );
+
+      query = query.leftJoinAndSelect(
+        'cart_products.cart',
+        'cart',
+        'cart.user_id = :user_id',
+        { user_id },
+      );
+
       query = query.leftJoinAndSelect(
         'product.products_favorite',
         'products_favorite',
@@ -677,6 +707,10 @@ export class ProductClientService {
       .leftJoinAndSelect(
         'product_category_prices.product_offer',
         'product_offer',
+        'product_offer.offer_quantity > 0 AND product_offer.start_date <= :current_date AND product_offer.end_date >= :current_date',
+        {
+          current_date: new Date(),
+        },
       )
       .innerJoin(
         'product_category_prices.product_sub_category',
@@ -708,9 +742,23 @@ export class ProductClientService {
       query = query.leftJoinAndSelect(
         'product_category_prices.cart_products',
         'cart_products',
-        'cart_products.cart_id = :cart_id',
-        { cart_id: cartUser.id },
       );
+      query = query.leftJoinAndSelect(
+        'cart_products.product_category_price',
+        'cart_product_category_price',
+      );
+      query = query.leftJoinAndSelect(
+        'cart_product_category_price.product_offer',
+        'cart_product_offer',
+      );
+
+      query = query.leftJoinAndSelect(
+        'cart_products.cart',
+        'cart',
+        'cart.user_id = :user_id',
+        { user_id },
+      );
+
       query = query.leftJoinAndSelect(
         'product.products_favorite',
         'products_favorite',
