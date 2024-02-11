@@ -9,9 +9,12 @@ const getFileExtension = (file: Partial<Express.Multer.File>): string => {
 const getFileName = (file: Partial<Express.Multer.File>): string => {
   return file.originalname.split('.').shift() + '-' + new Date().getTime();
 };
+function isArabic(text: string): boolean {
+  return /[\u0600-\u06FF]/.test(text);
+}
 
 function toUrl(path: string, direct = false): string {
- if (path === null || path === undefined) return null;
+  if (path === null || path === undefined) return null;
   if (path && path.startsWith('http')) return path;
   const host = readEnv('APP_HOST');
   if (direct || path.includes('assets')) return `${host}/${path}`;
