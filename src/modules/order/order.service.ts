@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { BaseUserService } from 'src/core/base/service/user-service.base';
 import { Order } from 'src/infrastructure/entities/order/order.entity';
 import { Request } from 'express';
@@ -14,10 +14,14 @@ import { DriverShipmentsQuery } from './filter/driver-shipment.query';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { ShipmentStatusEnum } from 'src/infrastructure/data/enums/shipment_status.enum';
 import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
+import { AddShipmentFeedBackRequest } from './dto/request/add-shipment-feedback.request';
+import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
+import { ShipmentFeedback } from 'src/infrastructure/entities/order/shipment-feedback.entity';
 @Injectable()
 export class OrderService extends BaseUserService<Order> {
   constructor(
     @InjectRepository(Order) private orderRepository: Repository<Order>,
+
     @InjectRepository(Shipment)
     private shipmentRepository: Repository<Shipment>,
 
@@ -170,7 +174,7 @@ export class OrderService extends BaseUserService<Order> {
     const user = this.currentUser;
 
     // Destructure the query parameters for easier access.
-    const { limit, page, status,order_date } = driverShipmentsQuery;
+    const { limit, page, status, order_date } = driverShipmentsQuery;
     const skip = (page - 1) * limit; // Calculate the offset for pagination.
 
     // Start building the query with necessary joins to fetch related entities.
@@ -207,12 +211,11 @@ export class OrderService extends BaseUserService<Order> {
       delivery_type: DeliveryType.FAST,
     });
     // Filter orders that are being delivered today.
-    if(order_date){
+    if (order_date) {
       query = query.andWhere('order.delivery_day = :delivery_day', {
         delivery_day: order_date,
       });
     }
- 
 
     // Apply filters based on the shipment status.
     if (status) {

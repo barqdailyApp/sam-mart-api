@@ -40,6 +40,7 @@ import { ProductFavorite } from '../entities/product/product-favorite.entity';
 import { Employee } from '../entities/employee/employee.entity';
 import { ShipmentChat } from '../entities/order/shipment-chat.entity';
 import { ShipmentChatAttachment } from '../entities/order/shipment-chat-attachment.entity';
+import { ShipmentFeedback } from '../entities/order/shipment-feedback.entity';
 
 export const DB_ENTITIES = [
   User,
@@ -83,7 +84,8 @@ export const DB_ENTITIES = [
   ProductFavorite,
   Employee,
   ShipmentChat,
-  ShipmentChatAttachment
+  ShipmentChatAttachment,
+  ShipmentFeedback,
 ];
 
 export const DB_VIEWS = [];
