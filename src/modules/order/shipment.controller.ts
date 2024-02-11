@@ -39,9 +39,24 @@ import { GetCommentQueryRequest } from '../support-ticket/dto/request/get-commen
 export class ShipmentController {
   constructor(private readonly shipmentService: ShipmentService) { }
 
-  @Post('accept/:id')
+  @Post('driver/accept/:id')
   async acceptShipment(@Param('id') id: string) {
     return new ActionResponse(await this.shipmentService.acceptShipment(id));
+  }
+
+  @Post('driver/process/:id')
+  async processShipment(@Param('id') id: string) {
+    return new ActionResponse(await this.shipmentService.prepareShipment(id));
+  }
+
+  @Post('driver/pick-up/:id')
+  async pickUpShipment(@Param('id') id: string) {
+    return new ActionResponse(await this.shipmentService.pickupShipment(id));
+  }
+
+  @Post('driver/deliver/:id')
+  async processhipment(@Param('id') id: string) {
+    return new ActionResponse(await this.shipmentService.deliverShipment(id));
   }
 
 
