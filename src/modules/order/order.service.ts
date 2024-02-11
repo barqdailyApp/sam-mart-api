@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { BaseUserService } from 'src/core/base/service/user-service.base';
 import { Order } from 'src/infrastructure/entities/order/order.entity';
 import { Request } from 'express';
@@ -170,7 +170,7 @@ export class OrderService extends BaseUserService<Order> {
     const user = this.currentUser;
 
     // Destructure the query parameters for easier access.
-    const { limit, page, status,order_date } = driverShipmentsQuery;
+    const { limit, page, status, order_date } = driverShipmentsQuery;
     const skip = (page - 1) * limit; // Calculate the offset for pagination.
 
     // Start building the query with necessary joins to fetch related entities.
@@ -207,12 +207,11 @@ export class OrderService extends BaseUserService<Order> {
       delivery_type: DeliveryType.FAST,
     });
     // Filter orders that are being delivered today.
-    if(order_date){
+    if (order_date) {
       query = query.andWhere('order.delivery_day = :delivery_day', {
         delivery_day: order_date,
       });
     }
- 
 
     // Apply filters based on the shipment status.
     if (status) {
@@ -344,5 +343,14 @@ export class OrderService extends BaseUserService<Order> {
     query = query.where('shipments.id = :id', { id: shipment_id });
 
     return query.getOne();
+  }
+
+  async sendOrderToDrivers(id: string) {
+    const order = await this.orderRepository.findOne({ where: { id } });
+    if(!order)
+    throw new NotFoundException("order not found");
+    order.delivery_type=DeliveryType.FAST;
+    return await this.orderRepository.save(order);
+
   }
 }
