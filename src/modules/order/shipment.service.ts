@@ -33,6 +33,8 @@ export class ShipmentService extends BaseService<Shipment> {
   constructor(
     @InjectRepository(Driver)
     private driverRepository: Repository<Driver>,
+    @InjectRepository(Order)
+    private orderRepository: Repository<Order>,
     @InjectRepository(Shipment)
     private shipmentRepository: Repository<Shipment>,
     @InjectRepository(ShipmentChat)
@@ -56,6 +58,7 @@ export class ShipmentService extends BaseService<Shipment> {
       },
     });
   }
+
   async deliverShipment(id: string) {
     const driver = await this.getDriver();
     if (!driver) {
@@ -75,7 +78,13 @@ export class ShipmentService extends BaseService<Shipment> {
     shipment.status = ShipmentStatusEnum.DELIVERED;
 
     await this.shipmentRepository.save(shipment);
-
+    const order = await this.orderRepository.findOne({
+      where: {
+        id: shipment.order_id,
+      },
+    });
+    order.is_paid = true;
+    await this.orderRepository.save(order);
     return shipment;
   }
   async pickupShipment(id: string) {

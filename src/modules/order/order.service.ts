@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { BaseUserService } from 'src/core/base/service/user-service.base';
 import { Order } from 'src/infrastructure/entities/order/order.entity';
 import { Request } from 'express';
@@ -347,5 +347,14 @@ export class OrderService extends BaseUserService<Order> {
     query = query.where('shipments.id = :id', { id: shipment_id });
 
     return query.getOne();
+  }
+
+  async sendOrderToDrivers(id: string) {
+    const order = await this.orderRepository.findOne({ where: { id } });
+    if(!order)
+    throw new NotFoundException("order not found");
+    order.delivery_type=DeliveryType.FAST;
+    return await this.orderRepository.save(order);
+
   }
 }
