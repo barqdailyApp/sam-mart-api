@@ -323,7 +323,7 @@ export class ProductClientService {
       )
       .innerJoinAndSelect('product_section_category.section', 'product_section')
 
-      .leftJoinAndSelect(
+      .innerJoinAndSelect(
         'product_category_prices.product_offer',
         'product_offer',
         'product_offer.offer_quantity > 0 AND product_offer.start_date <= :current_date AND product_offer.end_date >= :current_date',
