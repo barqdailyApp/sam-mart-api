@@ -50,7 +50,10 @@ export class OrderService extends BaseUserService<Order> {
       .leftJoinAndSelect('order.address', 'address')
       .leftJoinAndSelect('order.shipments', 'shipments')
 
+
       .leftJoinAndSelect('shipments.driver', 'driver')
+      .leftJoinAndSelect('driver.user', 'user')
+
       .leftJoinAndSelect('shipments.warehouse', 'warehouse_shipment')
       .leftJoinAndSelect('shipments.shipment_products', 'shipment_products')
 
@@ -97,6 +100,8 @@ export class OrderService extends BaseUserService<Order> {
       .leftJoinAndSelect('order.shipments', 'shipments')
 
       .leftJoinAndSelect('shipments.driver', 'driver')
+      .leftJoinAndSelect('driver.user', 'user')
+
       .leftJoinAndSelect('shipments.warehouse', 'warehouse_shipment')
       .leftJoinAndSelect('shipments.shipment_products', 'shipment_products')
 
@@ -138,6 +143,8 @@ export class OrderService extends BaseUserService<Order> {
       .leftJoinAndSelect('order.shipments', 'shipments')
 
       .leftJoinAndSelect('shipments.driver', 'driver')
+      .leftJoinAndSelect('driver.user', 'user')
+
       .leftJoinAndSelect('shipments.warehouse', 'warehouse_shipment')
       .leftJoinAndSelect('shipments.shipment_products', 'shipment_products')
 
