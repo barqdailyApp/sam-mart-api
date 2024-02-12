@@ -63,7 +63,7 @@ export class CartController {
     const cart_product = await this.cartService.addToCart(req);
     if (!cart_product) throw new BadRequestException();
     const result = this._i18nResponse.entity(
-      await this.cartService.getCartProducts(cart_product.id),
+      await this.cartService.getSingleCartProduct(cart_product.id),
     );
 
     const response = new CartProductRespone({
