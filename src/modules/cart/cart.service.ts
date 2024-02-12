@@ -53,6 +53,25 @@ export class CartService extends BaseService<CartProduct> {
       },
     });
   }
+  async getSingleCartProduct(id:string) {
+    return await this.cartProductRepository.findOne({
+      where: { id},
+      relations: {
+        product_category_price: {
+          product_additional_services: { additional_service: true },
+
+          product_measurement: { measurement_unit: true },
+
+          product_offer: true,
+          product_sub_category: {
+            product: { product_images: true },
+            category_subCategory: { section_category: true },
+          },
+        },
+      },
+    });
+    
+  }
 
   async addToCart(req: AddToCartRequest) {
     const cart = await this.getCart();

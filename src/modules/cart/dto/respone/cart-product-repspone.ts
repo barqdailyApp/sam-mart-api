@@ -24,6 +24,7 @@ export class CartProductRespone {
       price: data.price,
       quantity: data.quantity,
       unit: data.product.product_measurement.measurement_unit.name,
+      unit_id:data.product.product_measurement.measurement_unit.id,
       is_recovered: data.product.is_recovered,
       min_order_quantity: data.product.product_offer
         ? data.product.product_offer.min_quantity

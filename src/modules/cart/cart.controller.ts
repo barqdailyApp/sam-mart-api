@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -59,7 +60,21 @@ export class CartController {
 
   @Post('/add')
   async createCart(@Body() req: AddToCartRequest) {
-    return new ActionResponse(await this.cartService.addToCart(req));
+    const cart_product = await this.cartService.addToCart(req);
+    if (!cart_product) throw new BadRequestException();
+    const result = this._i18nResponse.entity(
+      await this.cartService.getCartProducts(cart_product.id),
+    );
+
+    const response = new CartProductRespone({
+      id: result.id,
+      additional_services: result.additions,
+      price: result.price,
+      quantity: result.quantity,
+      product: result.product_category_price,
+    });
+
+    return new ActionResponse(response);
   }
 
   @Delete('/delete/:cart_product_id')
@@ -68,13 +83,15 @@ export class CartController {
       cart_product_id,
     );
     return new ActionResponse(
-     this._i18nResponse.entity(  new CartProductRespone({
-        id: cart_product.id,
-        additional_services: cart_product.additions,
-        price: cart_product.price,
-        quantity: cart_product.quantity,
-        product: cart_product.product_category_price,
-      })),
+      this._i18nResponse.entity(
+        new CartProductRespone({
+          id: cart_product.id,
+          additional_services: cart_product.additions,
+          price: cart_product.price,
+          quantity: cart_product.quantity,
+          product: cart_product.product_category_price,
+        }),
+      ),
     );
   }
 
