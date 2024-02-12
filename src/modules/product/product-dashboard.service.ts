@@ -680,15 +680,15 @@ export class ProductDashboardService {
     if (!product) {
       throw new NotFoundException('message_product_not_found');
     }
-    const measurement = await this.SingleProductMeasurement(
-      product_id,
-      product_measurement_id,
-    );
-    if (measurement.is_main_unit == true) {
-      throw new NotFoundException(
-        'There must be at least one main measurement',
-      );
-    }
+    // const measurement = await this.SingleProductMeasurement(
+    //   product_id,
+    //   product_measurement_id,
+    // );
+    // if (measurement.is_main_unit == true) {
+    //   throw new NotFoundException(
+    //     'There must be at least one main measurement',
+    //   );
+    // }
     return await this.productMeasurementRepository.delete({
       id: product_measurement_id,
     });
