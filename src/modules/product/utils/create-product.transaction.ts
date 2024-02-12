@@ -125,6 +125,7 @@ export class CreateProductTransaction extends BaseTransaction<
           conversion_factor: primaryUnit.conversion_factor,
           measurement_unit_id: primaryUnit.measurement_unit_id,
           product_id: saveProduct.id,
+          is_main_unit:primaryUnit.is_main_unit
         },
       );
       const primaryProductMeasurement = await context.save(
