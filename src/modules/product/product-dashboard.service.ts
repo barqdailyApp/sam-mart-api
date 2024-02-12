@@ -244,29 +244,40 @@ export class ProductDashboardService {
 
     // Prepare the update data
     const updateData: any = { conversion_factor, is_main_unit };
+
     // If the unit is marked as the main unit, ensure the conversion factor is 1
+
     if (
-      conversion_factor !== undefined &&
-      conversion_factor !== null &&
-      conversion_factor !== 1
-    ) {
-      throw new BadRequestException(
-        'The conversion factor must be 1 for the main unit',
-      );
-    }
+        conversion_factor !== undefined &&
+        conversion_factor !== null &&
+        conversion_factor !== 1 && is_main_unit == true
+      ) {
+        throw new BadRequestException(
+          'The conversion factor must be 1 for the main unit',
+        );
+      }
+  
+
     // Update base unit logic
+    // Check if `is_main_unit` is defined and not null
     if (is_main_unit !== undefined && is_main_unit !== null) {
+      // If `is_main_unit` is true, set the `base_unit_id` to null
+      // This indicates that this unit is the main unit and doesn't link to any other unit
       if (is_main_unit) {
         updateData.base_unit_id = null;
       } else {
-        // If the unit is not the main unit, link it to the main unit
+        // If the unit is not the main unit, find the main unit for the product
         const mainProductMeasurement =
           await this.productMeasurementRepository.findOne({
             where: { product_id, is_main_unit: true },
           });
+
+        // If a main unit doesn't exist, throw an error
         if (!mainProductMeasurement) {
           throw new NotFoundException('Main product measurement not found');
         }
+
+        // Link this unit to the found main unit by setting `base_unit_id` to the main unit's ID
         updateData.base_unit_id = mainProductMeasurement.id;
       }
     }
