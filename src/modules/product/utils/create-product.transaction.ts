@@ -146,6 +146,7 @@ export class CreateProductTransaction extends BaseTransaction<
           conversion_factor: secondaryMeasurements[index].conversion_factor,
           measurement_unit_id: secondaryMeasurements[index].measurement_unit_id,
           product_id: saveProduct.id,
+          is_main_unit:secondaryMeasurements[index].is_main_unit
         });
 
         // Set Main Unit
