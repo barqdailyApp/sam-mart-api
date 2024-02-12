@@ -684,7 +684,7 @@ export class ProductDashboardService {
       product_id,
       product_measurement_id,
     );
-    if (measurement.base_unit_id != null) {
+    if (measurement.is_main_unit == true) {
       throw new NotFoundException(
         'There must be at least one main measurement',
       );
