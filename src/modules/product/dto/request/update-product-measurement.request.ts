@@ -16,10 +16,6 @@ export class UpdateProductMeasurementRequest {
   conversion_factor: number;
 
   
-  @ApiProperty({ nullable: true, required: false })
-  @IsOptional()
-  @IsString()
-  measurement_unit_id: string;
 
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()

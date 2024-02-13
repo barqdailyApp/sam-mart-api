@@ -16,20 +16,15 @@ export class ProductMeasurementResponse {
   @Expose()
   readonly measurement_unit: MeasurementUnitResponse;
 
-  @Transform(
-    ({ value }) => {
-      if (!Array.isArray(value)) {
-        return value;
-      }
-      return value.length === 1
-        ? plainToClass(ProductCategoryPriceResponse, value[0])
-        : value.map((item) => plainToClass(ProductCategoryPriceResponse, item));
+  @Transform(({ value }) => {
+    if (!Array.isArray(value)) {
+      return value;
     }
-  )
+    return value.map((item) => plainToClass(ProductCategoryPriceResponse, item));
+  })
   @Expose()
-  readonly product_category_prices:
-    | ProductCategoryPriceResponse[]
-    | ProductCategoryPriceResponse;
+  readonly product_category_prices: ProductCategoryPriceResponse[]
+
 
   @Expose() readonly base_unit_id: string;
 }
