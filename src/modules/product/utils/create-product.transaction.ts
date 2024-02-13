@@ -102,6 +102,7 @@ export class CreateProductTransaction extends BaseTransaction<
 
       //* save product images
       await context.save(ProductImage, productImages);
+      moveItemImages.next();
 
       //* -------------------- Add Measurements To Product ----------------------------
 
