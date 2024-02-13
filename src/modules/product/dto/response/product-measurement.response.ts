@@ -18,19 +18,13 @@ export class ProductMeasurementResponse {
 
   @Transform(({ value }) => {
     if (!Array.isArray(value)) {
-      return null;
+      return value;
     }
-    return value.length === 1
-      ? plainToClass(ProductCategoryPriceResponse, value[0])
-      : value.length === 0
-      ? null
-      : value.map((item) => plainToClass(ProductCategoryPriceResponse, item));
+    return value.map((item) => plainToClass(ProductCategoryPriceResponse, item));
   })
   @Expose()
-  readonly product_category_prices:
-    | ProductCategoryPriceResponse[]
-    | ProductCategoryPriceResponse
-    | null;
+  readonly product_category_prices: ProductCategoryPriceResponse[]
+
 
   @Expose() readonly base_unit_id: string;
 }
