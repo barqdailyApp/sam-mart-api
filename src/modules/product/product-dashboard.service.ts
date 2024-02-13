@@ -424,17 +424,12 @@ export class ProductDashboardService {
         },
       );
 
-      const product_price = await this.productCategoryPrice_repo.findOne({
-        where: { product_sub_category: { category_sub_category_id } },
-      });
-      if (product_price) {
-        query = query.andWhere(
-          'product_sub_category.category_sub_category_id = :category_sub_category_id',
-          {
-            category_sub_category_id,
-          },
-        );
-      }
+      query = query.orWhere(
+        'product_sub_category.category_sub_category_id = :category_sub_category_id',
+        {
+          category_sub_category_id,
+        },
+      );
     }
 
     if (section_category_id) {
@@ -444,21 +439,13 @@ export class ProductDashboardService {
           section_category_id,
         },
       );
-      const product_price = await this.productCategoryPrice_repo.findOne({
-        where: {
-          product_sub_category: {
-            category_subCategory: { section_category_id },
-          },
+
+      query = query.orWhere(
+        'category_subCategory.section_category_id = :section_category_id',
+        {
+          section_category_id,
         },
-      });
-      if (product_price) {
-        query = query.andWhere(
-          'category_subCategory.section_category_id = :section_category_id',
-          {
-            section_category_id,
-          },
-        );
-      }
+      );
     }
     if (section_id) {
       query = query.andWhere(
@@ -468,18 +455,9 @@ export class ProductDashboardService {
         },
       );
 
-      const product_price = await this.productCategoryPrice_repo.findOne({
-        where: {
-          product_sub_category: {
-            category_subCategory: { section_category: { section_id } },
-          },
-        },
+      query = query.andWhere('section_category.section_id = :section_id', {
+        section_id,
       });
-      if (product_price) {
-        query = query.andWhere('section_category.section_id = :section_id', {
-          section_id,
-        });
-      }
     }
     const [products, total] = await query.getManyAndCount();
     return { products, total };
@@ -560,74 +538,51 @@ export class ProductDashboardService {
       }
     }
 
-    // Conditional where clause based on sub category
-    // Conditional where clause based on sub category
-    if (category_sub_category_id) {
-      console.log('category_sub_category_id = ', category_sub_category_id);
-      query = query.andWhere(
-        'product_sub_categories.category_sub_category_id = :category_sub_category_id',
-        {
-          category_sub_category_id,
-        },
-      );
+  // Conditional where clause based on sub category
+  if (category_sub_category_id) {
+    console.log('category_sub_category_id = ', category_sub_category_id);
+    query = query.andWhere(
+      'product_sub_categories.category_sub_category_id = :category_sub_category_id',
+      {
+        category_sub_category_id,
+      },
+    );
 
-      const product_price = await this.productCategoryPrice_repo.findOne({
-        where: { product_sub_category: { category_sub_category_id } },
-      });
-      if (product_price) {
-        query = query.andWhere(
-          'product_sub_category.category_sub_category_id = :category_sub_category_id',
-          {
-            category_sub_category_id,
-          },
-        );
-      }
-    }
+    query = query.orWhere(
+      'product_sub_category.category_sub_category_id = :category_sub_category_id',
+      {
+        category_sub_category_id,
+      },
+    );
+  }
 
-    if (section_category_id) {
-      query = query.andWhere(
-        'product_category_subCategory.section_category_id = :section_category_id',
-        {
-          section_category_id,
-        },
-      );
-      const product_price = await this.productCategoryPrice_repo.findOne({
-        where: {
-          product_sub_category: {
-            category_subCategory: { section_category_id },
-          },
-        },
-      });
-      if (product_price) {
-        query = query.andWhere(
-          'category_subCategory.section_category_id = :section_category_id',
-          {
-            section_category_id,
-          },
-        );
-      }
-    }
-    if (section_id) {
-      query = query.andWhere(
-        'product_section_category.section_id = :section_id',
-        {
-          section_id,
-        },
-      );
+  if (section_category_id) {
+    query = query.andWhere(
+      'product_category_subCategory.section_category_id = :section_category_id',
+      {
+        section_category_id,
+      },
+    );
 
-      const product_price = await this.productCategoryPrice_repo.findOne({
-        where: {
-          product_sub_category: {
-            category_subCategory: { section_category: { section_id } },
-          },
-        },
-      });
-      if (product_price) {
-        query = query.andWhere('section_category.section_id = :section_id', {
-          section_id,
-        });
-      }
-    }
+    query = query.orWhere(
+      'category_subCategory.section_category_id = :section_category_id',
+      {
+        section_category_id,
+      },
+    );
+  }
+  if (section_id) {
+    query = query.andWhere(
+      'product_section_category.section_id = :section_id',
+      {
+        section_id,
+      },
+    );
+
+    query = query.andWhere('section_category.section_id = :section_id', {
+      section_id,
+    });
+  }
     const [products, total] = await query.getManyAndCount();
     return { products, total };
   }
@@ -708,6 +663,7 @@ export class ProductDashboardService {
   ): Promise<DeleteResult> {
     const product = await this.productRepository.findOne({
       where: { id: product_id },
+      relations: { product_images: true },
     });
     if (!product) {
       throw new NotFoundException('message_product_not_found');
