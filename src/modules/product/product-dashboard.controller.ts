@@ -56,6 +56,7 @@ import { Response } from 'express';
 import { ImportCategoryRequest } from '../category/dto/requests/import-category-request';
 import { UploadValidator } from 'src/core/validators/upload.validator';
 import { ProductClientService } from './product-client.service';
+import { SingleProductDashboardQuery } from './dto/filter/single-product-dashboard.query';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -182,7 +183,7 @@ export class ProductDashboardController {
       return productResponse;
     });
     const pageMetaDto = new PageMetaDto(page, limit, total);
-   // const data = this._i18nResponse.entity(productsResponse);
+    // const data = this._i18nResponse.entity(productsResponse);
     const pageDto = new PageDto(productsResponse, pageMetaDto);
 
     return new ActionResponse(pageDto);
@@ -209,10 +210,14 @@ export class ProductDashboardController {
     return new ActionResponse(pageDto);
   }
 
-  @Get('single-product-dashboard/:product_id')
-  async singleProductDashboard(@Param('product_id') id: string) {
+  @Get('single-product-dashboard')
+  async singleProductDashboard(
+    @Query() singleProductDashboardQuery: SingleProductDashboardQuery,
+  ) {
     const product =
-      await this.productDashboardService.getSingleProductForDashboard(id);
+      await this.productDashboardService.getSingleProductForDashboard(
+        singleProductDashboardQuery,
+      );
     const productResponse = plainToClass(ProductResponse, product);
     // const data = this._i18nResponse.entity(productsResponse);
 
