@@ -67,7 +67,7 @@ export class CategoryController {
     @UploadedFile(new UploadValidator().build())
     logo: Express.Multer.File,
   ) {
-    console.log(req);
+    
     req.logo = logo;
     return new ActionResponse(await this.categoryService.createCategory(req));
   }

@@ -79,7 +79,7 @@ export class SectionService extends BaseService<Section> {
       // set avatar path
       section.logo = logo;
     }
- 
+
     await this._repo.save(section);
     return section;
   }
@@ -141,10 +141,11 @@ export class SectionService extends BaseService<Section> {
     ) {
       throw new BadRequestException('category already exist');
     }
-    await this.orderItems(req.section_id);
-    return await this.section_category_repo.save({
+    const result = await this.section_category_repo.save({
       ...req,
     });
+    await this.orderItems(req.section_id);
+    return result;
   }
 
   async updatSectionCategory(req: UpdateSectionCategoryRequest) {
@@ -154,9 +155,9 @@ export class SectionService extends BaseService<Section> {
     if (!section_category) {
       throw new BadRequestException('category not found');
     }
-  
-    this.orderItems(section_category.section_id);
-    return await this.section_category_repo.update(req.id, req);
+    const result = await this.section_category_repo.update(req.id, req);
+    await this.orderItems(section_category.section_id);
+    return result;
   }
 
   async deleteSectionCategory(id: string) {
@@ -236,31 +237,27 @@ export class SectionService extends BaseService<Section> {
     await Promise.all(newSections);
   }
 
-
   async orderItems(section_id: string) {
     try {
       const itemsToUpdate = await this.section_category_repo.find({
         where: {
-          section_id
+          section_id,
         },
         order: {
-          order_by: "ASC"
-        }
+          order_by: 'ASC',
+        },
       });
-  
+
       let order = 1;
       for (const item of itemsToUpdate) {
         item.order_by = order++;
       }
-  
+
       await this.section_category_repo.save(itemsToUpdate);
-  
-      console.log("Section categories reordered successfully.");
+
+      console.log('Section categories reordered successfully.');
     } catch (error) {
-      console.error("Error occurred:", error.message);
+      console.error('Error occurred:', error.message);
     }
-  
-  
-  
   }
 }

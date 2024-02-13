@@ -129,11 +129,12 @@ export class CategoryService extends BaseService<Category> {
 
     if (category != null)
       throw new BadRequestException('subcategory already exist');
-    this.orderItems(req.section_category_id);
-    return await this.category_subcategory_repo.save({
+    const result= await this.category_subcategory_repo.save({
       ...req,
     });
-  }
+   await this.orderItems(req.section_category_id);
+    return result;
+   }
 
   async updateCategorySubcategory(req: UpdateSectionCategoryRequest) {
     const subcategory = await this.category_subcategory_repo.findOne({
@@ -142,8 +143,9 @@ export class CategoryService extends BaseService<Category> {
       },
     });
     if (!subcategory) throw new BadRequestException('subcategory not found');
-    this.orderItems(subcategory.section_category_id);
-    return await this.category_subcategory_repo.update(req.id, req);
+    const result=await this.category_subcategory_repo.update(req.id, req);
+  await  this.orderItems(subcategory.section_category_id);
+    return  result;
   }
 
   async deleteCategorySubcategory(id: string) {
