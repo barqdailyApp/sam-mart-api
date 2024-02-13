@@ -17,6 +17,9 @@ export class ProductMeasurementResponse {
   readonly measurement_unit: MeasurementUnitResponse;
 
   @Transform(({ value }) => {
+    if (!Array.isArray(value)) {
+      return null;
+    }
     return value.length === 1
       ? plainToClass(ProductCategoryPriceResponse, value[0])
       : value.length === 0
