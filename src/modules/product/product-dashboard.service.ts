@@ -43,6 +43,7 @@ import {
   CreateProductsExcelRequest,
 } from './dto/request/create-products-excel.request';
 import { toUrl } from 'src/core/helpers/file.helper';
+import { SingleProductDashboardQuery } from './dto/filter/single-product-dashboard.query';
 
 @Injectable()
 export class ProductDashboardService {
@@ -588,7 +589,8 @@ export class ProductDashboardService {
   }
 
   //* Get Single Product For Dashboard
-  async getSingleProductForDashboard(product_id: string) {
+  async getSingleProductForDashboard(singleProductDashboardQuery:SingleProductDashboardQuery) {
+    const {category_sub_category_id,product_id} = singleProductDashboardQuery;
     // For guests and individuals, orders are taken from the nearest warehouse
     // Start building the query
     let query = this.productRepository
@@ -643,7 +645,22 @@ export class ProductDashboardService {
 
     // Get single product
     query = query.where('product.id = :product_id', { product_id });
-
+    if (category_sub_category_id) {
+      console.log('category_sub_category_id = ', category_sub_category_id);
+      query = query.andWhere(
+        'product_sub_categories.category_sub_category_id = :category_sub_category_id',
+        {
+          category_sub_category_id,
+        },
+      );
+  
+      query = query.orWhere(
+        'product_sub_category.category_sub_category_id = :category_sub_category_id',
+        {
+          category_sub_category_id,
+        },
+      );
+    }
     return await query.getOne();
   }
 
