@@ -38,4 +38,9 @@ export abstract class Gateways {
     /** shipment-chat */
     static Namespace = 'shipment-chat';
   }
+
+  static FastDelivery = class {
+    /** fast-delivery */
+    static Namespace = 'fast-delivery';
+  }
 }
