@@ -29,6 +29,7 @@ import { UserResponse } from '../user/dto/responses/user.response';
 import { ShipmentFeedback } from 'src/infrastructure/entities/order/shipment-feedback.entity';
 import { AddShipmentFeedBackRequest } from './dto/request/add-shipment-feedback.request';
 import { FastDeliveryGateway } from 'src/integration/gateways/fast-delivery.gateway';
+import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
 @Injectable()
 export class ShipmentService extends BaseService<Shipment> {
   constructor(
@@ -165,11 +166,14 @@ export class ShipmentService extends BaseService<Shipment> {
     });
 
     await this.shipmentChatRepository.save(intialShipmentMessage);
+
+    if (shipment.order.delivery_type === DeliveryType.FAST) {
+      await this.fastdeliveryGateway.notifyShipmentStatusChange({
+        action: 'DRIVER_ACCEPTED_SHIPMENT',
+        shipment,
+      })
+    }
     
-    await this.fastdeliveryGateway.notifyShipmentStatusChange({
-      action: 'DRIVER_ACCEPTED_SHIPMENT',
-      shipment,
-    })
     return shipment;
   }
 
