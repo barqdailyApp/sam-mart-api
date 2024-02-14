@@ -293,16 +293,13 @@ export class ProductDashboardService {
     });
   }
 
-  async updateProductImage(
-    product_id: string,
-    image_id: string,
-    updateSingleImageRequest: UpdateSingleImageRequest,
-  ) {
-    const { file, is_logo } = updateSingleImageRequest;
-
+  async updateProductImage(product_id: string, image_id: string) {
     //* Check if product exist
     const product = await this.productRepository.findOne({
       where: { id: product_id },
+      relations: {
+        product_images: true,
+      },
     });
     if (!product) {
       throw new NotFoundException('message_product_not_found');
@@ -315,30 +312,21 @@ export class ProductDashboardService {
     if (!productImage) {
       throw new NotFoundException('message_product_image_not_found');
     }
-    //* Update image
-    if (file) {
-      const resizedImage = await this.imageManager.resize(file, {
-        size: {},
-        options: {
-          fit: sharp.fit.cover,
-          position: sharp.strategy.entropy,
-        },
-      });
 
-      // save image
-      const path = await this.storageManager.store(
-        { buffer: resizedImage, originalname: file.originalname },
-        { path: 'banners' },
-      );
-      await this.productImageRepository.update(image_id, {
-        url: path,
-        is_logo: is_logo,
-      });
-    } else {
-      await this.productImageRepository.update(image_id, {
-        is_logo: is_logo,
-      });
+    for (let index = 0; index < product.product_images.length; index++) {
+      if (product.product_images[index].is_logo == true) {
+        await this.productImageRepository.update(
+          product.product_images[index].id,
+          {
+            is_logo: false,
+          },
+        );
+      }
     }
+    await this.productImageRepository.update(image_id, {
+      is_logo: true,
+    });
+
     //* Return updated image
     return await this.productImageRepository.findOne({
       where: { id: image_id },
@@ -539,58 +527,61 @@ export class ProductDashboardService {
       }
     }
 
-  // Conditional where clause based on sub category
-  if (category_sub_category_id) {
-    console.log('category_sub_category_id = ', category_sub_category_id);
-    query = query.andWhere(
-      'product_sub_categories.category_sub_category_id = :category_sub_category_id',
-      {
-        category_sub_category_id,
-      },
-    );
+    // Conditional where clause based on sub category
+    if (category_sub_category_id) {
+      console.log('category_sub_category_id = ', category_sub_category_id);
+      query = query.andWhere(
+        'product_sub_categories.category_sub_category_id = :category_sub_category_id',
+        {
+          category_sub_category_id,
+        },
+      );
 
-    query = query.orWhere(
-      'product_sub_category.category_sub_category_id = :category_sub_category_id',
-      {
-        category_sub_category_id,
-      },
-    );
-  }
+      query = query.orWhere(
+        'product_sub_category.category_sub_category_id = :category_sub_category_id',
+        {
+          category_sub_category_id,
+        },
+      );
+    }
 
-  if (section_category_id) {
-    query = query.andWhere(
-      'product_category_subCategory.section_category_id = :section_category_id',
-      {
-        section_category_id,
-      },
-    );
+    if (section_category_id) {
+      query = query.andWhere(
+        'product_category_subCategory.section_category_id = :section_category_id',
+        {
+          section_category_id,
+        },
+      );
 
-    query = query.orWhere(
-      'category_subCategory.section_category_id = :section_category_id',
-      {
-        section_category_id,
-      },
-    );
-  }
-  if (section_id) {
-    query = query.andWhere(
-      'product_section_category.section_id = :section_id',
-      {
+      query = query.orWhere(
+        'category_subCategory.section_category_id = :section_category_id',
+        {
+          section_category_id,
+        },
+      );
+    }
+    if (section_id) {
+      query = query.andWhere(
+        'product_section_category.section_id = :section_id',
+        {
+          section_id,
+        },
+      );
+
+      query = query.andWhere('section_category.section_id = :section_id', {
         section_id,
-      },
-    );
-
-    query = query.andWhere('section_category.section_id = :section_id', {
-      section_id,
-    });
-  }
+      });
+    }
     const [products, total] = await query.getManyAndCount();
     return { products, total };
   }
 
   //* Get Single Product For Dashboard
-  async getSingleProductForDashboard(singleProductDashboardQuery:SingleProductDashboardQuery) {
-    const {category_sub_category_id,product_id} = singleProductDashboardQuery;
+  async getSingleProductForDashboard(
+    singleProductDashboardQuery: SingleProductDashboardQuery,
+  ) {
+    const { category_sub_category_id, product_id } =
+      singleProductDashboardQuery;
     // For guests and individuals, orders are taken from the nearest warehouse
     // Start building the query
     let query = this.productRepository
@@ -653,7 +644,7 @@ export class ProductDashboardService {
           category_sub_category_id,
         },
       );
-  
+
       query = query.orWhere(
         'product_sub_category.category_sub_category_id = :category_sub_category_id',
         {
