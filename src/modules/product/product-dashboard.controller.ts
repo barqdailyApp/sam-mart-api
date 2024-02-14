@@ -151,19 +151,15 @@ export class ProductDashboardController {
   }
 
   @Put('update-product-image/:product_id/:image_id')
-  @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FileInterceptor('file'))
+
   async updateProductImage(
     @Param('product_id') product_id: string,
     @Param('image_id') image_id: string,
-    @Body() updateSingleImageRequest: UpdateSingleImageRequest,
-    @UploadedFile() file: Express.Multer.File,
+
   ) {
-    updateSingleImageRequest.file = file;
     const product = await this.productDashboardService.updateProductImage(
       product_id,
       image_id,
-      updateSingleImageRequest,
     );
     return new ActionResponse(product);
   }
