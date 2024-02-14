@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { Subcategory } from 'src/infrastructure/entities/category/subcategory.entity';
+
 import { AdditionalServiceModule } from 'src/modules/additional-service/additional-service.module';
 import { AddressModule } from 'src/modules/address/address.module';
 
@@ -27,6 +27,7 @@ import { SubcategoryModule } from 'src/modules/subcategory/subcategory.module';
 import { SupportTicketModule } from 'src/modules/support-ticket/suuport-ticket.module';
 import { UserModule } from 'src/modules/user/user.module';
 import { WarehouseModule } from 'src/modules/warehouse/warehouse.module';
+import { WorkingAreaModule } from 'src/modules/working-area/working-area.module';
 
 export default (app: INestApplication, config: ConfigService) => {
   const operationIdFactory = (controllerKey: string, methodKey: string) =>
@@ -66,7 +67,8 @@ export default (app: INestApplication, config: ConfigService) => {
       SlotModule,
       OrderModule,
       EmployeeModule,
-      ShipmentController
+      ShipmentController,
+      WorkingAreaModule
     ],
     operationIdFactory,
   });

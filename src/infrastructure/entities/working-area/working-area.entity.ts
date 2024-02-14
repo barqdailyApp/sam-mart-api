@@ -16,6 +16,10 @@ export class WorkingArea extends AuditableEntity {
   @Column({ length: 500 })
   address: string;
 
+  @Column({default:true})
+  is_active:boolean
+  @Column({ nullable: true })
+  name: string;
   @Column({
     type: 'geometry',
     spatialFeatureType: 'Point',
@@ -35,6 +39,9 @@ export class WorkingArea extends AuditableEntity {
   @JoinColumn({ name: 'city_id' })
   city: City;
 
+
+  @Column()
+  range:number  
   @Column()
   city_id: string;
 

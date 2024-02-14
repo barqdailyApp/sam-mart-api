@@ -86,6 +86,7 @@ export const DB_ENTITIES = [
   ShipmentChat,
   ShipmentChatAttachment,
   ShipmentFeedback,
+  WorkingArea
 ];
 
 export const DB_VIEWS = [];
