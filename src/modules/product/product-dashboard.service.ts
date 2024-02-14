@@ -153,7 +153,24 @@ export class ProductDashboardService {
       is_logo,
       url: path,
     });
-    return await this.productImageRepository.save(productImage);
+    
+    const productImageSaved = await this.productImageRepository.save(productImage);
+    if(productImageSaved.is_logo){
+      for (let index = 0; index < product.product_images.length; index++) {
+        if (product.product_images[index].is_logo == true) {
+          await this.productImageRepository.update(
+            product.product_images[index].id,
+            {
+              is_logo: false,
+            },
+          );
+        }
+      }
+    }
+   
+
+    return productImageSaved;
+
   }
 
   async addProductMeasurement(
