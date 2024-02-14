@@ -128,7 +128,7 @@ export class ProductDashboardService {
   ) {
     const { file, is_logo } = createSingleImageRequest;
     const product = await this.productRepository.findOne({
-      where: { id: product_id },
+      where: { id: product_id },relations:{product_images:true}
     });
     if (!product) {
       throw new NotFoundException('message_product_not_found');
