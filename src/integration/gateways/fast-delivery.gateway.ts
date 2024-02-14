@@ -36,52 +36,35 @@ export class FastDeliveryGateway
     @WebSocketServer()
     server: Server;
 
+
     async broadcastOfferToDrivers(payload: SendOfferToDriver) {
         const connectedSockets: any = this.server.sockets;
         connectedSockets.forEach((socket: any) => {
-            if (
-                socket.driver &&
-                socket.driver?.warehouse_id === payload.shipment.warehouse_id
-            ) {
+            const isSameWarehouseDrivers = socket.driver && socket.driver?.warehouse_id === payload.shipment.warehouse_id;
+            const isAdminUser = socket.user && socket.user?.roles.includes('ADMIN');
+
+            if (isSameWarehouseDrivers || isAdminUser) {
                 socket.emit(`fast_delivery`, payload);
             }
         });
     }
 
-    /** 
-        * @description
-        * notify the driver, user and admin.
-        * notify the driver whose not picked the shipment but without send the driver_id whose accept the shipment
-    */
     async notifyShipmentStatusChange(payload: SendOfferToDriver) {
         const connectedSockets: any = this.server.sockets;
         connectedSockets.forEach((socket: any) => {
-            if (
-                (
-                    socket.driver &&
-                    socket.driver?.id === payload.shipment.driver_id
-                ) || (
-                    socket.user &&
-                    (
-                        socket.user?.id === payload.shipment.order.user_id ||
-                        socket.user?.roles.includes('ADMIN')
-                    )
-                )
-            ) {
-                socket.emit(`fast_delivery`, payload);
-            }
+            const isSameWarehouse = socket.driver?.warehouse_id === payload.shipment.warehouse_id;
+            const isShipmentDriver = socket.driver && socket.driver?.id === payload.shipment.driver_id;
+            const isUserOrAdmin = socket.user && socket.user?.roles.includes('ADMIN');
+            const isOrderOwner = socket.user && socket.user?.id === payload.shipment.order.user_id;
+            const isNotPickedDriver = socket.driver && socket.driver?.id !== payload.shipment.driver_id;
 
-            /**
-             * to notify the dirver whose not picked the shipment
-             * you can check if the driver is not the same as the driver who picked the shipment 
-             * shipment.driver_id ? he is the driver who picket the shipment : he isn't
-             */
             if (
-                socket.driver
-                && socket.driver?.warehouse_id === payload.shipment.warehouse_id
-                && socket.driver?.id !== payload.shipment.driver_id
+                (isShipmentDriver || isUserOrAdmin || isOrderOwner) ||
+                (isSameWarehouse && isNotPickedDriver)
             ) {
-                delete payload.shipment.driver_id;
+                if (isSameWarehouse && isNotPickedDriver) {
+                    delete payload.shipment.driver_id;
+                }
                 socket.emit(`fast_delivery`, payload);
             }
         });
