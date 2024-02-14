@@ -26,7 +26,7 @@ export class ProductsDashboardQuery {
   @IsOptional()
   @IsString()
   section_category_id: string;
-  
+
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()
   @IsString()
@@ -36,4 +36,9 @@ export class ProductsDashboardQuery {
   @IsOptional()
   @IsString()
   product_name: string;
+
+  @ApiProperty({ required: false, enum: ['new'], default: 'new' })
+  @IsOptional()
+  @IsString()
+  sort: 'new';
 }
