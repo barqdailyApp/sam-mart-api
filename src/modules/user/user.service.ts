@@ -63,11 +63,13 @@ export class UserService extends BaseService<User> {
     }
 
     Object.assign(user, updatdReq);
-    await this.userRepo.save(user);
-    
+    const savedUser = await this.userRepo.save(user);
+
     if (updatdReq.phone) {
       await this.sendOtpTransaction.run({ type: 'phone', username: updatdReq.phone })
     }
+
+    return savedUser;
   }
 
   get currentUser(): User {

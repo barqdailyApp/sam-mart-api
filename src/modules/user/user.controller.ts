@@ -89,8 +89,12 @@ export class UserController {
     @UploadedFile(new UploadValidator().build())
     avatarFile: Express.Multer.File,
   ) {
-    if (avatarFile) req.avatarFile = avatarFile
-    return new ActionResponse(await this._service.updateProfile(req));
+    if (avatarFile) req.avatarFile = avatarFile;
+    const updated = new ProfileResponse({
+      user_info: await this._service.updateProfile(req)
+    });
+
+    return new ActionResponse(updated);
   }
 
   @Get('get-profile')
