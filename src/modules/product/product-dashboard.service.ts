@@ -43,6 +43,7 @@ import {
   CreateProductsExcelRequest,
 } from './dto/request/create-products-excel.request';
 import { toUrl } from 'src/core/helpers/file.helper';
+import { SingleProductDashboardQuery } from './dto/filter/single-product-dashboard.query';
 
 @Injectable()
 export class ProductDashboardService {
@@ -152,7 +153,24 @@ export class ProductDashboardService {
       is_logo,
       url: path,
     });
-    return await this.productImageRepository.save(productImage);
+    
+    const productImageSaved = await this.productImageRepository.save(productImage);
+    if(productImageSaved.is_logo){
+      for (let index = 0; index < product.product_images.length; index++) {
+        if (product.product_images[index].is_logo == true) {
+          await this.productImageRepository.update(
+            product.product_images[index].id,
+            {
+              is_logo: false,
+            },
+          );
+        }
+      }
+    }
+   
+
+    return productImageSaved;
+
   }
 
   async addProductMeasurement(
@@ -292,16 +310,13 @@ export class ProductDashboardService {
     });
   }
 
-  async updateProductImage(
-    product_id: string,
-    image_id: string,
-    updateSingleImageRequest: UpdateSingleImageRequest,
-  ) {
-    const { file, is_logo } = updateSingleImageRequest;
-
+  async updateProductImage(product_id: string, image_id: string) {
     //* Check if product exist
     const product = await this.productRepository.findOne({
       where: { id: product_id },
+      relations: {
+        product_images: true,
+      },
     });
     if (!product) {
       throw new NotFoundException('message_product_not_found');
@@ -314,30 +329,21 @@ export class ProductDashboardService {
     if (!productImage) {
       throw new NotFoundException('message_product_image_not_found');
     }
-    //* Update image
-    if (file) {
-      const resizedImage = await this.imageManager.resize(file, {
-        size: {},
-        options: {
-          fit: sharp.fit.cover,
-          position: sharp.strategy.entropy,
-        },
-      });
 
-      // save image
-      const path = await this.storageManager.store(
-        { buffer: resizedImage, originalname: file.originalname },
-        { path: 'banners' },
-      );
-      await this.productImageRepository.update(image_id, {
-        url: path,
-        is_logo: is_logo,
-      });
-    } else {
-      await this.productImageRepository.update(image_id, {
-        is_logo: is_logo,
-      });
+    for (let index = 0; index < product.product_images.length; index++) {
+      if (product.product_images[index].is_logo == true) {
+        await this.productImageRepository.update(
+          product.product_images[index].id,
+          {
+            is_logo: false,
+          },
+        );
+      }
     }
+    await this.productImageRepository.update(image_id, {
+      is_logo: true,
+    });
+
     //* Return updated image
     return await this.productImageRepository.findOne({
       where: { id: image_id },
@@ -354,10 +360,16 @@ export class ProductDashboardService {
       category_sub_category_id,
       product_name,
       section_id,
-      section_category_id,
+      section_category_id,sort
     } = productsDashboardQuery;
     const skip = (page - 1) * limit;
+    let productsSort = {};
 
+    switch (sort) {
+      case 'new':
+        (productsSort = 'product.created_at'), 'DESC';
+        break;
+    }
     let query = this.productRepository
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.product_images', 'product_images')
@@ -395,6 +407,7 @@ export class ProductDashboardService {
         'category_subCategory',
       )
       .leftJoin('category_subCategory.section_category', 'section_category')
+      .orderBy(productsSort)
       .skip(skip)
       .take(limit);
     // Add search term condition if provided
@@ -424,17 +437,12 @@ export class ProductDashboardService {
         },
       );
 
-      const product_price = await this.productCategoryPrice_repo.findOne({
-        where: { product_sub_category: { category_sub_category_id } },
-      });
-      if (product_price) {
-        query = query.andWhere(
-          'product_sub_category.category_sub_category_id = :category_sub_category_id',
-          {
-            category_sub_category_id,
-          },
-        );
-      }
+      query = query.orWhere(
+        'product_sub_category.category_sub_category_id = :category_sub_category_id',
+        {
+          category_sub_category_id,
+        },
+      );
     }
 
     if (section_category_id) {
@@ -444,21 +452,13 @@ export class ProductDashboardService {
           section_category_id,
         },
       );
-      const product_price = await this.productCategoryPrice_repo.findOne({
-        where: {
-          product_sub_category: {
-            category_subCategory: { section_category_id },
-          },
+
+      query = query.orWhere(
+        'category_subCategory.section_category_id = :section_category_id',
+        {
+          section_category_id,
         },
-      });
-      if (product_price) {
-        query = query.andWhere(
-          'category_subCategory.section_category_id = :section_category_id',
-          {
-            section_category_id,
-          },
-        );
-      }
+      );
     }
     if (section_id) {
       query = query.andWhere(
@@ -468,18 +468,9 @@ export class ProductDashboardService {
         },
       );
 
-      const product_price = await this.productCategoryPrice_repo.findOne({
-        where: {
-          product_sub_category: {
-            category_subCategory: { section_category: { section_id } },
-          },
-        },
+      query = query.andWhere('section_category.section_id = :section_id', {
+        section_id,
       });
-      if (product_price) {
-        query = query.andWhere('section_category.section_id = :section_id', {
-          section_id,
-        });
-      }
     }
     const [products, total] = await query.getManyAndCount();
     return { products, total };
@@ -561,7 +552,6 @@ export class ProductDashboardService {
     }
 
     // Conditional where clause based on sub category
-    // Conditional where clause based on sub category
     if (category_sub_category_id) {
       console.log('category_sub_category_id = ', category_sub_category_id);
       query = query.andWhere(
@@ -571,17 +561,12 @@ export class ProductDashboardService {
         },
       );
 
-      const product_price = await this.productCategoryPrice_repo.findOne({
-        where: { product_sub_category: { category_sub_category_id } },
-      });
-      if (product_price) {
-        query = query.andWhere(
-          'product_sub_category.category_sub_category_id = :category_sub_category_id',
-          {
-            category_sub_category_id,
-          },
-        );
-      }
+      query = query.orWhere(
+        'product_sub_category.category_sub_category_id = :category_sub_category_id',
+        {
+          category_sub_category_id,
+        },
+      );
     }
 
     if (section_category_id) {
@@ -591,21 +576,13 @@ export class ProductDashboardService {
           section_category_id,
         },
       );
-      const product_price = await this.productCategoryPrice_repo.findOne({
-        where: {
-          product_sub_category: {
-            category_subCategory: { section_category_id },
-          },
+
+      query = query.orWhere(
+        'category_subCategory.section_category_id = :section_category_id',
+        {
+          section_category_id,
         },
-      });
-      if (product_price) {
-        query = query.andWhere(
-          'category_subCategory.section_category_id = :section_category_id',
-          {
-            section_category_id,
-          },
-        );
-      }
+      );
     }
     if (section_id) {
       query = query.andWhere(
@@ -615,25 +592,20 @@ export class ProductDashboardService {
         },
       );
 
-      const product_price = await this.productCategoryPrice_repo.findOne({
-        where: {
-          product_sub_category: {
-            category_subCategory: { section_category: { section_id } },
-          },
-        },
+      query = query.andWhere('section_category.section_id = :section_id', {
+        section_id,
       });
-      if (product_price) {
-        query = query.andWhere('section_category.section_id = :section_id', {
-          section_id,
-        });
-      }
     }
     const [products, total] = await query.getManyAndCount();
     return { products, total };
   }
 
   //* Get Single Product For Dashboard
-  async getSingleProductForDashboard(product_id: string) {
+  async getSingleProductForDashboard(
+    singleProductDashboardQuery: SingleProductDashboardQuery,
+  ) {
+    const { category_sub_category_id, product_id } =
+      singleProductDashboardQuery;
     // For guests and individuals, orders are taken from the nearest warehouse
     // Start building the query
     let query = this.productRepository
@@ -688,7 +660,22 @@ export class ProductDashboardService {
 
     // Get single product
     query = query.where('product.id = :product_id', { product_id });
+    if (category_sub_category_id) {
+      console.log('category_sub_category_id = ', category_sub_category_id);
+      query = query.andWhere(
+        'product_sub_categories.category_sub_category_id = :category_sub_category_id',
+        {
+          category_sub_category_id,
+        },
+      );
 
+      query = query.orWhere(
+        'product_sub_category.category_sub_category_id = :category_sub_category_id',
+        {
+          category_sub_category_id,
+        },
+      );
+    }
     return await query.getOne();
   }
 
@@ -708,6 +695,7 @@ export class ProductDashboardService {
   ): Promise<DeleteResult> {
     const product = await this.productRepository.findOne({
       where: { id: product_id },
+      relations: { product_images: true },
     });
     if (!product) {
       throw new NotFoundException('message_product_not_found');
