@@ -110,4 +110,15 @@ export class ShipmentController {
       ),
     );
   }
+
+  @Post('assign-driver/:shipment_id/:driver_id')
+  @Roles(Role.ADMIN)
+  async assignDriver(
+    @Param('shipment_id') shipment_id: string,
+    @Param('driver_id') driver_id: string,
+  ) {
+    return new ActionResponse(
+      await this.shipmentService.assignDriver(shipment_id, driver_id),
+    );
+  }
 }
