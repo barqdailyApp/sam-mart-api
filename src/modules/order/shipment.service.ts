@@ -277,6 +277,10 @@ export class ShipmentService extends BaseService<Shipment> {
     return this.orderFeedBackRepository.save(shipmentFeedBackCreated);
   }
 
+  async assignDriver(shipment_id: string, driver_id: string) {
+    return this.addDriverToShipment(shipment_id, AddDriverShipmentOption.DRIVER_ASSIGN_SHIPMENT, driver_id);
+  }
+
   get currentUser() {
     return this.request.user;
   }
@@ -302,10 +306,17 @@ export class ShipmentService extends BaseService<Shipment> {
       throw new NotFoundException('Shipment not found');
     }
 
+    if (shipment.status === ShipmentStatusEnum.CONFIRMED) {
+      throw new BadRequestException('Shipment already confirmed');
+    }
+
     shipment.order_confirmed_at = new Date();
-    shipment.status = ShipmentStatusEnum.CONFIRMED;
     shipment.driver_id = driver.id;
-    await this.shipmentRepository.save(shipment);
+
+    shipment.status = AddDriverShipmentOption.DRIVER_ACCEPT_SHIPMENT
+      ? ShipmentStatusEnum.CONFIRMED : ShipmentStatusEnum.PENDING;
+    
+      await this.shipmentRepository.save(shipment);
 
 
     let fastDeliveryGatewayPayload: SendOfferToDriver = {
@@ -322,7 +333,7 @@ export class ShipmentService extends BaseService<Shipment> {
 
     const intialShipmentChat = this.shipmentChatRepository.create({
       message: `${intialShipmentMessage} ${driver.user.name}`,
-      user_id: shipment.driver_id,
+      user_id: this.currentUser.id,
       shipment_id: shipment.id,
     });
 
