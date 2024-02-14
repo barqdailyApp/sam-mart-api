@@ -28,6 +28,7 @@ import { plainToInstance } from 'class-transformer';
 import { UserResponse } from '../user/dto/responses/user.response';
 import { ShipmentFeedback } from 'src/infrastructure/entities/order/shipment-feedback.entity';
 import { AddShipmentFeedBackRequest } from './dto/request/add-shipment-feedback.request';
+import { FastDeliveryGateway } from 'src/integration/gateways/fast-delivery.gateway';
 @Injectable()
 export class ShipmentService extends BaseService<Shipment> {
   constructor(
@@ -43,6 +44,7 @@ export class ShipmentService extends BaseService<Shipment> {
     private shipmentChatAttachmentRepository: Repository<ShipmentChatAttachment>,
 
     private readonly shipmentChatGateway: ShipmentChatGateway,
+    private readonly fastdeliveryGateway: FastDeliveryGateway,
     @InjectRepository(ShipmentFeedback)
     private orderFeedBackRepository: Repository<ShipmentFeedback>,
     @Inject(REQUEST) private readonly request: Request,
@@ -56,6 +58,7 @@ export class ShipmentService extends BaseService<Shipment> {
       where: {
         user_id: this.request.user.id,
       },
+      relations: ['user'],
     });
   }
 
@@ -143,6 +146,7 @@ export class ShipmentService extends BaseService<Shipment> {
         id: id,
         warehouse_id: driver.warehouse_id,
       },
+      relations: ['order'],
     });
 
     if (!shipment) {
@@ -159,8 +163,13 @@ export class ShipmentService extends BaseService<Shipment> {
       user_id: this.request.user.id,
       shipment_id: shipment.id,
     });
-    await this.shipmentChatRepository.save(intialShipmentMessage);
 
+    await this.shipmentChatRepository.save(intialShipmentMessage);
+    
+    await this.fastdeliveryGateway.notifyShipmentStatusChange({
+      action: 'DRIVER_ACCEPTED_SHIPMENT',
+      shipment,
+    })
     return shipment;
   }
 
