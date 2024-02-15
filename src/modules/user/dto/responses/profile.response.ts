@@ -24,10 +24,6 @@ export class UserInfoResponse {
     this.birth_date = partial.birth_date;
     this.gender = partial.gender;
 
-    if (!this.avatar) {
-      this.avatar = this.gender == "female" ? "assets/images/avatar/female.png" : "assets/images/avatar/male.png"
-    }
-
     if (this.avatar) {
       if (this.avatar.includes('assets')) {
         this.avatar = toUrl(this.avatar, true);
