@@ -88,7 +88,10 @@ export class OrderController {
     const order = await this.orderService.getSingleOrder(order_id);
 
     const orderResponse = plainToClass(OrderResponse, order);
-    return new ActionResponse(orderResponse);
+   
+    const data = this._i18nResponse.entity(orderResponse);
+
+    return new ActionResponse(data);
   }
 
   @Get('dashboard-shipments')
@@ -142,7 +145,8 @@ export class OrderController {
     const shipment = await this.orderService.getSingleShipment(shipment_id);
 
     const shipmentResponse = plainToClass(ShipmentResponse, shipment);
+    const data = this._i18nResponse.entity(shipmentResponse);
 
-    return new ActionResponse(shipmentResponse);
+    return new ActionResponse(data);
   }
 }
