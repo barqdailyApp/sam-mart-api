@@ -281,6 +281,30 @@ export class ShipmentService extends BaseService<Shipment> {
     return this.addDriverToShipment(shipment_id, AddDriverShipmentOption.DRIVER_ASSIGN_SHIPMENT, driver_id);
   }
 
+  async cancelShipment(
+    shipment_id: string,
+  ) {
+    const shipment = await this.shipmentRepository.findOne({
+      where: { id: shipment_id },
+      relations: ['order'],
+    });
+
+    if (!shipment) {
+      throw new NotFoundException('Shipment not found');
+    }
+
+    if (shipment.status === ShipmentStatusEnum.DELIVERED) {
+      throw new BadRequestException('Shipment already delivered');
+    }
+
+    shipment.status = ShipmentStatusEnum.CANCELED;
+    shipment.order_canceled_at = new Date();
+
+    await this.shipmentRepository.save(shipment);
+
+    return shipment;
+  }
+
   get currentUser() {
     return this.request.user;
   }
@@ -306,17 +330,16 @@ export class ShipmentService extends BaseService<Shipment> {
       throw new NotFoundException('Shipment not found');
     }
 
-    if (shipment.status === ShipmentStatusEnum.CONFIRMED) {
+    if (shipment.status !== ShipmentStatusEnum.PENDING) {
       throw new BadRequestException('Shipment already confirmed');
     }
 
     shipment.order_confirmed_at = new Date();
     shipment.driver_id = driver.id;
 
-    shipment.status = AddDriverShipmentOption.DRIVER_ACCEPT_SHIPMENT
-      ? ShipmentStatusEnum.CONFIRMED : ShipmentStatusEnum.PENDING;
-    
-      await this.shipmentRepository.save(shipment);
+    shipment.status = ShipmentStatusEnum.CONFIRMED;
+
+    await this.shipmentRepository.save(shipment);
 
 
     let fastDeliveryGatewayPayload: SendOfferToDriver = {
