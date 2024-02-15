@@ -43,7 +43,7 @@ export class User extends AuditableEntity {
   @Column({ nullable: true })
   phone_verified_at: Date;
 
-  @Column({ nullable: true, length: 500 })
+  @Column({ nullable: true, length: 500, default: 'assets/images/avatar/male.png' })
   avatar: string;
 
   @Column({ nullable: true, type: 'enum', enum: Gender })

@@ -43,8 +43,7 @@ export class ProductClientService {
     @Inject(REQUEST) private readonly request: Request,
   ) {}
 
-
-   isArabic(text: string): boolean {
+  isArabic(text: string): boolean {
     return /[\u0600-\u06FF]/.test(text);
   }
   //* Get All Products For Client
@@ -147,39 +146,40 @@ export class ProductClientService {
       .skip(skip)
       .take(limit);
 
-    if (user_id) {
-      const cartUser = await this.cart_repo.findOne({ where: { user_id } });
-      if (!cartUser) {
-        throw new NotFoundException('user not found');
+      if (user_id) {
+        const cartUser = await this.cart_repo.findOne({ where: { user_id } });
+        if (!cartUser) {
+          throw new NotFoundException('user not found');
+        }
+  
+        query = query.leftJoinAndSelect(
+          'product_category_prices.cart_products',
+          'cart_products',
+          'cart_products.cart_id = :cart_id',
+          { cart_id: cartUser.id },
+        );
+        query = query.leftJoinAndSelect(
+          'cart_products.cart',
+          'cart',
+        );
+  
+        query = query.leftJoinAndSelect(
+          'cart_products.product_category_price',
+          'cart_product_category_price',
+        );
+        query = query.leftJoinAndSelect(
+          'cart_product_category_price.product_offer',
+          'cart_product_offer',
+        );
+  
+        
+        query = query.leftJoinAndSelect(
+          'product.products_favorite',
+          'products_favorite',
+          'products_favorite.user_id = :user_id',
+          { user_id },
+        );
       }
-
-      query = query.leftJoinAndSelect(
-        'product_category_prices.cart_products',
-        'cart_products',
-      );
-      query = query.leftJoinAndSelect(
-        'cart_products.product_category_price',
-        'cart_product_category_price',
-      );
-      query = query.leftJoinAndSelect(
-        'cart_product_category_price.product_offer',
-        'cart_product_offer',
-      );
-
-      query = query.leftJoinAndSelect(
-        'cart_products.cart',
-        'cart',
-        'cart.user_id = :user_id',
-        { user_id },
-      );
-
-      query = query.leftJoinAndSelect(
-        'product.products_favorite',
-        'products_favorite',
-        'products_favorite.user_id = :user_id',
-        { user_id },
-      );
-    }
     // Modify condition if warehouse is defined
     if (warehouse) {
       query = query.andWhere('warehousesProduct.warehouse_id = :warehouseId', {
@@ -354,7 +354,14 @@ export class ProductClientService {
         query = query.leftJoinAndSelect(
           'product_category_prices.cart_products',
           'cart_products',
+          'cart_products.cart_id = :cart_id',
+          { cart_id: cartUser.id },
         );
+        query = query.leftJoinAndSelect(
+          'cart_products.cart',
+          'cart',
+        );
+  
         query = query.leftJoinAndSelect(
           'cart_products.product_category_price',
           'cart_product_category_price',
@@ -364,13 +371,7 @@ export class ProductClientService {
           'cart_product_offer',
         );
   
-        query = query.leftJoinAndSelect(
-          'cart_products.cart',
-          'cart',
-          'cart.user_id = :user_id',
-          { user_id },
-        );
-  
+        
         query = query.leftJoinAndSelect(
           'product.products_favorite',
           'products_favorite',
@@ -386,23 +387,22 @@ export class ProductClientService {
     }
 
     // Add search term condition if provided
-   // Add search term condition if provided
-   if (product_name) {
-    // Determine if the product_name is Arabic
-    const isProductNameArabic = this.isArabic(product_name); // Implement or use a library to check if the text is Arabic
+    // Add search term condition if provided
+    if (product_name) {
+      // Determine if the product_name is Arabic
+      const isProductNameArabic = this.isArabic(product_name); // Implement or use a library to check if the text is Arabic
 
-    // Build the query conditionally based on the language of product_name
-    if (isProductNameArabic) {
-      query = query.andWhere('product.name_ar LIKE :product_name', {
-        product_name: `%${product_name}%`,
-      });
-    } else {
-      query = query.andWhere('product.name_en LIKE :product_name', {
-        product_name: `%${product_name}%`,
-      });
+      // Build the query conditionally based on the language of product_name
+      if (isProductNameArabic) {
+        query = query.andWhere('product.name_ar LIKE :product_name', {
+          product_name: `%${product_name}%`,
+        });
+      } else {
+        query = query.andWhere('product.name_en LIKE :product_name', {
+          product_name: `%${product_name}%`,
+        });
+      }
     }
-   
-  }
 
     // Conditional where clause based on sub category
     if (category_sub_category_id) {
@@ -540,7 +540,14 @@ export class ProductClientService {
       query = query.leftJoinAndSelect(
         'product_category_prices.cart_products',
         'cart_products',
+        'cart_products.cart_id = :cart_id',
+        { cart_id: cartUser.id },
       );
+      query = query.leftJoinAndSelect(
+        'cart_products.cart',
+        'cart',
+      );
+
       query = query.leftJoinAndSelect(
         'cart_products.product_category_price',
         'cart_product_category_price',
@@ -550,13 +557,7 @@ export class ProductClientService {
         'cart_product_offer',
       );
 
-      query = query.leftJoinAndSelect(
-        'cart_products.cart',
-        'cart',
-        'cart.user_id = :user_id',
-        { user_id },
-      );
-
+      
       query = query.leftJoinAndSelect(
         'product.products_favorite',
         'products_favorite',
@@ -742,7 +743,14 @@ export class ProductClientService {
       query = query.leftJoinAndSelect(
         'product_category_prices.cart_products',
         'cart_products',
+        'cart_products.cart_id = :cart_id',
+        { cart_id: cartUser.id },
       );
+      query = query.leftJoinAndSelect(
+        'cart_products.cart',
+        'cart',
+      );
+
       query = query.leftJoinAndSelect(
         'cart_products.product_category_price',
         'cart_product_category_price',
@@ -752,13 +760,7 @@ export class ProductClientService {
         'cart_product_offer',
       );
 
-      query = query.leftJoinAndSelect(
-        'cart_products.cart',
-        'cart',
-        'cart.user_id = :user_id',
-        { user_id },
-      );
-
+      
       query = query.leftJoinAndSelect(
         'product.products_favorite',
         'products_favorite',

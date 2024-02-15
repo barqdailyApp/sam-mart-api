@@ -29,19 +29,9 @@ export class ProductResponse {
 
   @Expose() readonly updated_at: Date;
 
-  @Transform(({ value }) => {
-    if (value === null || value === undefined) {
-      return plainToClass(ProductSubCategoryResponse, value);
-    }
-    return value.length === 1
-      ? plainToClass(ProductSubCategoryResponse, value[0])
-      : plainToClass(ProductSubCategoryResponse, value);
-  })
+  @Transform(({ value }) => plainToClass(ProductSubCategoryResponse, value))
   @Expose()
-  product_sub_categories:
-    | ProductSubCategoryResponse[]
-    | ProductSubCategoryResponse
-    | null;
+  product_sub_categories: ProductSubCategoryResponse[];
 
   @Expose()
   @Transform(({ obj }) => {
@@ -54,15 +44,15 @@ export class ProductResponse {
 
   @Expose()
   @Transform(({ obj }) => {
-    if(!Array.isArray(obj.products_favorite)){
+    if (!Array.isArray(obj.products_favorite)) {
       return false;
-
     }
     for (let i = 0; i < obj.products_favorite.length; i++) {
       for (let j = 0; j < obj.product_sub_categories.length; j++) {
         if (
           obj.products_favorite[i].section_id ===
-          obj.product_sub_categories[j].category_subCategory.section_category.section_id
+          obj.product_sub_categories[j].category_subCategory.section_category
+            .section_id
         ) {
           return true;
         }
@@ -79,7 +69,6 @@ export class ProductResponse {
   @Transform(({ value }) => plainToClass(ProductImagesResponse, value))
   @Expose()
   readonly product_images: ProductImagesResponse;
-
 
   constructor(data: Partial<ProductResponse>) {
     Object.assign(this, data);

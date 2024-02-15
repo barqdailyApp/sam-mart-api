@@ -437,12 +437,12 @@ export class ProductDashboardService {
         },
       );
 
-      query = query.orWhere(
-        'product_sub_category.category_sub_category_id = :category_sub_category_id',
-        {
-          category_sub_category_id,
-        },
-      );
+      // query = query.orWhere(
+      //   'product_sub_category.category_sub_category_id = :category_sub_category_id',
+      //   {
+      //     category_sub_category_id,
+      //   },
+      // );
     }
 
     if (section_category_id) {
@@ -453,12 +453,12 @@ export class ProductDashboardService {
         },
       );
 
-      query = query.orWhere(
-        'category_subCategory.section_category_id = :section_category_id',
-        {
-          section_category_id,
-        },
-      );
+      // query = query.orWhere(
+      //   'category_subCategory.section_category_id = :section_category_id',
+      //   {
+      //     section_category_id,
+      //   },
+      // );
     }
     if (section_id) {
       query = query.andWhere(
@@ -468,9 +468,9 @@ export class ProductDashboardService {
         },
       );
 
-      query = query.andWhere('section_category.section_id = :section_id', {
-        section_id,
-      });
+      // query = query.andWhere('section_category.section_id = :section_id', {
+      //   section_id,
+      // });
     }
     const [products, total] = await query.getManyAndCount();
     return { products, total };
@@ -561,12 +561,12 @@ export class ProductDashboardService {
         },
       );
 
-      query = query.orWhere(
-        'product_sub_category.category_sub_category_id = :category_sub_category_id',
-        {
-          category_sub_category_id,
-        },
-      );
+      // query = query.orWhere(
+      //   'product_sub_category.category_sub_category_id = :category_sub_category_id',
+      //   {
+      //     category_sub_category_id,
+      //   },
+      // );
     }
 
     if (section_category_id) {
@@ -577,12 +577,12 @@ export class ProductDashboardService {
         },
       );
 
-      query = query.orWhere(
-        'category_subCategory.section_category_id = :section_category_id',
-        {
-          section_category_id,
-        },
-      );
+      // query = query.orWhere(
+      //   'category_subCategory.section_category_id = :section_category_id',
+      //   {
+      //     section_category_id,
+      //   },
+      // );
     }
     if (section_id) {
       query = query.andWhere(
@@ -592,9 +592,9 @@ export class ProductDashboardService {
         },
       );
 
-      query = query.andWhere('section_category.section_id = :section_id', {
-        section_id,
-      });
+      // query = query.andWhere('section_category.section_id = :section_id', {
+      //   section_id,
+      // });
     }
     const [products, total] = await query.getManyAndCount();
     return { products, total };
@@ -669,12 +669,12 @@ export class ProductDashboardService {
         },
       );
 
-      query = query.orWhere(
-        'product_sub_category.category_sub_category_id = :category_sub_category_id',
-        {
-          category_sub_category_id,
-        },
-      );
+      // query = query.orWhere(
+      //   'product_sub_category.category_sub_category_id = :category_sub_category_id',
+      //   {
+      //     category_sub_category_id,
+      //   },
+      // );
     }
     return await query.getOne();
   }
