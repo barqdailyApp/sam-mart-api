@@ -20,7 +20,7 @@ export class BanarService extends BaseService<Banar> {
     async createBanar(banar: CreateBanarRequest) {
         const tempImage = await this._fileService.upload(
             banar.banar,
-            `banars/`,
+            `banars`,
         );
 
         let createdBanar = this.banarRepository.create({
