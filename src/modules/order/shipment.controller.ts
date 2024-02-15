@@ -121,4 +121,12 @@ export class ShipmentController {
       await this.shipmentService.assignDriver(shipment_id, driver_id),
     );
   }
+
+  @Post('cancel-shipment/:shipment_id')
+  @Roles(Role.ADMIN)
+  async cancelShipment(@Param('shipment_id') shipment_id: string) {
+    return new ActionResponse(await this.shipmentService.cancelShipment(shipment_id));
+  }
+
+  // admin convert order from scheduled to fast delivery [Order Controller]
 }
