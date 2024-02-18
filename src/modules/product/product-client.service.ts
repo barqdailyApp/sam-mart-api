@@ -262,16 +262,14 @@ export class ProductClientService {
 
     switch (sort) {
       case 'lowest_price':
-        productsSort = 'product_offer.price : ASC';
-
+        // Convert price to a numeric type before sorting
+        (productsSort = 'product_category_prices.price'), 'ASC';
         break;
       case 'highest_price':
-        productsSort = 'product_offer.price : DESC';
-
+        (productsSort = 'product_category_prices.price'), 'DESC';
         break;
       case 'new':
-        productsSort = 'product_offer.created_at : DESC';
-
+        (productsSort = 'product.created_at'), 'DESC';
         break;
       // handle other sort cases if needed
     }
