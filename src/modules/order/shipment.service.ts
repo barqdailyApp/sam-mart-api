@@ -28,6 +28,10 @@ import { plainToInstance } from 'class-transformer';
 import { UserResponse } from '../user/dto/responses/user.response';
 import { ShipmentFeedback } from 'src/infrastructure/entities/order/shipment-feedback.entity';
 import { AddShipmentFeedBackRequest } from './dto/request/add-shipment-feedback.request';
+import { FastDeliveryGateway } from 'src/integration/gateways/fast-delivery.gateway';
+import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
+import { AddDriverShipmentOption } from 'src/infrastructure/data/enums/add-driver-shipment-option.enum';
+import { SendOfferToDriver } from 'src/integration/gateways/interfaces/fast-delivery/send-offer-payload.response';
 @Injectable()
 export class ShipmentService extends BaseService<Shipment> {
   constructor(
@@ -43,6 +47,7 @@ export class ShipmentService extends BaseService<Shipment> {
     private shipmentChatAttachmentRepository: Repository<ShipmentChatAttachment>,
 
     private readonly shipmentChatGateway: ShipmentChatGateway,
+    private readonly fastdeliveryGateway: FastDeliveryGateway,
     @InjectRepository(ShipmentFeedback)
     private orderFeedBackRepository: Repository<ShipmentFeedback>,
     @Inject(REQUEST) private readonly request: Request,
@@ -51,11 +56,12 @@ export class ShipmentService extends BaseService<Shipment> {
     super(shipmentRepository);
   }
 
-  async getDriver() {
+  async getDriver(driver_id?: string) {
     return await this.driverRepository.findOne({
       where: {
-        user_id: this.request.user.id,
+        user_id: driver_id ?? this.request.user.id,
       },
+      relations: ['user'],
     });
   }
 
@@ -132,36 +138,9 @@ export class ShipmentService extends BaseService<Shipment> {
 
     return shipment;
   }
+
   async acceptShipment(id: string) {
-    const driver = await this.getDriver();
-    if (!driver) {
-      throw new NotFoundException('Driver not found');
-    }
-
-    const shipment = await this.shipmentRepository.findOne({
-      where: {
-        id: id,
-        warehouse_id: driver.warehouse_id,
-      },
-    });
-
-    if (!shipment) {
-      throw new NotFoundException('Shipment not found');
-    }
-
-    shipment.order_confirmed_at = new Date();
-    shipment.status = ShipmentStatusEnum.CONFIRMED;
-    shipment.driver_id = driver.id;
-    await this.shipmentRepository.save(shipment);
-
-    const intialShipmentMessage = this.shipmentChatRepository.create({
-      message: `Shipment has been accepted by driver ${driver.user.name}`,
-      user_id: this.request.user.id,
-      shipment_id: shipment.id,
-    });
-    await this.shipmentChatRepository.save(intialShipmentMessage);
-
-    return shipment;
+    return this.addDriverToShipment(id, AddDriverShipmentOption.DRIVER_ACCEPT_SHIPMENT);
   }
 
   async addChatMessage(
@@ -254,6 +233,7 @@ export class ShipmentService extends BaseService<Shipment> {
       take: limit,
     });
   }
+
   async addShipmentFeedBack(
     addOrderFeedBackRequest: AddShipmentFeedBackRequest,
   ) {
@@ -296,7 +276,96 @@ export class ShipmentService extends BaseService<Shipment> {
     });
     return this.orderFeedBackRepository.save(shipmentFeedBackCreated);
   }
+
+  async assignDriver(shipment_id: string, driver_id: string) {
+    return this.addDriverToShipment(shipment_id, AddDriverShipmentOption.DRIVER_ASSIGN_SHIPMENT, driver_id);
+  }
+
+  async cancelShipment(
+    shipment_id: string,
+  ) {
+    const shipment = await this.shipmentRepository.findOne({
+      where: { id: shipment_id },
+      relations: ['order'],
+    });
+
+    if (!shipment) {
+      throw new NotFoundException('Shipment not found');
+    }
+
+    if (shipment.status === ShipmentStatusEnum.DELIVERED) {
+      throw new BadRequestException('Shipment already delivered');
+    }
+
+    shipment.status = ShipmentStatusEnum.CANCELED;
+    shipment.order_canceled_at = new Date();
+
+    await this.shipmentRepository.save(shipment);
+
+    return shipment;
+  }
+
   get currentUser() {
     return this.request.user;
+  }
+
+
+  private async addDriverToShipment(
+    shipment_id: string,
+    action: AddDriverShipmentOption,
+    driver_id?: string
+  ): Promise<Shipment> {
+    const driver = await this.getDriver(driver_id);
+
+    if (!driver) {
+      throw new NotFoundException('Driver not found');
+    }
+
+    const shipment = await this.shipmentRepository.findOne({
+      where: { id: shipment_id },
+      relations: ['order'],
+    });
+
+    if (!shipment) {
+      throw new NotFoundException('Shipment not found');
+    }
+
+    if (shipment.status !== ShipmentStatusEnum.PENDING) {
+      throw new BadRequestException('Shipment already confirmed');
+    }
+
+    shipment.order_confirmed_at = new Date();
+    shipment.driver_id = driver.id;
+
+    shipment.status = ShipmentStatusEnum.CONFIRMED;
+
+    await this.shipmentRepository.save(shipment);
+
+
+    let fastDeliveryGatewayPayload: SendOfferToDriver = {
+      action: AddDriverShipmentOption.DRIVER_ACCEPT_SHIPMENT,
+      shipment,
+    };
+
+    let intialShipmentMessage = 'Shipment has been accepted by driver';
+
+    if (action == AddDriverShipmentOption.DRIVER_ASSIGN_SHIPMENT) {
+      fastDeliveryGatewayPayload.action = AddDriverShipmentOption.DRIVER_ASSIGN_SHIPMENT;
+      intialShipmentMessage = 'Shipment has been assigned to driver'
+    }
+
+    const intialShipmentChat = this.shipmentChatRepository.create({
+      message: `${intialShipmentMessage} ${driver.user.name}`,
+      user_id: this.currentUser.id,
+      shipment_id: shipment.id,
+    });
+
+    await this.shipmentChatRepository.save(intialShipmentChat);
+
+    if (shipment.order.delivery_type === DeliveryType.FAST) {
+      await this.fastdeliveryGateway.notifyShipmentStatusChange(fastDeliveryGatewayPayload);
+    }
+
+    return shipment;
   }
 }

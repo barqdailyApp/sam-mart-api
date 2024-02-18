@@ -30,6 +30,7 @@ export class Shipment extends AuditableEntity {
   warehouse_id: string;
   @Column({ default: ShipmentStatusEnum.PENDING })
   status: ShipmentStatusEnum;
+
   @Column({ nullable: true })
   order_confirmed_at: Date;
 
@@ -41,6 +42,9 @@ export class Shipment extends AuditableEntity {
 
   @Column({ nullable: true })
   order_delivered_at: Date;
+
+  @Column({ nullable: true })
+  order_canceled_at: Date;
 
   @OneToMany(
     () => ShipmentProduct,

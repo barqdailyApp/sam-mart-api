@@ -27,6 +27,8 @@ import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
 import { Section } from 'src/infrastructure/entities/section/section.entity';
 import { Slot } from 'src/infrastructure/entities/order/slot.entity';
 import { ProductOffer } from 'src/infrastructure/entities/product/product-offer.entity';
+import { FastDeliveryGateway } from 'src/integration/gateways/fast-delivery.gateway';
+import { ShipmentStatusEnum } from 'src/infrastructure/data/enums/shipment_status.enum';
 @Injectable()
 export class MakeOrderTransaction extends BaseTransaction<
   MakeOrderRequest,
@@ -35,6 +37,8 @@ export class MakeOrderTransaction extends BaseTransaction<
   constructor(
     dataSource: DataSource,
     @Inject(REQUEST) readonly request: Request,
+
+    private readonly fastDeliveryGateway: FastDeliveryGateway,
   ) {
     super(dataSource);
   }
@@ -112,6 +116,13 @@ export class MakeOrderTransaction extends BaseTransaction<
         warehouse_id: nearst_warehouse.id,
       });
 
+      if (order.delivery_type == DeliveryType.FAST) {
+        this.fastDeliveryGateway.broadcastOfferToDrivers({
+          action: 'FAST_DELIVERY_OFFER',
+          shipment: shipment,
+        });
+      }
+
       const shipment_products = await Promise.all(
         cart_products.map(async (e) => {
           //handling offer
@@ -162,7 +173,7 @@ export class MakeOrderTransaction extends BaseTransaction<
         warehouse_product.quantity =
           warehouse_product.quantity -
           shipment_products[index].quantity *
-            shipment_products[index].conversion_factor;
+          shipment_products[index].conversion_factor;
         if (warehouse_product.quantity < 0) {
           throw new BadRequestException(
             'warehouse doesnt have enough products',
@@ -200,7 +211,6 @@ export const generateOrderNumber = (count: number) => {
   const day = date.getDate().toString().padStart(2, '0');
   // order number is the count of orders created today + 1 with 4 digits and leading zeros
   const orderNumber = (count + 1).toString().padStart(4, '0');
-  return `${100 - parseInt(year)}${100 - parseInt(month)}${
-    100 - parseInt(day)
-  }${orderNumber}`;
+  return `${100 - parseInt(year)}${100 - parseInt(month)}${100 - parseInt(day)
+    }${orderNumber}`;
 };
