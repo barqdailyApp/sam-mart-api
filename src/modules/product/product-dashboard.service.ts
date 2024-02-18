@@ -128,7 +128,8 @@ export class ProductDashboardService {
   ) {
     const { file, is_logo } = createSingleImageRequest;
     const product = await this.productRepository.findOne({
-      where: { id: product_id },relations:{product_images:true}
+      where: { id: product_id },
+      relations: { product_images: true },
     });
     if (!product) {
       throw new NotFoundException('message_product_not_found');
@@ -153,9 +154,11 @@ export class ProductDashboardService {
       is_logo,
       url: path,
     });
-    
-    const productImageSaved = await this.productImageRepository.save(productImage);
-    if(productImageSaved.is_logo){
+
+    const productImageSaved = await this.productImageRepository.save(
+      productImage,
+    );
+    if (productImageSaved.is_logo) {
       for (let index = 0; index < product.product_images.length; index++) {
         if (product.product_images[index].is_logo == true) {
           await this.productImageRepository.update(
@@ -167,10 +170,8 @@ export class ProductDashboardService {
         }
       }
     }
-   
 
     return productImageSaved;
-
   }
 
   async addProductMeasurement(
@@ -360,14 +361,15 @@ export class ProductDashboardService {
       category_sub_category_id,
       product_name,
       section_id,
-      section_category_id,sort
+      section_category_id,
+      sort,
     } = productsDashboardQuery;
     const skip = (page - 1) * limit;
     let productsSort = {};
 
     switch (sort) {
       case 'new':
-        (productsSort = 'product.created_at'), 'DESC';
+        productsSort = 'product.created_at : DESC';
         break;
     }
     let query = this.productRepository
