@@ -369,7 +369,7 @@ export class ProductDashboardService {
 
     switch (sort) {
       case 'new':
-        (productsSort = 'product.created_at'), 'DESC';
+        productsSort = { 'product.created_at': 'DESC' };
         break;
     }
     console.log(productsSort);
@@ -490,9 +490,16 @@ export class ProductDashboardService {
       product_name,
       section_id,
       section_category_id,
+      sort
     } = productsDashboardQuery;
     const skip = (page - 1) * limit;
+    let productsSort = {};
 
+    switch (sort) {
+      case 'new':
+        productsSort = { 'product.created_at': 'DESC' };
+        break;
+    }
     let query = this.productRepository
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.product_images', 'product_images')
@@ -535,6 +542,8 @@ export class ProductDashboardService {
         'category_subCategory',
       )
       .leftJoin('category_subCategory.section_category', 'section_category')
+      .orderBy(productsSort)
+
       .skip(skip)
       .take(limit);
     // Add search term condition if provided
