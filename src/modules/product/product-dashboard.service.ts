@@ -410,7 +410,7 @@ export class ProductDashboardService {
         'category_subCategory',
       )
       .leftJoin('category_subCategory.section_category', 'section_category')
-      .orderBy('product.created_at : DESC')
+      .orderBy(productsSort)
       .skip(skip)
       .take(limit);
     // Add search term condition if provided
