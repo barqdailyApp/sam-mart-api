@@ -146,40 +146,36 @@ export class ProductClientService {
       .skip(skip)
       .take(limit);
 
-      if (user_id) {
-        const cartUser = await this.cart_repo.findOne({ where: { user_id } });
-        if (!cartUser) {
-          throw new NotFoundException('user not found');
-        }
-  
-        query = query.leftJoinAndSelect(
-          'product_category_prices.cart_products',
-          'cart_products',
-          'cart_products.cart_id = :cart_id',
-          { cart_id: cartUser.id },
-        );
-        query = query.leftJoinAndSelect(
-          'cart_products.cart',
-          'cart',
-        );
-  
-        query = query.leftJoinAndSelect(
-          'cart_products.product_category_price',
-          'cart_product_category_price',
-        );
-        query = query.leftJoinAndSelect(
-          'cart_product_category_price.product_offer',
-          'cart_product_offer',
-        );
-  
-        
-        query = query.leftJoinAndSelect(
-          'product.products_favorite',
-          'products_favorite',
-          'products_favorite.user_id = :user_id',
-          { user_id },
-        );
+    if (user_id) {
+      const cartUser = await this.cart_repo.findOne({ where: { user_id } });
+      if (!cartUser) {
+        throw new NotFoundException('user not found');
       }
+
+      query = query.leftJoinAndSelect(
+        'product_category_prices.cart_products',
+        'cart_products',
+        'cart_products.cart_id = :cart_id',
+        { cart_id: cartUser.id },
+      );
+      query = query.leftJoinAndSelect('cart_products.cart', 'cart');
+
+      query = query.leftJoinAndSelect(
+        'cart_products.product_category_price',
+        'cart_product_category_price',
+      );
+      query = query.leftJoinAndSelect(
+        'cart_product_category_price.product_offer',
+        'cart_product_offer',
+      );
+
+      query = query.leftJoinAndSelect(
+        'product.products_favorite',
+        'products_favorite',
+        'products_favorite.user_id = :user_id',
+        { user_id },
+      );
+    }
     // Modify condition if warehouse is defined
     if (warehouse) {
       query = query.andWhere('warehousesProduct.warehouse_id = :warehouseId', {
@@ -266,14 +262,16 @@ export class ProductClientService {
 
     switch (sort) {
       case 'lowest_price':
-        // Convert price to a numeric type before sorting
-        (productsSort = 'product_offer.price'), 'ASC';
+        productsSort = 'product_offer.price : ASC';
+
         break;
       case 'highest_price':
-        (productsSort = 'product_offer.price'), 'DESC';
+        productsSort = 'product_offer.price : DESC';
+
         break;
       case 'new':
-        (productsSort = 'product_offer.created_at'), 'DESC';
+        productsSort = 'product_offer.created_at : DESC';
+
         break;
       // handle other sort cases if needed
     }
@@ -345,40 +343,36 @@ export class ProductClientService {
       .skip(skip)
       .take(limit);
 
-      if (user_id) {
-        const cartUser = await this.cart_repo.findOne({ where: { user_id } });
-        if (!cartUser) {
-          throw new NotFoundException('user not found');
-        }
-  
-        query = query.leftJoinAndSelect(
-          'product_category_prices.cart_products',
-          'cart_products',
-          'cart_products.cart_id = :cart_id',
-          { cart_id: cartUser.id },
-        );
-        query = query.leftJoinAndSelect(
-          'cart_products.cart',
-          'cart',
-        );
-  
-        query = query.leftJoinAndSelect(
-          'cart_products.product_category_price',
-          'cart_product_category_price',
-        );
-        query = query.leftJoinAndSelect(
-          'cart_product_category_price.product_offer',
-          'cart_product_offer',
-        );
-  
-        
-        query = query.leftJoinAndSelect(
-          'product.products_favorite',
-          'products_favorite',
-          'products_favorite.user_id = :user_id',
-          { user_id },
-        );
+    if (user_id) {
+      const cartUser = await this.cart_repo.findOne({ where: { user_id } });
+      if (!cartUser) {
+        throw new NotFoundException('user not found');
       }
+
+      query = query.leftJoinAndSelect(
+        'product_category_prices.cart_products',
+        'cart_products',
+        'cart_products.cart_id = :cart_id',
+        { cart_id: cartUser.id },
+      );
+      query = query.leftJoinAndSelect('cart_products.cart', 'cart');
+
+      query = query.leftJoinAndSelect(
+        'cart_products.product_category_price',
+        'cart_product_category_price',
+      );
+      query = query.leftJoinAndSelect(
+        'cart_product_category_price.product_offer',
+        'cart_product_offer',
+      );
+
+      query = query.leftJoinAndSelect(
+        'product.products_favorite',
+        'products_favorite',
+        'products_favorite.user_id = :user_id',
+        { user_id },
+      );
+    }
     // Modify condition if warehouse is defined
     if (warehouse) {
       query = query.andWhere('warehousesProduct.warehouse_id = :warehouseId', {
@@ -543,10 +537,7 @@ export class ProductClientService {
         'cart_products.cart_id = :cart_id',
         { cart_id: cartUser.id },
       );
-      query = query.leftJoinAndSelect(
-        'cart_products.cart',
-        'cart',
-      );
+      query = query.leftJoinAndSelect('cart_products.cart', 'cart');
 
       query = query.leftJoinAndSelect(
         'cart_products.product_category_price',
@@ -557,7 +548,6 @@ export class ProductClientService {
         'cart_product_offer',
       );
 
-      
       query = query.leftJoinAndSelect(
         'product.products_favorite',
         'products_favorite',
@@ -746,10 +736,7 @@ export class ProductClientService {
         'cart_products.cart_id = :cart_id',
         { cart_id: cartUser.id },
       );
-      query = query.leftJoinAndSelect(
-        'cart_products.cart',
-        'cart',
-      );
+      query = query.leftJoinAndSelect('cart_products.cart', 'cart');
 
       query = query.leftJoinAndSelect(
         'cart_products.product_category_price',
@@ -760,7 +747,6 @@ export class ProductClientService {
         'cart_product_offer',
       );
 
-      
       query = query.leftJoinAndSelect(
         'product.products_favorite',
         'products_favorite',

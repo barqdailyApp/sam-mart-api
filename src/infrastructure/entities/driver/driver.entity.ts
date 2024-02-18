@@ -40,6 +40,9 @@ export class Driver extends AuditableEntity {
   @Column()
   country_id: string;
 
+  @Column()
+  is_receive_orders: boolean;
+
   @ManyToOne(() => Warehouse, (warehouse) => warehouse.drivers, {})
   @JoinColumn({ name: 'warehouse_id' })
   warehouse: Warehouse;
