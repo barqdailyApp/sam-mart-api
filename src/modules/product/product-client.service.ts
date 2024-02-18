@@ -66,13 +66,16 @@ export class ProductClientService {
     switch (sort) {
       case 'lowest_price':
         // Convert price to a numeric type before sorting
-        (productsSort = 'product_category_prices.price'), 'ASC';
+        productsSort = { 'product_category_prices.price': 'ASC' };
+
         break;
       case 'highest_price':
-        (productsSort = 'product_category_prices.price'), 'DESC';
+        productsSort = { 'product_category_prices.price': 'DESC' };
+
         break;
       case 'new':
-        (productsSort = 'product.created_at'), 'DESC';
+        productsSort = { 'product.created_at': 'DESC' };
+
         break;
       // handle other sort cases if needed
     }
@@ -263,13 +266,16 @@ export class ProductClientService {
     switch (sort) {
       case 'lowest_price':
         // Convert price to a numeric type before sorting
-        (productsSort = 'product_category_prices.price'), 'ASC';
+        productsSort = { 'product_category_prices.price': 'ASC' };
+
         break;
       case 'highest_price':
-        (productsSort = 'product_category_prices.price'), 'DESC';
+        productsSort = { 'product_category_prices.price': 'DESC' };
+
         break;
       case 'new':
-        (productsSort = 'product.created_at'), 'DESC';
+        productsSort = { 'product.created_at': 'DESC' };
+
         break;
       // handle other sort cases if needed
     }
