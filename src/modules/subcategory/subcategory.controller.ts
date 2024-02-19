@@ -44,7 +44,7 @@ export class SubcategoryController {
     @UploadedFile(new UploadValidator().build())
     logo: Express.Multer.File,
   ) {
-    console.log(req);
+ 
     req.logo = logo;
     return new ActionResponse(await this.subcategoryService.createSubcategory(req));
   }
