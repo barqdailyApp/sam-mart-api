@@ -29,12 +29,13 @@ import { toUrl } from 'src/core/helpers/file.helper';
 })
 @ApiTags('Subcategory')
 @Controller('subcategory')
+@ApiBearerAuth()
 export class SubcategoryController {
   constructor(private readonly subcategoryService: SubcategoryService,
     private readonly _i18nResponse: I18nResponse,) { }
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN)
-    @ApiBearerAuth()
+ 
   @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('logo'))
   @ApiConsumes('multipart/form-data')
   @Post()
@@ -107,7 +108,7 @@ export class SubcategoryController {
   }
   @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.ADMIN)
-@ApiBearerAuth()
+
   @Delete("/:sub_category_id")
   async delete(@Param('sub_category_id') id: string) {
     return new ActionResponse(await this.subcategoryService.deleteSubCategory(id));
@@ -115,7 +116,7 @@ export class SubcategoryController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
-  @ApiBearerAuth()
+
   @Get('/export')
   @Header('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
   async exportSubCategory(@Res() res: Response) {
@@ -125,7 +126,7 @@ export class SubcategoryController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
-  @ApiBearerAuth()
+
   @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
   @Post("/import")
