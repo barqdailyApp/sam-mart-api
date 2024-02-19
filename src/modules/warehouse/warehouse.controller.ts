@@ -77,16 +77,16 @@ export class WarehouseController {
     );
   }
 
-  @Patch("/:warehouse_product_id/transfer/:to_warehouse_id")
-  async transferWarehouseProducts(
-    @Param("warehouse_product_id") warehouse_product_id: string,
-    @Param("to_warehouse_id") to_warehouse_id: string,
-    @Body() body: WarehouseTransferProductRequest
-  ) {
-    return new ActionResponse(
-      await this.warehouseService.transferWarehouseProducts(warehouse_product_id, to_warehouse_id, body),
-    );
-  }
+  // @Patch("/:warehouse_product_id/transfer/:to_warehouse_id")
+  // async transferWarehouseProducts(
+  //   @Param("warehouse_product_id") warehouse_product_id: string,
+  //   @Param("to_warehouse_id") to_warehouse_id: string,
+  //   @Body() body: WarehouseTransferProductRequest
+  // ) {
+  //   return new ActionResponse(
+  //     await this.warehouseService.transferWarehouseProducts(warehouse_product_id, to_warehouse_id, body),
+  //   );
+  // }
 
   @Roles(Role.ADMIN)
   @Post("/attach-driver/:warehouse_id/:driver_id")

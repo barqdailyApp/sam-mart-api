@@ -43,37 +43,37 @@ export class WarehouseService extends BaseService<Warehouse> {
         return await this.warehouse_repo.save(updatedWarehouse);
     }
 
-    async transferWarehouseProducts(from_warehouse_product_id: string, to_warehouse_id: string, transfered_product: WarehouseTransferProductRequest) {
-        const { quantity } = transfered_product;
+    // async transferWarehouseProducts(from_warehouse_product_id: string, to_warehouse_id: string, transfered_product: WarehouseTransferProductRequest) {
+    //     const { quantity } = transfered_product;
 
-        const from_warehouse_product = await this.warehouseProducts_repo.findOne({
-            where: {
-                id: from_warehouse_product_id
-            }
-        });
+    //     const from_warehouse_product = await this.warehouseProducts_repo.findOne({
+    //         where: {
+    //             id: from_warehouse_product_id
+    //         }
+    //     });
 
-        if (!from_warehouse_product) {
-            throw new NotFoundException("Warehouse product not found");
-        }
+    //     if (!from_warehouse_product) {
+    //         throw new NotFoundException("Warehouse product not found");
+    //     }
 
-        const exported_warehouse = await this.warehouseOperationTransaction.run({
-            warehouse_id: from_warehouse_product.warehouse_id,
-            product_id: from_warehouse_product.product_id,
-            quantity: quantity,
-            type: operationType.EXPORT,
-            product_measurement_id: from_warehouse_product.product_measurement_id
-        });
+    //     const exported_warehouse = await this.warehouseOperationTransaction.run({
+    //         warehouse_id: from_warehouse_product.warehouse_id,
+    //         product_id: from_warehouse_product.product_id,
+    //         quantity: quantity,
+    //         type: operationType.EXPORT,
+    //         product_measurement_id: from_warehouse_product.product_measurement_id
+    //     });
 
-        const imported_warehouse = await this.warehouseOperationTransaction.run({
-            warehouse_id: to_warehouse_id,
-            product_id: from_warehouse_product.product_id,
-            quantity: quantity,
-            type: operationType.IMPORT,
-            product_measurement_id: from_warehouse_product.product_measurement_id
-        });
+    //     const imported_warehouse = await this.warehouseOperationTransaction.run({
+    //         warehouse_id: to_warehouse_id,
+    //         product_id: from_warehouse_product.product_id,
+    //         quantity: quantity,
+    //         type: operationType.IMPORT,
+    //         product_measurement_id: from_warehouse_product.product_measurement_id
+    //     });
 
-        return { imported_warehouse, exported_warehouse };
-    }
+    //     return { imported_warehouse, exported_warehouse };
+    // }
 
     async attachDriverToWarehouse(driver_id: string, warehouse_id: string) {
         const warehouse = await this.warehouse_repo.findOne({

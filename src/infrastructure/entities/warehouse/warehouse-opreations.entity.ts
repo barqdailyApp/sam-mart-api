@@ -1,10 +1,11 @@
-import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
 import { Warehouse } from "./warehouse.entity";
 import { AuditableEntity } from "src/infrastructure/base/auditable.entity";
 import { User } from "../user/user.entity";
 import { OwnedEntity } from "src/infrastructure/base/owned.entity";
 import { Product } from "../product/product.entity";
 import { operationType } from "src/infrastructure/data/enums/operation-type.enum";
+import { WarehouseOpreationProducts } from "./wahouse-opreation-products.entity";
 
 @Entity()
 
@@ -16,12 +17,12 @@ export class WarehouseOperations extends OwnedEntity {
     warehouse: Warehouse;
 @Column()
 warehouse_id: string;
-@Column()
-product_id: string;
-@Column()
-product_measurement_id: string
-@Column()
-quantity: number;
+
+@OneToMany(() => WarehouseOpreationProducts, (product) => product.operation, {
+    cascade: true,
+})
+products: WarehouseOpreationProducts[]
+
 @Column({type:'enum',enum:operationType})
 type:operationType
 

@@ -9,6 +9,7 @@ import { PaymentMethod } from 'src/infrastructure/data/enums/payment-method';
 
 import { Slot } from './slot.entity';
 import { Shipment } from './shipment.entity';
+import { Transaction } from '../wallet/transaction.entity';
 
 @Entity()
 export class Order extends OwnedEntity {
@@ -19,6 +20,8 @@ export class Order extends OwnedEntity {
   @OneToMany(() => Shipment, (shipment) => shipment.order)
   shipments: Shipment[];
 
+  @OneToMany(() => Transaction, (transaction) => transaction.order)
+  transactions: Transaction[];
   @ManyToOne(() => Warehouse, (warehouse) => warehouse.orders)
   @JoinColumn()
   warehouse: Warehouse;

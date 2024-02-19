@@ -29,6 +29,7 @@ import { Slot } from 'src/infrastructure/entities/order/slot.entity';
 import { ProductOffer } from 'src/infrastructure/entities/product/product-offer.entity';
 import { FastDeliveryGateway } from 'src/integration/gateways/fast-delivery.gateway';
 import { ShipmentStatusEnum } from 'src/infrastructure/data/enums/shipment_status.enum';
+import { WarehouseOpreationProducts } from 'src/infrastructure/entities/warehouse/wahouse-opreation-products.entity';
 @Injectable()
 export class MakeOrderTransaction extends BaseTransaction<
   MakeOrderRequest,
@@ -159,7 +160,14 @@ export class MakeOrderTransaction extends BaseTransaction<
       await context.delete(CartProduct, cart_products);
 
       //warehouse opreation
-
+      const warehouse_operations = await context.save(
+        WarehouseOperations,
+        new WarehouseOperations({
+          type: operationType.SELL,
+          user_id: user.id,
+          warehouse_id: nearst_warehouse.id,
+        }),
+      );
       for (let index = 0; index < shipment_products.length; index++) {
         const warehouse_product = await context.findOne(WarehouseProducts, {
           where: {
@@ -173,7 +181,7 @@ export class MakeOrderTransaction extends BaseTransaction<
         warehouse_product.quantity =
           warehouse_product.quantity -
           shipment_products[index].quantity *
-          shipment_products[index].conversion_factor;
+            shipment_products[index].conversion_factor;
         if (warehouse_product.quantity < 0) {
           throw new BadRequestException(
             'warehouse doesnt have enough products',
@@ -181,12 +189,12 @@ export class MakeOrderTransaction extends BaseTransaction<
         }
         await context.save(warehouse_product);
         await context.save(
-          WarehouseOperations,
-          new WarehouseOperations({
-            warehouse_id: nearst_warehouse.id,
+          WarehouseOpreationProducts,
+          new WarehouseOpreationProducts({
+      
             product_id: shipment_products[index].product_id,
-            type: operationType.SELL,
-            user_id: user.id,
+            operation_id: warehouse_operations.id,
+          
             product_measurement_id:
               shipment_products[index].main_measurement_id,
             quantity:
@@ -211,6 +219,7 @@ export const generateOrderNumber = (count: number) => {
   const day = date.getDate().toString().padStart(2, '0');
   // order number is the count of orders created today + 1 with 4 digits and leading zeros
   const orderNumber = (count + 1).toString().padStart(4, '0');
-  return `${100 - parseInt(year)}${100 - parseInt(month)}${100 - parseInt(day)
-    }${orderNumber}`;
+  return `${100 - parseInt(year)}${100 - parseInt(month)}${
+    100 - parseInt(day)
+  }${orderNumber}`;
 };
