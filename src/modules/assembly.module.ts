@@ -21,6 +21,7 @@ import { SlotModule } from './slot/slot.module';
 import { OrderModule } from './order/order.module';
 import { EmployeeModule } from "./employee/employee.module";
 import { WorkingAreaModule } from './working-area/working-area.module';
+import { TransactionModule } from './transaction/transaction.module';
 
 
 @Module({
@@ -46,7 +47,8 @@ import { WorkingAreaModule } from './working-area/working-area.module';
     SlotModule,
     OrderModule,
     EmployeeModule,
-    WorkingAreaModule
+    WorkingAreaModule,
+    TransactionModule
   ],
   exports: [],
   providers: [],
