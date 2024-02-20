@@ -23,7 +23,7 @@ import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 import { applyQueryIncludes } from 'src/core/helpers/service-related.helper';
 import { Region } from 'src/infrastructure/entities/region/region.entity';
 import { UpdateWarehouseRequest } from './dto/requests/update-warehouse.request';
-import { WarehouseTransferProductRequest } from './dto/requests/warehouse-transfer-product.request';
+import { WarehouseTransferProductRequest, WarehouseTransferProductsRequest } from './dto/requests/warehouse-transfer-product.request';
 import { Roles } from '../authentication/guards/roles.decorator';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { query } from 'express';
@@ -110,16 +110,16 @@ export class WarehouseController {
     );
   }
 
-  // @Patch("/:warehouse_product_id/transfer/:to_warehouse_id")
-  // async transferWarehouseProducts(
-  //   @Param("warehouse_product_id") warehouse_product_id: string,
-  //   @Param("to_warehouse_id") to_warehouse_id: string,
-  //   @Body() body: WarehouseTransferProductRequest
-  // ) {
-  //   return new ActionResponse(
-  //     await this.warehouseService.transferWarehouseProducts(warehouse_product_id, to_warehouse_id, body),
-  //   );
-  // }
+  @Patch("/:from_warehouse_id/transfer/:to_warehouse_id")
+  async transferWarehouseProducts(
+    @Param("from_warehouse_id") from_warehouse_id: string,
+    @Param("to_warehouse_id") to_warehouse_id: string,
+    @Body() body: WarehouseTransferProductsRequest
+  ) {
+    return new ActionResponse(
+      await this.warehouseService.transferWarehouseProducts(from_warehouse_id, to_warehouse_id, body),
+    );
+  }
 
   @Roles(Role.ADMIN)
   @Post('/attach-driver/:warehouse_id/:driver_id')
