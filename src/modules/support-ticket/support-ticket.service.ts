@@ -84,6 +84,11 @@ export class SupportTicketService extends BaseService<SupportTicket> {
         return await this.supportTicketRepository.save(ticket);
     }
 
+    async createSubject(subject: CreateSupportTicketSubjectRequest) {
+        const savedSubject = await this.supportTicketSubjectRepository.create(subject);
+        return await this.supportTicketSubjectRepository.save(savedSubject);
+    }
+
     async getSubjects() {
         return await this.supportTicketSubjectRepository.find();
     }

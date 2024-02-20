@@ -115,6 +115,15 @@ export class SupportTicketController {
         return new ActionResponse<SupportTicketResponse>(result);
     }
 
+    @Roles(Role.ADMIN)
+    @Post('/subjects')
+    async createSubject(
+        @Body() subject: CreateSupportTicketSubjectRequest
+    ): Promise<ActionResponse<SupportTicketSubject>> {
+        const createdSubject = await this.supportTicketService.createSubject(subject);
+        return new ActionResponse<SupportTicketSubject>(createdSubject);
+    }
+
     @Get('/subjects')
     async getSubjects(): Promise<ActionResponse<SupportTicketSubject[]>> {
         const subjects = await this.supportTicketService.getSubjects();
