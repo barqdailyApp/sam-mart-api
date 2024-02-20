@@ -11,6 +11,8 @@ import { FileService } from '../file/file.service';
 import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 import { SupportTicketStatus } from 'src/infrastructure/data/enums/support-ticket-status.enum';
 import { TicketAttachment } from 'src/infrastructure/entities/support-ticket/ticket-attachement.entity';
+import { SupportTicketSubject } from 'src/infrastructure/entities/support-ticket/suppot-ticket-subject.entity';
+import { Role } from 'src/infrastructure/data/enums/role.enum';
 
 
 @Injectable()
@@ -18,6 +20,8 @@ export class SupportTicketService extends BaseService<SupportTicket> {
     constructor(
         @InjectRepository(SupportTicket) private readonly supportTicketRepository: Repository<SupportTicket>,
         @InjectRepository(TicketAttachment) private readonly ticketAttachmentRepository: Repository<TicketAttachment>,
+        @InjectRepository(SupportTicketSubject) private readonly supportTicketSubjectRepository: Repository<SupportTicketSubject>,
+
         @Inject(REQUEST) private readonly request: Request,
         @Inject(FileService) private _fileService: FileService,
 
@@ -25,7 +29,7 @@ export class SupportTicketService extends BaseService<SupportTicket> {
         super(supportTicketRepository);
     }
 
-    async createTicket({ subject, description, file }: CreateTicketRequest) {
+    async createTicket({ subject_id, description, file }: CreateTicketRequest) {
 
         let attachedFile = null;
         if (file) {
@@ -42,6 +46,9 @@ export class SupportTicketService extends BaseService<SupportTicket> {
             attachedFile = await this.ticketAttachmentRepository.save(createAttachedFile);
         }
 
+        const subject = await this.supportTicketSubjectRepository.findOne({ where: { id: subject_id } });
+        if (!subject) throw new BadRequestException('Subject not found');
+
         const savedTicket = await this.supportTicketRepository.create({
             subject,
             description,
@@ -53,20 +60,25 @@ export class SupportTicketService extends BaseService<SupportTicket> {
     }
 
     async getTickets(options?: PaginatedRequest) {
-        if (!options.filters) {
-            options.filters = [];
-        } else if (typeof options.filters === 'string') {
-            options.filters = [options.filters];
+        options.filters ??= [];
+        options.includes ??= [];
+
+        options.includes.push('subject');
+        options.includes.push('attachment');
+
+        if (this.currentUser.roles.includes(Role.ADMIN)) {
+            options.includes.push('user');
+        }else{
+            options.filters.push(`user_id=${this.currentUser.id}`);
         }
 
-        options.filters.push(`user_id=${this.currentUser.id}`);
         return await this.findAll(options);
     }
 
-    async chnageTicketStatus(ticketId:string, status: SupportTicketStatus){
-        const ticket = await this.supportTicketRepository.findOne({where:{id:ticketId}});
-        if(!ticket) throw new BadRequestException('Ticket not found');
-        
+    async chnageTicketStatus(ticketId: string, status: SupportTicketStatus) {
+        const ticket = await this.supportTicketRepository.findOne({ where: { id: ticketId } });
+        if (!ticket) throw new BadRequestException('Ticket not found');
+
         ticket.status = status;
         return await this.supportTicketRepository.save(ticket);
     }
