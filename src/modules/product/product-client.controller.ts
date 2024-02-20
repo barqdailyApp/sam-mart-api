@@ -92,7 +92,9 @@ export class ProductClientController {
       id,
       singleProductClientQuery,
     );
-    const productResponse =new SingleProductsNewResponse(product);
+   // const productResponse =new SingleProductsNewResponse(product);
+    const productResponse = plainToClass(ProductResponse, product);
+
     if (product?.warehouses_products == null) {
       throw new ConflictException('Product is not available In Warehouse');
     }
