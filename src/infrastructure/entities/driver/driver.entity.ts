@@ -40,7 +40,7 @@ export class Driver extends AuditableEntity {
   @Column()
   country_id: string;
 
-  @Column()
+  @Column({default: false})
   is_receive_orders: boolean;
 
   @ManyToOne(() => Warehouse, (warehouse) => warehouse.drivers, {})

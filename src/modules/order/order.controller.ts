@@ -88,7 +88,7 @@ export class OrderController {
     const order = await this.orderService.getSingleOrder(order_id);
 
     const orderResponse = plainToClass(OrderResponse, order);
-   
+
     const data = this._i18nResponse.entity(orderResponse);
 
     return new ActionResponse(data);
@@ -123,7 +123,7 @@ export class OrderController {
   ) {
     const { page, limit } = driverShipmentsQuery;
 
-    const { orders, total } = await this.orderService.getDriverShipments(
+    const { orders, total } = await this.orderService.getMyDriverShipments(
       driverShipmentsQuery,
     );
 
