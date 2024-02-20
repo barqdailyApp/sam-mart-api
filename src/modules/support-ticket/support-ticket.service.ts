@@ -101,6 +101,13 @@ export class SupportTicketService extends BaseService<SupportTicket> {
         return await this.supportTicketSubjectRepository.save(foundSubject);
     }
 
+    async deleteSubject(subjectId: string) {
+        const foundSubject = await this.supportTicketSubjectRepository.findOne({ where: { id: subjectId } });
+        if (!foundSubject) throw new BadRequestException('Subject not found');
+
+        return await this.supportTicketSubjectRepository.remove(foundSubject);
+    }
+
     get currentUser() {
         return this.request.user;
     }

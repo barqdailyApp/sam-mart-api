@@ -2,6 +2,7 @@ import {
     Body,
     ClassSerializerInterceptor,
     Controller,
+    Delete,
     Get,
     Param,
     Patch,
@@ -138,5 +139,14 @@ export class SupportTicketController {
     ): Promise<ActionResponse<SupportTicketSubject>> {
         const updatedSubject = await this.supportTicketService.updateSubject(subjectId, subject);
         return new ActionResponse<SupportTicketSubject>(updatedSubject);
+    }
+
+    @Roles(Role.ADMIN)
+    @Delete('/subjects/:subjectId')
+    async deleteSubject(
+        @Param('subjectId') subjectId: string
+    ): Promise<ActionResponse<SupportTicketSubject>> {
+        const deletedSubject = await this.supportTicketService.deleteSubject(subjectId);
+        return new ActionResponse<SupportTicketSubject>(deletedSubject);
     }
 }
