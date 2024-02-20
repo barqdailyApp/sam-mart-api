@@ -73,7 +73,7 @@ export class WarehouseController {
   }
 
   @Roles(Role.ADMIN)
-  @Post()
+  @Get("/products")
   async getWarehouseProducts(@Query() query: WarehouseProductsQuery) {
     const { page, limit } = query;
 
