@@ -68,7 +68,7 @@ export class SupportTicketService extends BaseService<SupportTicket> {
 
         if (this.currentUser.roles.includes(Role.ADMIN)) {
             options.includes.push('user');
-        }else{
+        } else {
             options.filters.push(`user_id=${this.currentUser.id}`);
         }
 
@@ -81,6 +81,10 @@ export class SupportTicketService extends BaseService<SupportTicket> {
 
         ticket.status = status;
         return await this.supportTicketRepository.save(ticket);
+    }
+
+    async getSubjects() {
+        return await this.supportTicketSubjectRepository.find();
     }
 
     get currentUser() {

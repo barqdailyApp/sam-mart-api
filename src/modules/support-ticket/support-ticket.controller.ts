@@ -31,6 +31,7 @@ import { Roles } from '../authentication/guards/roles.decorator';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { GetCommentQueryRequest } from './dto/request/get-comment-query.request';
 import { query } from 'express';
+import { SupportTicketSubject } from 'src/infrastructure/entities/support-ticket/suppot-ticket-subject.entity';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -110,5 +111,11 @@ export class SupportTicketController {
             excludeExtraneousValues: true,
         });
         return new ActionResponse<SupportTicketResponse>(result);
+    }
+
+    @Get('/subjects')
+    async getSubjects(): Promise<ActionResponse<SupportTicketSubject[]>> {
+        const subjects = await this.supportTicketService.getSubjects();
+        return new ActionResponse<SupportTicketSubject[]>(subjects);
     }
 }
