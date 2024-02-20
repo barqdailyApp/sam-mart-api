@@ -2,15 +2,14 @@ import { Exclude, Expose, Transform, plainToClass } from 'class-transformer';
 import { toUrl } from 'src/core/helpers/file.helper';
 import { ProductMeasurement } from 'src/infrastructure/entities/product/product-measurement.entity';
 import { MeasurementUnitResponse } from 'src/modules/measurement-unit/dto/responses/measurement-unit.response';
-import { ProductMeasurementResponse } from './product-measurement.response';
-import { ProductImagesResponse } from './product-images.response';
-import { ProductWarehouseResponse } from './product-warehouse.response';
+
 import { ProductSubCategory } from 'src/infrastructure/entities/product/product-sub-category.entity';
-import { ProductSubCategoryResponse } from './product-section/product-sub-categories.response';
 import { CartProduct } from 'src/infrastructure/entities/cart/cart-products';
+import { ProductMeasurementResponse } from '../product-measurement.response';
+import { ProductImagesResponse } from '../product-images.response';
 
 @Exclude()
-export class ProductResponse {
+export class ProductNewResponse {
   @Expose() readonly id: string;
 
   @Expose() readonly name_ar: string;
@@ -25,22 +24,11 @@ export class ProductResponse {
 
   @Expose() readonly is_recovered: boolean;
 
-  @Expose() readonly created_at: Date;
-
-  @Expose() readonly updated_at: Date;
-
-  @Transform(({ value }) => plainToClass(ProductSubCategoryResponse, value))
-  @Expose()
-  product_sub_categories: ProductSubCategoryResponse[];
-
   @Expose()
   @Transform(({ obj }) => {
-    if (!Array.isArray(obj.warehouses_products)) {
-      return 0;
-    }
-    return obj.warehouses_products.reduce((acc, cur) => acc + cur.quantity, 0);
+    return toUrl(obj.product_images.find((x) => x.is_logo === true).url);
   })
-  totalQuantity: number ;
+  logo: string;
 
   @Expose()
   @Transform(({ obj }) => {
@@ -61,6 +49,15 @@ export class ProductResponse {
     return false;
   })
   is_fav: boolean;
+  
+  @Expose()
+  @Transform(({ obj }) => {
+    if (!Array.isArray(obj.warehouses_products)) {
+      return 0;
+    }
+    return obj.warehouses_products.reduce((acc, cur) => acc + cur.quantity, 0);
+  })
+  totalQuantity: number;
 
   @Transform(({ value }) => plainToClass(ProductMeasurementResponse, value))
   @Expose()
@@ -70,7 +67,7 @@ export class ProductResponse {
   @Expose()
   readonly product_images: ProductImagesResponse;
 
-  constructor(data: Partial<ProductResponse>) {
+  constructor(data: Partial<ProductNewResponse>) {
     Object.assign(this, data);
   }
 }

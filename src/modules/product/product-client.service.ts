@@ -15,12 +15,16 @@ import { ProductFavorite } from 'src/infrastructure/entities/product/product-fav
 import { Section } from 'src/infrastructure/entities/section/section.entity';
 import { ProductFavQuery } from './dto/filter/product-fav.query';
 import { Cart } from 'src/infrastructure/entities/cart/cart.entity';
+import { ProductOffer } from 'src/infrastructure/entities/product/product-offer.entity';
 
 @Injectable()
 export class ProductClientService {
   constructor(
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
+
+    @InjectRepository(ProductOffer)
+    private readonly productOfferRepository: Repository<ProductOffer>,
 
     @InjectRepository(CategorySubCategory)
     private readonly categorySubcategory_repo: Repository<CategorySubCategory>,
@@ -117,6 +121,7 @@ export class ProductClientService {
       .innerJoinAndSelect(
         'product.product_measurements',
         'product_measurements',
+        'product_measurements.is_main_unit = true',
       )
       .innerJoinAndSelect(
         'product_measurements.measurement_unit',
@@ -143,7 +148,6 @@ export class ProductClientService {
         'category_subCategory',
       )
       .innerJoin('category_subCategory.section_category', 'section_category')
-      .orderBy('productSubCategory.order_by', 'ASC')
       .orderBy(productsSort)
 
       .skip(skip)
@@ -247,6 +251,8 @@ export class ProductClientService {
   }
 
   //* Get All Products Offers  For Client
+
+
   async getAllProductsOffersForClient(productClientQuery: ProductClientQuery) {
     const {
       page,
@@ -295,8 +301,74 @@ export class ProductClientService {
     }
 
     // Start building the query
-    let query = this.productRepository
-      .createQueryBuilder('product')
+    let query = this.productOfferRepository
+      .createQueryBuilder('product_offer')
+      .innerJoinAndSelect(
+        'product_offer.product_category_price',
+        'product_category_prices',
+      )
+
+      .innerJoinAndSelect(
+        'product_category_prices.product_additional_services',
+        'product_additional_services',
+      )
+      .innerJoinAndSelect(
+        'product_additional_services.additional_service',
+        'additional_service',
+      )
+
+      .innerJoinAndSelect(
+        'product_category_prices.product_measurement',
+        'product_measurement',
+      )
+      .innerJoinAndSelect(
+        'product_measurement.measurement_unit',
+        'measurement_unit',
+      )
+
+      .innerJoinAndSelect(
+        'product_category_prices.product_sub_category',
+        'product_sub_category',
+      )
+
+      .innerJoinAndSelect(
+        'product_sub_category.category_subCategory',
+        'category_subCategory',
+      )
+      .innerJoinAndSelect(
+        'category_subCategory.section_category',
+        'section_category',
+      )
+      .innerJoinAndSelect('section_category.section', 'section')
+      .innerJoinAndSelect('product_sub_category.product', 'product')
+      .innerJoinAndSelect('product.warehouses_products', 'warehousesProduct')
+      .innerJoinAndSelect(
+        'product.product_measurements',
+        'product_measurements',
+      )
+      .innerJoinAndSelect(
+        'product_measurements.product_category_prices',
+        'product_category_prices_measurement',
+      )
+
+      .innerJoinAndSelect(
+        'product_category_prices_measurement.product_sub_category',
+        'product_sub_category_measurement',
+      )
+
+      .innerJoinAndSelect(
+        'product_sub_category_measurement.category_subCategory',
+        'category_subCategory_measurement',
+      )
+      .innerJoinAndSelect(
+        'category_subCategory_measurement.section_category',
+        'section_category_measurement',
+      )
+      .innerJoinAndSelect(
+        'section_category_measurement.section',
+        'section_measurement',
+      )
+
       .innerJoinAndSelect('product.product_images', 'product_images')
       .innerJoinAndSelect(
         'product.product_sub_categories',
@@ -304,44 +376,20 @@ export class ProductClientService {
       )
       .innerJoinAndSelect(
         'product_sub_categories.category_subCategory',
-        'product_category_subCategory',
+        'category_subCategory_product',
       )
       .innerJoinAndSelect(
-        'product_category_subCategory.section_category',
-        'product_section_category',
+        'category_subCategory_product.section_category',
+        'section_category_product',
       )
-      .innerJoinAndSelect('product.warehouses_products', 'warehousesProduct')
-      .innerJoinAndSelect(
-        'product.product_measurements',
-        'product_measurements',
-      )
-      .innerJoinAndSelect(
-        'product_measurements.measurement_unit',
-        'measurement_unit',
-      )
-      .innerJoinAndSelect(
-        'product_measurements.product_category_prices',
-        'product_category_prices',
-      )
-      .innerJoinAndSelect('product_section_category.section', 'product_section')
+      .innerJoinAndSelect('section_category_product.section', 'section_product')
 
-      .innerJoinAndSelect(
-        'product_category_prices.product_offer',
-        'product_offer',
+      .where(
         'product_offer.offer_quantity > 0 AND product_offer.start_date <= :current_date AND product_offer.end_date >= :current_date',
         {
           current_date: new Date(),
         },
       )
-      .innerJoin(
-        'product_category_prices.product_sub_category',
-        'product_sub_category',
-      )
-      .innerJoin(
-        'product_sub_category.category_subCategory',
-        'category_subCategory',
-      )
-      .innerJoin('category_subCategory.section_category', 'section_category')
       .orderBy(productsSort)
 
       .skip(skip)
@@ -385,7 +433,6 @@ export class ProductClientService {
     }
 
     // Add search term condition if provided
-    // Add search term condition if provided
     if (product_name) {
       // Determine if the product_name is Arabic
       const isProductNameArabic = this.isArabic(product_name); // Implement or use a library to check if the text is Arabic
@@ -410,14 +457,14 @@ export class ProductClientService {
           category_sub_category_id,
         },
       );
-      query = query.andWhere('product.is_active = true');
-      query = query.andWhere('product_sub_categories.is_active = true');
       query = query.andWhere(
-        'product_sub_categories.category_sub_category_id = :category_sub_category_id',
+        'product_sub_category_measurement.category_sub_category_id = :category_sub_category_id',
         {
           category_sub_category_id,
         },
       );
+      query = query.andWhere('product.is_active = true');
+      query = query.andWhere('product_sub_category.is_active = true');
     }
 
     // Conditional where clause based on section
@@ -425,16 +472,15 @@ export class ProductClientService {
       query = query.andWhere('section_category.section_id = :section_id', {
         section_id,
       });
-      query = query.andWhere('product.is_active = true');
-      query = query.andWhere('product_sub_categories.is_active = true');
       query = query.andWhere(
-        'product_section_category.section_id = :section_id',
+        'section_category_measurement.section_id = :section_id',
         {
           section_id,
         },
       );
+      query = query.andWhere('product.is_active = true');
+      query = query.andWhere('product_sub_category.is_active = true');
     }
-
     const [products, total] = await query.getManyAndCount();
     return { products, total };
   }
@@ -716,6 +762,7 @@ export class ProductClientService {
         'category_subCategory',
       )
       .innerJoin('category_subCategory.section_category', 'section_category')
+
       .orderBy('productSubCategory.order_by', 'ASC')
       .orderBy(productsSort)
 

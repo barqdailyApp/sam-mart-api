@@ -1,4 +1,9 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { BaseUserService } from 'src/core/base/service/user-service.base';
 import { Order } from 'src/infrastructure/entities/order/order.entity';
 import { Request } from 'express';
@@ -49,7 +54,6 @@ export class OrderService extends BaseUserService<Order> {
       .leftJoinAndSelect('order.warehouse', 'warehouse_order')
       .leftJoinAndSelect('order.address', 'address')
       .leftJoinAndSelect('order.shipments', 'shipments')
-
 
       .leftJoinAndSelect('shipments.driver', 'driver')
       .leftJoinAndSelect('driver.user', 'shipment_user_driver')
@@ -176,7 +180,7 @@ export class OrderService extends BaseUserService<Order> {
   }
 
   // Function to get shipments for a driver based on various filters.
-  async getDriverShipments(driverShipmentsQuery: DriverShipmentsQuery) {
+  async getMyDriverShipments(driverShipmentsQuery: DriverShipmentsQuery) {
     // Retrieve the current user (assuming this is available via some context or service).
     const user = this.currentUser;
 
@@ -240,6 +244,11 @@ export class OrderService extends BaseUserService<Order> {
         query = query.andWhere('shipments.status = :status', {
           status: ShipmentStatusEnum.PENDING,
         });
+        // check driver is_receive_orders true
+        query = query.andWhere(
+          'driver.is_receive_orders = :is_receive_orders',
+          { is_receive_orders: true },
+        );
       } else {
         // For any other status, filter by the specific status and ensure the shipment belongs to the current user.
         query = query
@@ -358,10 +367,8 @@ export class OrderService extends BaseUserService<Order> {
 
   async sendOrderToDrivers(id: string) {
     const order = await this.orderRepository.findOne({ where: { id } });
-    if(!order)
-    throw new NotFoundException("order not found");
-    order.delivery_type=DeliveryType.FAST;
+    if (!order) throw new NotFoundException('order not found');
+    order.delivery_type = DeliveryType.FAST;
     return await this.orderRepository.save(order);
-
   }
 }
