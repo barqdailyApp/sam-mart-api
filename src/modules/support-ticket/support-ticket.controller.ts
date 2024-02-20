@@ -4,6 +4,7 @@ import {
     Controller,
     Get,
     Param,
+    Patch,
     Post,
     Put,
     Query,
@@ -32,6 +33,7 @@ import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { GetCommentQueryRequest } from './dto/request/get-comment-query.request';
 import { query } from 'express';
 import { SupportTicketSubject } from 'src/infrastructure/entities/support-ticket/suppot-ticket-subject.entity';
+import { CreateSupportTicketSubjectRequest } from './dto/request/create-support-subject.request';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -117,5 +119,15 @@ export class SupportTicketController {
     async getSubjects(): Promise<ActionResponse<SupportTicketSubject[]>> {
         const subjects = await this.supportTicketService.getSubjects();
         return new ActionResponse<SupportTicketSubject[]>(subjects);
+    }
+
+    @Roles(Role.ADMIN)
+    @Patch('/subjects/:subjectId')
+    async updateSubject(
+        @Param('subjectId') subjectId: string,
+        @Body() subject: CreateSupportTicketSubjectRequest
+    ): Promise<ActionResponse<SupportTicketSubject>> {
+        const updatedSubject = await this.supportTicketService.updateSubject(subjectId, subject);
+        return new ActionResponse<SupportTicketSubject>(updatedSubject);
     }
 }

@@ -13,6 +13,7 @@ import { SupportTicketStatus } from 'src/infrastructure/data/enums/support-ticke
 import { TicketAttachment } from 'src/infrastructure/entities/support-ticket/ticket-attachement.entity';
 import { SupportTicketSubject } from 'src/infrastructure/entities/support-ticket/suppot-ticket-subject.entity';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
+import { CreateSupportTicketSubjectRequest } from './dto/request/create-support-subject.request';
 
 
 @Injectable()
@@ -85,6 +86,14 @@ export class SupportTicketService extends BaseService<SupportTicket> {
 
     async getSubjects() {
         return await this.supportTicketSubjectRepository.find();
+    }
+
+    async updateSubject(subjectId: string, subject: CreateSupportTicketSubjectRequest) {
+        const foundSubject = await this.supportTicketSubjectRepository.findOne({ where: { id: subjectId } });
+        if (!foundSubject) throw new BadRequestException('Subject not found');
+
+        foundSubject.title = subject.title;
+        return await this.supportTicketSubjectRepository.save(foundSubject);
     }
 
     get currentUser() {
