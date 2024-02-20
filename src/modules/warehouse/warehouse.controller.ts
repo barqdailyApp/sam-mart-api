@@ -87,7 +87,7 @@ export class WarehouseController {
     const total = products[1];
     const pageMetaDto = new PageMetaDto(page, limit, total);
     // const data = this._i18nResponse.entity(productsResponse);
-    const pageDto = new PageDto(products[0], pageMetaDto);
+    const pageDto = new PageDto(product_response, pageMetaDto);
     return new ActionResponse(pageDto);
   }
   @Roles(Role.ADMIN)
