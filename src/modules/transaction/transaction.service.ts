@@ -19,7 +19,10 @@ export class TransactionService {
       user_id: req.user_id,
     });
     wallet.balance = wallet.balance + req.amount;
-    const transaction = plainToInstance(Transaction, req);
+    const transaction = plainToInstance(Transaction, {
+      ...req,
+      wallet_id: wallet.id,
+    });
 
     await this.transactionRepository.save(transaction);
     await this.walletRepository.save(wallet);
