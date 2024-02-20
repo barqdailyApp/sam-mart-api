@@ -81,8 +81,8 @@ export class WarehouseController {
     const products = await this.warehouseService.getWarehouseProduct(query);
     const product_response = plainToInstance(
       WarehouseProductRespone,
-      products[0],
-      { exposeDefaultValues: true },
+      products[0].map((product) => product.product),
+      { excludeExtraneousValues: true },
     );
     const total = products[1];
     const pageMetaDto = new PageMetaDto(page, limit, total);
