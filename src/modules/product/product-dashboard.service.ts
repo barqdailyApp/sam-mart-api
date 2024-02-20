@@ -99,12 +99,28 @@ export class ProductDashboardService {
     product_category_price_id: string,
     createProductOfferRequest: CreateProductOfferRequest,
   ) {
+    const { max_offer_quantity, min_offer_quantity, end_date, start_date } =
+      createProductOfferRequest;
+    if (max_offer_quantity < min_offer_quantity) {
+      throw new BadRequestException(
+        'max_offer_quantity_must_be_greater_than_min_offer_quantity',
+      );
+    }
+    if (end_date < start_date) {
+      throw new BadRequestException('end_date_must_be_greater_than_start_date');
+    }
     const productCategoryPrice = await this.productCategoryPrice_repo.findOne({
       where: { id: product_category_price_id },
     });
     if (!productCategoryPrice) {
       throw new NotFoundException('message_product_category_price_not_found');
     }
+     const productOffer = await this.productOffer_repo.findOne({
+       where: { product_category_price_id: product_category_price_id }
+     }) 
+     if (productOffer) {
+       throw new BadRequestException('message_product_offer_already_exist');
+     }
 
     const createProductOffer = this.productOffer_repo.create(
       createProductOfferRequest,
@@ -119,6 +135,7 @@ export class ProductDashboardService {
       createProductOffer.price =
         productCategoryPrice.price - discountedPercentage;
     }
+
     return await this.productOffer_repo.save(createProductOffer);
   }
 
@@ -490,7 +507,7 @@ export class ProductDashboardService {
       product_name,
       section_id,
       section_category_id,
-      sort
+      sort,
     } = productsDashboardQuery;
     const skip = (page - 1) * limit;
     let productsSort = {};
@@ -500,6 +517,7 @@ export class ProductDashboardService {
         productsSort = { 'product.created_at': 'DESC' };
         break;
     }
+    console.log(productsSort);
     let query = this.productRepository
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.product_images', 'product_images')

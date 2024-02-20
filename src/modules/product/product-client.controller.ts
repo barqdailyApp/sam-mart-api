@@ -22,6 +22,9 @@ import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
 import { RolesGuard } from '../authentication/guards/roles.guard';
 import { ProductFavResponse } from './dto/response/product-fav.response';
 import { ProductFavQuery } from './dto/filter/product-fav.query';
+import { ProductsOffersNewResponse } from './dto/response/response-client/products-offers-new.response';
+import { ProductsNewResponse } from './dto/response/response-client/products-new.response';
+import { SingleProductsNewResponse } from './dto/response/response-client/single-product-new.response';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -47,7 +50,7 @@ export class ProductClientController {
       );
 
     const productsResponse = products.map((product) => {
-      const productResponse = plainToClass(ProductResponse, product);
+      const productResponse = new ProductsNewResponse(product);
 
       return productResponse;
     });
@@ -57,6 +60,8 @@ export class ProductClientController {
 
     return new ActionResponse(pageDto);
   }
+
+
   @Get('all-products-offers-for-client')
   async allProductsOffersForClient(
     @Query() productClientFilter: ProductClientQuery,
@@ -68,7 +73,7 @@ export class ProductClientController {
         productClientFilter,
       );
     const productsResponse = products.map((product) => {
-      const productResponse = plainToClass(ProductResponse, product);
+      const productResponse = new ProductsOffersNewResponse(product);
       return productResponse;
     });
     const pageMetaDto = new PageMetaDto(page, limit, total);
@@ -87,7 +92,9 @@ export class ProductClientController {
       id,
       singleProductClientQuery,
     );
+   // const productResponse =new SingleProductsNewResponse(product);
     const productResponse = plainToClass(ProductResponse, product);
+
     if (product?.warehouses_products == null) {
       throw new ConflictException('Product is not available In Warehouse');
     }
@@ -100,11 +107,9 @@ export class ProductClientController {
     const { limit, page } = productFavQuery;
 
     const { products_favorite, total } =
-      await this.productClientService.getAllProductsFavorite(
-        productFavQuery,
-      );
+      await this.productClientService.getAllProductsFavorite(productFavQuery);
     const productsResponse = products_favorite.map((product_fav) => {
-      const productResponse = plainToClass(ProductResponse, product_fav.product);
+      const productResponse =new ProductsNewResponse(product_fav.product);
 
       return productResponse;
     });
