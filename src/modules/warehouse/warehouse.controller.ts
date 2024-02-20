@@ -30,6 +30,7 @@ import { query } from 'express';
 import { WarehouseProductsQuery } from './dto/requests/warehouse-products-query';
 import { PageMetaDto } from 'src/core/helpers/pagination/page-meta.dto';
 import { PageDto } from 'src/core/helpers/pagination/page.dto';
+import { WarehouseProductRespone } from './dto/response/warehouse-products-response';
 
 @ApiBearerAuth()
 @ApiTags('Warehouse')
@@ -73,11 +74,16 @@ export class WarehouseController {
   }
 
   @Roles(Role.ADMIN)
-  @Get("/products")
+  @Get('/products')
   async getWarehouseProducts(@Query() query: WarehouseProductsQuery) {
     const { page, limit } = query;
 
     const products = await this.warehouseService.getWarehouseProduct(query);
+    const product_response = plainToInstance(
+      WarehouseProductRespone,
+      products[0],
+      { exposeDefaultValues: true },
+    );
     const total = products[1];
     const pageMetaDto = new PageMetaDto(page, limit, total);
     // const data = this._i18nResponse.entity(productsResponse);

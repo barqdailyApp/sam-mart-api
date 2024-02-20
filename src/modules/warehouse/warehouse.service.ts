@@ -52,7 +52,10 @@ export class WarehouseService extends BaseService<Warehouse> {
 
   async getWarehouseProduct(query: WarehouseProductsQuery) {
     const products = await this.warehouseProducts_repo.findAndCount({
-      where: { warehouse_id: query.warehouse_id },
+      where: [
+        { warehouse_id: query.warehouse_id, product: { name_ar: query.name } },
+        { warehouse_id: query.warehouse_id, product: { name_en: query.name } },
+      ],
       relations: {
         product: { product_images: true },
         product_measurement: { measurement_unit: true },

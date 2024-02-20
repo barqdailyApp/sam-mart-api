@@ -8,14 +8,14 @@ export class WarehouseProductsQuery {
   @IsString()
   warehouse_id: string;
 
-  @ApiPropertyOptional({default: 20})
-  @IsOptional()
+  @ApiProperty({default: 20})
+
   @Transform(({ value }) => parseInt(value))
   @IsNumber()
   limit: number;
 
-  @ApiPropertyOptional({ default: 1 })
-  @IsOptional()
+  @ApiProperty({ default: 1 })
+
   @Transform(({ value }) => parseInt(value))
   @IsNumber()
   page: number;
