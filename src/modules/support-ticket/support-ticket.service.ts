@@ -62,7 +62,10 @@ export class SupportTicketService extends BaseService<SupportTicket> {
         });
 
         const savedTicket = await this.supportTicketRepository.save(newTicket);
-        await this.ticketCommentService.addComment(savedTicket.id, { comment_text: description, file: file ?? null });
+        await this.ticketCommentService.addComment(savedTicket.id, {
+            comment_text: description ?? subject.title,
+            file: file ?? null
+        });
 
         return savedTicket;
     }
