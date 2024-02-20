@@ -14,6 +14,8 @@ import { TicketAttachment } from 'src/infrastructure/entities/support-ticket/tic
 import { SupportTicketSubject } from 'src/infrastructure/entities/support-ticket/suppot-ticket-subject.entity';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { CreateSupportTicketSubjectRequest } from './dto/request/create-support-subject.request';
+import { TicketCommentService } from './ticket-comment.service';
+import { SupportTicketGateway } from 'src/integration/gateways/support-ticket.gateway';
 
 
 @Injectable()
@@ -25,6 +27,8 @@ export class SupportTicketService extends BaseService<SupportTicket> {
 
         @Inject(REQUEST) private readonly request: Request,
         @Inject(FileService) private _fileService: FileService,
+
+        private readonly ticketCommentService: TicketCommentService,
 
     ) {
         super(supportTicketRepository);
@@ -50,14 +54,17 @@ export class SupportTicketService extends BaseService<SupportTicket> {
         const subject = await this.supportTicketSubjectRepository.findOne({ where: { id: subject_id } });
         if (!subject) throw new BadRequestException('Subject not found');
 
-        const savedTicket = await this.supportTicketRepository.create({
+        const newTicket = await this.supportTicketRepository.create({
             subject,
             description,
             user: this.currentUser,
             attachment: attachedFile
         });
 
-        return await this.supportTicketRepository.save(savedTicket);
+        const savedTicket = await this.supportTicketRepository.save(newTicket);
+        await this.ticketCommentService.addComment(savedTicket.id, { comment_text: description, file: file ?? null });
+
+        return savedTicket;
     }
 
     async getTickets(options?: PaginatedRequest) {
