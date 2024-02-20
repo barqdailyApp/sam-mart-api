@@ -44,6 +44,7 @@ import { ShipmentFeedback } from '../entities/order/shipment-feedback.entity';
 import { Wallet } from '../entities/wallet/wallet.entity';
 import { Transaction as WalletTransaction } from '../entities/wallet/transaction.entity';
 import { WarehouseOpreationProducts } from '../entities/warehouse/wahouse-opreation-products.entity';
+import { SupportTicketSubject } from '../entities/support-ticket/suppot-ticket-subject.entity';
 
 
 export const DB_ENTITIES = [
@@ -80,6 +81,7 @@ export const DB_ENTITIES = [
   SupportTicket,
   TicketAttachment,
   TicketComment,
+  SupportTicketSubject,
   StaticPage,
   Order,
   Slot,

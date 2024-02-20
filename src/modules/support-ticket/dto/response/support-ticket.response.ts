@@ -2,10 +2,11 @@ import { Expose, Type } from "class-transformer";
 import { SupportTicketStatus } from "src/infrastructure/data/enums/support-ticket-status.enum";
 import { RegisterResponse } from "src/modules/authentication/dto/responses/register.response";
 import { TicketAttachmentResponse } from "./ticket-attachment.response";
+import { SupportTicketSubjectResponse } from "./suppot-ticket-subject.response";
 
 export class SupportTicketResponse {
     @Expose() id: string;
-    @Expose() subject: string;
+    @Expose() @Type(() => SupportTicketSubjectResponse) subject: SupportTicketSubjectResponse;
     @Expose() description: string;
     @Expose() status: SupportTicketStatus;
     @Expose() ticket_num: string;
@@ -14,5 +15,4 @@ export class SupportTicketResponse {
     @Expose() updated_at: Date;
     @Expose() user_id: string;
     @Expose() @Type(() => RegisterResponse) user: RegisterResponse;
-
 }
