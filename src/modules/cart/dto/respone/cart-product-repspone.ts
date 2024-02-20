@@ -30,7 +30,7 @@ export class CartProductRespone {
         ? data.product.product_offer.min_offer_quantity
         : data.product.min_order_quantity,
       max_order_quantity: data.product.product_offer
-        ? data.product.product_offer.min_offer_quantity
+        ? data.product.product_offer.max_offer_quantity
         : data.product.max_order_quantity,
 
       additional_services: data.product.product_additional_services.filter(
