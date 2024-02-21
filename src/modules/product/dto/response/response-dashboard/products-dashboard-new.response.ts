@@ -13,9 +13,9 @@ import { Product } from 'src/infrastructure/entities/product/product.entity';
 export class ProductsDashboardNewResponse {
   @Expose() readonly product_id: string;
 
-  @Expose() readonly product_name_ar: string;
+  @Expose() readonly name_ar: string;
 
-  @Expose() readonly product_name_en: string;
+  @Expose() readonly name_en: string;
 
   @Expose() readonly product_logo: string;
 
@@ -43,8 +43,8 @@ export class ProductsDashboardNewResponse {
     const measurement_unit = product_measurement.measurement_unit;
 
     this.product_id = product.id;
-    this.product_name_ar = product.name_ar;
-    this.product_name_en = product.name_en;
+    this.name_ar = product.name_ar;
+    this.name_en = product.name_en;
     this.product_logo = toUrl(
       product.product_images.find((x) => x.is_logo === true).url,
     );
