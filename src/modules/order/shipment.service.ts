@@ -32,6 +32,7 @@ import { FastDeliveryGateway } from 'src/integration/gateways/fast-delivery.gate
 import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
 import { AddDriverShipmentOption } from 'src/infrastructure/data/enums/add-driver-shipment-option.enum';
 import { SendOfferToDriver } from 'src/integration/gateways/interfaces/fast-delivery/send-offer-payload.response';
+import { CancelShipmentRequest } from './dto/request/cancel-shipment.request';
 @Injectable()
 export class ShipmentService extends BaseService<Shipment> {
   constructor(
@@ -281,9 +282,9 @@ export class ShipmentService extends BaseService<Shipment> {
     return this.addDriverToShipment(shipment_id, AddDriverShipmentOption.DRIVER_ASSIGN_SHIPMENT, driver_id);
   }
 
-  async cancelShipment(
-    shipment_id: string,
-  ) {
+  async cancelShipment(shipment_id: string, req: CancelShipmentRequest) {
+    const { reason } = req;
+
     const shipment = await this.shipmentRepository.findOne({
       where: { id: shipment_id },
       relations: ['order'],
@@ -293,12 +294,34 @@ export class ShipmentService extends BaseService<Shipment> {
       throw new NotFoundException('Shipment not found');
     }
 
-    if (shipment.status === ShipmentStatusEnum.DELIVERED) {
-      throw new BadRequestException('Shipment already delivered');
+    const currentUserRole = this.currentUser.roles;
+    const shipmentStatus = shipment.status;
+
+    if (
+      (currentUserRole.includes(Role.CLIENT) && shipment.order.user_id !== this.currentUser.id) ||
+      (currentUserRole.includes(Role.DRIVER) && shipment.driver_id !== this.currentUser.id)
+    ) {
+      throw new UnauthorizedException('You are not allowed to cancel this shipment');
+    }
+
+    if (
+      (currentUserRole.includes(Role.CLIENT) && shipmentStatus === ShipmentStatusEnum.PICKED_UP) ||
+      (currentUserRole.includes(Role.DRIVER) && shipmentStatus === ShipmentStatusEnum.PENDING) ||
+      (shipmentStatus ===
+        (
+          ShipmentStatusEnum.CANCELED ||
+          ShipmentStatusEnum.DELIVERED ||
+          ShipmentStatusEnum.RETRUNED ||
+          ShipmentStatusEnum.COMPLETED
+        )
+      )
+    ) {
+      throw new BadRequestException('Shipment cannot be canceled');
     }
 
     shipment.status = ShipmentStatusEnum.CANCELED;
     shipment.order_canceled_at = new Date();
+    shipment.status_reason = reason;
 
     await this.shipmentRepository.save(shipment);
 
@@ -321,6 +344,7 @@ export class ShipmentService extends BaseService<Shipment> {
       throw new NotFoundException('Driver not found');
     }
 
+
     const shipment = await this.shipmentRepository.findOne({
       where: { id: shipment_id },
       relations: ['order'],
@@ -328,6 +352,10 @@ export class ShipmentService extends BaseService<Shipment> {
 
     if (!shipment) {
       throw new NotFoundException('Shipment not found');
+    }
+    
+    if (driver.warehouse_id !== shipment.warehouse_id) {
+      throw new BadRequestException('Driver not in the same warehouse');
     }
 
     if (shipment.status !== ShipmentStatusEnum.PENDING) {
