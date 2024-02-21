@@ -59,6 +59,7 @@ import { ProductClientService } from './product-client.service';
 import { SingleProductDashboardQuery } from './dto/filter/single-product-dashboard.query';
 import { ProductsDashboardNewResponse } from './dto/response/response-dashboard/products-dashboard-new.response';
 import { SingleProductDashboardNewResponse } from './dto/response/response-dashboard/single-product-dashboard-new.response';
+import { ProductsOffersDashboardNewResponse } from './dto/response/response-dashboard/products-offers-dashboard-new.response';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -195,11 +196,11 @@ export class ProductDashboardController {
     const { limit, page } = productsDashboardQuery;
 
     const { products, total } =
-      await this.productDashboardService.getAllProductsOffersForDashboard(
+      await this.productDashboardService.getAllProductsOffersForDashboard2(
         productsDashboardQuery,
       );
     const productsResponse = products.map((product) => {
-      const productResponse = plainToClass(ProductResponse, product);
+  const productResponse = new ProductsOffersDashboardNewResponse(product);
       return productResponse;
     });
     const pageMetaDto = new PageMetaDto(page, limit, total);
@@ -207,6 +208,20 @@ export class ProductDashboardController {
     const pageDto = new PageDto(productsResponse, pageMetaDto);
 
     return new ActionResponse(pageDto);
+  }
+  
+  @Get('single-product-offer-dashboard/:offer_id')
+  async singleProductOfferDashboard(
+    @Param('offer_id') offer_id: string,
+  ) {
+    const product =
+      await this.productDashboardService.getSingleProductOfferDashboard(offer_id);
+    const productResponse = new ProductsOffersDashboardNewResponse(product);
+      // console.log(JSON.stringify(product, null, '  '));
+    //   const productResponse = plainToClass(ProductResponse, product);
+    // const data = this._i18nResponse.entity(productsResponse);
+
+    return new ActionResponse(productResponse);
   }
 
   @Get('single-product-dashboard')
@@ -218,7 +233,7 @@ export class ProductDashboardController {
         singleProductDashboardQuery,
       );
     const productResponse = new SingleProductDashboardNewResponse(product);
-
+      // console.log(JSON.stringify(product, null, '  '));
     //   const productResponse = plainToClass(ProductResponse, product);
     // const data = this._i18nResponse.entity(productsResponse);
 
