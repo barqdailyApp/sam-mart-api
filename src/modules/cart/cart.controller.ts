@@ -97,11 +97,36 @@ export class CartController {
 
   @Put('/update/:cart-product')
   async updateCartProduct(@Body() req: UpdateCartProductRequest) {
-    return new ActionResponse(await this.cartService.updatecartProduct(req));
+    const cart_product = await this.cartService.updatecartProduct(req);
+    const result = this._i18nResponse.entity(
+      await this.cartService.getSingleCartProduct(cart_product.id),
+    );
+
+    const response = new CartProductRespone({
+      id: result.id,
+      additional_services: result.additions,
+      price: result.price,
+      quantity: result.quantity,
+      product: result.product_category_price,
+    });
+    return new ActionResponse(response);
   }
 
   @Put('/update/:cart-product/service')
   async addRemoveService(@Body() req: AddRemoveCartProductServiceRequest) {
-    return new ActionResponse(await this.cartService.addRemoveService(req));
+    const cart_product = await this.cartService.addRemoveService(req);
+    const result = this._i18nResponse.entity(
+      await this.cartService.getSingleCartProduct(cart_product.id),
+    );
+
+    const response = new CartProductRespone({
+      id: result.id,
+      additional_services: result.additions,
+      price: result.price,
+      quantity: result.quantity,
+      product: result.product_category_price,
+    });
+
+    return new ActionResponse(response);
   }
 }

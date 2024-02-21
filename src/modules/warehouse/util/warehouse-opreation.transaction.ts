@@ -29,6 +29,7 @@ import { WarehouseOperations } from 'src/infrastructure/entities/warehouse/wareh
 import { operationType } from 'src/infrastructure/data/enums/operation-type.enum';
 import { WarehouseProducts } from 'src/infrastructure/entities/warehouse/warehouse-products.entity';
 import { where } from 'sequelize';
+import { WarehouseOpreationProducts as WarehouseOpreationProduct } from 'src/infrastructure/entities/warehouse/wahouse-opreation-products.entity';
 
 @Injectable()
 export class WarehouseOperationTransaction extends BaseTransaction<
@@ -47,59 +48,77 @@ export class WarehouseOperationTransaction extends BaseTransaction<
     request: WarehouseOperationRequest,
     context: EntityManager,
   ): Promise<WarehouseOperations> {
-    const warehouseOperation = plainToInstance(WarehouseOperations, request);
-    warehouseOperation.user_id = this.request.user.id;
-    const product_measurement = await context.find(ProductMeasurement, {
-      where: {
-        product_id: request.product_id,
-      },
+    const warehouseOperation = plainToInstance(WarehouseOperations, {
+      type: request.type,
+      warehouse_id: request.warehouse_id,
+      user_id: this.request.user.id,
     });
-    const passed_measurement = product_measurement.filter(
-      (product_measurement) =>
-        product_measurement.id === request.product_measurement_id,
-    )[0];
-    const base_measurement = product_measurement.filter(
-      (product_measurement) => product_measurement.is_main_unit === true,
-    )[0];
-
-    let quantity =
-      passed_measurement == base_measurement
-        ? request.quantity
-        : passed_measurement.conversion_factor * request.quantity;
-    quantity = operationType.IMPORT == request.type ? quantity : quantity * -1;
-
-    warehouseOperation.quantity = quantity;
-
-    warehouseOperation.product_measurement_id = base_measurement.id;
+    
     await context.save(warehouseOperation);
 
-    const warehouseProducts = await context.findOne(WarehouseProducts, {
-      where: {
-        warehouse_id: request.warehouse_id,
-        product_id: request.product_id,
-      },
-    });
-    if (
-      (warehouseProducts == null && quantity < 0) || warehouseProducts == null
-        ? 0
-        : warehouseProducts.quantity + quantity < 0
-    ) {
-      throw new BadRequestException('warehouse doesnt have enough products');
-    }
+    await Promise.all(
+      request.products.map(async (item) => {
+        const product = plainToInstance(WarehouseOpreationProduct, {
+          ...item,
+          operation_id: warehouseOperation.id,
+        });
+        const product_measurement = await context.find(ProductMeasurement, {
+          where: {
+            product_id: product.product_id,
+          },
+        });
+        const passed_measurement = product_measurement.filter(
+          (product_measurement) =>
+            product_measurement.id === product.product_measurement_id,
+        )[0];
+        const base_measurement = product_measurement.filter(
+          (product_measurement) => product_measurement.is_main_unit === true,
+        )[0];
 
-    if (warehouseProducts) {
-      warehouseProducts.quantity = warehouseProducts.quantity + quantity;
-      await context.save(warehouseProducts);
-    } else {
-      await context.save(
-        new WarehouseProducts({
-          warehouse_id: request.warehouse_id,
-          product_id: request.product_id,
-          quantity: quantity,
-          product_measurement_id: base_measurement.id,
-        }),
-      );
-    }
+        let quantity =
+          passed_measurement == base_measurement
+            ? product.quantity
+            : passed_measurement.conversion_factor * product.quantity;
+        quantity =
+          operationType.IMPORT == request.type ? quantity : quantity * -1;
+
+        product.quantity = quantity;
+
+        product.product_measurement_id = base_measurement.id;
+        await context.save(product);
+
+        const warehouseProducts = await context.findOne(WarehouseProducts, {
+          where: {
+            warehouse_id: request.warehouse_id,
+            product_id: product.product_id,
+          },
+        });
+        if (
+          (warehouseProducts == null && quantity < 0) ||
+          warehouseProducts == null
+            ? 0
+            : warehouseProducts.quantity + quantity < 0
+        ) {
+          throw new BadRequestException(
+            'warehouse doesnt have enough products',
+          );
+        }
+
+        if (warehouseProducts) {
+          warehouseProducts.quantity = warehouseProducts.quantity + quantity;
+          await context.save(warehouseProducts);
+        } else {
+          await context.save(
+            new WarehouseProducts({
+              warehouse_id: request.warehouse_id,
+              product_id: product.product_id,
+              quantity: quantity,
+              product_measurement_id: base_measurement.id,
+            }),
+          );
+        }
+      }),
+    );
 
     return warehouseOperation;
   }

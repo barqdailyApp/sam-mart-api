@@ -41,6 +41,11 @@ import { Employee } from '../entities/employee/employee.entity';
 import { ShipmentChat } from '../entities/order/shipment-chat.entity';
 import { ShipmentChatAttachment } from '../entities/order/shipment-chat-attachment.entity';
 import { ShipmentFeedback } from '../entities/order/shipment-feedback.entity';
+import { Wallet } from '../entities/wallet/wallet.entity';
+import { Transaction as WalletTransaction } from '../entities/wallet/transaction.entity';
+import { WarehouseOpreationProducts } from '../entities/warehouse/wahouse-opreation-products.entity';
+import { SupportTicketSubject } from '../entities/support-ticket/suppot-ticket-subject.entity';
+
 
 export const DB_ENTITIES = [
   User,
@@ -76,6 +81,7 @@ export const DB_ENTITIES = [
   SupportTicket,
   TicketAttachment,
   TicketComment,
+  SupportTicketSubject,
   StaticPage,
   Order,
   Slot,
@@ -86,7 +92,10 @@ export const DB_ENTITIES = [
   ShipmentChat,
   ShipmentChatAttachment,
   ShipmentFeedback,
-  WorkingArea
+  WorkingArea,
+  Wallet,
+  WalletTransaction,
+  WarehouseOpreationProducts
 ];
 
 export const DB_VIEWS = [];

@@ -6,6 +6,7 @@ import {
   OneToMany,
   OneToOne,
   AfterInsert,
+
 } from 'typeorm';
 import { randNum } from 'src/core/helpers/cast.helper';
 import { Gender } from 'src/infrastructure/data/enums/gender.enum';
@@ -14,11 +15,12 @@ import { Language } from 'src/infrastructure/data/enums/language.enum';
 import { Address } from './address.entity';
 import { SupportTicket } from '../support-ticket/support-ticket.entity';
 import { TicketComment } from '../support-ticket/ticket-comment.entity';
-
+import { Transaction } from '../wallet/transaction.entity';
 import { Order } from '../order/order.entity';
 import { ProductFavorite } from '../product/product-favorite.entity';
 import { ShipmentChat } from '../order/shipment-chat.entity';
 import { ShipmentFeedback } from '../order/shipment-feedback.entity';
+import { Wallet } from '../wallet/wallet.entity';
 
 @Entity()
 export class User extends AuditableEntity {
@@ -36,6 +38,12 @@ export class User extends AuditableEntity {
 
   @Column({ nullable: true })
   email_verified_at: Date;
+
+
+  @OneToOne(() => Wallet, (wallet) => wallet.user)
+  wallet: Wallet;
+  @OneToMany(()=>Transaction, (transaction) => transaction.user)
+  transactions: Transaction[]
 
   @Column({ nullable: true, length: 20 })
   phone: string;

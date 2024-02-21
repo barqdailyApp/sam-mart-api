@@ -43,5 +43,9 @@ export class CreateAddressRequest {
   is_favorite?: boolean;
 
 
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  phone: string;
 
 }

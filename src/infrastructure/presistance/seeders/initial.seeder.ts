@@ -9,6 +9,7 @@ import { SlotSeeder } from './slot.seeder';
 import { ProductSeeder } from './product.seeder';
 import { WareHouseSeeder } from './warehouse.seeder';
 import { WareHouseProductsSeeder } from './warehouse-product.seeder';
+import { SupportTicketSubjectSeeder } from './suppot-ticket-subjects.seeder';
 
 export const DB_SEEDERS = [
   // UsersSeeder,
@@ -21,5 +22,6 @@ export const DB_SEEDERS = [
   StaticPageSeeder,
   SlotSeeder,
   WareHouseSeeder,
-  WareHouseProductsSeeder
+  WareHouseProductsSeeder,
+  SupportTicketSubjectSeeder
 ];

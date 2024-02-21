@@ -53,9 +53,9 @@ export class CartService extends BaseService<CartProduct> {
       },
     });
   }
-  async getSingleCartProduct(id:string) {
+  async getSingleCartProduct(id: string) {
     return await this.cartProductRepository.findOne({
-      where: { id},
+      where: { id },
       relations: {
         product_category_price: {
           product_additional_services: { additional_service: true },
@@ -70,7 +70,6 @@ export class CartService extends BaseService<CartProduct> {
         },
       },
     });
-    
   }
 
   async addToCart(req: AddToCartRequest) {
@@ -197,7 +196,7 @@ export class CartService extends BaseService<CartProduct> {
         cart_product.quantity + product_category_price.min_order_quantity >=
         product_category_price.max_order_quantity
       )
-        cart_product.quantity = product_category_price.max_order_quantity;
+        cart_product.quantity = cart_product.quantity;
       else cart_product.quantity += product_category_price.min_order_quantity;
     } else {
       if (
@@ -246,11 +245,20 @@ export class CartService extends BaseService<CartProduct> {
             cart_product.price -= Number(service.price);
           }
         } else {
+          if (cart_product.additions.length > 0) {
+            const old_service =
+              product_category_price.product_additional_services.find(
+                (s) => s.id == cart_product.additions[0],
+              );
+            cart_product.price -= Number(old_service.price);
+            cart_product.additions.splice(0, 1);
+          }
+
           cart_product.additions.push(e);
           cart_product.price += Number(service.price);
         }
       });
     }
-    return this.cartProductRepository.save(cart_product);
+    return await this.cartProductRepository.save(cart_product);
   }
 }

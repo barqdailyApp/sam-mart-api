@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { SupportTicketStatus } from 'src/infrastructure/data/enums/support-ticket-status.enum';
 import { TicketComment } from './ticket-comment.entity';
 import { TicketAttachment } from './ticket-attachement.entity';
+import { SupportTicketSubject } from './suppot-ticket-subject.entity';
 
 @Entity()
 export class SupportTicket extends AuditableEntity {
@@ -18,17 +19,14 @@ export class SupportTicket extends AuditableEntity {
     @OneToMany(() => TicketComment, (comment) => comment.ticket, { cascade: true })
     ticket_comments: TicketComment[];
 
-    @OneToOne(()=>TicketAttachment, (attachment) => attachment.ticket)
+    @OneToOne(() => TicketAttachment, (attachment) => attachment.ticket)
     @JoinColumn({ name: 'attachment_id' })
     attachment: TicketAttachment;
 
     @Column({ nullable: true })
     attachment_id: string;
 
-    @Column({ nullable: false })
-    subject: string;
-
-    @Column({ nullable: false })
+    @Column({ nullable: true })
     description: string;
 
     @Column({
@@ -41,6 +39,13 @@ export class SupportTicket extends AuditableEntity {
 
     @Column({ nullable: false, unique: true })
     ticket_num: string;
+
+    @ManyToOne(() => SupportTicketSubject, (subject) => subject.support_tickets, { onDelete: 'SET NULL' })
+    @JoinColumn({ name: 'subject_id' })
+    subject: SupportTicketSubject;
+
+    @Column({ nullable: true })
+    subject_id: string;
 
     @BeforeInsert()
     async generateTicketNum() {

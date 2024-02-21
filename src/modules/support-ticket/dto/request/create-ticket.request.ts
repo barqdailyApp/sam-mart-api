@@ -1,14 +1,14 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator";
 
 export class CreateTicketRequest {
     @ApiProperty()
     @IsNotEmpty()
-    @IsString()
-    subject: string;
+    @IsUUID()
+    subject_id: string;
 
-    @ApiProperty()
-    @IsNotEmpty()
+    @ApiProperty({ required: false })
+    @IsOptional()
     @IsString()
     description: string;
 

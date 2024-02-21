@@ -24,6 +24,9 @@ export class Address extends OwnedEntity {
   @Column({ length: 100 })
   name: string;
 
+  @Column({nullable:true})
+  phone: string;
+
   // address
   @Column({ length: 500 })
   address: string;
