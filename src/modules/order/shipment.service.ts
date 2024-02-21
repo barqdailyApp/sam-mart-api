@@ -298,6 +298,13 @@ export class ShipmentService extends BaseService<Shipment> {
     const shipmentStatus = shipment.status;
 
     if (
+      (currentUserRole.includes(Role.CLIENT) && shipment.order.user_id !== this.currentUser.id) ||
+      (currentUserRole.includes(Role.DRIVER) && shipment.driver_id !== this.currentUser.id)
+    ) {
+      throw new UnauthorizedException('You are not allowed to cancel this shipment');
+    }
+
+    if (
       (currentUserRole.includes(Role.CLIENT) && shipmentStatus === ShipmentStatusEnum.PICKED_UP) ||
       (currentUserRole.includes(Role.DRIVER) && shipmentStatus === ShipmentStatusEnum.PENDING) ||
       (shipmentStatus ===
