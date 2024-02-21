@@ -57,6 +57,9 @@ import { ImportCategoryRequest } from '../category/dto/requests/import-category-
 import { UploadValidator } from 'src/core/validators/upload.validator';
 import { ProductClientService } from './product-client.service';
 import { SingleProductDashboardQuery } from './dto/filter/single-product-dashboard.query';
+import { ProductsDashboardNewResponse } from './dto/response/response-dashboard/products-dashboard-new.response';
+import { SingleProductDashboardNewResponse } from './dto/response/response-dashboard/single-product-dashboard-new.response';
+import { ProductsOffersDashboardNewResponse } from './dto/response/response-dashboard/products-offers-dashboard-new.response';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -151,11 +154,9 @@ export class ProductDashboardController {
   }
 
   @Put('update-product-image/:product_id/:image_id')
-
   async updateProductImage(
     @Param('product_id') product_id: string,
     @Param('image_id') image_id: string,
-
   ) {
     const product = await this.productDashboardService.updateProductImage(
       product_id,
@@ -175,7 +176,10 @@ export class ProductDashboardController {
         productsDashboardQuery,
       );
     const productsResponse = products.map((product) => {
-      const productResponse = plainToClass(ProductResponse, product);
+      // const productResponse = plainToClass(ProductResponse, product);
+      // console.log(JSON.stringify(product.product_sub_categories, null, '  '));
+
+      const productResponse = new ProductsDashboardNewResponse(product);
       return productResponse;
     });
     const pageMetaDto = new PageMetaDto(page, limit, total);
@@ -192,11 +196,11 @@ export class ProductDashboardController {
     const { limit, page } = productsDashboardQuery;
 
     const { products, total } =
-      await this.productDashboardService.getAllProductsOffersForDashboard(
+      await this.productDashboardService.getAllProductsOffersForDashboard2(
         productsDashboardQuery,
       );
     const productsResponse = products.map((product) => {
-      const productResponse = plainToClass(ProductResponse, product);
+  const productResponse = new ProductsOffersDashboardNewResponse(product);
       return productResponse;
     });
     const pageMetaDto = new PageMetaDto(page, limit, total);
@@ -204,6 +208,20 @@ export class ProductDashboardController {
     const pageDto = new PageDto(productsResponse, pageMetaDto);
 
     return new ActionResponse(pageDto);
+  }
+  
+  @Get('single-product-offer-dashboard/:offer_id')
+  async singleProductOfferDashboard(
+    @Param('offer_id') offer_id: string,
+  ) {
+    const product =
+      await this.productDashboardService.getSingleProductOfferDashboard(offer_id);
+    const productResponse = new ProductsOffersDashboardNewResponse(product);
+      // console.log(JSON.stringify(product, null, '  '));
+    //   const productResponse = plainToClass(ProductResponse, product);
+    // const data = this._i18nResponse.entity(productsResponse);
+
+    return new ActionResponse(productResponse);
   }
 
   @Get('single-product-dashboard')
@@ -214,7 +232,9 @@ export class ProductDashboardController {
       await this.productDashboardService.getSingleProductForDashboard(
         singleProductDashboardQuery,
       );
-    const productResponse = plainToClass(ProductResponse, product);
+    const productResponse = new SingleProductDashboardNewResponse(product);
+      // console.log(JSON.stringify(product, null, '  '));
+    //   const productResponse = plainToClass(ProductResponse, product);
     // const data = this._i18nResponse.entity(productsResponse);
 
     return new ActionResponse(productResponse);
