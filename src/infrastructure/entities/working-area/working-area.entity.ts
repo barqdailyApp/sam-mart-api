@@ -42,7 +42,7 @@ export class WorkingArea extends AuditableEntity {
 
   @Column()
   range:number  
-  @Column()
+  @Column({nullable:true})
   city_id: string;
 
 
