@@ -12,8 +12,6 @@ import { Product } from 'src/infrastructure/entities/product/product.entity';
 @Exclude()
 export class SingleProductsNewResponse {
   @Expose() product: any;
-  @Expose() product_images: any[];
-
   @Expose() product_measurements: any[];
 
   constructor(product: Product) {

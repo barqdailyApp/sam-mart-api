@@ -115,12 +115,12 @@ export class ProductDashboardService {
     if (!productCategoryPrice) {
       throw new NotFoundException('message_product_category_price_not_found');
     }
-     const productOffer = await this.productOffer_repo.findOne({
-       where: { product_category_price_id: product_category_price_id }
-     }) 
-     if (productOffer) {
-       throw new BadRequestException('message_product_offer_already_exist');
-     }
+    const productOffer = await this.productOffer_repo.findOne({
+      where: { product_category_price_id: product_category_price_id },
+    });
+    if (productOffer) {
+      throw new BadRequestException('message_product_offer_already_exist');
+    }
 
     const createProductOffer = this.productOffer_repo.create(
       createProductOfferRequest,
@@ -400,33 +400,24 @@ export class ProductDashboardService {
       )
       .leftJoinAndSelect(
         'product_sub_categories.category_subCategory',
-        'product_category_subCategory',
+        'category_subCategory',
       )
       .leftJoinAndSelect(
-        'product_category_subCategory.section_category',
-        'product_section_category',
+        'category_subCategory.section_category',
+        'section_category',
       )
-      .leftJoinAndSelect('product_section_category.section', 'product_section')
+      .leftJoinAndSelect('section_category.section', 'section')
 
       .leftJoinAndSelect('product.warehouses_products', 'warehousesProduct')
-      .leftJoinAndSelect('product.product_measurements', 'product_measurements')
+      .leftJoinAndSelect(
+        'product.product_measurements',
+        'product_measurements',
+        'product_measurements.is_main_unit = true',
+      )
       .leftJoinAndSelect(
         'product_measurements.measurement_unit',
         'measurement_unit',
       )
-      .leftJoinAndSelect(
-        'product_measurements.product_category_prices',
-        'product_category_prices',
-      )
-      .leftJoin(
-        'product_category_prices.product_sub_category',
-        'product_sub_category',
-      )
-      .leftJoin(
-        'product_sub_category.category_subCategory',
-        'category_subCategory',
-      )
-      .leftJoin('category_subCategory.section_category', 'section_category')
       .orderBy(productsSort)
       .skip(skip)
       .take(limit);
@@ -456,41 +447,20 @@ export class ProductDashboardService {
           category_sub_category_id,
         },
       );
-
-      // query = query.orWhere(
-      //   'product_sub_category.category_sub_category_id = :category_sub_category_id',
-      //   {
-      //     category_sub_category_id,
-      //   },
-      // );
     }
 
     if (section_category_id) {
       query = query.andWhere(
-        'product_category_subCategory.section_category_id = :section_category_id',
+        'category_subCategory.section_category_id = :section_category_id',
         {
           section_category_id,
         },
       );
-
-      // query = query.orWhere(
-      //   'category_subCategory.section_category_id = :section_category_id',
-      //   {
-      //     section_category_id,
-      //   },
-      // );
     }
     if (section_id) {
-      query = query.andWhere(
-        'product_section_category.section_id = :section_id',
-        {
-          section_id,
-        },
-      );
-
-      // query = query.andWhere('section_category.section_id = :section_id', {
-      //   section_id,
-      // });
+      query = query.andWhere('section_category.section_id = :section_id', {
+        section_id,
+      });
     }
     const [products, total] = await query.getManyAndCount();
     return { products, total };
