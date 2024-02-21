@@ -344,6 +344,7 @@ export class ShipmentService extends BaseService<Shipment> {
       throw new NotFoundException('Driver not found');
     }
 
+
     const shipment = await this.shipmentRepository.findOne({
       where: { id: shipment_id },
       relations: ['order'],
@@ -351,6 +352,10 @@ export class ShipmentService extends BaseService<Shipment> {
 
     if (!shipment) {
       throw new NotFoundException('Shipment not found');
+    }
+    
+    if (driver.warehouse_id !== shipment.warehouse_id) {
+      throw new BadRequestException('Driver not in the same warehouse');
     }
 
     if (shipment.status !== ShipmentStatusEnum.PENDING) {
