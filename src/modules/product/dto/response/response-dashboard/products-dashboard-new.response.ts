@@ -25,6 +25,8 @@ export class ProductsDashboardNewResponse {
 
   @Expose() readonly quantity_available: number;
 
+  @Expose() readonly product_sub_category_id: string;
+
   @Expose() readonly product_sub_category_order_by: number;
 
   @Expose() readonly product_sub_category_is_active: boolean;
@@ -52,6 +54,10 @@ export class ProductsDashboardNewResponse {
       (acc, cur) => acc + cur.quantity,
       0,
     );
+    this.product_sub_category_id = 
+    product.product_sub_categories.length > 0
+      ? product.product_sub_categories[0].id
+      : null
     this.product_sub_category_order_by =
       product.product_sub_categories.length > 0
         ? product.product_sub_categories[0].order_by
