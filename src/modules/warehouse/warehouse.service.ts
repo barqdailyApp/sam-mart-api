@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/core/base/service/service.base';
 import { BaseUserService } from 'src/core/base/service/user-service.base';
 import { Warehouse } from 'src/infrastructure/entities/warehouse/warehouse.entity';
-import { In, Repository } from 'typeorm';
+import { In, Repository, Like } from 'typeorm';
 import { WarehouseOperationTransaction } from './util/warehouse-opreation.transaction';
 import { WarehouseOperationRequest } from './dto/requests/warehouse-operation.request';
 import { UpdateWarehouseRequest } from './dto/requests/update-warehouse.request';
@@ -53,8 +53,8 @@ export class WarehouseService extends BaseService<Warehouse> {
   async getWarehouseProduct(query: WarehouseProductsQuery) {
     const products = await this.warehouseProducts_repo.findAndCount({
       where: [
-        { warehouse_id: query.warehouse_id, product: { name_ar: query.name } },
-        { warehouse_id: query.warehouse_id, product: { name_en: query.name } },
+        { warehouse_id: query.warehouse_id, product: { name_ar:Like(`%${query.name}%`) } },
+        { warehouse_id: query.warehouse_id, product: { name_en:Like(`%${query.name}%`) } },
       ],
       relations: {
         product: { product_images: true },
