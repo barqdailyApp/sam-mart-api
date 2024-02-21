@@ -32,8 +32,8 @@ export class ProductsOffersDashboardNewResponse {
   @Expose() mix_order_quantity: number;
 
   @Expose() product_id: string;
-  @Expose() product_name_ar: string;
-  @Expose() product_name_en: string;
+  @Expose() name_ar: string;
+  @Expose() name_en: string;
   @Expose() product_logo: string;
 
   @Expose() product_measurement_id: string;
@@ -62,8 +62,8 @@ export class ProductsOffersDashboardNewResponse {
     this.product_category_price_id = product_offer.product_category_price_id;
 
     this.product_id = product.id;
-    this.product_name_ar = product.name_ar;
-    this.product_name_en = product.name_en;
+    this.name_ar = product.name_ar;
+    this.name_en = product.name_en;
 
     this.product_logo = toUrl(
       product.product_images.find((x) => x.is_logo === true).url,

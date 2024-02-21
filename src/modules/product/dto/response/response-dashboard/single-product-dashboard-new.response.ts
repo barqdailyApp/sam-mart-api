@@ -26,8 +26,8 @@ export class SingleProductDashboardNewResponse {
       product_sub_category_id:
         product_sub_categories.length > 0 ? product_sub_categories[0].id : null,
       product_id: product.id,
-      product_name_ar: product.name_ar,
-      product_name_en: product.name_en,
+      name_ar: product.name_ar,
+      name_en: product.name_en,
       product_description_ar: product.description_ar,
       product_description_en: product.description_en,
       product_is_active: product.is_active,
