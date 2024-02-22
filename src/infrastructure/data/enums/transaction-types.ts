@@ -1,7 +1,7 @@
 export enum TransactionTypes {
 
-    ORDER_CANCEL = 'order_cancel',
-    ORDER_COMMISSION = 'order_commission',
-    ADMIN_RESET = 'admin-reset',
-    OTHER = 'other',
+    ORDER_CANCEL = 'ORDER_CANCEL',
+    ORDER_COMMISSION = 'ORDER_COMMISSION',
+    ADMIN_RESET = 'ADMIN_RESET',
+    OTHER = 'OTHER',
 }
