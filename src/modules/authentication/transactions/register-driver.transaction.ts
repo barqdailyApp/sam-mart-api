@@ -16,7 +16,6 @@ import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
 import { RegionService } from 'src/modules/region/region.service';
 import { CountryService } from 'src/modules/country/country.service';
 import { CityService } from 'src/modules/city/city.service';
-import { FileService } from 'src/modules/file/file.service';
 
 @Injectable()
 export class RegisterDriverTransaction extends BaseTransaction<
@@ -31,7 +30,6 @@ export class RegisterDriverTransaction extends BaseTransaction<
     @Inject(RegionService) private readonly regionService: RegionService,
     @Inject(CountryService) private readonly countryService: CountryService,
     @Inject(CityService) private readonly cityService: CityService,
-    @Inject(FileService) private readonly _fileService: FileService,
   ) {
     super(dataSource);
   }
@@ -66,14 +64,10 @@ export class RegisterDriverTransaction extends BaseTransaction<
 
       //* save avatar
       if (avatarFile) {
-        const pathAvatar = await this._fileService.upload(
-          avatarFile,
-          `avatars`,
+        const pathAvatar = await this.storageManager.store(
+          { buffer: avatarFile.buffer, originalname: avatarFile.originalname },
+          { path: 'avatars' },
         );
-        // const pathAvatar = await this.storageManager.store(
-        //   { buffer: avatarFile.buffer, originalname: avatarFile.originalname },
-        //   { path: 'avatars' },
-        // );
 
         //* set avatar path
         createUser.avatar = pathAvatar;
@@ -119,31 +113,24 @@ export class RegisterDriverTransaction extends BaseTransaction<
         vehicle_type,
       });
       //* save IdCardImage
-      // const pathIdCardImage = await this.storageManager.store(
-      //   {
-      //     buffer: id_card_image.buffer,
-      //     originalname: id_card_image.originalname,
-      //   },
-      //   { path: 'id_card_images' },
-      // );
-      const pathIdCardImage = await this._fileService.upload(
-        id_card_image,
-        `id_card_images`,
+      const pathIdCardImage = await this.storageManager.store(
+        {
+          buffer: id_card_image.buffer,
+          originalname: id_card_image.originalname,
+        },
+        { path: 'id_card_images' },
       );
+
       //* set avatar path
       CreateDriver.id_card_image = pathIdCardImage;
 
       //* save licenseImage
-      // const pathLicenseImage = await this.storageManager.store(
-      //   {
-      //     buffer: license_image.buffer,
-      //     originalname: license_image.originalname,
-      //   },
-      //   { path: 'license_images' },
-      // );
-      const pathLicenseImage = await this._fileService.upload(
-        license_image,
-        `license_images`,
+      const pathLicenseImage = await this.storageManager.store(
+        {
+          buffer: license_image.buffer,
+          originalname: license_image.originalname,
+        },
+        { path: 'license_images' },
       );
 
       //* set licenseImage path

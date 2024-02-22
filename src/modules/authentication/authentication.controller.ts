@@ -86,18 +86,12 @@ export class AuthenticationController {
   @Post('register-driver')
   async registerDriver(
     @Body() req: DriverRegisterRequest,
-    @UploadedFiles(new UploadValidator().build()) files: {
+    @UploadedFiles()
+    files: {
       avatarFile: Express.Multer.File;
       id_card_image: Express.Multer.File;
       license_image: Express.Multer.File;
     },
-
-    // @UploadedFiles()
-    // files: {
-    //   avatarFile: Express.Multer.File;
-    //   id_card_image: Express.Multer.File;
-    //   license_image: Express.Multer.File;
-    // },
   ): Promise<ActionResponse<RegisterResponse>> {
     if (files.avatarFile) {
       req.avatarFile = files.avatarFile[0];
