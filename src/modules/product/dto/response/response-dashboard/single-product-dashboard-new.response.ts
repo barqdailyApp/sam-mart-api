@@ -61,6 +61,7 @@ export class SingleProductDashboardNewResponse {
       (this.product_measurements = product_measurements.map((item) => {
         return {
           product_measurement_id: item.id,
+          measurement_unit_id: item.measurement_unit.id,
           measurement_unit_ar: item.measurement_unit.name_ar,
           measurement_unit_en: item.measurement_unit.name_en,
           is_main_unit: item.is_main_unit,
