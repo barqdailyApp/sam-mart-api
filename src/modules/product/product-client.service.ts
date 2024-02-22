@@ -370,19 +370,7 @@ export class ProductClientService {
       )
 
       .innerJoinAndSelect('product.product_images', 'product_images')
-      .innerJoinAndSelect(
-        'product.product_sub_categories',
-        'product_sub_categories',
-      )
-      .innerJoinAndSelect(
-        'product_sub_categories.category_subCategory',
-        'category_subCategory_product',
-      )
-      .innerJoinAndSelect(
-        'category_subCategory_product.section_category',
-        'section_category_product',
-      )
-      .innerJoinAndSelect('section_category_product.section', 'section_product')
+    
 
       .where(
         'product_offer.offer_quantity > 0 AND product_offer.start_date <= :current_date AND product_offer.end_date >= :current_date',
