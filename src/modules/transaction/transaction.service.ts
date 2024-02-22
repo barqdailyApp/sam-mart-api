@@ -7,6 +7,7 @@ import { MakeTransactionRequest } from './dto/requests/make-transaction-request'
 import { plainToInstance } from 'class-transformer';
 import { BaseUserService } from 'src/core/base/service/user-service.base';
 import { Request } from 'express';
+import { REQUEST } from '@nestjs/core';
 
 @Injectable()
 export class TransactionService extends BaseUserService<Transaction> {
@@ -14,7 +15,7 @@ export class TransactionService extends BaseUserService<Transaction> {
     @InjectRepository(Transaction)
     private transactionRepository: Repository<Transaction>,
     @InjectRepository(Wallet) private walletRepository: Repository<Wallet>,
-    @Inject(Request) request: Request,
+    @Inject(REQUEST) request: Request,
   ) {
     super(transactionRepository, request);
   }
