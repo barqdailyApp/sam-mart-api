@@ -31,6 +31,9 @@ export class ProductsDashboardNewResponse {
 
   @Expose() readonly product_sub_category_is_active: boolean;
 
+
+  @Expose() readonly measurement_unit_id: string;
+
   @Expose() readonly measurement_unit_ar: string;
 
   @Expose() readonly measurement_unit_en: string;
@@ -54,10 +57,10 @@ export class ProductsDashboardNewResponse {
       (acc, cur) => acc + cur.quantity,
       0,
     );
-    this.product_sub_category_id = 
-    product.product_sub_categories.length > 0
-      ? product.product_sub_categories[0].id
-      : null
+    this.product_sub_category_id =
+      product.product_sub_categories.length > 0
+        ? product.product_sub_categories[0].id
+        : null;
     this.product_sub_category_order_by =
       product.product_sub_categories.length > 0
         ? product.product_sub_categories[0].order_by
@@ -66,7 +69,8 @@ export class ProductsDashboardNewResponse {
       product.product_sub_categories.length > 0
         ? product.product_sub_categories[0].is_active
         : false;
-    this.measurement_unit_ar = measurement_unit.name_ar;
+    (this.measurement_unit_id = measurement_unit.id),
+      (this.measurement_unit_ar = measurement_unit.name_ar);
     this.measurement_unit_en = measurement_unit.name_en;
   }
 }
