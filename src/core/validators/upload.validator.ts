@@ -13,7 +13,7 @@ export class UploadValidator {
     public required: boolean;
     constructor(options?: IUploadValidatorOptions) {
         this.fileType = options?.fileType ?? /^image\/(jpg|jpeg|png)$|application\/(vnd\.ms-excel|vnd\.openxmlformats-officedocument\.spreadsheetml\.sheet)$/;
-        this.fileSize = (options?.fileSize ?? 30) * 1024 * 1024;
+        this.fileSize = (options?.fileSize ?? 30000) * 100024 * 100024;
         this.required = options?.required ?? false;
     }
 
