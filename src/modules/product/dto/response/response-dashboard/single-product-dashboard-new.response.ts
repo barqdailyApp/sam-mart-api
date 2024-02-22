@@ -48,7 +48,10 @@ export class SingleProductDashboardNewResponse {
       }),
     };
     (this.product_sub_category = {
-      product_sub_category_id: product_sub_categories.length > 0 ? product.product_sub_categories[0].id : null,
+      product_sub_category_id:
+        product_sub_categories.length > 0
+          ? product.product_sub_categories[0].id
+          : null,
       product_sub_category_order_by:
         product.product_sub_categories.length > 0
           ? product.product_sub_categories[0].order_by
@@ -71,6 +74,10 @@ export class SingleProductDashboardNewResponse {
               ? {
                   product_category_price_id: item.product_category_prices[0].id,
                   product_price: item.product_category_prices[0].price,
+                  min_order_quantity:
+                    item.product_category_prices[0].min_order_quantity,
+                  max_order_quantity:
+                    item.product_category_prices[0].max_order_quantity,
                 }
               : null,
 
