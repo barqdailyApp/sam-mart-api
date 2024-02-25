@@ -51,7 +51,10 @@ export class DriverShipmentGateway
           data: {
             order_id: shipment.order.id,
             shipment_id: shipment.id,
-            driver: shipment.driver,
+            driver: {
+              latitude: shipment.driver.latitude,
+              longitude: shipment.driver.longitude,
+            },
           },
         });
       }

@@ -121,4 +121,16 @@ export class ProductCategoryPriceController {
       ),
     );
   }
+  @Delete(
+    'product-additional-service/:product_additional_service_id',
+  )
+  async deleteProductAdditionalService(
+    @Param('product_additional_service_id') product_additional_service_id: string
+  ) {
+    return new ActionResponse(
+      await this.productCategoryPriceService.deleteProductAdditionalService(
+        product_additional_service_id
+      ),
+    );
+  }
 }
