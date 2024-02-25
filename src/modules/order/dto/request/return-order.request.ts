@@ -17,6 +17,11 @@ class ReturnProductRequest {
     @IsOptional()
     @IsString()
     customer_note: string;
+
+    @ApiProperty()
+    @IsNotEmpty()
+    @IsNumber()
+    quantity: number;
 }
 
 export class ReturnOrderRequest {
@@ -25,5 +30,10 @@ export class ReturnOrderRequest {
     @IsArray()
     @ValidateNested({ each: true })
     @Type(() => ReturnProductRequest)
-    products: ReturnProductRequest[];
+    returned_products: ReturnProductRequest[];
+
+    @ApiProperty({nullable: true})
+    @IsOptional()
+    @IsString()
+    customer_note: string;
 }

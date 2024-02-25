@@ -27,6 +27,7 @@ import { SingleOrderQuery } from './filter/single-order.query';
 import { OrdersDashboardResponse } from './dto/response/orders-dashboard.response';
 import { OrdersTotalDashboardResponse } from './dto/response/orders-total-dashboard.response';
 import { ShipmentsTotalDriverResponse } from './dto/response/shipments-driver-total.response';
+import { ReturnOrderRequest } from './dto/request/return-order.request';
 
 @ApiTags('Order')
 @ApiHeader({
@@ -41,7 +42,7 @@ export class OrderController {
   constructor(
     private readonly orderService: OrderService,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
-  ) {}
+  ) { }
   @Post()
   async makeOrder(@Body() req: MakeOrderRequest) {
     return new ActionResponse(await this.orderService.makeOrder(req));
@@ -179,4 +180,13 @@ export class OrderController {
 
     return new ActionResponse(data);
   }
+
+  @Post("/return-order/:order_id")
+  async returnOrder(
+    @Param('order_id') order_id: string,
+    @Body() req: ReturnOrderRequest
+  ) {
+    return new ActionResponse(await this.orderService.returnOrder(order_id,req));
+  }
+
 }
