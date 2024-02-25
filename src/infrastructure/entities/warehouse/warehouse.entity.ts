@@ -13,7 +13,7 @@ import { WarehouseProducts } from './warehouse-products.entity';
 import { City } from '../city/city.entity';
 import { Region } from '../region/region.entity';
 
-import { Order, } from '../order/order.entity';
+import { Order } from '../order/order.entity';
 import { Shipment } from '../order/shipment.entity';
 import { Driver } from '../driver/driver.entity';
 
@@ -25,6 +25,11 @@ export class Warehouse extends AuditableEntity {
   @Column({ unique: true })
   name_en: string;
 
+  @Column({ nullable: true })
+  address_ar: string;
+
+  @Column({ nullable: true })
+  address_en: string;
   @Column({ default: true })
   is_active: boolean;
 
@@ -50,8 +55,8 @@ export class Warehouse extends AuditableEntity {
   })
   location: string;
 
-  @OneToMany(()=>Driver,(driver)=>driver.warehouse)
-  drivers:Driver[]
+  @OneToMany(() => Driver, (driver) => driver.warehouse)
+  drivers: Driver[];
 
   // latitude
   @Column({ type: 'float', precision: 10, scale: 6 })

@@ -12,7 +12,7 @@ import { StorageManager } from 'src/integration/storage/storage.manager';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { Cart } from 'src/infrastructure/entities/cart/cart.entity';
-
+import { Wallet } from 'src/infrastructure/entities/wallet/wallet.entity';
 
 @Injectable()
 export class RegisterUserTransaction extends BaseTransaction<
@@ -43,7 +43,7 @@ export class RegisterUserTransaction extends BaseTransaction<
           size: { width: 300, height: 300 },
           options: {
             fit: sharp.fit.cover,
-            position: sharp.strategy.entropy
+            position: sharp.strategy.entropy,
           },
         });
 
@@ -66,22 +66,19 @@ export class RegisterUserTransaction extends BaseTransaction<
       // set user role
       user.roles = [Role.CLIENT];
 
-      user.name = req.name
+      user.name = req.name;
       // save user
       const savedUser = await context.save(User, user);
 
-     await context.save(new Cart({user_id:savedUser.id}))
-
+      await context.save(new Cart({ user_id: savedUser.id }));
+      await context.save(new Wallet({ user_id: savedUser.id }));
       // return user
       return savedUser;
-
-
-
     } catch (error) {
       throw new BadRequestException(
-        this._config.get('app.env') !== 'prod' ?
-          error :
-          'message.register_failed',
+        this._config.get('app.env') !== 'prod'
+          ? error
+          : 'message.register_failed',
       );
     }
   }

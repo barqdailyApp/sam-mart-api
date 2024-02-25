@@ -21,6 +21,16 @@ export class CreateWarehouseRequest {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
+  address_ar: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  address_en: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
   region_id: string;
 
   @ApiProperty()
