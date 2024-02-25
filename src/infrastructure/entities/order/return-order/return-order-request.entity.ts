@@ -21,5 +21,5 @@ export class ReturnOrderRequest extends AuditableEntity {
 
     // this column for the admin to write notes about the return order in case of any issue
     @Column({ type: 'text', nullable: true })
-    admin_notes: string;
+    admin_note: string;
 }

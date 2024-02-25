@@ -14,10 +14,10 @@ export class ReturnOrderProduct extends AuditableEntity {
     status: ReturnOrderStatus;
 
     @Column()
-    admin_notes: string;
+    admin_note: string;
 
     @Column({nullable: true})
-    customer_notes: string;
+    customer_note: string;
 
     @OneToOne(
         () => ShipmentProduct,
