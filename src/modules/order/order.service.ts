@@ -28,6 +28,7 @@ import { ReturnOrderStatus } from 'src/infrastructure/data/enums/return-order-st
 import { ReturnOrder } from 'src/infrastructure/entities/order/return-order/return-order.entity';
 import { ReturnOrderProduct } from 'src/infrastructure/entities/order/return-order/return-order-product.entity';
 import { ReturnProductReason } from 'src/infrastructure/entities/order/return-order/return-product-reason.entity';
+import { UpdateReturnOrderStatusRequest } from './dto/request/update-return-order-statu.request';
 
 @Injectable()
 export class OrderService extends BaseUserService<Order> {
@@ -45,6 +46,9 @@ export class OrderService extends BaseUserService<Order> {
     private returnOrderProductRepository: Repository<ReturnOrderProduct>,
     @InjectRepository(ReturnProductReason)
     private returnProductReasonRepository: Repository<ReturnProductReason>,
+
+    @InjectRepository(Driver)
+    private driverRepository: Repository<Driver>,
 
     @Inject(REQUEST) request: Request,
     private readonly makeOrdrTransacton: MakeOrderTransaction,
@@ -614,5 +618,61 @@ export class OrderService extends BaseUserService<Order> {
     })
 
     return await this.ReturnOrderRepository.save(returnOrder);
+  }
+
+  // this method is used by the admin to update the return order status
+  async updateReturnOrderStatus(return_order_id: string, req: UpdateReturnOrderStatusRequest) {
+    const returnOrder = await this.ReturnOrderRepository.findOne({ where: { id: return_order_id } });
+    if (!returnOrder) throw new NotFoundException('return order not found');
+
+    const { return_order_products, admin_note, driver_id,status } = req;
+    const returned_products_id = return_order_products.map(p => p.return_order_product_id);
+
+    // check if the return order products IDs are valid
+    const returnOrderProducts = await this.returnOrderProductRepository.find({
+      where: {
+        id: In(returned_products_id),
+        return_order_id
+      }
+    })
+
+    if (returnOrderProducts.length !== return_order_products.length) {
+      throw new BadRequestException('invalid return order products IDs')
+    }
+
+    // check if the accepted return products order quantity is valid
+    const invalidQuantityForProducts = return_order_products.filter(p => {
+      const product = returnOrderProducts.find(rp => rp.id === p.return_order_product_id);
+      return product.quantity < p.accepted_quantity && p.status === ReturnOrderStatus.ACCEPTED;
+    })
+
+    if (invalidQuantityForProducts.length > 0) {
+      throw new BadRequestException(`invalid accepted quantity for products ${JSON.stringify(invalidQuantityForProducts)}`)
+    }
+
+    const driver = await this.driverRepository.findOne({ where: { id: driver_id } });
+    if (!driver) throw new BadRequestException('driver not found');
+
+    // update the return order products status
+    const mappedUpdatedReturnOrderProducts = return_order_products.map(p => {
+      const product = returnOrderProducts.find(rp => rp.id === p.return_order_product_id);
+      return {
+        ...product,
+        status: p.status,
+        accepted_quantity: p.accepted_quantity,
+        admin_note: p.admin_note,
+      }
+    })
+
+    Object.assign(returnOrder, {
+      status,
+      admin_note,
+      driver,
+      returnOrderProducts: mappedUpdatedReturnOrderProducts as ReturnOrderProduct[],
+    });
+
+    await this.ReturnOrderRepository.save(returnOrder);
+
+    return returnOrder;
   }
 }
