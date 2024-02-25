@@ -9,7 +9,7 @@ import { Order } from 'src/infrastructure/entities/order/order.entity';
 import { Request } from 'express';
 import { REQUEST } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import { MakeOrderRequest } from './dto/request/make-order-request';
 import { MakeOrderTransaction } from './util/make-order.transaction';
 import { OrderClientQuery } from './filter/order-client.query';
@@ -22,6 +22,13 @@ import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
 import { AddShipmentFeedBackRequest } from './dto/request/add-shipment-feedback.request';
 import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
 import { ShipmentFeedback } from 'src/infrastructure/entities/order/shipment-feedback.entity';
+import { ReturnOrderRequest } from './dto/request/return-order.request';
+import { ShipmentProduct } from 'src/infrastructure/entities/order/shipment-product.entity';
+import { ReturnOrderStatus } from 'src/infrastructure/data/enums/return-order-status.enum';
+import { ReturnOrder } from 'src/infrastructure/entities/order/return-order/return-order.entity';
+import { ReturnOrderProduct } from 'src/infrastructure/entities/order/return-order/return-order-product.entity';
+import { ReturnProductReason } from 'src/infrastructure/entities/order/return-order/return-product-reason.entity';
+
 @Injectable()
 export class OrderService extends BaseUserService<Order> {
   constructor(
@@ -29,6 +36,15 @@ export class OrderService extends BaseUserService<Order> {
 
     @InjectRepository(Shipment)
     private shipmentRepository: Repository<Shipment>,
+    @InjectRepository(ShipmentProduct)
+    private shipmentProductRepository: Repository<ShipmentProduct>,
+
+    @InjectRepository(ReturnOrder)
+    private ReturnOrderRepository: Repository<ReturnOrder>,
+    @InjectRepository(ReturnOrderProduct)
+    private returnOrderProductRepository: Repository<ReturnOrderProduct>,
+    @InjectRepository(ReturnProductReason)
+    private returnProductReasonRepository: Repository<ReturnProductReason>,
 
     @Inject(REQUEST) request: Request,
     private readonly makeOrdrTransacton: MakeOrderTransaction,
@@ -521,5 +537,82 @@ export class OrderService extends BaseUserService<Order> {
   }
   isArabic(text: string): boolean {
     return /[\u0600-\u06FF]/.test(text);
+  }
+
+  async returnOrder(order_id: string, req: ReturnOrderRequest) {
+    const { returned_products } = req;
+    const returned_products_id = returned_products.map(p => p.product_id);
+
+    // check if the order exists
+    const order = await this.orderRepository.findOne({ where: { id: order_id } });
+    if (!order) throw new NotFoundException('order not found');
+
+    // check if the order belongs to the current user
+    if (order.user_id !== this.currentUser.id) {
+      throw new BadRequestException('you are not allowed to return this order')
+    }
+
+    // check if the order is delivered
+    const shipment = await this.shipmentRepository.findOne({
+      where: { order_id }
+    });
+    if (!shipment) throw new NotFoundException('shipment not found');
+
+    if (shipment.status !== ShipmentStatusEnum.DELIVERED) {
+      throw new BadRequestException('you can not return this order that is not delivered yet')
+    }
+
+    // check if the return products IDs are valid and belongs to the order
+    const shipmentProducts = await this.shipmentProductRepository.find({
+      where: {
+        shipment_id: shipment.id,
+        product_id: In(returned_products_id)
+      }
+    })
+
+    if (shipmentProducts.length !== returned_products.length) {
+      throw new BadRequestException('invalid products IDs')
+    }
+
+    // check if the return products quantities are valid based on the shipment products
+    const invalidQuantityForProducts = returned_products.filter(p => {
+      const product = shipmentProducts.find(sp => sp.product_id === p.product_id);
+      return product.quantity < p.quantity;
+    })
+
+    if (invalidQuantityForProducts.length > 0) {
+      throw new BadRequestException(`invalid quantity for products ${JSON.stringify(invalidQuantityForProducts)}`)
+    }
+
+    // check if the return products reasons IDs are valid
+    const returnedProductsReasons = await this.returnProductReasonRepository.find({
+      where: {
+        id: In(returned_products.map(p => p.reason_id))
+      }
+    })
+
+    if (returnedProductsReasons.length !== new Set(returned_products.map(p => p.reason_id)).size) {
+      throw new BadRequestException(`invalid return reasons IDs`)
+    }
+
+    // map the returned products to the return order products
+    const mapped_returned_products = returned_products.map(p => {
+      const product = shipmentProducts.find(sp => sp.product_id === p.product_id);
+      return {
+        quantity: p.quantity,
+        shipmentProduct: product,
+        customer_note: p.customer_note,
+        returnProductReason: p.reason_id ? { id: p.reason_id } : null
+      }
+    });
+
+    const returnOrder = await this.ReturnOrderRepository.create({
+      status: ReturnOrderStatus.PENDING,
+      order,
+      returnOrderProducts: mapped_returned_products,
+      customer_note: req.customer_note
+    })
+
+    return await this.ReturnOrderRepository.save(returnOrder);
   }
 }
