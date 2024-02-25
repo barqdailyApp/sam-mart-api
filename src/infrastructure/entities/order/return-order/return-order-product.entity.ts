@@ -22,6 +22,12 @@ export class ReturnOrderProduct extends AuditableEntity {
     @Column({ type: 'text', nullable: true })
     customer_note: string;
 
+    @Column()
+    quantity: number;
+
+    @Column({ nullable: true , type: 'int' })
+    accepted_quantity: number;
+
     @ManyToOne(
         () => ShipmentProduct,
         shipmentProduct => shipmentProduct.returnOrderProduct,
