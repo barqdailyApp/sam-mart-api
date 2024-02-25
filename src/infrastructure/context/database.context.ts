@@ -47,7 +47,7 @@ import { WarehouseOpreationProducts } from '../entities/warehouse/wahouse-opreat
 import { SupportTicketSubject } from '../entities/support-ticket/suppot-ticket-subject.entity';
 import { ReturnOrderProduct } from '../entities/order/return-order/return-order-product.entity';
 import { ReturnProductReason } from '../entities/order/return-order/return-product-reason.entity';
-import { ReturnOrderRequest } from '../entities/order/return-order/return-order-request.entity';
+import { ReturnOrder } from '../entities/order/return-order/return-order.entity';
 
 
 export const DB_ENTITIES = [
@@ -101,7 +101,7 @@ export const DB_ENTITIES = [
   WarehouseOpreationProducts,
   ReturnOrderProduct,
   ReturnProductReason,
-  ReturnOrderRequest
+  ReturnOrder
 ];
 
 export const DB_VIEWS = [];

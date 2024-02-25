@@ -10,7 +10,7 @@ import { PaymentMethod } from 'src/infrastructure/data/enums/payment-method';
 import { Slot } from './slot.entity';
 import { Shipment } from './shipment.entity';
 import { Transaction } from '../wallet/transaction.entity';
-import { ReturnOrderRequest } from './return-order/return-order-request.entity';
+import { ReturnOrder } from './return-order/return-order.entity';
 
 @Entity()
 export class Order extends OwnedEntity {
@@ -43,8 +43,8 @@ export class Order extends OwnedEntity {
   @Column()
   section_id: string;
 
-  @OneToMany(() => ReturnOrderRequest, (returnOrderRequest) => returnOrderRequest.order, { cascade: true })
-  returnOrders: ReturnOrderRequest[];
+  @OneToMany(() => ReturnOrder, (returnOrderRequest) => returnOrderRequest.order, { cascade: true })
+  returnOrders: ReturnOrder[];
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   total_price: number;
