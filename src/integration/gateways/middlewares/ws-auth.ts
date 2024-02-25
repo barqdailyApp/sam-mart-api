@@ -35,7 +35,9 @@ export const SocketAuthMiddleware = (
             }
             next();
         } catch (error) {
-            next(error);
+            console.error("Authentication error:", error.message);
+            // Refuse the connection
+            next(new Error("Authentication failed. Please log in."));
         }
     };
 };

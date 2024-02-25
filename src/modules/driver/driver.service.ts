@@ -57,7 +57,7 @@ export class DriverService {
     updateDriverLocationRequest: UpdateDriverLocationRequest,
   ): Promise<UpdateResult> {
     const { latitude, longitude } = updateDriverLocationRequest;
-    await this.driverRepository.update(
+  const update =  await this.driverRepository.update(
       { user_id: this._request.user.id },
       {
         latitude,
@@ -82,35 +82,8 @@ export class DriverService {
         order: true,
       },
     });
-    const shipmentsResponse = driver_shipments.map((driver_shipment) => {
-      const shipmentResponse = plainToClass(
-        ShipmentDriverResponse,
-        driver_shipment,
-      );
-
-      return shipmentResponse;
-    });
-    const shipmentsResponseTranslate =
-      this._i18nResponse.entity(shipmentsResponse);
-
-    for (const shipment of shipmentsResponseTranslate) {
-      this.driverShipmentGateway.server.emit(
-        `${Gateways.DriverShipment.ShipmentId}${shipment.id}`,
-        {
-          action: 'DRIVER_LOCATION_UPDATE',
-          data: {
-            order_id: shipment.order.id,
-            shipment_id: shipment.id,
-            driver: shipment.driver,
-          },
-        },
-      );
-    }
-
-    return await this.driverRepository.update(
-      { user_id: this._request.user.id },
-      updateDriverLocationRequest,
-    );
+    this.driverShipmentGateway.broadcastLocationDriver(driver_shipments);
+    return update;
   }
 
   async updateDriverStatus(
