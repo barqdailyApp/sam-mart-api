@@ -1,7 +1,7 @@
 import { AuditableEntity } from "src/infrastructure/base/auditable.entity";
 import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from "typeorm";
 import { ShipmentProduct } from "../shipment-product.entity";
-import { ReturnOrderReason } from "./return-order-reason.entity";
+import {  ReturnProductReason } from "./return-product-reason.entity";
 import { ReturnOrderStatus } from "src/infrastructure/data/enums/return-order-status.enum";
 
 @Entity()
@@ -31,14 +31,14 @@ export class ReturnOrderProduct extends AuditableEntity {
     shipment_product_id: string;
 
     @ManyToOne(
-        () => ReturnOrderReason,
-        returnOrderReason => returnOrderReason.returnOrderProducts,
+        () => ReturnProductReason,
+        returnProductReason => returnProductReason.returnOrderProducts,
         { onDelete: 'SET NULL' }
     )
-    @JoinColumn({ name: 'return_order_reason_id' })
-    returnOrderReason: ReturnOrderReason;
+    @JoinColumn({ name: 'return_product_reason_id' })
+    returnProductReason: ReturnProductReason;
 
-    @Column()
-    return_order_reason_id: string;
+    @Column({nullable: true})
+    return_product_reason_id: string;
 
 }

@@ -4,14 +4,13 @@ import { Column, Entity, OneToMany } from "typeorm";
 import { ReturnOrderProduct } from "./return-order-product.entity";
 
 @Entity()
-export class ReturnOrderReason extends BaseEntity {
+export class ReturnProductReason extends BaseEntity {
     @Column()
     reason: string;
 
     @OneToMany(
         () => ReturnOrderProduct,
-        returnOrderProduct => returnOrderProduct.returnOrderReason,
-        { onDelete: 'SET NULL' }
+        returnOrderProduct => returnOrderProduct.returnProductReason,
     )
     returnOrderProducts: ReturnOrderProduct[];
 }
