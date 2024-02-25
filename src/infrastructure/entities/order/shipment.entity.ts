@@ -28,8 +28,12 @@ export class Shipment extends AuditableEntity {
 
   @Column()
   warehouse_id: string;
+  
   @Column({ default: ShipmentStatusEnum.PENDING })
   status: ShipmentStatusEnum;
+
+  @Column({ nullable: true })
+  status_reason: string;
 
   @Column({ nullable: true })
   order_confirmed_at: Date;

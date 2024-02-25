@@ -32,6 +32,7 @@ import { ShipmentMessageResponse } from './dto/response/shipment-message.respons
 import { plainToInstance } from 'class-transformer';
 import { GetCommentQueryRequest } from '../support-ticket/dto/request/get-comment-query.request';
 import { AddShipmentFeedBackRequest } from './dto/request/add-shipment-feedback.request';
+import { CancelShipmentRequest } from './dto/request/cancel-shipment.request';
 
 @ApiTags('Shipment')
 @ApiHeader({
@@ -43,7 +44,7 @@ import { AddShipmentFeedBackRequest } from './dto/request/add-shipment-feedback.
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('shipment')
 export class ShipmentController {
-  constructor(private readonly shipmentService: ShipmentService) {}
+  constructor(private readonly shipmentService: ShipmentService) { }
 
   @Post('driver/accept/:id')
   async acceptShipment(@Param('id') id: string) {
@@ -123,9 +124,11 @@ export class ShipmentController {
   }
 
   @Post('cancel-shipment/:shipment_id')
-  @Roles(Role.ADMIN)
-  async cancelShipment(@Param('shipment_id') shipment_id: string) {
-    return new ActionResponse(await this.shipmentService.cancelShipment(shipment_id));
+  async cancelShipment(
+    @Param('shipment_id') shipment_id: string,
+    @Body() req: CancelShipmentRequest
+  ) {
+    return new ActionResponse(await this.shipmentService.cancelShipment(shipment_id, req));
   }
 
   // admin convert order from scheduled to fast delivery [Order Controller]

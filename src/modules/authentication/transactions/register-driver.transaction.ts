@@ -17,6 +17,7 @@ import { RegionService } from 'src/modules/region/region.service';
 import { CountryService } from 'src/modules/country/country.service';
 import { CityService } from 'src/modules/city/city.service';
 import { FileService } from 'src/modules/file/file.service';
+import { Wallet } from 'src/infrastructure/entities/wallet/wallet.entity';
 
 @Injectable()
 export class RegisterDriverTransaction extends BaseTransaction<
@@ -140,6 +141,7 @@ export class RegisterDriverTransaction extends BaseTransaction<
       //* set licenseImage path
       CreateDriver.license_image = pathLicenseImage;
       const savedDriver = await context.save(Driver, CreateDriver);
+      await context.save(new Wallet({ user_id: savedUser.id }));
       console.log('savedDriver', savedDriver);
       // return user
       return savedUser;
