@@ -56,9 +56,13 @@ export class DriverService {
   async updateDriverLocation(
     updateDriverLocationRequest: UpdateDriverLocationRequest,
   ): Promise<UpdateResult> {
-     await this.driverRepository.update(
+    const { latitude, longitude } = updateDriverLocationRequest;
+    await this.driverRepository.update(
       { user_id: this._request.user.id },
-      updateDriverLocationRequest,
+      {
+        latitude,
+        longitude,
+      },
     );
     const driver_shipments = await this.shipmentRepository.find({
       where: {
@@ -75,6 +79,7 @@ export class DriverService {
       },
       relations: {
         driver: true,
+        order: true,
       },
     });
     const shipmentsResponse = driver_shipments.map((driver_shipment) => {
@@ -95,7 +100,8 @@ export class DriverService {
           action: 'DRIVER_LOCATION_UPDATE',
           data: {
             order_id: shipment.order.id,
-            message: shipment,
+            shipment_id: shipment.id,
+            driver: shipment.driver,
           },
         },
       );

@@ -27,6 +27,7 @@ import { SingleOrderQuery } from './filter/single-order.query';
 import { OrdersDashboardResponse } from './dto/response/orders-dashboard.response';
 import { OrdersTotalDashboardResponse } from './dto/response/orders-total-dashboard.response';
 import { ShipmentsTotalDriverResponse } from './dto/response/shipments-driver-total.response';
+import { OrderSingleDashboardResponse } from './dto/response/order-single-dashboard.response';
 
 @ApiTags('Order')
 @ApiHeader({
@@ -105,7 +106,7 @@ export class OrderController {
   async getSingleClientOrder(@Param('order_id') order_id: string) {
     const order = await this.orderService.getSingleOrder(order_id);
 
-    const orderResponse = plainToClass(OrderResponse, order);
+    const orderResponse =  new OrderSingleDashboardResponse(order);
 
     const data = this._i18nResponse.entity(orderResponse);
 
