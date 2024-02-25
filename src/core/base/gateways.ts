@@ -32,15 +32,21 @@ export abstract class Gateways {
   static SupportTicket = class {
     /** support-ticket */
     static Namespace = 'support-ticket';
-  }
+  };
 
   static ShipmentChat = class {
     /** shipment-chat */
     static Namespace = 'shipment-chat';
-  }
+  };
 
   static FastDelivery = class {
     /** fast-delivery */
     static Namespace = 'fast-delivery';
-  }
+  };
+  static DriverShipment = class {
+    /** fast-delivery */
+    static Namespace = 'driver-shipment';
+    static ShipmentId = 'shipmentId-';
+
+  };
 }
