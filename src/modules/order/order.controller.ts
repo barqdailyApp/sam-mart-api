@@ -4,6 +4,7 @@ import {
   Get,
   Inject,
   Param,
+  Patch,
   Post,
   Query,
   UseGuards,
@@ -28,6 +29,9 @@ import { OrdersDashboardResponse } from './dto/response/orders-dashboard.respons
 import { OrdersTotalDashboardResponse } from './dto/response/orders-total-dashboard.response';
 import { ShipmentsTotalDriverResponse } from './dto/response/shipments-driver-total.response';
 import { ReturnOrderRequest } from './dto/request/return-order.request';
+import { Roles } from '../authentication/guards/roles.decorator';
+import { Role } from 'src/infrastructure/data/enums/role.enum';
+import { UpdateReturnOrderStatusRequest } from './dto/request/update-return-order-statu.request';
 
 @ApiTags('Order')
 @ApiHeader({
@@ -186,7 +190,15 @@ export class OrderController {
     @Param('order_id') order_id: string,
     @Body() req: ReturnOrderRequest
   ) {
-    return new ActionResponse(await this.orderService.returnOrder(order_id,req));
+    return new ActionResponse(await this.orderService.returnOrder(order_id, req));
   }
 
+  @Roles(Role.ADMIN)
+  @Patch("/update-return-order-status/:return_order_id")
+  async updateReturnOrderStatus(
+    @Param('return_order_id') return_order_id: string,
+    @Body() req: UpdateReturnOrderStatusRequest
+  ) {
+    return new ActionResponse(await this.orderService.updateReturnOrderStatus(return_order_id, req));
+  }
 }
