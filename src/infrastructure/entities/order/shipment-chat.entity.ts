@@ -1,10 +1,8 @@
 import { AuditableEntity } from "src/infrastructure/base/auditable.entity";
 import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from "typeorm";
 import { User } from "../user/user.entity";
-import { Driver } from "../driver/driver.entity";
 import { ShipmentChatAttachment } from "./shipment-chat-attachment.entity";
 import { Shipment } from "./shipment.entity";
-import { ReturnOrder } from "./return-order/return-order.entity";
 
 @Entity()
 export class ShipmentChat extends AuditableEntity {
@@ -31,14 +29,6 @@ export class ShipmentChat extends AuditableEntity {
 
     @Column({ nullable: true })
     shipment_id: string;
-
-    @ManyToOne(
-        () => ReturnOrder,
-        (returnOrder) => returnOrder.shipment_chats,
-        { onDelete: 'CASCADE' }
-    )
-    @JoinColumn({ name: 'return_order_id' })
-    returnOrder: ReturnOrder;
 
     @Column({ nullable: true })
     return_order_id: string;

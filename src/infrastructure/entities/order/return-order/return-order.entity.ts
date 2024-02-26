@@ -4,8 +4,7 @@ import { Order } from "../order.entity";
 import { ReturnOrderStatus } from "src/infrastructure/data/enums/return-order-status.enum";
 import { ReturnOrderProduct } from "./return-order-product.entity";
 import { Driver } from "../../driver/driver.entity";
-import { Warehouse } from "../../warehouse/warehouse.entity";
-import { ShipmentChat } from "../shipment-chat.entity";
+
 
 @Entity()
 export class ReturnOrder extends AuditableEntity {
@@ -43,16 +42,4 @@ export class ReturnOrder extends AuditableEntity {
 
     @Column({ nullable: true })
     driver_id: string;
-
-    @ManyToOne(() => Warehouse, (warehouse) => warehouse.shipments)
-    warehouse: Warehouse;
-
-    @Column()
-    warehouse_id: string;
-
-    @OneToMany(() => ShipmentChat, (shipmentChat) => shipmentChat.returnOrder, {
-        cascade: true,
-    })
-    shipment_chats: ShipmentChat[];
-
 }

@@ -28,7 +28,7 @@ export class ReturnOrderProduct extends AuditableEntity {
     @Column({ nullable: true , type: 'int' })
     accepted_quantity: number;
 
-    @ManyToOne(
+    @OneToOne(
         () => ShipmentProduct,
         shipmentProduct => shipmentProduct.returnOrderProduct,
         { onDelete: 'CASCADE' }

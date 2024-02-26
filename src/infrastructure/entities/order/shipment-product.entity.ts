@@ -30,7 +30,7 @@ export class ShipmentProduct extends AuditableEntity {
   @JoinColumn()
   product_category_price: ProductCategoryPrice;
 
-  @OneToMany(() => ReturnOrderProduct, returnOrderProduct => returnOrderProduct.shipmentProduct, { cascade: true })
+  @OneToOne(() => ReturnOrderProduct, returnOrderProduct => returnOrderProduct.shipmentProduct, { cascade: true })
   returnOrderProduct: ReturnOrderProduct[];
 
   @Column()
@@ -41,6 +41,9 @@ export class ShipmentProduct extends AuditableEntity {
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   price: number;
+
+  @Column({type:"boolean", default:true})
+  can_return: boolean;
 
   @Column({ type: 'simple-array', nullable: true })
   additions: string[];
