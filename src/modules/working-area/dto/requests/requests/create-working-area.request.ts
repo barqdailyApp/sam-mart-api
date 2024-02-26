@@ -26,4 +26,10 @@ export class CreateWorkingAreaRequest {
     @IsString()
     address: string;
 
+    @ApiProperty()
+    @IsNotEmpty()
+    @IsString()
+    city_id: string;
+
+
 }

@@ -32,6 +32,7 @@ import { ReturnOrderRequest } from './dto/request/return-order.request';
 import { Roles } from '../authentication/guards/roles.decorator';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { UpdateReturnOrderStatusRequest } from './dto/request/update-return-order-statu.request';
+import { OrderSingleDashboardResponse } from './dto/response/order-single-dashboard.response';
 
 @ApiTags('Order')
 @ApiHeader({
@@ -96,6 +97,7 @@ export class OrderController {
     const ordersTotal = await this.orderService.getTotalDashboardOrders();
 
     const ordersTotalResponse = new OrdersTotalDashboardResponse(
+      ordersTotal.ordersTotal,
       ordersTotal.ordersNew,
       ordersTotal.ordersDriversAccepted,
       ordersTotal.ordersProcessing,
@@ -110,7 +112,7 @@ export class OrderController {
   async getSingleClientOrder(@Param('order_id') order_id: string) {
     const order = await this.orderService.getSingleOrder(order_id);
 
-    const orderResponse = plainToClass(OrderResponse, order);
+    const orderResponse =  new OrderSingleDashboardResponse(order);
 
     const data = this._i18nResponse.entity(orderResponse);
 

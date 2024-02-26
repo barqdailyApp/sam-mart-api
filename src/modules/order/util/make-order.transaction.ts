@@ -61,8 +61,11 @@ export class MakeOrderTransaction extends BaseTransaction<
 
       const user = this.request.user;
       const address = await context.findOne(Address, {
-        where: [{ id: req.address_id, user_id: user.id }],
+        where: [{ is_favorite: true, user_id: user.id }],
       });
+      if(!address) {
+        throw new BadRequestException('user does not have a default address');
+      }
       const cart = await context.findOne(Cart, { where: { user_id: user.id } });
 
       const cart_products = await context.find(CartProduct, {
@@ -72,15 +75,7 @@ export class MakeOrderTransaction extends BaseTransaction<
         throw new BadRequestException('Cart is empty');
       }
 
-      const nearst_warehouse = await context
-        .createQueryBuilder(Warehouse, 'warehouse')
-        .orderBy(
-          `ST_Distance_Sphere(
-                 ST_SRID(point(${address.latitude}, ${address.longitude}), 4326),
-                 warehouse.location
-             )`,
-        )
-        .getOne();
+    
 
       const count = await context
         .createQueryBuilder(Order, 'order')
@@ -89,9 +84,10 @@ export class MakeOrderTransaction extends BaseTransaction<
       const order = await context.save(Order, {
         ...plainToInstance(Order, req),
         user_id: user.id,
-        warehouse_id: nearst_warehouse.id,
+        warehouse_id: cart_products[0].warehouse_id,
         delivery_fee: section.delivery_price,
         number: generateOrderNumber(count),
+        address_id: address.id,
       });
 
       if (order.delivery_type == DeliveryType.FAST) {
@@ -114,7 +110,7 @@ export class MakeOrderTransaction extends BaseTransaction<
 
       const shipment = await context.save(Shipment, {
         order_id: order.id,
-        warehouse_id: nearst_warehouse.id,
+        warehouse_id: cart_products[0].warehouse_id,
       });
 
       if (order.delivery_type == DeliveryType.FAST) {
@@ -165,18 +161,18 @@ export class MakeOrderTransaction extends BaseTransaction<
         new WarehouseOperations({
           type: operationType.SELL,
           user_id: user.id,
-          warehouse_id: nearst_warehouse.id,
+          warehouse_id: cart_products[0].warehouse_id,
         }),
       );
       for (let index = 0; index < shipment_products.length; index++) {
         const warehouse_product = await context.findOne(WarehouseProducts, {
           where: {
-            warehouse_id: nearst_warehouse.id,
+            warehouse_id: cart_products[0].warehouse_id,
             product_id: shipment_products[index].product_id,
           },
         });
         if (!warehouse_product) {
-          throw new BadRequestException('warehouse doesnt have product');
+          throw new BadRequestException( 'message.warehouse_product_not_enough' + index);
         }
         warehouse_product.quantity =
           warehouse_product.quantity -
@@ -184,7 +180,7 @@ export class MakeOrderTransaction extends BaseTransaction<
             shipment_products[index].conversion_factor;
         if (warehouse_product.quantity < 0) {
           throw new BadRequestException(
-            'warehouse doesnt have enough products',
+            'message.warehouse_product_not_enough' + index,
           );
         }
         await context.save(warehouse_product);

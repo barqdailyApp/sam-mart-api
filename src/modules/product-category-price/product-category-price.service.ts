@@ -299,4 +299,15 @@ export class ProductCategoryPriceService {
     });
     return await this.productService_repo.save(createProductAdditionalService);
   }
+  async deleteProductAdditionalService(product_additional_service_id:string){
+    const productAdditionalService = await this.productService_repo.findOne({
+      where: {
+        id: product_additional_service_id
+      }
+    })
+    if(!productAdditionalService){
+      throw new NotFoundException('Product Additional Service not found')
+    }
+    return await this.productService_repo.remove(productAdditionalService)
+  }
 }

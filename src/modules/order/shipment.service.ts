@@ -11,8 +11,7 @@ import { Request } from 'express';
 import { REQUEST } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { MakeOrderRequest } from './dto/request/make-order-request';
-import { MakeOrderTransaction } from './util/make-order.transaction';
+
 import { Shipment } from 'src/infrastructure/entities/order/shipment.entity';
 import { BaseService } from 'src/core/base/service/service.base';
 import { Driver } from 'src/infrastructure/entities/driver/driver.entity';

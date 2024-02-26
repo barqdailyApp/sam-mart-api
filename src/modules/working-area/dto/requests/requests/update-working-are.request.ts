@@ -23,6 +23,10 @@ export class UpdateWorkingAreaRequest {
     @IsNotEmpty() @IsString()
     id: string;
 
+
+    @ApiProperty({required:false})
+   
+    city_id: string;
     @ApiProperty()
     @IsNotEmpty()
     @IsString()
