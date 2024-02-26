@@ -184,7 +184,7 @@ export class MakeOrderTransaction extends BaseTransaction<
             shipment_products[index].conversion_factor;
         if (warehouse_product.quantity < 0) {
           throw new BadRequestException(
-            'warehouse doesnt have enough products',
+            'message.warehouse_product_not_enough' + index,
           );
         }
         await context.save(warehouse_product);
