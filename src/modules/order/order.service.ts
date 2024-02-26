@@ -97,11 +97,11 @@ export class OrderService extends BaseUserService<Order> {
       order_date,
       is_paid,
       payment_method,
-      warehouse_name,
-      driver_name,
-      client_name,
-      client_phone,
-      order_number,
+      warehouse_id,
+      driver_id,
+delivery_type,
+      status,
+      order_search,
     } = orderClientQuery;
     const skip = (page - 1) * limit;
 
@@ -143,6 +143,9 @@ export class OrderService extends BaseUserService<Order> {
       .skip(skip)
       .take(limit);
 
+    if (status) {
+      query = query.andWhere('shipments.status = :status', { status });
+    }
     if (order_date) {
       //*using database functions to truncate the time part of the order.created_at timestamp to compare only the date components
       query = query.where('DATE(order.created_at) = :order_date', {
@@ -151,61 +154,46 @@ export class OrderService extends BaseUserService<Order> {
     }
 
     if (is_paid) {
-      console.log(is_paid);
-      query = query.where('order.is_paid = :is_paid', {
+      query = query.andWhere('order.is_paid = :is_paid', {
         is_paid,
       });
     }
 
     if (payment_method) {
-      query = query.where('order.payment_method = :payment_method', {
+      query = query.andWhere('order.payment_method = :payment_method', {
         payment_method,
       });
     }
 
-    if (driver_name) {
-      query = query.andWhere('shipment_user_driver.name LIKE :driver_name', {
-        driver_name: `%${driver_name}%`,
+    if (delivery_type) {
+      query = query.andWhere('order.delivery_type = :delivery_type', {
+        delivery_type,
       });
     }
 
-    if (warehouse_name) {
-      // Determine if the product_name is Arabic
-      const isWarehouseNameArabic = this.isArabic(warehouse_name); // Implement or use a library to check if the text is Arabic
-
-      // Build the query conditionally based on the language of product_name
-      if (isWarehouseNameArabic) {
-        query = query.andWhere('warehouse_order.name_ar LIKE :warehouse_name', {
-          warehouse_name: `%${warehouse_name}%`,
-        });
-      } else {
-        query = query.andWhere('warehouse_order.name_en LIKE :warehouse_name', {
-          warehouse_name: `%${warehouse_name}%`,
-        });
-      }
-    }
-
-    if (client_name) {
-      query = query.andWhere('user.name LIKE :client_name', {
-        client_name: `%${client_name}%`,
+    if (driver_id) {
+      query = query.andWhere('shipment_user_driver.id = :driver_id', {
+        driver_id,
       });
     }
 
-    if (client_phone) {
-      query = query.andWhere('user.phone = :client_phone', {
-        client_phone,
+    if (warehouse_id) {
+      query = query.andWhere('warehouse_order.id = :warehouse_id', {
+        warehouse_id,
       });
     }
 
-    if (order_number) {
-      query = query.andWhere('order.number = :order_number', {
-        order_number,
-      });
+    if (order_search) {
+      query = query.andWhere(
+        'user.name LIKE :order_search OR user.phone LIKE :order_search OR order.number LIKE :order_search',
+        { order_search: `%${order_search}%` },
+      );
     }
     const [orders, total] = await query.getManyAndCount();
     return { orders, total };
   }
   async getTotalDashboardOrders() {
+    const ordersTotal = await this.shipmentRepository.count({});
     const ordersNew = await this.shipmentRepository.count({
       where: {
         status: ShipmentStatusEnum.PENDING,
@@ -242,6 +230,7 @@ export class OrderService extends BaseUserService<Order> {
       },
     });
     return {
+      ordersTotal,
       ordersNew,
       ordersDriversAccepted,
       ordersProcessing,
@@ -417,7 +406,6 @@ export class OrderService extends BaseUserService<Order> {
       ordersNew,
       ordersActive,
       ordersDelivered,
-
     };
   }
   async getDashboardShipments(driverShipmentsQuery: DriverShipmentsQuery) {

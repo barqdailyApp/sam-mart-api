@@ -1,7 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
+import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
 import { PaymentMethod } from 'src/infrastructure/data/enums/payment-method';
+import { ShipmentStatusEnum } from 'src/infrastructure/data/enums/shipment_status.enum';
 
 export class OrderClientQuery {
   @ApiProperty({ required: false, default: 1 })
@@ -36,28 +44,32 @@ export class OrderClientQuery {
   @IsString()
   payment_method: PaymentMethod;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, enum: DeliveryType })
   @IsOptional()
   @IsString()
-  warehouse_name: string;
+  delivery_type: DeliveryType;
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  driver_name: string;
+  warehouse_id: string;
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  client_name: string;
+  driver_id: string;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false,description:"search by order number or client name or client phone" })
   @IsOptional()
   @IsString()
-  client_phone: string;
+  order_search: string;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({
+    nullable: true,
+    required: false,
+    enum: ShipmentStatusEnum,
+  })
   @IsOptional()
-  @IsString()
-  order_number: string;
+  @IsEnum(ShipmentStatusEnum)
+  status: ShipmentStatusEnum;
 }

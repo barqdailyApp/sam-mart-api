@@ -2,6 +2,8 @@ import { Exclude, Expose } from 'class-transformer';
 
 @Exclude()
 export class OrdersTotalDashboardResponse {
+  @Expose() ordersTotal: number;
+
   @Expose() ordersNew: number;
   @Expose() ordersDriversAccepted: number;
   @Expose() ordersProcessing: number;
@@ -10,6 +12,7 @@ export class OrdersTotalDashboardResponse {
   @Expose() ordersCanceled: number;
 
   constructor(
+    ordersTotal: number,
     ordersNew: number,
     ordersDriversAccepted: number,
     ordersProcessing: number,
@@ -17,6 +20,7 @@ export class OrdersTotalDashboardResponse {
     ordersDelivered: number,
     ordersCanceled: number,
   ) {
+    this.ordersTotal = ordersTotal;
     this.ordersNew = ordersNew;
     this.ordersDriversAccepted = ordersDriversAccepted;
     this.ordersProcessing = ordersProcessing;

@@ -1,4 +1,5 @@
 import { Exclude, Expose } from "class-transformer";
+import { DeliveryType } from "src/infrastructure/data/enums/delivery-type.enum";
 import { PaymentMethod } from "src/infrastructure/data/enums/payment-method";
 import { Order } from "src/infrastructure/entities/order/order.entity";
 
@@ -10,6 +11,7 @@ export class OrderSingleDashboardResponse {
   @Expose() order_created_at: Date;
   
   @Expose() order_number: string;
+  @Expose() delivery_type: DeliveryType;
 
   @Expose() total_price: number;
   @Expose() payment_method: PaymentMethod;
@@ -34,6 +36,8 @@ export class OrderSingleDashboardResponse {
     this.payment_method = order.payment_method;
     this.is_paid = order.is_paid;
     this.delivery_day = order.delivery_day;
+    this.delivery_type = order.delivery_type;
+
     this.warehouse = {
       id: order.warehouse.id,
       name_ar: order.warehouse.name_ar,
