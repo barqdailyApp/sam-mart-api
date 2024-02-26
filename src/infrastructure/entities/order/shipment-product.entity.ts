@@ -1,7 +1,8 @@
-import { Column, ManyToOne, JoinColumn, Entity } from 'typeorm';
+import { Column, ManyToOne, JoinColumn, Entity, OneToOne, OneToMany } from 'typeorm';
 import { ProductCategoryPrice } from '../product/product-category-price.entity';
 import { AuditableEntity } from 'src/infrastructure/base/auditable.entity';
 import { Shipment } from './shipment.entity';
+import { ReturnOrderProduct } from './return-order/return-order-product.entity';
 @Entity()
 export class ShipmentProduct extends AuditableEntity {
   @ManyToOne(() => Shipment, (shipment) => shipment.shipment_products)
@@ -29,6 +30,9 @@ export class ShipmentProduct extends AuditableEntity {
   @JoinColumn()
   product_category_price: ProductCategoryPrice;
 
+  @OneToOne(() => ReturnOrderProduct, returnOrderProduct => returnOrderProduct.shipmentProduct, { cascade: true })
+  returnOrderProduct: ReturnOrderProduct[];
+
   @Column()
   product_category_price_id: string;
 
@@ -37,6 +41,10 @@ export class ShipmentProduct extends AuditableEntity {
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   price: number;
+
+  // to check if the product can be asked for return or not
+  @Column({type:"boolean", default:true})
+  can_return: boolean;
 
   @Column({ type: 'simple-array', nullable: true })
   additions: string[];
