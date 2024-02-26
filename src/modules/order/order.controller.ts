@@ -24,6 +24,10 @@ import { DriverShipmentsQuery } from './filter/driver-shipment.query';
 import { ShipmentResponse } from './dto/response/shipment.response';
 import { ShipmentDriverResponse } from './dto/response/driver-response/shipment-driver.respnse';
 import { SingleOrderQuery } from './filter/single-order.query';
+import { OrdersDashboardResponse } from './dto/response/orders-dashboard.response';
+import { OrdersTotalDashboardResponse } from './dto/response/orders-total-dashboard.response';
+import { ShipmentsTotalDriverResponse } from './dto/response/shipments-driver-total.response';
+import { OrderSingleDashboardResponse } from './dto/response/order-single-dashboard.response';
 
 @ApiTags('Order')
 @ApiHeader({
@@ -71,7 +75,8 @@ export class OrderController {
     );
 
     const ordersResponse = orders.map((order) => {
-      const orderResponse = plainToClass(OrderResponse, order);
+      //const orderResponse = plainToClass(OrderResponse, order);
+      const orderResponse = new OrdersDashboardResponse(order);
 
       return orderResponse;
     });
@@ -82,12 +87,26 @@ export class OrderController {
 
     return new ActionResponse(pageDto);
   }
+  @Get('dashboard-orders-total')
+  async getDashboardOrdersTotal() {
+    const ordersTotal = await this.orderService.getTotalDashboardOrders();
 
+    const ordersTotalResponse = new OrdersTotalDashboardResponse(
+      ordersTotal.ordersNew,
+      ordersTotal.ordersDriversAccepted,
+      ordersTotal.ordersProcessing,
+      ordersTotal.ordersPicked,
+      ordersTotal.ordersDelivered,
+      ordersTotal.ordersCanceled,
+    );
+
+    return new ActionResponse(ordersTotalResponse);
+  }
   @Get('single-order/:order_id')
   async getSingleClientOrder(@Param('order_id') order_id: string) {
     const order = await this.orderService.getSingleOrder(order_id);
 
-    const orderResponse = plainToClass(OrderResponse, order);
+    const orderResponse =  new OrderSingleDashboardResponse(order);
 
     const data = this._i18nResponse.entity(orderResponse);
 
@@ -139,7 +158,19 @@ export class OrderController {
 
     return new ActionResponse(pageDto);
   }
+  @Get('shipments-driver-total')
+  async getTotalDriverShipments() {
+    const shipmentsTotal = await this.orderService.getTotalDriverShipments();
 
+    const shipmentsTotalResponse = new ShipmentsTotalDriverResponse(
+      shipmentsTotal.ordersNew,
+      shipmentsTotal.ordersActive,
+
+      shipmentsTotal.ordersDelivered,
+    );
+
+    return new ActionResponse(shipmentsTotalResponse);
+  }
   @Get('single-shipment/:shipment_id')
   async getSingleShipment(@Param('shipment_id') shipment_id: string) {
     const shipment = await this.orderService.getSingleShipment(shipment_id);

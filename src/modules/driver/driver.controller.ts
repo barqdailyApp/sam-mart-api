@@ -58,7 +58,7 @@ export class DriverController {
     return new ActionResponse(this._i18nResponse.entity(driverResponse));
   }
   @Roles(Role.DRIVER)
-  @Put(':driver_id/location')
+  @Put('location')
   async updateDriverLocation(
     @Body() updateDriverLocationRequest: UpdateDriverLocationRequest,
   ) {
