@@ -42,6 +42,7 @@ export class ShipmentProduct extends AuditableEntity {
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   price: number;
 
+  // to check if the product can be asked for return or not
   @Column({type:"boolean", default:true})
   can_return: boolean;
 

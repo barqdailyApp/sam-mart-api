@@ -544,8 +544,8 @@ export class OrderService extends BaseUserService<Order> {
   }
 
   async returnOrder(order_id: string, req: ReturnOrderRequest) {
-    const { returned_products } = req;
-    const returned_products_id = returned_products.map(p => p.product_id);
+    const { returned_shipment_products } = req;
+    const returned_shipment_products_id = returned_shipment_products.map(p => p.shipment_product_id);
 
     // check if the order exists
     const order = await this.orderRepository.findOne({ where: { id: order_id } });
@@ -570,17 +570,22 @@ export class OrderService extends BaseUserService<Order> {
     const shipmentProducts = await this.shipmentProductRepository.find({
       where: {
         shipment_id: shipment.id,
-        product_id: In(returned_products_id)
+        id: In(returned_shipment_products_id)
       }
     })
 
-    if (shipmentProducts.length !== returned_products.length) {
+    if (shipmentProducts.length !== returned_shipment_products.length) {
       throw new BadRequestException('invalid products IDs')
     }
 
+    const canNotReturnProducts = shipmentProducts.find(p => p.can_return === false);
+    if (canNotReturnProducts) {
+      throw new BadRequestException(`you can't return this product alread returned ${JSON.stringify(canNotReturnProducts)}`)
+    }
+
     // check if the return products quantities are valid based on the shipment products
-    const invalidQuantityForProducts = returned_products.filter(p => {
-      const product = shipmentProducts.find(sp => sp.product_id === p.product_id);
+    const invalidQuantityForProducts = returned_shipment_products.filter(p => {
+      const product = shipmentProducts.find(sp => sp.id === p.shipment_product_id);
       return product.quantity < p.quantity;
     })
 
@@ -591,30 +596,25 @@ export class OrderService extends BaseUserService<Order> {
     // check if the return products reasons IDs are valid
     const returnedProductsReasons = await this.returnProductReasonRepository.find({
       where: {
-        id: In(returned_products.map(p => p.reason_id))
+        id: In(returned_shipment_products.map(p => p.reason_id))
       }
     })
 
-    if (returnedProductsReasons.length !== new Set(returned_products.map(p => p.reason_id)).size) {
+    if (returnedProductsReasons.length !== new Set(returned_shipment_products.map(p => p.reason_id)).size) {
       throw new BadRequestException(`invalid return reasons IDs`)
     }
-
-    // map the returned products to the return order products
-    const mapped_returned_products = returned_products.map(p => {
-      const product = shipmentProducts.find(sp => sp.product_id === p.product_id);
-      return {
-        quantity: p.quantity,
-        shipmentProduct: product,
-        customer_note: p.customer_note,
-        returnProductReason: p.reason_id ? { id: p.reason_id } : null
-      }
-    });
 
     const returnOrder = await this.ReturnOrderRepository.create({
       status: ReturnOrderStatus.PENDING,
       order,
-      returnOrderProducts: mapped_returned_products,
+      returnOrderProducts: req.returned_shipment_products,
       customer_note: req.customer_note
+    })
+
+    await this.shipmentProductRepository.update({
+      id: In(returned_shipment_products_id)
+    }, {
+      can_return: false
     })
 
     return await this.ReturnOrderRepository.save(returnOrder);
@@ -622,10 +622,11 @@ export class OrderService extends BaseUserService<Order> {
 
   // this method is used by the admin to update the return order status
   async updateReturnOrderStatus(return_order_id: string, req: UpdateReturnOrderStatusRequest) {
+    console.log("here", return_order_id)
     const returnOrder = await this.ReturnOrderRepository.findOne({ where: { id: return_order_id } });
     if (!returnOrder) throw new NotFoundException('return order not found');
 
-    const { return_order_products, admin_note, driver_id,status } = req;
+    const { return_order_products, admin_note, driver_id, status } = req;
     const returned_products_id = return_order_products.map(p => p.return_order_product_id);
 
     // check if the return order products IDs are valid
@@ -650,29 +651,22 @@ export class OrderService extends BaseUserService<Order> {
       throw new BadRequestException(`invalid accepted quantity for products ${JSON.stringify(invalidQuantityForProducts)}`)
     }
 
-    const driver = await this.driverRepository.findOne({ where: { id: driver_id } });
-    if (!driver) throw new BadRequestException('driver not found');
+    if (driver_id) {
+      const driver = await this.driverRepository.findOne({ where: { id: driver_id } });
+      if (!driver) throw new BadRequestException('driver not found');
+    }
 
-    // update the return order products status
-    const mappedUpdatedReturnOrderProducts = return_order_products.map(p => {
-      const product = returnOrderProducts.find(rp => rp.id === p.return_order_product_id);
+    const mappedUpdatedReturnOrderProducts = returnOrderProducts.map(p => {
+      const product = return_order_products.find(rp => rp.return_order_product_id === p.id);
       return {
-        ...product,
-        status: p.status,
-        accepted_quantity: p.accepted_quantity,
-        admin_note: p.admin_note,
+        ...p,
+        status: product.status,
+        accepted_quantity: product.accepted_quantity,
+        admin_note: product.admin_note,
       }
     })
 
-    Object.assign(returnOrder, {
-      status,
-      admin_note,
-      driver,
-      returnOrderProducts: mappedUpdatedReturnOrderProducts as ReturnOrderProduct[],
-    });
-
-    await this.ReturnOrderRepository.save(returnOrder);
-
-    return returnOrder;
+    await this.returnOrderProductRepository.save(mappedUpdatedReturnOrderProducts);
+    return await this.ReturnOrderRepository.save(returnOrder);
   }
 }
