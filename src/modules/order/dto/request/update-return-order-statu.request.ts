@@ -16,6 +16,7 @@ class UpdateReturnProductStatusRequest {
     status: ReturnOrderStatus;
 
     @ApiProperty({ type: 'number' })
+    @ValidateIf((obj) => obj.status === ReturnOrderStatus.ACCEPTED)
     @IsNotEmpty()
     @IsNumber()
     accepted_quantity: number;
