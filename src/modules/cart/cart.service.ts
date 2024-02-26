@@ -115,7 +115,7 @@ export class CartService extends BaseService<CartProduct> {
         `ST_Distance_Sphere(
              ST_SRID(point(${address.latitude}, ${address.longitude}), 4326),
              warehouse.location
-         )`,  
+         )`,
       )
       .getOne();
 
@@ -172,6 +172,7 @@ export class CartService extends BaseService<CartProduct> {
       new CartProduct({
         additions: additions,
         is_offer: is_offer,
+        warehouse_id: nearst_warehouse.id,
         cart_id: cart.id,
         section_id:
           product_price.product_sub_category.category_subCategory
@@ -248,6 +249,21 @@ export class CartService extends BaseService<CartProduct> {
       )
         cart_product.quantity = product_category_price.min_order_quantity;
       else cart_product.quantity -= product_category_price.min_order_quantity;
+    }
+    const warehouse_product = await this.WarehouseProductsRepository.findOne({
+      where: {
+        warehouse_id: cart_product.warehouse_id,
+        product_id: cart_product.product_id,
+      },
+    });
+    if (!warehouse_product) {
+      throw new BadRequestException('message.warehouse_product_not_enough');
+    }
+    warehouse_product.quantity =
+      warehouse_product.quantity -
+      cart_product.quantity * cart_product.conversion_factor;
+    if (warehouse_product.quantity < 0) {
+      throw new BadRequestException('message.warehouse_product_not_enough');
     }
 
     return {

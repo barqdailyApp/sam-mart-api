@@ -75,16 +75,7 @@ export class MakeOrderTransaction extends BaseTransaction<
         throw new BadRequestException('Cart is empty');
       }
 
-      const nearst_warehouse = await context
-        .createQueryBuilder(Warehouse, 'warehouse')
-        .where('is_active = :is_active', { is_active: true })
-        .orderBy(
-          `ST_Distance_Sphere(
-                 ST_SRID(point(${address.latitude}, ${address.longitude}), 4326),
-                 warehouse.location
-             )`,
-        )
-        .getOne();
+    
 
       const count = await context
         .createQueryBuilder(Order, 'order')
@@ -93,7 +84,7 @@ export class MakeOrderTransaction extends BaseTransaction<
       const order = await context.save(Order, {
         ...plainToInstance(Order, req),
         user_id: user.id,
-        warehouse_id: nearst_warehouse.id,
+        warehouse_id: cart_products[0].warehouse_id,
         delivery_fee: section.delivery_price,
         number: generateOrderNumber(count),
         address_id: address.id,
@@ -119,7 +110,7 @@ export class MakeOrderTransaction extends BaseTransaction<
 
       const shipment = await context.save(Shipment, {
         order_id: order.id,
-        warehouse_id: nearst_warehouse.id,
+        warehouse_id: cart_products[0].warehouse_id,
       });
 
       if (order.delivery_type == DeliveryType.FAST) {
@@ -170,13 +161,13 @@ export class MakeOrderTransaction extends BaseTransaction<
         new WarehouseOperations({
           type: operationType.SELL,
           user_id: user.id,
-          warehouse_id: nearst_warehouse.id,
+          warehouse_id: cart_products[0].warehouse_id,
         }),
       );
       for (let index = 0; index < shipment_products.length; index++) {
         const warehouse_product = await context.findOne(WarehouseProducts, {
           where: {
-            warehouse_id: nearst_warehouse.id,
+            warehouse_id: cart_products[0].warehouse_id,
             product_id: shipment_products[index].product_id,
           },
         });
