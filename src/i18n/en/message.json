@@ -17,5 +17,5 @@
     "measurement_Unit_not_found": "Measurement Unit not found",
     "product_measurement_not_found": "Product measurement not found",
     "region_not_found": "Region not found",
-    "warehouse_product_not_enough":"Warehouse doesn't have  enough quantity of produuct number :"
+    "warehouse_product_not_enough":"Quantity is not availiable"
 }

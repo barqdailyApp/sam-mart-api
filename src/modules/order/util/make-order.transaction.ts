@@ -61,8 +61,11 @@ export class MakeOrderTransaction extends BaseTransaction<
 
       const user = this.request.user;
       const address = await context.findOne(Address, {
-        where: [{ id: req.address_id, user_id: user.id }],
+        where: [{ is_favorite: true, user_id: user.id }],
       });
+      if(!address) {
+        throw new BadRequestException('user does not have a default address');
+      }
       const cart = await context.findOne(Cart, { where: { user_id: user.id } });
 
       const cart_products = await context.find(CartProduct, {
@@ -74,6 +77,7 @@ export class MakeOrderTransaction extends BaseTransaction<
 
       const nearst_warehouse = await context
         .createQueryBuilder(Warehouse, 'warehouse')
+        .where('is_active = :is_active', { is_active: true })
         .orderBy(
           `ST_Distance_Sphere(
                  ST_SRID(point(${address.latitude}, ${address.longitude}), 4326),
@@ -92,6 +96,7 @@ export class MakeOrderTransaction extends BaseTransaction<
         warehouse_id: nearst_warehouse.id,
         delivery_fee: section.delivery_price,
         number: generateOrderNumber(count),
+        address_id: address.id,
       });
 
       if (order.delivery_type == DeliveryType.FAST) {

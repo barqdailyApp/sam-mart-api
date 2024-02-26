@@ -21,10 +21,7 @@ export class MakeOrderRequest {
   @IsString()
   section_id: string;
 
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
-  address_id: string;
+
 
   @ApiProperty({
     type: 'enum',
