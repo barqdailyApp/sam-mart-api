@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -107,6 +108,17 @@ export class WarehouseController {
   ) {
     return new ActionResponse(
       await this.warehouseService.updateWarehouse(id, request),
+    );
+  }
+
+  @Roles(Role.ADMIN)
+  @Delete('/:id')
+  async delete(
+
+    @Query('id') id: string,
+  ) {
+    return new ActionResponse(
+      await this.warehouseService.softDelete(id)
     );
   }
 

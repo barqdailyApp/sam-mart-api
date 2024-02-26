@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags, ApiHeader } from '@nestjs/swagger';
 import { Router } from 'express';
 import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
@@ -25,6 +25,11 @@ export class WorkingAreaController {
     constructor(
         private workingAreaService: WorkingAreaService
     ){}
+
+    @Get('/working-area')
+    async getWorkingArea() {
+      return new ActionResponse(await this.workingAreaService.getWorkingArea());
+    }
 
   @Post()
   async createWorkingArea(@Body() req: CreateWorkingAreaRequest) {
