@@ -92,6 +92,7 @@ export class OrderController {
     const ordersTotal = await this.orderService.getTotalDashboardOrders();
 
     const ordersTotalResponse = new OrdersTotalDashboardResponse(
+      ordersTotal.ordersTotal,
       ordersTotal.ordersNew,
       ordersTotal.ordersDriversAccepted,
       ordersTotal.ordersProcessing,
