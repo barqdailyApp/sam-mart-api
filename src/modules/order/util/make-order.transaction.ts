@@ -176,7 +176,7 @@ export class MakeOrderTransaction extends BaseTransaction<
           },
         });
         if (!warehouse_product) {
-          throw new BadRequestException( 'message.warehouse_product_not_enough' + index,);
+          throw new BadRequestException( 'message.warehouse_product_not_enough:' + index);
         }
         warehouse_product.quantity =
           warehouse_product.quantity -
