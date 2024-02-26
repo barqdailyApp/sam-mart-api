@@ -26,7 +26,7 @@ export class WorkingAreaController {
         private workingAreaService: WorkingAreaService
     ){}
 
-    @Get('/working-area')
+    @Get()
     async getWorkingArea() {
       return new ActionResponse(await this.workingAreaService.getWorkingArea());
     }
