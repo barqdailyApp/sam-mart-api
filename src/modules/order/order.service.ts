@@ -119,7 +119,7 @@ export class OrderService extends BaseUserService<Order> {
       payment_method,
       warehouse_id,
       driver_id,
-delivery_type,
+      delivery_type,
       status,
       order_search,
     } = orderClientQuery;
@@ -550,7 +550,11 @@ delivery_type,
     });
     if (!shipment) throw new NotFoundException('shipment not found');
 
-    if (shipment.status !== ShipmentStatusEnum.DELIVERED) {
+    if (
+      shipment.status !== ShipmentStatusEnum.DELIVERED &&
+      shipment.status !== ShipmentStatusEnum.COMPLETED &&
+      shipment.status !== ShipmentStatusEnum.CANCELED
+    ) {
       throw new BadRequestException('you can not return this order that is not delivered yet')
     }
 
@@ -610,7 +614,6 @@ delivery_type,
 
   // this method is used by the admin to update the return order status
   async updateReturnOrderStatus(return_order_id: string, req: UpdateReturnOrderStatusRequest) {
-    console.log("here", return_order_id)
     const returnOrder = await this.ReturnOrderRepository.findOne({ where: { id: return_order_id } });
     if (!returnOrder) throw new NotFoundException('return order not found');
 
