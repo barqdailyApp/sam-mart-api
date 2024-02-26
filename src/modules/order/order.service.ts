@@ -266,6 +266,17 @@ delivery_type,
       )
 
       .leftJoinAndSelect(
+        'product_sub_category.category_subCategory',
+        'category_subCategory',
+      )
+
+      .leftJoinAndSelect('category_subCategory.subcategory', 'subcategory')
+
+      .leftJoinAndSelect('category_subCategory.section_category', 'section_category')
+      .leftJoinAndSelect('section_category.category', 'category')
+
+
+      .leftJoinAndSelect(
         'product_category_price.product_measurement',
         'product_measurement',
       )
