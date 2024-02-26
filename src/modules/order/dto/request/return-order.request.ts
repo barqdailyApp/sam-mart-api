@@ -2,11 +2,11 @@ import { ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
 import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID, ValidateNested } from "class-validator";
 
-class ReturnProductRequest {
+class ReturnShipmentProductRequest {
     @ApiProperty()
     @IsNotEmpty()
     @IsUUID()
-    product_id: string;
+    shipment_product_id: string;
 
     @ApiProperty()
     @IsNotEmpty()
@@ -25,12 +25,12 @@ class ReturnProductRequest {
 }
 
 export class ReturnOrderRequest {
-    @ApiProperty({ type: [ReturnProductRequest] })
+    @ApiProperty({ type: [ReturnShipmentProductRequest] })
     @IsNotEmpty()
     @IsArray()
     @ValidateNested({ each: true })
-    @Type(() => ReturnProductRequest)
-    returned_products: ReturnProductRequest[];
+    @Type(() => ReturnShipmentProductRequest)
+    returned_shipment_products: ReturnShipmentProductRequest[];
 
     @ApiProperty({nullable: true})
     @IsOptional()
