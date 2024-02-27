@@ -33,11 +33,27 @@ export class OrderGateway
   server: Server;
 
   handleConnection(client: Socket) {
-   
+    // setup the client to join the rooms
+    if (client.user?.roles.includes(Role.DRIVER)) {
+      client.join(client.driver.warehouse_id)
+      client.join(client.driver.id)
+    } else if (client.user?.roles.includes(Role.ADMIN)) {
+      client.join("admin")
+    } else if (client.user?.roles.includes(Role.CLIENT)) {
+      client.join(client.user.id)
+    }
   }
 
   handleDisconnect(client: Socket) {
-   
+    // remove the client from the rooms
+    if (client.user?.roles.includes(Role.DRIVER)) {
+      client.leave(client.driver.warehouse_id)
+      client.leave(client.driver.id)
+    } else if (client.user?.roles.includes(Role.ADMIN)) {
+      client.leave("admin")
+    } else if (client.user?.roles.includes(Role.CLIENT)) {
+      client.leave(client.user.id)
+    }
   }
 
 
