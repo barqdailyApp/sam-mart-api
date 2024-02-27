@@ -48,6 +48,7 @@ import { SupportTicketSubject } from '../entities/support-ticket/suppot-ticket-s
 import { ReturnOrderProduct } from '../entities/order/return-order/return-order-product.entity';
 import { ReturnProductReason } from '../entities/order/return-order/return-product-reason.entity';
 import { ReturnOrder } from '../entities/order/return-order/return-order.entity';
+import { NotificationEntity } from '../entities/notification/notification.entity';
 
 
 export const DB_ENTITIES = [
@@ -101,7 +102,9 @@ export const DB_ENTITIES = [
   WarehouseOpreationProducts,
   ReturnOrderProduct,
   ReturnProductReason,
-  ReturnOrder
+  ReturnOrder,
+  NotificationEntity
+
 ];
 
 export const DB_VIEWS = [];
