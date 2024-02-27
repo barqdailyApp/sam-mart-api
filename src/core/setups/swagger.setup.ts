@@ -68,7 +68,8 @@ export default (app: INestApplication, config: ConfigService) => {
       OrderModule,
       EmployeeModule,
       ShipmentController,
-      WorkingAreaModule
+      WorkingAreaModule,
+    
     ],
     operationIdFactory,
   });

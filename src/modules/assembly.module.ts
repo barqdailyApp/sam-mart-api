@@ -48,7 +48,7 @@ import { TransactionModule } from './transaction/transaction.module';
     OrderModule,
     EmployeeModule,
     WorkingAreaModule,
-    TransactionModule
+    TransactionModule,
   ],
   exports: [],
   providers: [],

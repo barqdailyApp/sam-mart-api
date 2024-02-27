@@ -45,8 +45,7 @@ import { UpdateLanguageRequest } from './dto/requests/update-language.request';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { Roles } from '../authentication/guards/roles.decorator';
 import { plainToInstance } from 'class-transformer';
-
-
+import { UpdateFcmTokenRequest } from './requests/update-fcm-token.request';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -62,23 +61,23 @@ export class UserController {
     private readonly _service: UserService,
     @Inject(REQUEST) readonly request: Request,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
-  ) { }
+  ) {}
 
   @Put('allow-notification/:allow_notification')
   async allowNotification(
     @Param('allow_notification') allow_notification: boolean,
   ) {
-    return new ActionResponse(await this._service.allowNotification(allow_notification));
+    return new ActionResponse(
+      await this._service.allowNotification(allow_notification),
+    );
   }
 
   @Roles(Role.ADMIN)
   @Put('make-resturant')
   async makeResturant(@Body() id: string) {
-
-    const user = await this._service.findOne(id)
-    user.roles.push(Role.RESTURANT)
-    return new ActionResponse(await this._service.update(user))
-
+    const user = await this._service.findOne(id);
+    user.roles.push(Role.RESTURANT);
+    return new ActionResponse(await this._service.update(user));
   }
 
   @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('avatarFile'))
@@ -91,7 +90,7 @@ export class UserController {
   ) {
     if (avatarFile) req.avatarFile = avatarFile;
     const updated = new ProfileResponse({
-      user_info: await this._service.updateProfile(req)
+      user_info: await this._service.updateProfile(req),
     });
 
     return new ActionResponse(updated);
@@ -100,9 +99,14 @@ export class UserController {
   @Get('get-profile')
   async profile(): Promise<ActionResponse<ProfileResponse>> {
     const result = new ProfileResponse({
-      user_info: this._service.currentUser
+      user_info: this._service.currentUser,
     });
 
     return new ActionResponse<ProfileResponse>(result);
+  }
+  @Put('update-fcm-token')
+  async updateFcmToken(@Body() updateFcmTokenRequest: UpdateFcmTokenRequest) {
+    const result = await this._service.updateFcmToken(updateFcmTokenRequest);
+    return new ActionResponse(result);
   }
 }

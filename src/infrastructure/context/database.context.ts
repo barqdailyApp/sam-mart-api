@@ -45,6 +45,7 @@ import { Wallet } from '../entities/wallet/wallet.entity';
 import { Transaction as WalletTransaction } from '../entities/wallet/transaction.entity';
 import { WarehouseOpreationProducts } from '../entities/warehouse/wahouse-opreation-products.entity';
 import { SupportTicketSubject } from '../entities/support-ticket/suppot-ticket-subject.entity';
+import { NotificationEntity } from '../entities/notification/notification.entity';
 
 
 export const DB_ENTITIES = [
@@ -95,7 +96,9 @@ export const DB_ENTITIES = [
   WorkingArea,
   Wallet,
   WalletTransaction,
-  WarehouseOpreationProducts
+  WarehouseOpreationProducts,
+  NotificationEntity
+
 ];
 
 export const DB_VIEWS = [];
