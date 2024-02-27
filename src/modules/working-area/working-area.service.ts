@@ -28,4 +28,7 @@ export class WorkingAreaService {
   async getWorkingArea() {
     return await this.workingArea_repo.find({});
   }
+  async getSingleWorkingArea(id:string) {
+    return await this.workingArea_repo.findOne({where:{id:id}});
+  }
 }

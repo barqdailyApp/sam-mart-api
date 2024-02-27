@@ -31,6 +31,11 @@ export class WorkingAreaController {
       return new ActionResponse(await this.workingAreaService.getWorkingArea());
     }
 
+    @Get("/:id")
+    async getSingleWorkingArea(@Param('id') id: string) {
+      return new ActionResponse(await this.workingAreaService.getSingleWorkingArea(id));
+    }
+
   @Post()
   async createWorkingArea(@Body() req: CreateWorkingAreaRequest) {
     return new ActionResponse(await this.workingAreaService.createWorkingArea(req));
