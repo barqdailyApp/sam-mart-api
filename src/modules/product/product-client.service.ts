@@ -89,6 +89,7 @@ export class ProductClientService {
     if (latitude && longitude) {
       warehouse = await this.warehouse_repo
         .createQueryBuilder('warehouse')
+        .where('is_active = :is_active', { is_active: true })
         .orderBy(
           `ST_Distance_Sphere(
              ST_SRID(point(${latitude}, ${longitude}), 4326),
@@ -692,6 +693,7 @@ export class ProductClientService {
     if (latitude && longitude) {
       warehouse = await this.warehouse_repo
         .createQueryBuilder('warehouse')
+        .where('is_active = :is_active', { is_active: true })
         .orderBy(
           `ST_Distance_Sphere(
              ST_SRID(point(${latitude}, ${longitude}), 4326),
