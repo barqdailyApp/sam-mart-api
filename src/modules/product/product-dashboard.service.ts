@@ -859,7 +859,7 @@ export class ProductDashboardService {
         },
       );
 
-      query = query.orWhere(
+      query = query.andWhere(
         'product_sub_category.category_sub_category_id = :category_sub_category_id',
         {
           category_sub_category_id,
