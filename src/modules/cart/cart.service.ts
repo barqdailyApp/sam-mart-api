@@ -13,13 +13,21 @@ import { In } from 'typeorm';
 import { calculateSum } from 'src/core/helpers/cast.helper';
 import { UpdateCartProductRequest } from './dto/requests/update-cart-request';
 import { AddRemoveCartProductServiceRequest } from './dto/requests/add-remove-service-request';
+import { Address } from 'src/infrastructure/entities/user/address.entity';
+import { Warehouse } from 'src/infrastructure/entities/warehouse/warehouse.entity';
+import { WarehouseProducts } from 'src/infrastructure/entities/warehouse/warehouse-products.entity';
 
 @Injectable()
 export class CartService extends BaseService<CartProduct> {
   constructor(
     @InjectRepository(CartProduct)
     private cartProductRepository: Repository<CartProduct>,
+    @InjectRepository(Address) private addressRepository: Repository<Address>,
     @InjectRepository(Cart) private cartRepository: Repository<Cart>,
+    @InjectRepository(WarehouseProducts)
+    private WarehouseProductsRepository: Repository<WarehouseProducts>,
+    @InjectRepository(Warehouse)
+    private warehouseRepository: Repository<Warehouse>,
     @InjectRepository(Product) private productRepository: Repository<Product>,
     @InjectRepository(ProductCategoryPrice)
     private productCategoryPrice: Repository<ProductCategoryPrice>,
@@ -76,6 +84,13 @@ export class CartService extends BaseService<CartProduct> {
     const cart = await this.getCart();
     const additions = req.additions || [];
 
+    const user = this.request.user;
+    const address = await this.addressRepository.findOne({
+      where: [{ is_favorite: true, user_id: user.id }],
+    });
+    if (!address) {
+      throw new BadRequestException('user does not have a default address');
+    }
     const product_price = await this.productCategoryPrice.findOne({
       where: {
         id: req.product_category_price_id,
@@ -93,12 +108,40 @@ export class CartService extends BaseService<CartProduct> {
       },
     });
 
+    const nearst_warehouse = await this.warehouseRepository
+      .createQueryBuilder('warehouse')
+      .where('is_active = :is_active', { is_active: true })
+      .orderBy(
+        `ST_Distance_Sphere(
+             ST_SRID(point(${address.latitude}, ${address.longitude}), 4326),
+             warehouse.location
+         )`,
+      )
+      .getOne();
+
     if (product_price.product_offer != null) {
       product_price.min_order_quantity =
         product_price.product_offer.min_offer_quantity;
       product_price.max_order_quantity =
         product_price.product_offer.max_offer_quantity;
       product_price.price = product_price.product_offer.price;
+    }
+
+    const warehouse_product = await this.WarehouseProductsRepository.findOne({
+      where: {
+        warehouse_id: nearst_warehouse.id,
+        product_id: product_price.product_measurement.product_id,
+      },
+    });
+    if (!warehouse_product) {
+      throw new BadRequestException('message.warehouse_product_not_enough');
+    }
+    warehouse_product.quantity =
+      warehouse_product.quantity -
+      product_price.min_order_quantity *
+        product_price.product_measurement.conversion_factor;
+    if (warehouse_product.quantity < 0) {
+      throw new BadRequestException('message.warehouse_product_not_enough');
     }
 
     if (additions.length > 0) {
@@ -129,6 +172,7 @@ export class CartService extends BaseService<CartProduct> {
       new CartProduct({
         additions: additions,
         is_offer: is_offer,
+        warehouse_id: nearst_warehouse.id,
         cart_id: cart.id,
         section_id:
           product_price.product_sub_category.category_subCategory
@@ -205,6 +249,21 @@ export class CartService extends BaseService<CartProduct> {
       )
         cart_product.quantity = product_category_price.min_order_quantity;
       else cart_product.quantity -= product_category_price.min_order_quantity;
+    }
+    const warehouse_product = await this.WarehouseProductsRepository.findOne({
+      where: {
+        warehouse_id: cart_product.warehouse_id,
+        product_id: cart_product.product_id,
+      },
+    });
+    if (!warehouse_product) {
+      throw new BadRequestException('message.warehouse_product_not_enough');
+    }
+    warehouse_product.quantity =
+      warehouse_product.quantity -
+      cart_product.quantity * cart_product.conversion_factor;
+    if (warehouse_product.quantity < 0) {
+      throw new BadRequestException('message.warehouse_product_not_enough');
     }
 
     return {

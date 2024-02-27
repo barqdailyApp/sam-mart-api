@@ -45,6 +45,9 @@ import { Wallet } from '../entities/wallet/wallet.entity';
 import { Transaction as WalletTransaction } from '../entities/wallet/transaction.entity';
 import { WarehouseOpreationProducts } from '../entities/warehouse/wahouse-opreation-products.entity';
 import { SupportTicketSubject } from '../entities/support-ticket/suppot-ticket-subject.entity';
+import { ReturnOrderProduct } from '../entities/order/return-order/return-order-product.entity';
+import { ReturnProductReason } from '../entities/order/return-order/return-product-reason.entity';
+import { ReturnOrder } from '../entities/order/return-order/return-order.entity';
 import { NotificationEntity } from '../entities/notification/notification.entity';
 
 
@@ -97,6 +100,9 @@ export const DB_ENTITIES = [
   Wallet,
   WalletTransaction,
   WarehouseOpreationProducts,
+  ReturnOrderProduct,
+  ReturnProductReason,
+  ReturnOrder,
   NotificationEntity
 
 ];

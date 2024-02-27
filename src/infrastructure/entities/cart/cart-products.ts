@@ -45,6 +45,8 @@ price:number;
 @Column({type:"simple-array",nullable:true})
 additions:string[]
 
+@Column({nullable:true})
+warehouse_id:string
 constructor(data: Partial<CartProduct>) {
     super();
     Object.assign(this, data);

@@ -17,12 +17,16 @@ export class UpdateWorkingAreaRequest {
     range:number
     @ApiProperty({required:false})
     @IsBoolean()
-    active:boolean
+    is_active:boolean
 
     @ApiProperty()
     @IsNotEmpty() @IsString()
     id: string;
 
+
+    @ApiProperty({required:false})
+   
+    city_id: string;
     @ApiProperty()
     @IsNotEmpty()
     @IsString()

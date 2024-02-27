@@ -1,0 +1,8 @@
+export enum ReturnOrderStatus{
+    PENDING = 'PENDING',
+    ACCEPTED = 'ACCEPTED',
+    REJECTED = 'REJECTED',
+    PICKED_UP = 'PICKED_UP',
+    DELIVERED = 'DELIVERED',
+    COMPLETE = 'COMPLETE'
+}

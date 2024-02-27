@@ -19,6 +19,7 @@ import { DriverStatus } from 'src/infrastructure/data/enums/driver-status.enum';
 import { Warehouse } from '../warehouse/warehouse.entity';
 import { ShipmentChat } from '../order/shipment-chat.entity';
 import { ShipmentFeedback } from '../order/shipment-feedback.entity';
+import { ReturnOrder } from '../order/return-order/return-order.entity';
 
 @Entity()
 export class Driver extends AuditableEntity {
@@ -40,7 +41,7 @@ export class Driver extends AuditableEntity {
   @Column()
   country_id: string;
 
-  @Column({default: false})
+  @Column({ default: false })
   is_receive_orders: boolean;
 
   @ManyToOne(() => Warehouse, (warehouse) => warehouse.drivers, {})
@@ -118,6 +119,10 @@ export class Driver extends AuditableEntity {
 
   @OneToMany(() => ShipmentFeedback, (orderFeedback) => orderFeedback.driver)
   order_feedbacks: ShipmentFeedback[];
+
+  @OneToMany(() => ReturnOrder, (returnOrder) => returnOrder.driver)
+  returnOrders: ReturnOrder[];
+
   constructor(partial?: Partial<Driver>) {
     super();
     Object.assign(this, partial);

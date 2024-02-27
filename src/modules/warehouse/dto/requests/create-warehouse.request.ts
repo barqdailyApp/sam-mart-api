@@ -18,12 +18,14 @@ export class CreateWarehouseRequest {
   @IsString()
   name_en: string;
 
-  @ApiProperty()
+  @ApiProperty({required:false})
+  @IsOptional()
   @IsNotEmpty()
   @IsString()
   address_ar: string;
 
-  @ApiProperty()
+  @ApiProperty({required:false})
+  @IsOptional()
   @IsNotEmpty()
   @IsString()
   address_en: string;

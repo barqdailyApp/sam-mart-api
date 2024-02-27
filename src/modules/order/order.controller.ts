@@ -4,6 +4,7 @@ import {
   Get,
   Inject,
   Param,
+  Patch,
   Post,
   Query,
   UseGuards,
@@ -27,6 +28,10 @@ import { SingleOrderQuery } from './filter/single-order.query';
 import { OrdersDashboardResponse } from './dto/response/orders-dashboard.response';
 import { OrdersTotalDashboardResponse } from './dto/response/orders-total-dashboard.response';
 import { ShipmentsTotalDriverResponse } from './dto/response/shipments-driver-total.response';
+import { ReturnOrderRequest } from './dto/request/return-order.request';
+import { Roles } from '../authentication/guards/roles.decorator';
+import { Role } from 'src/infrastructure/data/enums/role.enum';
+import { UpdateReturnOrderStatusRequest } from './dto/request/update-return-order-statu.request';
 import { OrderSingleDashboardResponse } from './dto/response/order-single-dashboard.response';
 
 @ApiTags('Order')
@@ -42,7 +47,7 @@ export class OrderController {
   constructor(
     private readonly orderService: OrderService,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
-  ) {}
+  ) { }
   @Post()
   async makeOrder(@Body() req: MakeOrderRequest) {
     return new ActionResponse(await this.orderService.makeOrder(req));
@@ -180,5 +185,22 @@ export class OrderController {
     const data = this._i18nResponse.entity(shipmentResponse);
 
     return new ActionResponse(data);
+  }
+
+  @Post("/return-order/:order_id")
+  async returnOrder(
+    @Param('order_id') order_id: string,
+    @Body() req: ReturnOrderRequest
+  ) {
+    return new ActionResponse(await this.orderService.returnOrder(order_id, req));
+  }
+
+  @Roles(Role.ADMIN)
+  @Patch("/update-return-order-status/:return_order_id")
+  async updateReturnOrderStatus(
+    @Param('return_order_id') return_order_id: string,
+    @Body() req: UpdateReturnOrderStatusRequest
+  ) {
+    return new ActionResponse(await this.orderService.updateReturnOrderStatus(return_order_id, req));
   }
 }

@@ -1,7 +1,6 @@
 import { AuditableEntity } from "src/infrastructure/base/auditable.entity";
 import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from "typeorm";
 import { User } from "../user/user.entity";
-import { Driver } from "../driver/driver.entity";
 import { ShipmentChatAttachment } from "./shipment-chat-attachment.entity";
 import { Shipment } from "./shipment.entity";
 
@@ -28,6 +27,9 @@ export class ShipmentChat extends AuditableEntity {
     @JoinColumn({ name: 'shipment_id' })
     shipment: Shipment;
 
-    @Column({ nullable: false })
+    @Column({ nullable: true })
     shipment_id: string;
+
+    @Column({ nullable: true })
+    return_order_id: string;
 }
