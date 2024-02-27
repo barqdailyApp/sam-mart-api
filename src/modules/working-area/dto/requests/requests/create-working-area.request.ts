@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsLatitude, IsLongitude, IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsBoolean, IsLatitude, IsLongitude, IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 export class CreateWorkingAreaRequest {
     @ApiProperty()
@@ -25,6 +25,9 @@ export class CreateWorkingAreaRequest {
     @IsNotEmpty()
     @IsString()
     address: string;
+    @ApiProperty({required:false})
+    @IsBoolean()
+    is_active:boolean
 
     @ApiProperty()
     @IsNotEmpty()
