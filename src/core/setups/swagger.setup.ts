@@ -15,6 +15,7 @@ import { DriverModule } from 'src/modules/driver/driver.module';
 import { EmployeeModule } from 'src/modules/employee/employee.module';
 import { FileModule } from 'src/modules/file/file.module';
 import { MeasurementUnitModule } from 'src/modules/measurement-unit/measurement-unit.module';
+import { NotificationModule } from 'src/modules/notification/notification.module';
 import { OrderModule } from 'src/modules/order/order.module';
 import { ShipmentController } from 'src/modules/order/shipment.controller';
 import { ProductCategoryPriceModule } from 'src/modules/product-category-price/product-category-price.module';
@@ -68,7 +69,8 @@ export default (app: INestApplication, config: ConfigService) => {
       OrderModule,
       EmployeeModule,
       ShipmentController,
-      WorkingAreaModule
+      WorkingAreaModule,
+      NotificationModule
     ],
     operationIdFactory,
   });

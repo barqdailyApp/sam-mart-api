@@ -60,6 +60,7 @@ import { SingleProductDashboardQuery } from './dto/filter/single-product-dashboa
 import { ProductsDashboardNewResponse } from './dto/response/response-dashboard/products-dashboard-new.response';
 import { SingleProductDashboardNewResponse } from './dto/response/response-dashboard/single-product-dashboard-new.response';
 import { ProductsOffersDashboardNewResponse } from './dto/response/response-dashboard/products-offers-dashboard-new.response';
+import { UpdateProductOfferRequest } from './dto/request/update-product-offer.request';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -94,6 +95,24 @@ export class ProductDashboardController {
     const product = await this.productDashboardService.createProductOffer(
       product_category_price_id,
       createProductOfferRequest,
+    );
+    return new ActionResponse(product);
+  }
+  @Put('update-product-offer/:offer_id')
+  async updateProductOffer(
+    @Param('offer_id') offer_id: string,
+    @Body() updateProductOfferRequest: UpdateProductOfferRequest,
+  ) {
+    const product = await this.productDashboardService.updateProductOffer(
+      offer_id,
+      updateProductOfferRequest,
+    );
+    return new ActionResponse(product);
+  }
+  @Delete('delete-product-offer/:offer_id')
+  async deleteProductOffer(@Param('offer_id') offer_id: string) {
+    const product = await this.productDashboardService.deleteProductOffer(
+      offer_id,
     );
     return new ActionResponse(product);
   }
@@ -200,7 +219,7 @@ export class ProductDashboardController {
         productsDashboardQuery,
       );
     const productsResponse = products.map((product) => {
-  const productResponse = new ProductsOffersDashboardNewResponse(product);
+      const productResponse = new ProductsOffersDashboardNewResponse(product);
       return productResponse;
     });
     const pageMetaDto = new PageMetaDto(page, limit, total);
@@ -209,15 +228,15 @@ export class ProductDashboardController {
 
     return new ActionResponse(pageDto);
   }
-  
+
   @Get('single-product-offer-dashboard/:offer_id')
-  async singleProductOfferDashboard(
-    @Param('offer_id') offer_id: string,
-  ) {
+  async singleProductOfferDashboard(@Param('offer_id') offer_id: string) {
     const product =
-      await this.productDashboardService.getSingleProductOfferDashboard(offer_id);
+      await this.productDashboardService.getSingleProductOfferDashboard(
+        offer_id,
+      );
     const productResponse = new ProductsOffersDashboardNewResponse(product);
-      // console.log(JSON.stringify(product, null, '  '));
+    // console.log(JSON.stringify(product, null, '  '));
     //   const productResponse = plainToClass(ProductResponse, product);
     // const data = this._i18nResponse.entity(productsResponse);
 
@@ -233,7 +252,7 @@ export class ProductDashboardController {
         singleProductDashboardQuery,
       );
     const productResponse = new SingleProductDashboardNewResponse(product);
-      // console.log(JSON.stringify(product, null, '  '));
+    // console.log(JSON.stringify(product, null, '  '));
     //   const productResponse = plainToClass(ProductResponse, product);
     // const data = this._i18nResponse.entity(productsResponse);
 

@@ -11,6 +11,7 @@ import { ImageManager } from 'src/integration/sharp/image.manager';
 import * as sharp from 'sharp';
 import { StorageManager } from 'src/integration/storage/storage.manager';
 import { SendOtpTransaction } from '../authentication/transactions/send-otp.transaction';
+import { UpdateFcmTokenRequest } from './requests/update-fcm-token.request';
 
 
 
@@ -70,6 +71,11 @@ export class UserService extends BaseService<User> {
     }
 
     return savedUser;
+  }
+
+  async updateFcmToken(updateFcmTokenRequest:UpdateFcmTokenRequest){
+    const {fcmToken} = updateFcmTokenRequest;
+    await this.userRepo.update({id:this.currentUser.id},{fcm_token:fcmToken})
   }
 
   get currentUser(): User {

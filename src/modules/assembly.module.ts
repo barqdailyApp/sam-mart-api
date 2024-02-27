@@ -22,6 +22,7 @@ import { OrderModule } from './order/order.module';
 import { EmployeeModule } from "./employee/employee.module";
 import { WorkingAreaModule } from './working-area/working-area.module';
 import { TransactionModule } from './transaction/transaction.module';
+import { NotificationModule } from "./notification/notification.module";
 
 
 @Module({
@@ -48,7 +49,8 @@ import { TransactionModule } from './transaction/transaction.module';
     OrderModule,
     EmployeeModule,
     WorkingAreaModule,
-    TransactionModule
+    TransactionModule,
+    NotificationModule
   ],
   exports: [],
   providers: [],

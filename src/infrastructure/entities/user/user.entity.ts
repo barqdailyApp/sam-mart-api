@@ -21,6 +21,7 @@ import { ProductFavorite } from '../product/product-favorite.entity';
 import { ShipmentChat } from '../order/shipment-chat.entity';
 import { ShipmentFeedback } from '../order/shipment-feedback.entity';
 import { Wallet } from '../wallet/wallet.entity';
+import { NotificationEntity } from '../notification/notification.entity';
 
 @Entity()
 export class User extends AuditableEntity {
@@ -88,6 +89,18 @@ export class User extends AuditableEntity {
 
   @OneToMany(() => ProductFavorite, (productFavorite) => productFavorite.user)
   products_favorite: ProductFavorite[];
+
+  @Column({ nullable: true, length: 500 })
+  fcm_token: string;
+
+  @Column({ default: true })
+  notification_is_active: boolean;
+
+  @OneToMany(() => NotificationEntity, (notification) => notification.user)
+  notifications: NotificationEntity[];
+
+  @Column({ type: 'enum', enum: Language, default: Language.EN })
+  language: Language;
   constructor(partial: Partial<User>) {
     super();
     Object.assign(this, partial);
