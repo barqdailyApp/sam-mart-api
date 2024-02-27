@@ -44,6 +44,7 @@ import {
 } from './dto/request/create-products-excel.request';
 import { toUrl } from 'src/core/helpers/file.helper';
 import { SingleProductDashboardQuery } from './dto/filter/single-product-dashboard.query';
+import { UpdateProductOfferRequest } from './dto/request/update-product-offer.request';
 
 @Injectable()
 export class ProductDashboardService {
@@ -138,6 +139,67 @@ export class ProductDashboardService {
     }
 
     return await this.productOffer_repo.save(createProductOffer);
+  }
+  async updateProductOffer(
+    offer_id: string,
+    updateProductOfferRequest: UpdateProductOfferRequest,
+  ) {
+    const {
+      discount_type,
+      discount_value,
+      end_date,
+      is_active,
+      max_offer_quantity,
+      min_offer_quantity,
+      start_date,
+    } = updateProductOfferRequest;
+    const productOffer = await this.productOffer_repo.findOne({
+      where: { id: offer_id },
+      relations: { product_category_price: true },
+    });
+    let productOfferPrice = productOffer.price;
+
+    if (!productOffer) {
+      throw new NotFoundException('message_product_offer_not_found');
+    }
+    if (discount_type != undefined && discount_value != undefined) {
+      if (discount_type == DiscountType.VALUE) {
+        productOfferPrice =
+          productOffer.product_category_price.price - discount_value;
+      } else {
+        const discountedPercentage =
+          (productOffer.product_category_price.price * discount_value) / 100;
+        productOfferPrice =
+          productOffer.product_category_price.price - discountedPercentage;
+      }
+    }
+
+    await this.productOffer_repo.update(
+      { id: offer_id },
+      {
+        discount_type,
+        discount_value,
+        end_date,
+        start_date,
+        is_active,
+        max_offer_quantity,
+        min_offer_quantity,
+        price: productOfferPrice,
+      },
+    );
+    return await this.productOffer_repo.findOne({
+      where: { id: offer_id },
+      relations: { product_category_price: true },
+    });
+  }
+  async deleteProductOffer(product_id: string) {
+    const productOffer = await this.productOffer_repo.findOne({
+      where: { id: product_id },
+    });
+    if (!productOffer) {
+      throw new NotFoundException('message_product_offer_not_found');
+    }
+    return await this.productOffer_repo.softDelete({ id: product_id });
   }
 
   async addProductImage(
@@ -617,14 +679,11 @@ export class ProductDashboardService {
     let productsSort = {};
 
     switch (sort) {
-    
       case 'new':
         productsSort = { 'product.created_at': 'DESC' };
 
         break;
     }
-
-    
 
     // Start building the query
     let query = this.productOfferRepository
@@ -672,7 +731,6 @@ export class ProductDashboardService {
         'product.product_measurements',
         'product_measurements',
       )
-  
 
       .innerJoinAndSelect('product.product_images', 'product_images')
 
@@ -686,7 +744,6 @@ export class ProductDashboardService {
 
       .skip(skip)
       .take(limit);
-
 
     // Add search term condition if provided
     if (product_name) {
@@ -722,7 +779,7 @@ export class ProductDashboardService {
     if (section_id) {
       query = query.andWhere('section_category.section_id = :section_id', {
         section_id,
-      })
+      });
       query = query.andWhere('product.is_active = true');
       query = query.andWhere('product_sub_category.is_active = true');
     }
@@ -730,9 +787,6 @@ export class ProductDashboardService {
     return { products, total };
   }
   async getSingleProductOfferDashboard(offer_id: string) {
-
-    
-
     // Start building the query
     let query = this.productOfferRepository
       .createQueryBuilder('product_offer')
@@ -779,7 +833,7 @@ export class ProductDashboardService {
         'product.product_measurements',
         'product_measurements',
       )
-  
+
       .innerJoinAndSelect('product.product_images', 'product_images')
 
       .where(
@@ -787,10 +841,8 @@ export class ProductDashboardService {
         {
           current_date: new Date(),
         },
-      ).andWhere('product_offer.id = :offer_id', { offer_id })
-      ;
-
-
+      )
+      .andWhere('product_offer.id = :offer_id', { offer_id });
     return await query.getOne();
   }
 
