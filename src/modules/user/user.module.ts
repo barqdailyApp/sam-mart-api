@@ -11,6 +11,6 @@ import { SendOtpTransaction } from '../authentication/transactions/send-otp.tran
     imports: [],
     controllers: [UserController],
     providers: [UserService, ImageManager, StorageManager, SendOtpTransaction],
-    exports: [UserService]
+    exports: [UserService, SendOtpTransaction]
 })
 export class UserModule { }
