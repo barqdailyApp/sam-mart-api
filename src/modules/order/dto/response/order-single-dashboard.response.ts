@@ -1,15 +1,15 @@
-import { Exclude, Expose } from "class-transformer";
-import { DeliveryType } from "src/infrastructure/data/enums/delivery-type.enum";
-import { PaymentMethod } from "src/infrastructure/data/enums/payment-method";
-import { Order } from "src/infrastructure/entities/order/order.entity";
+import { Exclude, Expose } from 'class-transformer';
+import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
+import { PaymentMethod } from 'src/infrastructure/data/enums/payment-method';
+import { Order } from 'src/infrastructure/entities/order/order.entity';
 
 @Exclude()
 export class OrderSingleDashboardResponse {
   @Expose() order_id: string;
   @Expose() slot_id: string;
-  @Expose() section_id: string;
+  @Expose() section: any;
   @Expose() order_created_at: Date;
-  
+
   @Expose() order_number: string;
   @Expose() delivery_type: DeliveryType;
 
@@ -28,7 +28,11 @@ export class OrderSingleDashboardResponse {
   constructor(order: Order) {
     this.order_id = order.id;
     this.slot_id = order.slot_id;
-    this.section_id = order.section_id;
+    this.section = {
+      id: order.section.id,
+      name_ar: order.section.name_ar,
+      name_en: order.section.name_en,
+    };
     this.order_created_at = order.created_at;
     this.order_number = order.number;
     this.order_products = order.shipments[0].shipment_products.length;
@@ -41,10 +45,10 @@ export class OrderSingleDashboardResponse {
     this.warehouse = {
       id: order.warehouse.id,
       name_ar: order.warehouse.name_ar,
-      name_en: order.warehouse.name_en,      
+      name_en: order.warehouse.name_en,
       latitude: order.warehouse.latitude,
       longitude: order.warehouse.longitude,
-    }
+    };
     this.user = {
       id: order.user.id,
       username: order.user.name,
@@ -75,6 +79,56 @@ export class OrderSingleDashboardResponse {
       order_shipped_at: order.shipments[0].order_shipped_at,
       order_delivered_at: order.shipments[0].order_delivered_at,
       order_canceled_at: order.shipments[0].order_canceled_at,
+      shipment_products: order.shipments[0].shipment_products.map(
+        (shipment_product) => {
+          return {
+            id: shipment_product.id,
+            shipment_id: shipment_product.shipment_id,
+            product_id: shipment_product.product_id,
+            quantity: shipment_product.quantity,
+            price: shipment_product.price,
+            product_name_ar:
+              shipment_product.product_category_price.product_sub_category
+                .product.name_ar,
+            product_name_en:
+              shipment_product.product_category_price.product_sub_category
+                .product.name_en,
+            total_price: shipment_product.quantity * shipment_product.price,
+            sub_category_name_ar:
+              shipment_product.product_category_price.product_sub_category
+                .category_subCategory.subcategory.name_ar,
+            sub_category_name_en:
+              shipment_product.product_category_price.product_sub_category
+                .category_subCategory.subcategory.name_en,
+            category_name_ar:
+              shipment_product.product_category_price.product_sub_category
+                .category_subCategory.section_category.category.name_ar,
+            category_name_en:shipment_product.product_category_price.product_sub_category
+            .category_subCategory.section_category.category.name_en
+          };
+        },
+      ),
     };
   }
 }
+// shipment_products: {
+//   id: order.shipments[0].shipment_products[0].id,
+//   shipment_id: order.shipments[0].shipment_products[0].shipment_id,
+//   product_id: order.shipments[0].shipment_products[0].product_id,
+//   quantity: order.shipments[0].shipment_products[0].quantity,
+//   price: order.shipments[0].shipment_products[0].price,
+//   product_name_ar:
+//     order.shipments[0].shipment_products[0].product_category_price
+//       .product_sub_category.product.name_ar,
+//   product_name_en:
+//     order.shipments[0].shipment_products[0].product_category_price
+//       .product_sub_category.product.name_en,
+//   total_price:
+//     order.shipments[0].shipment_products[0].quantity *
+//     order.shipments[0].shipment_products[0].price,
+//   sub_category_name_ar:
+//     order.shipments[0].shipment_products[0].product_category_price
+//       .product_sub_category.category_subCategory.subcategory.name_ar,
+//   sub_category_name_en: order.shipments[0].shipment_products[0].product_category_price
+//   .product_sub_category.category_subCategory.subcategory.name_en
+// },
