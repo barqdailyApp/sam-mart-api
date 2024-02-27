@@ -5,26 +5,40 @@ import {
   OnGatewayDisconnect,
   OnGatewayInit,
 } from '@nestjs/websockets';
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { Gateways } from 'src/core/base/gateways';
+import { SocketAuthMiddleware } from './middlewares/ws-auth';
+import { ValidDriverMiddleware } from './middlewares/ws-valid-driver';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from 'src/infrastructure/entities/user/user.entity';
+import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
+import { Repository } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
+import { Role } from 'src/infrastructure/data/enums/role.enum';
 @WebSocketGateway({ namespace: Gateways.Order.Namespace, cors: { origin: '*' } })
 export class OrderGateway
-  implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit
-{
+  implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
+  constructor(
+    private configService: ConfigService,
+    @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(Driver) private driverRepository: Repository<Driver>,
+  ) { }
+
+  async afterInit(client: Socket) {
+    await client.use(SocketAuthMiddleware(this.configService, this.userRepository) as any);
+    await client.use(ValidDriverMiddleware(this.driverRepository) as any);
+  }
+
   @WebSocketServer()
   server: Server;
 
-  handleConnection(client: any) {
-    console.log('Order connected', client.id);
-    // set the driver as online
+  handleConnection(client: Socket) {
+   
   }
 
-  handleDisconnect(client: any) {
-    console.log(`Order disconnected ${client.id}`);
-    // set the driver as offline
+  handleDisconnect(client: Socket) {
+   
   }
 
-  afterInit(server: any) {
-    console.log(`Socket is live ${server.name}`);
-  }
+
 }
