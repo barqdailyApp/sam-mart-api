@@ -133,7 +133,7 @@ export class WarehouseController {
     );
   }
 
-  @Roles(Role.ADMIN)
+  //@Roles(Role.ADMIN)
   @Post('/attach-driver/:warehouse_id/:driver_id')
   async attachDriverToWarehouse(
     @Param('warehouse_id') warehouse_id: string,

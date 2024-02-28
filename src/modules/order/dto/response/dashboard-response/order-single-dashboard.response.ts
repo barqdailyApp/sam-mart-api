@@ -111,24 +111,4 @@ export class OrderSingleDashboardResponse {
     };
   }
 }
-// shipment_products: {
-//   id: order.shipments[0].shipment_products[0].id,
-//   shipment_id: order.shipments[0].shipment_products[0].shipment_id,
-//   product_id: order.shipments[0].shipment_products[0].product_id,
-//   quantity: order.shipments[0].shipment_products[0].quantity,
-//   price: order.shipments[0].shipment_products[0].price,
-//   product_name_ar:
-//     order.shipments[0].shipment_products[0].product_category_price
-//       .product_sub_category.product.name_ar,
-//   product_name_en:
-//     order.shipments[0].shipment_products[0].product_category_price
-//       .product_sub_category.product.name_en,
-//   total_price:
-//     order.shipments[0].shipment_products[0].quantity *
-//     order.shipments[0].shipment_products[0].price,
-//   sub_category_name_ar:
-//     order.shipments[0].shipment_products[0].product_category_price
-//       .product_sub_category.category_subCategory.subcategory.name_ar,
-//   sub_category_name_en: order.shipments[0].shipment_products[0].product_category_price
-//   .product_sub_category.category_subCategory.subcategory.name_en
-// },
+

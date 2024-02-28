@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { REQUEST } from '@nestjs/core';
@@ -9,7 +9,12 @@ import { User } from 'src/infrastructure/entities/user/user.entity';
 import { BaseUserService } from 'src/core/base/service/user-service.base';
 import { NotificationEntity } from 'src/infrastructure/entities/notification/notification.entity';
 import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
-import { applyQueryFilters, applyQuerySort } from 'src/core/helpers/service-related.helper';
+import {
+  applyQueryFilters,
+  applyQuerySort,
+} from 'src/core/helpers/service-related.helper';
+import { SendToUsersNotificationRequest } from '../dto/requests/send-to-users-notification.request';
+import { NotificationTypes } from 'src/infrastructure/data/enums/notification-types.enum';
 
 @Injectable()
 export class NotificationService extends BaseUserService<NotificationEntity> {
@@ -19,6 +24,8 @@ export class NotificationService extends BaseUserService<NotificationEntity> {
     @Inject(REQUEST) request: Request,
     private readonly _userService: UserService,
     private readonly _fcmIntegrationService: FcmIntegrationService,
+    @InjectRepository(User)
+    public userRepository: Repository<User>,
   ) {
     super(_repo, request);
   }
@@ -60,12 +67,38 @@ export class NotificationService extends BaseUserService<NotificationEntity> {
     });
     return notifications;
   }
-async  findAll(options?: PaginatedRequest): Promise<NotificationEntity[]> {
-  applyQueryFilters(options, `user_id=${super.currentUser.id}`);
+  async findAll(options?: PaginatedRequest): Promise<NotificationEntity[]> {
+    applyQueryFilters(options, `user_id=${super.currentUser.id}`);
 
-  applyQuerySort(options, 'created_at=desc');
+    applyQuerySort(options, 'created_at=desc');
 
-  return await super.findAll(options);
+    return await super.findAll(options);
+  }
+  async sendToUsers(sendToUsersNotificationRequest: SendToUsersNotificationRequest){
+    const { users_id, message_ar, message_en, title_ar, title_en } =
+    sendToUsersNotificationRequest;
+    //* Check if user exists
+    for (let index = 0; index < users_id.length; index++) {
+      const user = await this.userRepository.findOne({
+        where: { id: users_id[index] },
+      });
+      if (!user) {
+        throw new NotFoundException('message.user_not_found');
+      }
+    }
 
+    for (let index = 0; index < users_id.length; index++) {
+      this._repo.create(
+        new NotificationEntity({
+          user_id: users_id[index],
+          url: users_id[index],
+          type: NotificationTypes.USERS,
+          title_ar: title_ar,
+          title_en: title_en,
+          text_ar: message_ar,
+          text_en: message_en,
+        })
+      );
+    }
   }
 }

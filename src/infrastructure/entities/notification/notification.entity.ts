@@ -1,10 +1,10 @@
+import { AuditableEntity } from 'src/infrastructure/base/auditable.entity';
 import { OwnedEntity } from 'src/infrastructure/base/owned.entity';
 import { User } from 'src/infrastructure/entities/user/user.entity';
 import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 
-
 @Entity()
-export class NotificationEntity extends OwnedEntity {
+export class NotificationEntity extends AuditableEntity {
   //type
   @Column({ default: 'COMMON' })
   type: string;
@@ -42,11 +42,6 @@ export class NotificationEntity extends OwnedEntity {
 
   @Column()
   user_id: string;
-
-  //createdat column
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  created_at: Date;
-
 
   constructor(partial: Partial<NotificationEntity>) {
     super();
