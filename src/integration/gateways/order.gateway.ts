@@ -20,6 +20,8 @@ import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { OrderStatusChangePayload } from './interfaces/order/order-status-change.payload';
+import { plainToInstance } from 'class-transformer';
+import { OrderStatusChangeResponse } from './dto/response/order-status-change.response';
 @WebSocketGateway({ namespace: Gateways.Order.Namespace, cors: { origin: '*' } })
 export class OrderGateway
   implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
@@ -62,7 +64,29 @@ export class OrderGateway
   }
 
   async notifyOrderStatusChange(payload: OrderStatusChangePayload) {
-    await this.server.to(payload.to_rooms).emit("order_status_change", payload.body);
+    const { action, body } = payload;
+    const message = plainToInstance(OrderStatusChangeResponse,
+      {
+        action: action,
+        client: body.client,
+        driver: body.driver,
+        warehouse: body.warehouse,
+        order: {
+          ...body.order,
+          status: body.shipment.status,
+          status_reason: body.shipment.status_reason,
+          order_confirmed_at: body.shipment.order_confirmed_at,
+          order_on_processed_at: body.shipment.order_on_processed_at,
+          order_shipped_at: body.shipment.order_shipped_at,
+          order_delivered_at: body.shipment.order_delivered_at,
+        },
+      },
+      {
+        excludeExtraneousValues: true,
+      }
+    );
+    
+    await this.server.to(payload.to_rooms).emit("order_status_change", message);
   }
 
 }
