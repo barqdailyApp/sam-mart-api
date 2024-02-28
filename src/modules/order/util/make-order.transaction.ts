@@ -30,6 +30,7 @@ import { ProductOffer } from 'src/infrastructure/entities/product/product-offer.
 import { FastDeliveryGateway } from 'src/integration/gateways/fast-delivery.gateway';
 import { ShipmentStatusEnum } from 'src/infrastructure/data/enums/shipment_status.enum';
 import { WarehouseOpreationProducts } from 'src/infrastructure/entities/warehouse/wahouse-opreation-products.entity';
+import { OrderGateway } from 'src/integration/gateways/order.gateway';
 @Injectable()
 export class MakeOrderTransaction extends BaseTransaction<
   MakeOrderRequest,
@@ -38,7 +39,7 @@ export class MakeOrderTransaction extends BaseTransaction<
   constructor(
     dataSource: DataSource,
     @Inject(REQUEST) readonly request: Request,
-
+    private readonly orderGateway: OrderGateway,
     private readonly fastDeliveryGateway: FastDeliveryGateway,
   ) {
     super(dataSource);
@@ -63,7 +64,7 @@ export class MakeOrderTransaction extends BaseTransaction<
       const address = await context.findOne(Address, {
         where: [{ is_favorite: true, user_id: user.id }],
       });
-      if(!address) {
+      if (!address) {
         throw new BadRequestException('user does not have a default address');
       }
       const cart = await context.findOne(Cart, { where: { user_id: user.id } });
@@ -75,7 +76,7 @@ export class MakeOrderTransaction extends BaseTransaction<
         throw new BadRequestException('Cart is empty');
       }
 
-    
+
 
       const count = await context
         .createQueryBuilder(Order, 'order')
@@ -113,12 +114,7 @@ export class MakeOrderTransaction extends BaseTransaction<
         warehouse_id: cart_products[0].warehouse_id,
       });
 
-      if (order.delivery_type == DeliveryType.FAST) {
-        this.fastDeliveryGateway.broadcastOfferToDrivers({
-          action: 'FAST_DELIVERY_OFFER',
-          shipment: shipment,
-        });
-      }
+
 
       const shipment_products = await Promise.all(
         cart_products.map(async (e) => {
@@ -172,12 +168,12 @@ export class MakeOrderTransaction extends BaseTransaction<
           },
         });
         if (!warehouse_product) {
-          throw new BadRequestException( 'message.warehouse_product_not_enough' + index);
+          throw new BadRequestException('message.warehouse_product_not_enough' + index);
         }
         warehouse_product.quantity =
           warehouse_product.quantity -
           shipment_products[index].quantity *
-            shipment_products[index].conversion_factor;
+          shipment_products[index].conversion_factor;
         if (warehouse_product.quantity < 0) {
           throw new BadRequestException(
             'message.warehouse_product_not_enough' + index,
@@ -187,10 +183,10 @@ export class MakeOrderTransaction extends BaseTransaction<
         await context.save(
           WarehouseOpreationProducts,
           new WarehouseOpreationProducts({
-      
+
             product_id: shipment_products[index].product_id,
             operation_id: warehouse_operations.id,
-          
+
             product_measurement_id:
               shipment_products[index].main_measurement_id,
             quantity:
@@ -199,6 +195,21 @@ export class MakeOrderTransaction extends BaseTransaction<
           }),
         );
       }
+
+      let to_rooms = ['admin']
+      if (order.delivery_type == DeliveryType.FAST) to_rooms.push(shipment.warehouse_id);
+
+      await this.orderGateway.notifyOrderStatusChange({
+        action: ShipmentStatusEnum.PENDING,
+        to_rooms,
+        body: {
+          shipment: shipment,
+          order: order,
+          warehouse: shipment.warehouse,
+          client: user,
+          driver: null,
+        }
+      });
 
       return order;
     } catch (error) {
@@ -215,7 +226,6 @@ export const generateOrderNumber = (count: number) => {
   const day = date.getDate().toString().padStart(2, '0');
   // order number is the count of orders created today + 1 with 4 digits and leading zeros
   const orderNumber = (count + 1).toString().padStart(4, '0');
-  return `${100 - parseInt(year)}${100 - parseInt(month)}${
-    100 - parseInt(day)
-  }${orderNumber}`;
+  return `${100 - parseInt(year)}${100 - parseInt(month)}${100 - parseInt(day)
+    }${orderNumber}`;
 };

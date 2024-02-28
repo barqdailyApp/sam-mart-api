@@ -1,5 +1,5 @@
-import { Order } from "sequelize";
 import { ShipmentStatusEnum } from "src/infrastructure/data/enums/shipment_status.enum";
+import { Order } from "src/infrastructure/entities/order/order.entity";
 import { Shipment } from "src/infrastructure/entities/order/shipment.entity";
 import { User } from "src/infrastructure/entities/user/user.entity";
 import { Warehouse } from "src/infrastructure/entities/warehouse/warehouse.entity";
