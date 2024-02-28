@@ -4,6 +4,10 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
   OnGatewayInit,
+  SubscribeMessage,
+  WsResponse,
+  MessageBody,
+  ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { Gateways } from 'src/core/base/gateways';
@@ -15,6 +19,7 @@ import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
+import { OrderStatusChangePayload } from './interfaces/order/order-status-change.payload';
 @WebSocketGateway({ namespace: Gateways.Order.Namespace, cors: { origin: '*' } })
 export class OrderGateway
   implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
@@ -56,5 +61,8 @@ export class OrderGateway
     }
   }
 
+  async notifyOrderStatusChange(payload: OrderStatusChangePayload) {
+    await this.server.to(payload.to_rooms).emit("order_status_change", payload.body);
+  }
 
 }
