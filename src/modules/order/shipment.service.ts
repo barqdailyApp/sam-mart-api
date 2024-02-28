@@ -32,6 +32,7 @@ import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
 import { AddDriverShipmentOption } from 'src/infrastructure/data/enums/add-driver-shipment-option.enum';
 import { SendOfferToDriver } from 'src/integration/gateways/interfaces/fast-delivery/send-offer-payload.response';
 import { CancelShipmentRequest } from './dto/request/cancel-shipment.request';
+import { OrderGateway } from 'src/integration/gateways/order.gateway';
 @Injectable()
 export class ShipmentService extends BaseService<Shipment> {
   constructor(
@@ -48,6 +49,8 @@ export class ShipmentService extends BaseService<Shipment> {
 
     private readonly shipmentChatGateway: ShipmentChatGateway,
     private readonly fastdeliveryGateway: FastDeliveryGateway,
+    private readonly orderGateway: OrderGateway,
+
     @InjectRepository(ShipmentFeedback)
     private orderFeedBackRepository: Repository<ShipmentFeedback>,
     @Inject(REQUEST) private readonly request: Request,
@@ -75,7 +78,9 @@ export class ShipmentService extends BaseService<Shipment> {
         id: id,
         warehouse_id: driver.warehouse_id,
       },
+      relations: ['order', 'warehouse', 'order.user'],
     });
+
     if (!shipment || shipment.status !== ShipmentStatusEnum.PICKED_UP) {
       throw new NotFoundException('Shipment not found');
     }
@@ -91,6 +96,19 @@ export class ShipmentService extends BaseService<Shipment> {
     });
     order.is_paid = true;
     await this.orderRepository.save(order);
+
+    await this.orderGateway.notifyOrderStatusChange({
+      action: ShipmentStatusEnum.DELIVERED,
+      to_rooms: ["admin", shipment.order.user_id, shipment.driver_id],
+      body: {
+        shipment,
+        order,
+        warehouse: shipment.warehouse,
+        client: shipment.order.user,
+        driver,
+      }
+    });
+
     return shipment;
   }
   async pickupShipment(id: string) {
@@ -103,6 +121,7 @@ export class ShipmentService extends BaseService<Shipment> {
         id: id,
         warehouse_id: driver.warehouse_id,
       },
+      relations: ['order', 'warehouse', 'order.user'],
     });
     if (!shipment || shipment.status !== ShipmentStatusEnum.PROCESSING) {
       throw new NotFoundException('Shipment not found');
@@ -112,6 +131,18 @@ export class ShipmentService extends BaseService<Shipment> {
     shipment.status = ShipmentStatusEnum.PICKED_UP;
 
     await this.shipmentRepository.save(shipment);
+
+    await this.orderGateway.notifyOrderStatusChange({
+      action: ShipmentStatusEnum.PICKED_UP,
+      to_rooms: ["admin", shipment.order.user_id, shipment.driver_id],
+      body: {
+        shipment,
+        order: shipment.order,
+        warehouse: shipment.warehouse,
+        client: shipment.order.user,
+        driver,
+      }
+    });
 
     return shipment;
   }
@@ -126,6 +157,7 @@ export class ShipmentService extends BaseService<Shipment> {
         id: id,
         warehouse_id: driver.warehouse_id,
       },
+      relations: ['order', 'warehouse', 'order.user'],
     });
     if (!shipment || shipment.status !== ShipmentStatusEnum.CONFIRMED) {
       throw new NotFoundException('Shipment not found');
@@ -135,6 +167,18 @@ export class ShipmentService extends BaseService<Shipment> {
     shipment.status = ShipmentStatusEnum.PROCESSING;
 
     await this.shipmentRepository.save(shipment);
+
+    await this.orderGateway.notifyOrderStatusChange({
+      action: ShipmentStatusEnum.PROCESSING,
+      to_rooms: ["admin", shipment.driver_id, shipment.order.user_id],
+      body: {
+        shipment,
+        order: shipment.order,
+        warehouse: shipment.warehouse,
+        client: shipment.order.user,
+        driver,
+      }
+    });
 
     return shipment;
   }
@@ -286,7 +330,13 @@ export class ShipmentService extends BaseService<Shipment> {
 
     const shipment = await this.shipmentRepository.findOne({
       where: { id: shipment_id },
-      relations: ['order'],
+      relations: [
+        'order',
+        'warehouse',
+        'order.user',
+        'driver',
+        'driver.user'
+      ],
     });
 
     if (!shipment) {
@@ -324,6 +374,18 @@ export class ShipmentService extends BaseService<Shipment> {
 
     await this.shipmentRepository.save(shipment);
 
+    await this.orderGateway.notifyOrderStatusChange({
+      action: ShipmentStatusEnum.CANCELED,
+      to_rooms: ["admin", shipment.driver_id, shipment.order.user_id],
+      body: {
+        shipment,
+        order: shipment.order,
+        warehouse: shipment.warehouse,
+        client: shipment.order.user,
+        driver: shipment.driver,
+      }
+    });
+
     return shipment;
   }
 
@@ -346,13 +408,13 @@ export class ShipmentService extends BaseService<Shipment> {
 
     const shipment = await this.shipmentRepository.findOne({
       where: { id: shipment_id },
-      relations: ['order'],
+      relations: ['order', 'warehouse', 'order.user'],
     });
 
     if (!shipment) {
       throw new NotFoundException('Shipment not found');
     }
-    
+
     if (driver.warehouse_id !== shipment.warehouse_id) {
       throw new BadRequestException('Driver not in the same warehouse');
     }
@@ -374,12 +436,9 @@ export class ShipmentService extends BaseService<Shipment> {
       shipment,
     };
 
-    let intialShipmentMessage = 'Shipment has been accepted by driver';
-
-    if (action == AddDriverShipmentOption.DRIVER_ASSIGN_SHIPMENT) {
-      fastDeliveryGatewayPayload.action = AddDriverShipmentOption.DRIVER_ASSIGN_SHIPMENT;
-      intialShipmentMessage = 'Shipment has been assigned to driver'
-    }
+    let intialShipmentMessage = action === AddDriverShipmentOption.DRIVER_ASSIGN_SHIPMENT
+      ? 'Shipment has been assigned to driver'
+      : 'Shipment has been accepted by driver';
 
     const intialShipmentChat = this.shipmentChatRepository.create({
       message: `${intialShipmentMessage} ${driver.user.name}`,
@@ -392,6 +451,34 @@ export class ShipmentService extends BaseService<Shipment> {
     if (shipment.order.delivery_type === DeliveryType.FAST) {
       await this.fastdeliveryGateway.notifyShipmentStatusChange(fastDeliveryGatewayPayload);
     }
+
+    const gateway_action = action === AddDriverShipmentOption.DRIVER_ASSIGN_SHIPMENT
+      ? 'ASSIGNED'
+      : ShipmentStatusEnum.CONFIRMED;
+
+    const to_rooms = ['admin'];
+    if (action === AddDriverShipmentOption.DRIVER_ASSIGN_SHIPMENT) {
+      if (shipment.order.delivery_type === DeliveryType.FAST) {
+        // if he assigned to fast delivery, notify the drivers in the warehouse. to avoid double accept
+        to_rooms.push(shipment.warehouse_id);
+      } else {
+        to_rooms.push(shipment.driver_id);
+      }
+    } else {
+      to_rooms.push(shipment.warehouse_id);
+    }
+
+    await this.orderGateway.notifyOrderStatusChange({
+      action: gateway_action,
+      to_rooms,
+      body: {
+        shipment: shipment,
+        order: shipment.order,
+        warehouse: shipment.warehouse,
+        client: shipment.order.user,
+        driver: driver,
+      }
+    });
 
     return shipment;
   }
