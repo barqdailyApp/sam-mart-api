@@ -1,9 +1,9 @@
 import { ShipmentStatusEnum } from "src/infrastructure/data/enums/shipment_status.enum";
+import { Driver } from "src/infrastructure/entities/driver/driver.entity";
 import { Order } from "src/infrastructure/entities/order/order.entity";
 import { Shipment } from "src/infrastructure/entities/order/shipment.entity";
 import { User } from "src/infrastructure/entities/user/user.entity";
 import { Warehouse } from "src/infrastructure/entities/warehouse/warehouse.entity";
-import { Driver } from "typeorm";
 
 /**
  * @interface OrderStatusChangePayload
