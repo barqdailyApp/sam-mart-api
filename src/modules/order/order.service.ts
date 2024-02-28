@@ -327,6 +327,9 @@ export class OrderService extends BaseUserService<Order> {
     let query = this.shipmentRepository
       .createQueryBuilder('shipments')
       .leftJoinAndSelect('shipments.order', 'order')
+      .leftJoinAndSelect('order.user', 'user')
+      .leftJoinAndSelect('order.address', 'address')
+
       .leftJoinAndSelect('shipments.driver', 'driver')
       .leftJoinAndSelect('driver.user', 'shipment_user_driver')
       .leftJoinAndSelect('shipments.warehouse', 'warehouse_shipment')
@@ -498,7 +501,8 @@ export class OrderService extends BaseUserService<Order> {
     let query = this.shipmentRepository
       .createQueryBuilder('shipments')
       .leftJoinAndSelect('shipments.order', 'order')
-
+      .leftJoinAndSelect('order.user', 'user')
+      .leftJoinAndSelect('order.address', 'address')
       .leftJoinAndSelect('shipments.driver', 'driver')
       .leftJoinAndSelect('driver.user', 'shipment_user_driver')
 

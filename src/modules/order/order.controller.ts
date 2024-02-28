@@ -25,14 +25,17 @@ import { DriverShipmentsQuery } from './filter/driver-shipment.query';
 import { ShipmentResponse } from './dto/response/shipment.response';
 import { ShipmentDriverResponse } from './dto/response/driver-response/shipment-driver.respnse';
 import { SingleOrderQuery } from './filter/single-order.query';
-import { OrdersDashboardResponse } from './dto/response/orders-dashboard.response';
-import { OrdersTotalDashboardResponse } from './dto/response/orders-total-dashboard.response';
+
 import { ShipmentsTotalDriverResponse } from './dto/response/shipments-driver-total.response';
 import { ReturnOrderRequest } from './dto/request/return-order.request';
 import { Roles } from '../authentication/guards/roles.decorator';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { UpdateReturnOrderStatusRequest } from './dto/request/update-return-order-statu.request';
-import { OrderSingleDashboardResponse } from './dto/response/order-single-dashboard.response';
+import { OrderSingleDashboardResponse } from './dto/response/dashboard-response/order-single-dashboard.response';
+import { OrdersDashboardResponse } from './dto/response/dashboard-response/orders-dashboard.response';
+import { OrdersTotalDashboardResponse } from './dto/response/dashboard-response/orders-total-dashboard.response';
+import { ShipmentsResponse } from './dto/response/client-response/shipments.response';
+import { ShipmentSingleResponse } from './dto/response/client-response/shipment-single.response';
 
 @ApiTags('Order')
 @ApiHeader({
@@ -151,9 +154,8 @@ export class OrderController {
     const { orders, total } = await this.orderService.getMyDriverShipments(
       driverShipmentsQuery,
     );
-
     const shipmentsResponse = orders.map((order) => {
-      const shipmentResponse = plainToClass(ShipmentDriverResponse, order);
+      const shipmentResponse = new ShipmentsResponse(order);
 
       return shipmentResponse;
     });
@@ -181,7 +183,7 @@ export class OrderController {
   async getSingleShipment(@Param('shipment_id') shipment_id: string) {
     const shipment = await this.orderService.getSingleShipment(shipment_id);
 
-    const shipmentResponse = plainToClass(ShipmentResponse, shipment);
+  const shipmentResponse = new ShipmentSingleResponse(shipment);
     const data = this._i18nResponse.entity(shipmentResponse);
 
     return new ActionResponse(data);

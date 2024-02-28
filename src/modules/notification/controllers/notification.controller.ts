@@ -73,15 +73,12 @@ export class NotificationController {
   ) {
     const { notification_ids } = readNotificationsRequest;
     for (let index = 0; index < notification_ids.length; index++) {
-      
       await this.notificationService.toggleRead(true, notification_ids[index]);
     }
     return {
       message: 'success read notifications',
     };
   }
-
-
 
   @Put(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -96,33 +93,9 @@ export class NotificationController {
   }
 
   @Post('send-to-users')
-  async sendToUsers(@Body() sendToUsersNotificationRequest: SendToUsersNotificationRequest) {
-    const { users_id, message_ar, message_en, title_ar, title_en } =
-    sendToUsersNotificationRequest;
-    //* Check if user exists
-    for (let index = 0; index < users_id.length; index++) {
-      const user = await this.userRepository.findOne({
-        where: { id: users_id[index] },
-      });
-      if (!user) {
-        throw new NotFoundException('message.user_not_found');
-      }
-    }
-
-    for (let index = 0; index < users_id.length; index++) {
-      await this.notificationService.create(
-        new NotificationEntity({
-          user_id: users_id[index],
-          url: users_id[index],
-          type: NotificationTypes.USERS,
-          title_ar: title_ar,
-          title_en: title_en,
-          text_ar: message_ar,
-          text_en: message_en,
-        }),
-      );
-    }
+  async sendToUsers(
+    @Body() sendToUsersNotificationRequest: SendToUsersNotificationRequest,
+  ) {
+    await this.notificationService.sendToUsers(sendToUsersNotificationRequest);
   }
-
- 
 }
