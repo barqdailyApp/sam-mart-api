@@ -80,7 +80,7 @@ export class ShipmentService extends BaseService<Shipment> {
       },
       relations: ['order', 'warehouse', 'order.user'],
     });
-    
+
     if (!shipment || shipment.status !== ShipmentStatusEnum.PICKED_UP) {
       throw new NotFoundException('Shipment not found');
     }
@@ -330,7 +330,13 @@ export class ShipmentService extends BaseService<Shipment> {
 
     const shipment = await this.shipmentRepository.findOne({
       where: { id: shipment_id },
-      relations: ['order'],
+      relations: [
+        'order',
+        'warehouse',
+        'order.user',
+        'driver',
+        'driver.user'
+      ],
     });
 
     if (!shipment) {
@@ -367,6 +373,18 @@ export class ShipmentService extends BaseService<Shipment> {
     shipment.status_reason = reason;
 
     await this.shipmentRepository.save(shipment);
+
+    await this.orderGateway.notifyOrderStatusChange({
+      action: ShipmentStatusEnum.CANCELED,
+      to_rooms: ["admin", shipment.driver_id, shipment.order.user_id],
+      body: {
+        shipment,
+        order: shipment.order,
+        warehouse: shipment.warehouse,
+        client: shipment.order.user,
+        driver: shipment.driver,
+      }
+    });
 
     return shipment;
   }

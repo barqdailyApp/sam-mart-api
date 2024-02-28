@@ -69,7 +69,10 @@ export class OrderGateway
       {
         action: action,
         client: body.client,
-        driver: body.driver,
+        driver: {
+          ...body.driver,
+          user: body.driver.user,
+        },
         warehouse: body.warehouse,
         order: {
           ...body.order,
@@ -85,7 +88,7 @@ export class OrderGateway
         excludeExtraneousValues: true,
       }
     );
-    
+
     await this.server.to(payload.to_rooms).emit("order_status_change", message);
   }
 
