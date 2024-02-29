@@ -227,4 +227,11 @@ export class OrderController {
   ) {
     return new ActionResponse(await this.orderService.updateReturnOrderStatus(return_order_id, req));
   }
+
+  @Roles(Role.ADMIN)
+  @Post('broadcast-order-drivers/:order_id')
+  async broadcastOrderDrivers(@Param('order_id') order_id: string) {
+    return new ActionResponse(await this.orderService.broadcastOrderDrivers(order_id));
+  }
+
 }
