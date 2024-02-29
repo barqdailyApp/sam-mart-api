@@ -71,7 +71,7 @@ export class OrderGateway
         client: body.client,
         driver: {
           ...body.driver,
-          user: body.driver.user,
+          user: body.driver?.user,
         },
         warehouse: body.warehouse,
         order: {

@@ -23,7 +23,7 @@ export class DriverService {
     @InjectRepository(Shipment)
     private shipmentRepository: Repository<Shipment>,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
-  ) {}
+  ) { }
 
   async single(driver_id: string): Promise<Driver> {
     const driver = await this.driverRepository.findOne({
@@ -49,15 +49,23 @@ export class DriverService {
     return driver;
   }
 
-  async all(): Promise<Driver[]> {
-    return await this.driverRepository.find({ relations: { user: true } });
+  async all(warehouse_id?: string): Promise<Driver[]> {
+    const dbQuery = {
+      relations: { user: true },
+    }
+
+    if (warehouse_id) {
+      dbQuery['where'] = { warehouse_id }
+    }
+
+    return await this.driverRepository.find(dbQuery);
   }
 
   async updateDriverLocation(
     updateDriverLocationRequest: UpdateDriverLocationRequest,
   ): Promise<UpdateResult> {
     const { latitude, longitude } = updateDriverLocationRequest;
-  const update =  await this.driverRepository.update(
+    const update = await this.driverRepository.update(
       { user_id: this._request.user.id },
       {
         latitude,

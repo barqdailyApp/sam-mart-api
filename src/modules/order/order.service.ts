@@ -29,6 +29,7 @@ import { ReturnOrder } from 'src/infrastructure/entities/order/return-order/retu
 import { ReturnOrderProduct } from 'src/infrastructure/entities/order/return-order/return-order-product.entity';
 import { ReturnProductReason } from 'src/infrastructure/entities/order/return-order/return-product-reason.entity';
 import { UpdateReturnOrderStatusRequest } from './dto/request/update-return-order-statu.request';
+import { OrderGateway } from 'src/integration/gateways/order.gateway';
 
 @Injectable()
 export class OrderService extends BaseUserService<Order> {
@@ -52,6 +53,7 @@ export class OrderService extends BaseUserService<Order> {
 
     @Inject(REQUEST) request: Request,
     private readonly makeOrdrTransacton: MakeOrderTransaction,
+    private readonly orderGateway: OrderGateway,
   ) {
     super(orderRepository, request);
   }
@@ -727,5 +729,29 @@ export class OrderService extends BaseUserService<Order> {
 
     await this.returnOrderProductRepository.save(mappedUpdatedReturnOrderProducts);
     return await this.ReturnOrderRepository.save(returnOrder);
+  }
+
+  async broadcastOrderDrivers(order_id: string) {
+    const order = await this.orderRepository.findOne({ where: { id: order_id }, relations: ['user'] });
+    if (!order) throw new NotFoundException('order not found');
+
+    const shipment = await this.shipmentRepository.findOne({ where: { order_id }, relations: ['warehouse'] });
+    if (!shipment) throw new NotFoundException('shipment not found');
+
+    if (shipment.status !== ShipmentStatusEnum.PENDING) {
+      throw new BadRequestException('this order is already broadcasted to drivers')
+    }
+
+    await this.orderGateway.notifyOrderStatusChange({
+      action: shipment.status,
+      to_rooms: [shipment.warehouse_id],
+      body: {
+        order,
+        shipment,
+        driver: null,
+        client: order.user,
+        warehouse: shipment.warehouse
+      }
+    })
   }
 }
