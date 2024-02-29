@@ -616,7 +616,8 @@ export class OrderService extends BaseUserService<Order> {
 
     // check if the order is delivered
     const shipment = await this.shipmentRepository.findOne({
-      where: { order_id }
+      where: { order_id },
+      relations: ['warehouse']
     });
     if (!shipment) throw new NotFoundException('shipment not found');
 
@@ -679,7 +680,19 @@ export class OrderService extends BaseUserService<Order> {
       can_return: false
     })
 
-    return await this.ReturnOrderRepository.save(returnOrder);
+    const savedReturnOrder = await this.ReturnOrderRepository.save(returnOrder);
+    await this.orderGateway.notifyReturnOrder({
+      to_rooms: ["admin"],
+      body: {
+        client: this.currentUser,
+        driver: null,
+        order,
+        return_order: savedReturnOrder,
+        warehouse: shipment.warehouse
+      }
+    })
+
+    return savedReturnOrder;
   }
 
   // this method is used by the admin to update the return order status
