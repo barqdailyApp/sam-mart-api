@@ -95,9 +95,7 @@ export class ProductClientController {
    // const productResponse =new SingleProductsNewResponse(product);
     const productResponse = plainToClass(ProductResponse, product);
 
-    if (product?.warehouses_products == null) {
-      throw new ConflictException('Product is not available In Warehouse');
-    }
+ 
 
     return new ActionResponse(this._i18nResponse.entity(productResponse));
   }

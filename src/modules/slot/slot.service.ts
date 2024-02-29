@@ -70,6 +70,6 @@ export class SlotService {
   }
   async delete(slot_id: string): Promise<DeleteResult> {
     await this.single(slot_id);
-    return await this.slotRepository.delete({ id: slot_id });
+    return await this.slotRepository.softDelete({ id: slot_id });
   }
 }

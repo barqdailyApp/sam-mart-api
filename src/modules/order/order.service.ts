@@ -260,7 +260,7 @@ export class OrderService extends BaseUserService<Order> {
     };
   }
 
-  async getSingleOrder(order_id: string) {
+  async getSingleOrderDashboard(order_id: string) {
     let query = this.orderRepository
       .createQueryBuilder('order')
 
@@ -314,6 +314,59 @@ export class OrderService extends BaseUserService<Order> {
     return query.getOne();
   }
 
+  async getSingleOrder(order_id: string) {
+    let query = this.orderRepository
+      .createQueryBuilder('order')
+
+      .leftJoinAndSelect('order.user', 'user')
+      .leftJoinAndSelect('order.section', 'section_order')
+      .leftJoinAndSelect('order.warehouse', 'warehouse_order')
+      .leftJoinAndSelect('order.address', 'address')
+      .leftJoinAndSelect('order.shipments', 'shipments')
+
+      .leftJoinAndSelect('shipments.driver', 'driver')
+      .leftJoinAndSelect('driver.user', 'shipment_user_driver')
+
+      .leftJoinAndSelect('shipments.warehouse', 'warehouse_shipment')
+      .leftJoinAndSelect('shipments.shipment_products', 'shipment_products')
+
+      .leftJoinAndSelect(
+        'shipment_products.product_category_price',
+        'product_category_price',
+      )
+      .leftJoinAndSelect(
+        'product_category_price.product_sub_category',
+        'product_sub_category',
+      )
+
+      .leftJoinAndSelect(
+        'product_sub_category.category_subCategory',
+        'category_subCategory',
+      )
+
+      .leftJoinAndSelect('category_subCategory.subcategory', 'subcategory')
+
+      .leftJoinAndSelect('category_subCategory.section_category', 'section_category')
+      .leftJoinAndSelect('section_category.category', 'category')
+
+
+      .leftJoinAndSelect(
+        'product_category_price.product_measurement',
+        'product_measurement',
+      )
+      .leftJoinAndSelect(
+        'product_measurement.measurement_unit',
+        'measurement_unit',
+      )
+
+      .leftJoinAndSelect('product_sub_category.product', 'product')
+      .leftJoinAndSelect('product.product_images', 'product_images');
+
+    //  single order
+    query = query.where('order.id = :id', { id: order_id });
+
+    return query.getOne();
+  }
   // Function to get shipments for a driver based on various filters.
   async getMyDriverShipments(driverShipmentsQuery: DriverShipmentsQuery) {
     // Retrieve the current user (assuming this is available via some context or service).

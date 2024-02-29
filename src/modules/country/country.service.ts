@@ -42,6 +42,6 @@ export class CountryService {
   }
   async delete(country_id: string): Promise<DeleteResult> {
     await this.single(country_id);
-    return await this.countryRepository.delete({ id: country_id });
+    return await this.countryRepository.softDelete({ id: country_id });
   }
 }

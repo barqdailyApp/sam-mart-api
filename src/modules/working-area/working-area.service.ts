@@ -22,7 +22,7 @@ export class WorkingAreaService {
     return await this.workingArea_repo.update(workingArea.id, workingArea);
   }
   async deleteWorkingArea(id: string) {
-    return await this.workingArea_repo.delete(id);
+    return await this.workingArea_repo.softDelete(id);
   }
 
   async getWorkingArea() {

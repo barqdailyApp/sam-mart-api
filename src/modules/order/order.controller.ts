@@ -36,6 +36,8 @@ import { OrdersDashboardResponse } from './dto/response/dashboard-response/order
 import { OrdersTotalDashboardResponse } from './dto/response/dashboard-response/orders-total-dashboard.response';
 import { ShipmentsResponse } from './dto/response/client-response/shipments.response';
 import { ShipmentSingleResponse } from './dto/response/client-response/shipment-single.response';
+import { OrdersResponse } from './dto/response/client-response/orders.response';
+import { OrderSingleResponse } from './dto/response/client-response/order-single.response';
 
 @ApiTags('Order')
 @ApiHeader({
@@ -64,7 +66,7 @@ export class OrderController {
     );
 
     const ordersResponse = orders.map((order) => {
-      const orderResponse = plainToClass(OrderResponse, order);
+      const orderResponse = new OrdersResponse(order);
 
       return orderResponse;
     });
@@ -115,13 +117,22 @@ export class OrderController {
   async getSingleClientOrder(@Param('order_id') order_id: string) {
     const order = await this.orderService.getSingleOrder(order_id);
 
+    const orderResponse =  new OrderSingleResponse(order);
+
+    const data = this._i18nResponse.entity(orderResponse);
+
+    return new ActionResponse(data);
+  }
+  @Get('single-order-dashboard/:order_id')
+  async getSingleDashboardOrder(@Param('order_id') order_id: string) {
+    const order = await this.orderService.getSingleOrderDashboard(order_id);
+
     const orderResponse =  new OrderSingleDashboardResponse(order);
 
     const data = this._i18nResponse.entity(orderResponse);
 
     return new ActionResponse(data);
   }
-
   @Get('dashboard-shipments')
   async getShipmentsDashboard(
     @Query() driverShipmentsQuery: DriverShipmentsQuery,
