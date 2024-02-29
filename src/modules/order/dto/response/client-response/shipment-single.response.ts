@@ -7,6 +7,7 @@ import { Shipment } from 'src/infrastructure/entities/order/shipment.entity';
 export class ShipmentSingleResponse {
   @Expose() shipment_id: string;
   @Expose() status: ShipmentStatusEnum;
+  @Expose() driver: any;
 
   @Expose() shipment_products: any;
 
@@ -18,7 +19,16 @@ export class ShipmentSingleResponse {
   constructor(shipments: Shipment) {
     this.shipment_id = shipments.id;
     this.status = shipments.status;
-
+    this.driver= shipments.driver_id
+    ? {
+        id: shipments.driver.user.id,
+        username: shipments.driver.user.name,
+        email: shipments.driver.user.email,
+        phone: shipments.driver.user.phone,
+        latitude: shipments.driver.latitude,
+        longitude: shipments.driver.longitude,
+      }
+    : null;
     this.order = {
       id: shipments.order.id,
       number: shipments.order.number,
@@ -27,6 +37,7 @@ export class ShipmentSingleResponse {
       payment_method: shipments.order.payment_method,
       delivery_type: shipments.order.delivery_type,
       delivery_day: shipments.order.delivery_day,
+      delivery_fee: shipments.order.delivery_fee,
       created_at: shipments.order.created_at,
       client: {
         id: shipments.order.user.id,
@@ -41,6 +52,7 @@ export class ShipmentSingleResponse {
         latitude: shipments.order.address.latitude,
         longitude: shipments.order.address.longitude,
       },
+      
     };
     (this.shipment_products = shipments.shipment_products.map(
       (shipment_product) => {
@@ -71,6 +83,7 @@ export class ShipmentSingleResponse {
           measurement_unit_name_en:
             shipment_product.product_category_price.product_measurement
               .measurement_unit.name_en,
+              
         };
       },
     )),

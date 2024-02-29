@@ -24,6 +24,7 @@ export class ShipmentsResponse {
       payment_method: shipments.order.payment_method,
       delivery_type: shipments.order.delivery_type,
       delivery_day: shipments.order.delivery_day,
+      delivery_fee: shipments.order.delivery_fee,
       client: {
         id: shipments.order.user.id,
         name: shipments.order.user.name,
