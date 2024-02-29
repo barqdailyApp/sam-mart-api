@@ -151,7 +151,7 @@ export class ProductDashboardService {
       is_active,
       max_offer_quantity,
       min_offer_quantity,
-      start_date,
+      start_date,offer_quantity
     } = updateProductOfferRequest;
     const productOffer = await this.productOffer_repo.findOne({
       where: { id: offer_id },
@@ -185,6 +185,7 @@ export class ProductDashboardService {
         max_offer_quantity,
         min_offer_quantity,
         price: productOfferPrice,
+        offer_quantity
       },
     );
     return await this.productOffer_repo.findOne({

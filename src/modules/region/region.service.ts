@@ -53,6 +53,6 @@ export class RegionService {
   }
   async delete(region_id: string): Promise<DeleteResult> {
     await this.single(region_id);
-    return await this.regionRepository.delete({ id: region_id });
+    return await this.regionRepository.softDelete({ id: region_id });
   }
 }

@@ -156,7 +156,7 @@ export class CategoryService extends BaseService<Category> {
     });
     if (!subcategory) throw new BadRequestException('subcategory not found');
     this.orderItems(subcategory.section_category_id);
-    return await this.category_subcategory_repo.delete(id);
+    return await this.category_subcategory_repo.softDelete(id);
   }
 
   async exportCategories() {

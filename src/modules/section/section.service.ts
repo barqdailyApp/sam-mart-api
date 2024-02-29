@@ -168,7 +168,7 @@ export class SectionService extends BaseService<Section> {
       throw new BadRequestException('category not found');
     }
     this.orderItems(section_category.section_id);
-    return await this.section_category_repo.delete(id);
+    return await this.section_category_repo.softDelete(id);
   }
 
   async exportSections() {

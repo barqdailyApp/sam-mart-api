@@ -50,6 +50,6 @@ export class CityService {
   }
   async delete(city_id: string): Promise<DeleteResult> {
     await this.single(city_id);
-    return  await this.cityRepository.delete({ id: city_id });
+    return  await this.cityRepository.softDelete({ id: city_id });
   }
 }

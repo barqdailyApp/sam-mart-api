@@ -46,7 +46,7 @@ export class AdditionalServiceService {
     
       async delete(additional_service_id: string): Promise<DeleteResult> {
         await this.single(additional_service_id);
-        return await this.additionalServiceRepository.delete({
+        return await this.additionalServiceRepository.softDelete({
           id: additional_service_id,
         });
       }
