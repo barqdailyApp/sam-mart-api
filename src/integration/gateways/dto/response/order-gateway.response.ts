@@ -14,6 +14,7 @@ export class OrderGatewayResponse {
     @Expose() delivery_day: string;
     @Expose() number: string;
     @Expose() delivery_fee: number;
+    @Expose() address: string;
     @Expose() status: ShipmentStatusEnum;
     @Expose() status_reason: string;
     @Expose() order_confirmed_at: Date;
