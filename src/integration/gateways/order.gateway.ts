@@ -22,6 +22,8 @@ import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { OrderStatusChangePayload } from './interfaces/order/order-status-change.payload';
 import { plainToInstance } from 'class-transformer';
 import { OrderStatusChangeResponse } from './dto/response/order-status-change.response';
+import { ReturnOrderPayload } from './interfaces/order/return-order.payload';
+import { ReturnOrderResponse } from './dto/response/return-order.response';
 @WebSocketGateway({ namespace: Gateways.Order.Namespace, cors: { origin: '*' } })
 export class OrderGateway
   implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
@@ -92,4 +94,21 @@ export class OrderGateway
     await this.server.to(payload.to_rooms).emit("order_status_change", message);
   }
 
+  async notifyReturnOrder(payload: ReturnOrderPayload) {
+    const { body, to_rooms } = payload;
+    const message = plainToInstance(ReturnOrderResponse,
+      {
+        ...body,
+        driver: {
+          ...body.driver,
+          user: body.driver?.user,
+        },
+      },
+      {
+        excludeExtraneousValues: true,
+      }
+    );
+
+    await this.server.to(payload.to_rooms).emit("order_return", message)
+  }
 }
