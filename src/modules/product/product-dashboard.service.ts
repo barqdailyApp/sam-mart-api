@@ -659,58 +659,58 @@ export class ProductDashboardService {
     // Start building the query
     let query = this.productOfferRepository
       .createQueryBuilder('product_offer')
-      .innerJoinAndSelect(
+      .leftJoinAndSelect(
         'product_offer.product_category_price',
         'product_category_prices',
       )
 
-      .innerJoinAndSelect(
+      .leftJoinAndSelect(
         'product_category_prices.product_additional_services',
         'product_additional_services',
       )
-      .innerJoinAndSelect(
+      .leftJoinAndSelect(
         'product_additional_services.additional_service',
         'additional_service',
       )
 
-      .innerJoinAndSelect(
+      .leftJoinAndSelect(
         'product_category_prices.product_measurement',
         'product_measurement',
       )
-      .innerJoinAndSelect(
+      .leftJoinAndSelect(
         'product_measurement.measurement_unit',
         'measurement_unit',
       )
 
-      .innerJoinAndSelect(
+      .leftJoinAndSelect(
         'product_category_prices.product_sub_category',
         'product_sub_category',
       )
 
-      .innerJoinAndSelect(
+      .leftJoinAndSelect(
         'product_sub_category.category_subCategory',
         'category_subCategory',
       )
-      .innerJoinAndSelect(
+      .leftJoinAndSelect(
         'category_subCategory.section_category',
         'section_category',
       )
-      .innerJoinAndSelect('section_category.section', 'section')
-      .innerJoinAndSelect('product_sub_category.product', 'product')
-      .innerJoinAndSelect('product.warehouses_products', 'warehousesProduct')
-      .innerJoinAndSelect(
+      .leftJoinAndSelect('section_category.section', 'section')
+      .leftJoinAndSelect('product_sub_category.product', 'product')
+      .leftJoinAndSelect('product.warehouses_products', 'warehousesProduct')
+      .leftJoinAndSelect(
         'product.product_measurements',
         'product_measurements',
       )
 
-      .innerJoinAndSelect('product.product_images', 'product_images')
+      .leftJoinAndSelect('product.product_images', 'product_images')
 
-      .where(
-        'product_offer.offer_quantity > 0 AND product_offer.start_date <= :current_date AND product_offer.end_date >= :current_date',
-        {
-          current_date: new Date(),
-        },
-      )
+      // .where(
+      //   'product_offer.offer_quantity > 0 AND product_offer.start_date <= :current_date AND product_offer.end_date >= :current_date',
+      //   {
+      //     current_date: new Date(),
+      //   },
+      // )
       .andWhere('product_offer.id = :offer_id', { offer_id });
     return await query.getOne();
   }
