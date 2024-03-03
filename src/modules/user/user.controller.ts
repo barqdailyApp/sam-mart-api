@@ -112,10 +112,19 @@ export class UserController {
     return new ActionResponse(result);
   }
 
-  @Get('all-clients')
+  @Get('all-clients-dashboard')
   async getAllClients(@Query() usersDashboardQuery: UsersDashboardQuery) {
-    const users = await this._service.getAllClients(usersDashboardQuery);
+    const users = await this._service.getAllClientsDashboard(
+      usersDashboardQuery,
+    );
     const usersResponse = users.map((user) => new UserDashboardResponse(user));
     return new ActionResponse(usersResponse);
+  }
+
+  @Get('single-client-dashboard/:user_id')
+  async getSingleClient(@Param('user_id') user_id: string) {
+    const user = await this._service.getSingleClientDashboard(user_id);
+    const userResponse = new UserDashboardResponse(user);
+    return new ActionResponse(userResponse);
   }
 }
