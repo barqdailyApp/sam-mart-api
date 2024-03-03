@@ -13,7 +13,7 @@ export class UserDashboardResponse {
   @Transform(({ value }) => toUrl(value))
   @Expose()
   readonly avatar: string;
-  @Expose() readonly gender: Gender;
+  @Expose() readonly birth_date: string;
   @Expose() readonly created_at: Date;
   @Expose() readonly user_status: UserStatus;
 
@@ -26,7 +26,7 @@ export class UserDashboardResponse {
     this.email = user.email;
     this.phone = user.phone;
     this.avatar = user.avatar;
-    this.gender = user.gender;
+    this.birth_date = user.birth_date;
     this.created_at = user.created_at;
     this.user_status = user.user_status;
     this.wallet_balance = user.wallet == undefined ? 0 : user.wallet.balance;

@@ -127,4 +127,16 @@ export class UserController {
     const userResponse = new UserDashboardResponse(user);
     return new ActionResponse(userResponse);
   }
+
+  @Get('total-clients-dashboard')
+  async getTotalClients() {
+    const { active, blocked, purchased, total } =
+      await this._service.getTotalClientsDashboard();
+    return new ActionResponse({
+      active,
+      blocked,
+      purchased,
+      total,
+    });
+  }
 }
