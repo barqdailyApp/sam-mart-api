@@ -1,4 +1,4 @@
-import { Inject, Injectable, Scope } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, Scope } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/infrastructure/entities/user/user.entity';
 import { DataSource, Repository } from 'typeorm';
@@ -96,7 +96,7 @@ export class UserService extends BaseService<User> {
     return this.request.user;
   }
 
-  async getAllClients(usersDashboardQuery: UsersDashboardQuery) {
+  async getAllClientsDashboard(usersDashboardQuery: UsersDashboardQuery) {
     const { page, limit, created_at, client_search, status } =
       usersDashboardQuery;
     const skip = (page - 1) * limit;
@@ -128,5 +128,16 @@ export class UserService extends BaseService<User> {
 
     const users = await query.getMany();
     return users;
+  }
+  async getSingleClientDashboard(user_id: string) {
+    const user = await this.userRepo.findOne({
+      where: { id: user_id },
+      relations: {
+        wallet: true,
+        addresses: true,
+      },
+    });
+    if (!user) throw new NotFoundException('user not found');
+    return user;
   }
 }
