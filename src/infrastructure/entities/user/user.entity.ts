@@ -22,6 +22,7 @@ import { ShipmentChat } from '../order/shipment-chat.entity';
 import { ShipmentFeedback } from '../order/shipment-feedback.entity';
 import { Wallet } from '../wallet/wallet.entity';
 import { NotificationEntity } from '../notification/notification.entity';
+import { UserStatus } from 'src/infrastructure/data/enums/user-status.enum';
 
 @Entity()
 export class User extends AuditableEntity {
@@ -58,6 +59,10 @@ export class User extends AuditableEntity {
   @Column({ nullable: true, type: 'enum', enum: Gender })
   gender: Gender;
 
+  @Column({ nullable: true, type: 'enum', enum: UserStatus,default: UserStatus.ActiveClient, })
+  user_status: UserStatus;
+
+  
   @Column({ nullable: true })
   birth_date: string;
 
