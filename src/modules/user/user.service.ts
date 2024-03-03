@@ -13,6 +13,7 @@ import { StorageManager } from 'src/integration/storage/storage.manager';
 import { SendOtpTransaction } from '../authentication/transactions/send-otp.transaction';
 import { UpdateFcmTokenRequest } from './requests/update-fcm-token.request';
 import { UsersDashboardQuery } from './dto/filters/user-dashboard.query';
+import { UserStatus } from 'src/infrastructure/data/enums/user-status.enum';
 
 @Injectable({ scope: Scope.REQUEST })
 export class UserService extends BaseService<User> {
@@ -139,5 +140,33 @@ export class UserService extends BaseService<User> {
     });
     if (!user) throw new NotFoundException('user not found');
     return user;
+  }
+    async getTotalClientsDashboard() {
+    const clientsTotal = await this.userRepo.count({});
+    const clientsActive = await this.userRepo.count({
+      where: {
+        user_status:UserStatus.ActiveClient
+      },
+    });
+
+    const clientsPurchased = await this.userRepo.count({
+      where: {
+        user_status:UserStatus.CustomerPurchase
+      },
+    });
+
+    const clientsBlocked = await this.userRepo.count({
+      where: {
+        user_status:UserStatus.BlockedClient
+      },
+    });
+    return {
+      total:clientsTotal,
+      active:clientsActive,
+      purchased:clientsPurchased,
+      blocked:clientsBlocked
+    
+  
+    };
   }
 }
