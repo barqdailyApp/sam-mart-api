@@ -12,8 +12,7 @@ import * as sharp from 'sharp';
 import { StorageManager } from 'src/integration/storage/storage.manager';
 import { SendOtpTransaction } from '../authentication/transactions/send-otp.transaction';
 import { UpdateFcmTokenRequest } from './requests/update-fcm-token.request';
-
-
+import { UsersDashboardQuery } from './dto/filters/user-dashboard.query';
 
 @Injectable({ scope: Scope.REQUEST })
 export class UserService extends BaseService<User> {
@@ -24,7 +23,8 @@ export class UserService extends BaseService<User> {
     @Inject(REQUEST) readonly request: Request,
     @Inject(StorageManager) private readonly storageManager: StorageManager,
     @Inject(ImageManager) private readonly imageManager: ImageManager,
-    @Inject(SendOtpTransaction) private readonly sendOtpTransaction: SendOtpTransaction,
+    @Inject(SendOtpTransaction)
+    private readonly sendOtpTransaction: SendOtpTransaction,
   ) {
     super(userRepo);
   }
@@ -37,7 +37,9 @@ export class UserService extends BaseService<User> {
   }
 
   async updateProfile(updatdReq: UpdateProfileRequest) {
-    const user = await this.userRepo.findOne({ where: { id: this.currentUser.id } });
+    const user = await this.userRepo.findOne({
+      where: { id: this.currentUser.id },
+    });
 
     if (updatdReq.delete_avatar) {
       await this._fileService.delete(user.avatar);
@@ -46,17 +48,23 @@ export class UserService extends BaseService<User> {
 
     if (updatdReq.avatarFile) {
       // resize image to 300x300
-      const resizedImage = await this.imageManager.resize(updatdReq.avatarFile, {
-        size: { width: 300, height: 300 },
-        options: {
-          fit: sharp.fit.cover,
-          position: sharp.strategy.entropy
+      const resizedImage = await this.imageManager.resize(
+        updatdReq.avatarFile,
+        {
+          size: { width: 300, height: 300 },
+          options: {
+            fit: sharp.fit.cover,
+            position: sharp.strategy.entropy,
+          },
         },
-      });
+      );
 
       // save image
       const path = await this.storageManager.store(
-        { buffer: resizedImage, originalname: updatdReq.avatarFile.originalname },
+        {
+          buffer: resizedImage,
+          originalname: updatdReq.avatarFile.originalname,
+        },
         { path: 'avatars' },
       );
 
@@ -67,18 +75,58 @@ export class UserService extends BaseService<User> {
     const savedUser = await this.userRepo.save(user);
 
     if (updatdReq.phone) {
-      await this.sendOtpTransaction.run({ type: 'phone', username: updatdReq.phone })
+      await this.sendOtpTransaction.run({
+        type: 'phone',
+        username: updatdReq.phone,
+      });
     }
 
     return savedUser;
   }
 
-  async updateFcmToken(updateFcmTokenRequest:UpdateFcmTokenRequest){
-    const {fcmToken} = updateFcmTokenRequest;
-    await this.userRepo.update({id:this.currentUser.id},{fcm_token:fcmToken})
+  async updateFcmToken(updateFcmTokenRequest: UpdateFcmTokenRequest) {
+    const { fcmToken } = updateFcmTokenRequest;
+    await this.userRepo.update(
+      { id: this.currentUser.id },
+      { fcm_token: fcmToken },
+    );
   }
 
   get currentUser(): User {
     return this.request.user;
+  }
+
+  async getAllClients(usersDashboardQuery: UsersDashboardQuery) {
+    const { page, limit, created_at, client_search, status } =
+      usersDashboardQuery;
+    const skip = (page - 1) * limit;
+
+    let query = this.userRepo
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.wallet', 'wallet')
+      .leftJoinAndSelect('user.addresses', 'addresses')
+      .skip(skip)
+      .take(limit);
+
+    if (created_at) {
+      //*using database functions to truncate the time part of the order.created_at timestamp to compare only the date components
+      query = query.where('DATE(user.created_at) = :created_at', {
+        created_at,
+      });
+    }
+
+    if (client_search) {
+      query = query.andWhere(
+        'user.name LIKE :client_search OR user.phone LIKE :client_search OR user.email LIKE :client_search',
+        { client_search: `%${client_search}%` },
+      );
+    }
+
+    if (status) {
+      query = query.andWhere('user.user_status = :status', { status });
+    }
+
+    const users = await query.getMany();
+    return users;
   }
 }
