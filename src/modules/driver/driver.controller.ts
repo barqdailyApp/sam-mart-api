@@ -22,6 +22,8 @@ import { Roles } from '../authentication/guards/roles.decorator';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { UpdateDriverReceiveOrdersRequest } from './requests/update-driver-receive-orders';
 import { GetDriversQueryRequest } from './requests/get-drivers-query.request';
+import { DriversDashboardQuery } from './filters/driver-dashboard.query';
+import { DriverDashboardResponse } from './response/driver-dashboard.response';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -47,6 +49,30 @@ export class DriverController {
       plainToClass(DriverResponse, driver),
     );
     return new ActionResponse(this._i18nResponse.entity(driversResponse));
+  }
+
+  @Get('all-drivers-dashboard')
+  async allDriversDashboard(
+    @Query() driversDashboardQuery: DriversDashboardQuery,
+  ) {
+    const drivers = await this.driverService.allDriversDashboard(
+      driversDashboardQuery,
+    );
+    const driversResponse = drivers.map(
+      (driver) => new DriverDashboardResponse(driver),
+    );
+    return new ActionResponse(driversResponse);
+  }
+  @Get('single-driver-dashboard/:driver_id')
+  async singleDriverDashboard(@Param('driver_id') id: string) {
+    const driver = await this.driverService.singleDriverDashboard(id);
+    const driverResponse = new  DriverDashboardResponse(driver);
+    return new ActionResponse(driverResponse);
+  }
+  @Get('total-client-dashboard')
+  async totalClientDashboard() {
+    const total = await this.driverService.totalClientDashboard();
+    return new ActionResponse(total);
   }
 
   @Get(':driver_id/single-driver')

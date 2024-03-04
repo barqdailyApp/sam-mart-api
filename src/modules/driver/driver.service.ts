@@ -13,6 +13,8 @@ import { ShipmentStatusEnum } from 'src/infrastructure/data/enums/shipment_statu
 import { ShipmentDriverResponse } from '../order/dto/response/driver-response/shipment-driver.respnse';
 import { plainToClass } from 'class-transformer';
 import { I18nResponse } from 'src/core/helpers/i18n.helper';
+import { DriversDashboardQuery } from './filters/driver-dashboard.query';
+import { DriverStatus } from 'src/infrastructure/data/enums/driver-status.enum';
 @Injectable()
 export class DriverService {
   constructor(
@@ -114,5 +116,105 @@ export class DriverService {
       where: { user_id: this._request.user.id },
       relations: { user: true },
     });
+  }
+  async allDriversDashboard(driversDashboardQuery: DriversDashboardQuery) {
+    const {
+      created_at,
+      driver_search,
+      limit,
+      page,
+      status,
+      city_id,
+      country_id,
+      region_id,
+    } = driversDashboardQuery;
+    const skip = (page - 1) * limit;
+
+    let query = this.driverRepository
+      .createQueryBuilder('driver')
+      .leftJoinAndSelect('driver.user', 'user')
+      .leftJoinAndSelect('user.wallet', 'wallet')
+
+      .leftJoinAndSelect('driver.country', 'country')
+      .leftJoinAndSelect('driver.city', 'city')
+      .leftJoinAndSelect('driver.region', 'region')
+      .skip(skip)
+      .take(limit);
+
+    if (created_at) {
+      query = query.andWhere('driver.created_at = :created_at', {
+        created_at,
+      });
+    }
+    if (driver_search) {
+      query = query.andWhere(
+        'user.name LIKE :driver_search OR user.phone LIKE :driver_search OR user.email LIKE :driver_search',
+        { driver_search: `%${driver_search}%` },
+      );
+    }
+    if (status) {
+      query = query.andWhere('driver.status = :status', {
+        status,
+      });
+    }
+    if (country_id) {
+      query = query.andWhere('driver.country_id = :country_id', {
+        country_id,
+      });
+    }
+    if (city_id) {
+      query = query.andWhere('driver.city_id = :city_id', {
+        city_id,
+      });
+    }
+    if (region_id) {
+      query = query.andWhere('driver.region_id = :region_id', {
+        region_id,
+      });
+    }
+
+    const drivers = await query.getMany();
+    return drivers;
+  }
+  async singleDriverDashboard(driver_id: string) {
+    const driver = await this.driverRepository.findOne({
+      where: { id: driver_id },
+      relations: {
+        user: {
+          wallet: true,
+        },
+        city: true,
+        country: true,
+        region: true,
+      },
+    });
+    if (!driver) {
+      throw new Error('message.driver_not_found');
+    }
+    return driver;
+  }
+  async totalClientDashboard(){
+    const total = await this.driverRepository.count();
+    const totalPending = await this.driverRepository.count({
+      where: {
+        status: DriverStatus.PENDING
+      }
+    });
+    const totalVerified = await this.driverRepository.count({
+      where: {
+        status: DriverStatus.VERIFIED
+      }
+    });
+    const totalBlocked = await this.driverRepository.count({
+      where: {
+        status: DriverStatus.BLOCKED
+      }
+    })
+    return {
+      total,
+      totalPending,
+      totalVerified,
+      totalBlocked
+    }
   }
 }

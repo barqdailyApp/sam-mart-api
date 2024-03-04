@@ -22,7 +22,7 @@ export class UserDashboardResponse {
 
   constructor(user: User) {
     this.id = user.id;
-    this.username = user.username;
+    this.username = user.name;
     this.email = user.email;
     this.phone = user.phone;
     this.avatar = user.avatar;
