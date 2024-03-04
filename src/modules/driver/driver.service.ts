@@ -196,7 +196,7 @@ export class DriverService {
     }
     return driver;
   }
-  async totalClientDashboard() {
+  async totalDriverDashboard() {
     const total = await this.driverRepository.count();
     const totalPending = await this.driverRepository.count({
       where: {

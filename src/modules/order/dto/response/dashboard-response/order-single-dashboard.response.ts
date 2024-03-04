@@ -1,4 +1,5 @@
 import { Exclude, Expose } from 'class-transformer';
+import { toUrl } from 'src/core/helpers/file.helper';
 import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
 import { PaymentMethod } from 'src/infrastructure/data/enums/payment-method';
 import { Order } from 'src/infrastructure/entities/order/order.entity';
@@ -93,6 +94,11 @@ export class OrderSingleDashboardResponse {
             product_name_en:
               shipment_product.product_category_price.product_sub_category
                 .product.name_en,
+            product_logo: toUrl(
+              shipment_product.product_category_price.product_sub_category.product.product_images.find(
+                (product_image) => product_image.is_logo === true,
+              ).url,
+            ),
             total_price: shipment_product.quantity * shipment_product.price,
             sub_category_name_ar:
               shipment_product.product_category_price.product_sub_category
@@ -103,12 +109,12 @@ export class OrderSingleDashboardResponse {
             category_name_ar:
               shipment_product.product_category_price.product_sub_category
                 .category_subCategory.section_category.category.name_ar,
-            category_name_en:shipment_product.product_category_price.product_sub_category
-            .category_subCategory.section_category.category.name_en
+            category_name_en:
+              shipment_product.product_category_price.product_sub_category
+                .category_subCategory.section_category.category.name_en,
           };
         },
       ),
     };
   }
 }
-
