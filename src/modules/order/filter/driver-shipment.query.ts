@@ -32,4 +32,10 @@ export class DriverShipmentsQuery {
   @IsOptional()
   @IsString()
   order_date: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  driver_id: string;
+
 }

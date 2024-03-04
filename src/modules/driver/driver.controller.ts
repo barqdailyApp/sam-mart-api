@@ -39,13 +39,11 @@ export class DriverController {
   constructor(
     private readonly driverService: DriverService,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
-  ) { }
+  ) {}
 
   @Roles(Role.ADMIN)
   @Get('all-drivers')
-  async allDrivers(
-    @Query() query: GetDriversQueryRequest,
-  ) {
+  async allDrivers(@Query() query: GetDriversQueryRequest) {
     const drivers = await this.driverService.all(query.warehouse_id);
     const driversResponse = drivers.map((driver) =>
       plainToClass(DriverResponse, driver),
@@ -57,7 +55,7 @@ export class DriverController {
   async allDriversDashboard(
     @Query() driversDashboardQuery: DriversDashboardQuery,
   ) {
-const {limit,page} = driversDashboardQuery;
+    const { limit, page } = driversDashboardQuery;
     const { drivers, total } = await this.driverService.allDriversDashboard(
       driversDashboardQuery,
     );
@@ -72,12 +70,12 @@ const {limit,page} = driversDashboardQuery;
   @Get('single-driver-dashboard/:driver_id')
   async singleDriverDashboard(@Param('driver_id') id: string) {
     const driver = await this.driverService.singleDriverDashboard(id);
-    const driverResponse = new  DriverDashboardResponse(driver);
+    const driverResponse = new DriverDashboardResponse(driver);
     return new ActionResponse(driverResponse);
   }
-  @Get('total-client-dashboard')
+  @Get('total-driver-dashboard')
   async totalClientDashboard() {
-    const total = await this.driverService.totalClientDashboard();
+    const total = await this.driverService.totalDriverDashboard();
     return new ActionResponse(total);
   }
 

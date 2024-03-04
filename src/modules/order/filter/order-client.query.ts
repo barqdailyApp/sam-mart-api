@@ -59,6 +59,11 @@ export class OrderClientQuery {
   @IsString()
   driver_id: string;
 
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  client_id: string;
+
   @ApiProperty({ required: false,description:"search by order number or client name or client phone" })
   @IsOptional()
   @IsString()
