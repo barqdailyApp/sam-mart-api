@@ -8,10 +8,12 @@ import {
   IsString,
 } from 'class-validator';
 import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
+import { DriverStatus } from 'src/infrastructure/data/enums/driver-status.enum';
 import { PaymentMethod } from 'src/infrastructure/data/enums/payment-method';
 import { ShipmentStatusEnum } from 'src/infrastructure/data/enums/shipment_status.enum';
+import { UserStatus } from 'src/infrastructure/data/enums/user-status.enum';
 
-export class OrderClientQuery {
+export class DriversDashboardQuery {
   @ApiProperty({ required: false, default: 1 })
   @Transform(({ value }) => {
     return Number(value);
@@ -29,52 +31,38 @@ export class OrderClientQuery {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  order_date: string;
+  created_at: string;
 
-  @ApiProperty({ nullable: true, required: false })
-  @IsOptional()
-  @Transform(({ value }) => {
-    return value === 'true' || value === true;
+  @ApiProperty({
+    required: false,
+    description: 'search by client email or client name or client phone',
   })
-  @IsBoolean()
-  is_paid: boolean;
-
-  @ApiProperty({ required: false, enum: PaymentMethod })
   @IsOptional()
   @IsString()
-  payment_method: PaymentMethod;
-
-  @ApiProperty({ required: false, enum: DeliveryType })
-  @IsOptional()
-  @IsString()
-  delivery_type: DeliveryType;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  warehouse_id: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  driver_id: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  client_id: string;
-
-  @ApiProperty({ required: false,description:"search by order number or client name or client phone" })
-  @IsOptional()
-  @IsString()
-  order_search: string;
+  driver_search: string;
 
   @ApiProperty({
     nullable: true,
     required: false,
-    enum: ShipmentStatusEnum,
+    enum: DriverStatus,
   })
   @IsOptional()
-  @IsEnum(ShipmentStatusEnum)
-  status: ShipmentStatusEnum;
+  @IsEnum(DriverStatus)
+  status: DriverStatus;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  country_id: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  city_id: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  region_id: string;
+
 }

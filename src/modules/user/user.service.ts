@@ -111,14 +111,13 @@ export class UserService extends BaseService<User> {
 
     if (created_at) {
       //*using database functions to truncate the time part of the order.created_at timestamp to compare only the date components
-      query = query.where('DATE(user.created_at) = :created_at', {
+      query = query.andWhere('DATE(user.created_at) = :created_at', {
         created_at,
       });
     }
-
     if (client_search) {
       query = query.andWhere(
-        'user.name LIKE :client_search OR user.phone LIKE :client_search OR user.email LIKE :client_search',
+        '(user.name LIKE :client_search OR user.phone LIKE :client_search OR user.email LIKE :client_search)',
         { client_search: `%${client_search}%` },
       );
     }
@@ -127,8 +126,8 @@ export class UserService extends BaseService<User> {
       query = query.andWhere('user.user_status = :status', { status });
     }
 
-    const users = await query.getMany();
-    return users;
+    const [users, total] = await query.getManyAndCount();
+    return { users, total };
   }
   async getSingleClientDashboard(user_id: string) {
     const user = await this.userRepo.findOne({
@@ -141,32 +140,30 @@ export class UserService extends BaseService<User> {
     if (!user) throw new NotFoundException('user not found');
     return user;
   }
-    async getTotalClientsDashboard() {
+  async getTotalClientsDashboard() {
     const clientsTotal = await this.userRepo.count({});
     const clientsActive = await this.userRepo.count({
       where: {
-        user_status:UserStatus.ActiveClient
+        user_status: UserStatus.ActiveClient,
       },
     });
 
     const clientsPurchased = await this.userRepo.count({
       where: {
-        user_status:UserStatus.CustomerPurchase
+        user_status: UserStatus.CustomerPurchase,
       },
     });
 
     const clientsBlocked = await this.userRepo.count({
       where: {
-        user_status:UserStatus.BlockedClient
+        user_status: UserStatus.BlockedClient,
       },
     });
     return {
-      total:clientsTotal,
-      active:clientsActive,
-      purchased:clientsPurchased,
-      blocked:clientsBlocked
-    
-  
+      total: clientsTotal,
+      active: clientsActive,
+      purchased: clientsPurchased,
+      blocked: clientsBlocked,
     };
   }
 }

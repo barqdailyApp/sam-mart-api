@@ -120,7 +120,7 @@ export class OrderService extends BaseUserService<Order> {
       is_paid,
       payment_method,
       warehouse_id,
-      driver_id,
+      driver_id,client_id,
       delivery_type,
       status,
       order_search,
@@ -198,6 +198,11 @@ export class OrderService extends BaseUserService<Order> {
         driver_id,
       });
     }
+    if(client_id){
+      query = query.andWhere('user.id = :client_id', {
+        client_id,
+      })
+    }
 
     if (warehouse_id) {
       query = query.andWhere('warehouse_order.id = :warehouse_id', {
@@ -207,7 +212,7 @@ export class OrderService extends BaseUserService<Order> {
 
     if (order_search) {
       query = query.andWhere(
-        'user.name LIKE :order_search OR user.phone LIKE :order_search OR order.number LIKE :order_search',
+'(user.name LIKE :order_search OR user.phone LIKE :order_search OR order.number LIKE :order_search)',
         { order_search: `%${order_search}%` },
       );
     }
@@ -498,7 +503,7 @@ export class OrderService extends BaseUserService<Order> {
     };
   }
   async getDashboardShipments(driverShipmentsQuery: DriverShipmentsQuery) {
-    const { limit, page, status } = driverShipmentsQuery;
+    const { limit, page, status,driver_id,order_date } = driverShipmentsQuery;
     const skip = (page - 1) * limit;
     let query = this.shipmentRepository
       .createQueryBuilder('shipments')
@@ -548,6 +553,10 @@ export class OrderService extends BaseUserService<Order> {
         query = query.andWhere('shipments.status = :status', { status });
       }
     }
+    if(driver_id){
+      query = query.andWhere('shipments.driver_id = :driver_id', { driver_id });
+    }
+
     const [orders, total] = await query.getManyAndCount();
     return { orders, total };
   }

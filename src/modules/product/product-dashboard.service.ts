@@ -200,7 +200,7 @@ export class ProductDashboardService {
     if (!productOffer) {
       throw new NotFoundException('message_product_offer_not_found');
     }
-    return await this.productOffer_repo.softDelete({ id: product_id });
+    return await this.productOffer_repo.delete({ id: product_id });
   }
 
   async addProductImage(
