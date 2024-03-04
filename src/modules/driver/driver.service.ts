@@ -25,7 +25,7 @@ export class DriverService {
     @InjectRepository(Shipment)
     private shipmentRepository: Repository<Shipment>,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
-  ) { }
+  ) {}
 
   async single(driver_id: string): Promise<Driver> {
     const driver = await this.driverRepository.findOne({
@@ -54,10 +54,10 @@ export class DriverService {
   async all(warehouse_id?: string): Promise<Driver[]> {
     const dbQuery = {
       relations: { user: true },
-    }
+    };
 
     if (warehouse_id) {
-      dbQuery['where'] = { warehouse_id }
+      dbQuery['where'] = { warehouse_id };
     }
 
     return await this.driverRepository.find(dbQuery);
@@ -173,8 +173,11 @@ export class DriverService {
       });
     }
 
-    const drivers = await query.getMany();
-    return drivers;
+    const [drivers, total] = await query.getManyAndCount();
+    return {
+      drivers,
+      total,
+    };
   }
   async singleDriverDashboard(driver_id: string) {
     const driver = await this.driverRepository.findOne({
@@ -193,28 +196,28 @@ export class DriverService {
     }
     return driver;
   }
-  async totalClientDashboard(){
+  async totalClientDashboard() {
     const total = await this.driverRepository.count();
     const totalPending = await this.driverRepository.count({
       where: {
-        status: DriverStatus.PENDING
-      }
+        status: DriverStatus.PENDING,
+      },
     });
     const totalVerified = await this.driverRepository.count({
       where: {
-        status: DriverStatus.VERIFIED
-      }
+        status: DriverStatus.VERIFIED,
+      },
     });
     const totalBlocked = await this.driverRepository.count({
       where: {
-        status: DriverStatus.BLOCKED
-      }
-    })
+        status: DriverStatus.BLOCKED,
+      },
+    });
     return {
       total,
       totalPending,
       totalVerified,
-      totalBlocked
-    }
+      totalBlocked,
+    };
   }
 }
