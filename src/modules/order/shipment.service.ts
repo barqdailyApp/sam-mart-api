@@ -99,7 +99,7 @@ export class ShipmentService extends BaseService<Shipment> {
 
     await this.orderGateway.notifyOrderStatusChange({
       action: ShipmentStatusEnum.DELIVERED,
-      to_rooms: ["admin", shipment.order.user_id, shipment.driver_id],
+      to_rooms: ["admin", shipment.order.user_id],
       body: {
         shipment,
         order,

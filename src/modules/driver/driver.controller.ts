@@ -21,6 +21,7 @@ import { RolesGuard } from '../authentication/guards/roles.guard';
 import { Roles } from '../authentication/guards/roles.decorator';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { UpdateDriverReceiveOrdersRequest } from './requests/update-driver-receive-orders';
+import { GetDriversQueryRequest } from './requests/get-drivers-query.request';
 import { DriversDashboardQuery } from './filters/driver-dashboard.query';
 import { DriverDashboardResponse } from './response/driver-dashboard.response';
 @ApiBearerAuth()
@@ -36,11 +37,14 @@ export class DriverController {
   constructor(
     private readonly driverService: DriverService,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
-  ) {}
+  ) { }
 
+  @Roles(Role.ADMIN)
   @Get('all-drivers')
-  async allDrivers() {
-    const drivers = await this.driverService.all();
+  async allDrivers(
+    @Query() query: GetDriversQueryRequest,
+  ) {
+    const drivers = await this.driverService.all(query.warehouse_id);
     const driversResponse = drivers.map((driver) =>
       plainToClass(DriverResponse, driver),
     );
