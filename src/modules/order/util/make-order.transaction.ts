@@ -27,7 +27,6 @@ import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
 import { Section } from 'src/infrastructure/entities/section/section.entity';
 import { Slot } from 'src/infrastructure/entities/order/slot.entity';
 import { ProductOffer } from 'src/infrastructure/entities/product/product-offer.entity';
-import { FastDeliveryGateway } from 'src/integration/gateways/fast-delivery.gateway';
 import { ShipmentStatusEnum } from 'src/infrastructure/data/enums/shipment_status.enum';
 import { WarehouseOpreationProducts } from 'src/infrastructure/entities/warehouse/wahouse-opreation-products.entity';
 import { OrderGateway } from 'src/integration/gateways/order.gateway';
@@ -40,7 +39,6 @@ export class MakeOrderTransaction extends BaseTransaction<
     dataSource: DataSource,
     @Inject(REQUEST) readonly request: Request,
     private readonly orderGateway: OrderGateway,
-    private readonly fastDeliveryGateway: FastDeliveryGateway,
   ) {
     super(dataSource);
   }
