@@ -46,6 +46,8 @@ import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { Roles } from '../authentication/guards/roles.decorator';
 import { plainToInstance } from 'class-transformer';
 import { UpdateFcmTokenRequest } from './requests/update-fcm-token.request';
+import { UserDashboardResponse } from './dto/responses/user-dashboard.response';
+import { UsersDashboardQuery } from './dto/filters/user-dashboard.query';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -108,5 +110,33 @@ export class UserController {
   async updateFcmToken(@Body() updateFcmTokenRequest: UpdateFcmTokenRequest) {
     const result = await this._service.updateFcmToken(updateFcmTokenRequest);
     return new ActionResponse(result);
+  }
+
+  @Get('all-clients-dashboard')
+  async getAllClients(@Query() usersDashboardQuery: UsersDashboardQuery) {
+    const users = await this._service.getAllClientsDashboard(
+      usersDashboardQuery,
+    );
+    const usersResponse = users.map((user) => new UserDashboardResponse(user));
+    return new ActionResponse(usersResponse);
+  }
+
+  @Get('single-client-dashboard/:user_id')
+  async getSingleClient(@Param('user_id') user_id: string) {
+    const user = await this._service.getSingleClientDashboard(user_id);
+    const userResponse = new UserDashboardResponse(user);
+    return new ActionResponse(userResponse);
+  }
+
+  @Get('total-clients-dashboard')
+  async getTotalClients() {
+    const { active, blocked, purchased, total } =
+      await this._service.getTotalClientsDashboard();
+    return new ActionResponse({
+      active,
+      blocked,
+      purchased,
+      total,
+    });
   }
 }
