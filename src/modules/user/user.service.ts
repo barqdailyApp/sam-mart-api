@@ -115,10 +115,9 @@ export class UserService extends BaseService<User> {
         created_at,
       });
     }
-
     if (client_search) {
       query = query.andWhere(
-        'user.name LIKE :client_search OR user.phone LIKE :client_search OR user.email LIKE :client_search',
+        '(user.name LIKE :client_search OR user.phone LIKE :client_search OR user.email LIKE :client_search)',
         { client_search: `%${client_search}%` },
       );
     }

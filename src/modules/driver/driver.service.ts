@@ -148,7 +148,7 @@ export class DriverService {
     }
     if (driver_search) {
       query = query.andWhere(
-        'user.name LIKE :driver_search OR user.phone LIKE :driver_search OR user.email LIKE :driver_search',
+        '(user.name LIKE :driver_search OR user.phone LIKE :driver_search OR user.email LIKE :driver_search)',
         { driver_search: `%${driver_search}%` },
       );
     }

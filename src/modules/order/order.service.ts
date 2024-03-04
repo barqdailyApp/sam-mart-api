@@ -212,7 +212,7 @@ export class OrderService extends BaseUserService<Order> {
 
     if (order_search) {
       query = query.andWhere(
-        'user.name LIKE :order_search OR user.phone LIKE :order_search OR order.number LIKE :order_search',
+'(user.name LIKE :order_search OR user.phone LIKE :order_search OR order.number LIKE :order_search)',
         { order_search: `%${order_search}%` },
       );
     }
