@@ -616,7 +616,8 @@ export class OrderService extends BaseUserService<Order> {
 
     // check if the order is delivered
     const shipment = await this.shipmentRepository.findOne({
-      where: { order_id }
+      where: { order_id },
+      relations: ['warehouse']
     });
     if (!shipment) throw new NotFoundException('shipment not found');
 
@@ -679,12 +680,28 @@ export class OrderService extends BaseUserService<Order> {
       can_return: false
     })
 
-    return await this.ReturnOrderRepository.save(returnOrder);
+    const savedReturnOrder = await this.ReturnOrderRepository.save(returnOrder);
+    await this.orderGateway.notifyReturnOrder({
+      to_rooms: ["admin"],
+      body: {
+        client: this.currentUser,
+        driver: null,
+        order,
+        return_order: savedReturnOrder,
+        warehouse: shipment.warehouse
+      }
+    })
+
+    return savedReturnOrder;
   }
 
   // this method is used by the admin to update the return order status
   async updateReturnOrderStatus(return_order_id: string, req: UpdateReturnOrderStatusRequest) {
-    const returnOrder = await this.ReturnOrderRepository.findOne({ where: { id: return_order_id } });
+    const returnOrder = await this.ReturnOrderRepository.findOne({
+      where: { id: return_order_id },
+      relations: ['order', 'order.user']
+    });
+
     if (!returnOrder) throw new NotFoundException('return order not found');
 
     const { return_order_products, admin_note, driver_id, status } = req;
@@ -712,8 +729,9 @@ export class OrderService extends BaseUserService<Order> {
       throw new BadRequestException(`invalid accepted quantity for products ${JSON.stringify(invalidQuantityForProducts)}`)
     }
 
+    let driver:Driver = null;
     if (driver_id) {
-      const driver = await this.driverRepository.findOne({ where: { id: driver_id } });
+      driver = await this.driverRepository.findOne({ where: { id: driver_id } });
       if (!driver) throw new BadRequestException('driver not found');
     }
 
@@ -728,7 +746,25 @@ export class OrderService extends BaseUserService<Order> {
     })
 
     await this.returnOrderProductRepository.save(mappedUpdatedReturnOrderProducts);
-    return await this.ReturnOrderRepository.save(returnOrder);
+    const savedReturnOrder = await this.ReturnOrderRepository.save(returnOrder);
+
+    const shipment = await this.shipmentRepository.findOne({
+      where: { order_id: returnOrder.order_id },
+      relations: ['warehouse']
+    });
+
+    await this.orderGateway.notifyReturnOrder({
+      to_rooms: [returnOrder.order.user.id, driver?.id],
+      body: {
+        client: returnOrder.order.user,
+        driver: driver,
+        order: returnOrder.order,
+        return_order: savedReturnOrder,
+        warehouse: shipment.warehouse
+      }
+    })
+
+    return savedReturnOrder;
   }
 
   async broadcastOrderDrivers(order_id: string) {

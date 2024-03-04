@@ -28,7 +28,7 @@ export class ReturnOrder extends AuditableEntity {
     order: Order;
 
     @Column()
-    orderId: string;
+    order_id: string;
 
     @OneToMany(
         () => ReturnOrderProduct,
