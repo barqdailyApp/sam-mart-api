@@ -48,6 +48,8 @@ import { plainToInstance } from 'class-transformer';
 import { UpdateFcmTokenRequest } from './requests/update-fcm-token.request';
 import { UserDashboardResponse } from './dto/responses/user-dashboard.response';
 import { UsersDashboardQuery } from './dto/filters/user-dashboard.query';
+import { PageDto } from 'src/core/helpers/pagination/page.dto';
+import { PageMetaDto } from 'src/core/helpers/pagination/page-meta.dto';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -113,12 +115,18 @@ export class UserController {
   }
 
   @Get('all-clients-dashboard')
-  async getAllClients(@Query() usersDashboardQuery: UsersDashboardQuery) {
-    const users = await this._service.getAllClientsDashboard(
+  async getAllClientsDashboard(
+    @Query() usersDashboardQuery: UsersDashboardQuery,
+  ) {
+    const { limit, page } = usersDashboardQuery;
+    const { users, total } = await this._service.getAllClientsDashboard(
       usersDashboardQuery,
     );
     const usersResponse = users.map((user) => new UserDashboardResponse(user));
-    return new ActionResponse(usersResponse);
+    const pageMetaDto = new PageMetaDto(page, limit, total);
+    const pageDto = new PageDto(usersResponse, pageMetaDto);
+
+    return new ActionResponse(pageDto);
   }
 
   @Get('single-client-dashboard/:user_id')

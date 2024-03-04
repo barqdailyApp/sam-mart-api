@@ -24,6 +24,8 @@ import { UpdateDriverReceiveOrdersRequest } from './requests/update-driver-recei
 import { GetDriversQueryRequest } from './requests/get-drivers-query.request';
 import { DriversDashboardQuery } from './filters/driver-dashboard.query';
 import { DriverDashboardResponse } from './response/driver-dashboard.response';
+import { PageMetaDto } from 'src/core/helpers/pagination/page-meta.dto';
+import { PageDto } from 'src/core/helpers/pagination/page.dto';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -55,13 +57,17 @@ export class DriverController {
   async allDriversDashboard(
     @Query() driversDashboardQuery: DriversDashboardQuery,
   ) {
-    const drivers = await this.driverService.allDriversDashboard(
+const {limit,page} = driversDashboardQuery;
+    const { drivers, total } = await this.driverService.allDriversDashboard(
       driversDashboardQuery,
     );
     const driversResponse = drivers.map(
       (driver) => new DriverDashboardResponse(driver),
     );
-    return new ActionResponse(driversResponse);
+    const pageMetaDto = new PageMetaDto(page, limit, total);
+    const pageDto = new PageDto(driversResponse, pageMetaDto);
+
+    return new ActionResponse(pageDto);
   }
   @Get('single-driver-dashboard/:driver_id')
   async singleDriverDashboard(@Param('driver_id') id: string) {
