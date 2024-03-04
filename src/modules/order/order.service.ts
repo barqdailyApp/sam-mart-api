@@ -120,7 +120,8 @@ export class OrderService extends BaseUserService<Order> {
       is_paid,
       payment_method,
       warehouse_id,
-      driver_id,client_id,
+      driver_id,
+      client_id,
       delivery_type,
       status,
       order_search,
@@ -198,10 +199,10 @@ export class OrderService extends BaseUserService<Order> {
         driver_id,
       });
     }
-    if(client_id){
+    if (client_id) {
       query = query.andWhere('user.id = :client_id', {
         client_id,
-      })
+      });
     }
 
     if (warehouse_id) {
@@ -212,7 +213,7 @@ export class OrderService extends BaseUserService<Order> {
 
     if (order_search) {
       query = query.andWhere(
-'(user.name LIKE :order_search OR user.phone LIKE :order_search OR order.number LIKE :order_search)',
+        '(user.name LIKE :order_search OR user.phone LIKE :order_search OR order.number LIKE :order_search)',
         { order_search: `%${order_search}%` },
       );
     }
@@ -299,9 +300,11 @@ export class OrderService extends BaseUserService<Order> {
 
       .leftJoinAndSelect('category_subCategory.subcategory', 'subcategory')
 
-      .leftJoinAndSelect('category_subCategory.section_category', 'section_category')
+      .leftJoinAndSelect(
+        'category_subCategory.section_category',
+        'section_category',
+      )
       .leftJoinAndSelect('section_category.category', 'category')
-
 
       .leftJoinAndSelect(
         'product_category_price.product_measurement',
@@ -353,9 +356,11 @@ export class OrderService extends BaseUserService<Order> {
 
       .leftJoinAndSelect('category_subCategory.subcategory', 'subcategory')
 
-      .leftJoinAndSelect('category_subCategory.section_category', 'section_category')
+      .leftJoinAndSelect(
+        'category_subCategory.section_category',
+        'section_category',
+      )
       .leftJoinAndSelect('section_category.category', 'category')
-
 
       .leftJoinAndSelect(
         'product_category_price.product_measurement',
@@ -415,10 +420,21 @@ export class OrderService extends BaseUserService<Order> {
       .skip(skip) // Apply pagination offset.
       .take(limit); // Limit the number of results returned.
 
+    const driver = await this.driverRepository.findOne({
+      where: {
+        user_id: user.id,
+      },
+    });
     // Filter orders by FAST delivery type.
     query = query.andWhere('order.delivery_type = :delivery_type', {
       delivery_type: DeliveryType.FAST,
     });
+
+    query = query.andWhere('shipments.warehouse_id = :warehouse_id',  {
+      warehouse_id: driver.warehouse_id
+    });
+
+
     // Filter orders that are being delivered today.
     if (order_date) {
       query = query.andWhere('order.delivery_day = :delivery_day', {
@@ -437,30 +453,26 @@ export class OrderService extends BaseUserService<Order> {
             ShipmentStatusEnum.PROCESSING,
           ],
         });
-      } else if (status === ShipmentStatusEnum.PENDING) {
+        query = query.andWhere('driver.user_id = :user_id', {
+          user_id: user.id,
+        });
+      } else if (
+        status === ShipmentStatusEnum.PENDING &&
+        driver.is_receive_orders
+      ) {
         // For PENDING status, filter shipments that are specifically PENDING.
+
         query = query.andWhere('shipments.status = :status', {
           status: ShipmentStatusEnum.PENDING,
         });
         // check driver is_receive_orders true
-        query = query.andWhere(
-          'driver.is_receive_orders = :is_receive_orders',
-          { is_receive_orders: true },
-        );
       } else {
         // For any other status, filter by the specific status and ensure the shipment belongs to the current user.
-        query = query
-          .andWhere('driver.user_id = :user_id', { user_id: user.id })
-          .andWhere('shipments.status = :status', { status })
-          .andWhere('driver.warehouse_id = shipments.warehouse_id');
-        // Filter shipments by matching driver's warehouse_id with the shipment's warehouse_id.
+        query = query.andWhere('shipments.status = :status', { status });
+        query = query.andWhere('driver.user_id = :user_id', {
+          user_id: user.id,
+        });
       }
-    } else {
-      // If no status is provided, filter shipments to those that belong to the current user.
-      query = query.andWhere('driver.user_id = :user_id', { user_id: user.id });
-
-      // Filter shipments by matching driver's warehouse_id with the shipment's warehouse_id.
-      query = query.where('driver.warehouse_id = shipments.warehouse_id');
     }
 
     // Execute the query to get the shipments and the total count.
@@ -503,7 +515,7 @@ export class OrderService extends BaseUserService<Order> {
     };
   }
   async getDashboardShipments(driverShipmentsQuery: DriverShipmentsQuery) {
-    const { limit, page, status,driver_id,order_date } = driverShipmentsQuery;
+    const { limit, page, status, driver_id, order_date } = driverShipmentsQuery;
     const skip = (page - 1) * limit;
     let query = this.shipmentRepository
       .createQueryBuilder('shipments')
@@ -553,7 +565,7 @@ export class OrderService extends BaseUserService<Order> {
         query = query.andWhere('shipments.status = :status', { status });
       }
     }
-    if(driver_id){
+    if (driver_id) {
       query = query.andWhere('shipments.driver_id = :driver_id', { driver_id });
     }
 
@@ -612,21 +624,25 @@ export class OrderService extends BaseUserService<Order> {
 
   async returnOrder(order_id: string, req: ReturnOrderRequest) {
     const { returned_shipment_products } = req;
-    const returned_shipment_products_id = returned_shipment_products.map(p => p.shipment_product_id);
+    const returned_shipment_products_id = returned_shipment_products.map(
+      (p) => p.shipment_product_id,
+    );
 
     // check if the order exists
-    const order = await this.orderRepository.findOne({ where: { id: order_id } });
+    const order = await this.orderRepository.findOne({
+      where: { id: order_id },
+    });
     if (!order) throw new NotFoundException('order not found');
 
     // check if the order belongs to the current user
     if (order.user_id !== this.currentUser.id) {
-      throw new BadRequestException('you are not allowed to return this order')
+      throw new BadRequestException('you are not allowed to return this order');
     }
 
     // check if the order is delivered
     const shipment = await this.shipmentRepository.findOne({
       where: { order_id },
-      relations: ['warehouse']
+      relations: ['warehouse'],
     });
     if (!shipment) throw new NotFoundException('shipment not found');
 
@@ -635,131 +651,174 @@ export class OrderService extends BaseUserService<Order> {
       shipment.status !== ShipmentStatusEnum.COMPLETED &&
       shipment.status !== ShipmentStatusEnum.CANCELED
     ) {
-      throw new BadRequestException('you can not return this order that is not delivered yet')
+      throw new BadRequestException(
+        'you can not return this order that is not delivered yet',
+      );
     }
 
     // check if the return products IDs are valid and belongs to the order
     const shipmentProducts = await this.shipmentProductRepository.find({
       where: {
         shipment_id: shipment.id,
-        id: In(returned_shipment_products_id)
-      }
-    })
+        id: In(returned_shipment_products_id),
+      },
+    });
 
     if (shipmentProducts.length !== returned_shipment_products.length) {
-      throw new BadRequestException('invalid products IDs')
+      throw new BadRequestException('invalid products IDs');
     }
 
-    const canNotReturnProducts = shipmentProducts.find(p => p.can_return === false);
+    const canNotReturnProducts = shipmentProducts.find(
+      (p) => p.can_return === false,
+    );
     if (canNotReturnProducts) {
-      throw new BadRequestException(`you can't return this product alread returned ${JSON.stringify(canNotReturnProducts)}`)
+      throw new BadRequestException(
+        `you can't return this product alread returned ${JSON.stringify(
+          canNotReturnProducts,
+        )}`,
+      );
     }
 
     // check if the return products quantities are valid based on the shipment products
-    const invalidQuantityForProducts = returned_shipment_products.filter(p => {
-      const product = shipmentProducts.find(sp => sp.id === p.shipment_product_id);
-      return product.quantity < p.quantity;
-    })
+    const invalidQuantityForProducts = returned_shipment_products.filter(
+      (p) => {
+        const product = shipmentProducts.find(
+          (sp) => sp.id === p.shipment_product_id,
+        );
+        return product.quantity < p.quantity;
+      },
+    );
 
     if (invalidQuantityForProducts.length > 0) {
-      throw new BadRequestException(`invalid quantity for products ${JSON.stringify(invalidQuantityForProducts)}`)
+      throw new BadRequestException(
+        `invalid quantity for products ${JSON.stringify(
+          invalidQuantityForProducts,
+        )}`,
+      );
     }
 
     // check if the return products reasons IDs are valid
-    const returnedProductsReasons = await this.returnProductReasonRepository.find({
-      where: {
-        id: In(returned_shipment_products.map(p => p.reason_id))
-      }
-    })
+    const returnedProductsReasons =
+      await this.returnProductReasonRepository.find({
+        where: {
+          id: In(returned_shipment_products.map((p) => p.reason_id)),
+        },
+      });
 
-    if (returnedProductsReasons.length !== new Set(returned_shipment_products.map(p => p.reason_id)).size) {
-      throw new BadRequestException(`invalid return reasons IDs`)
+    if (
+      returnedProductsReasons.length !==
+      new Set(returned_shipment_products.map((p) => p.reason_id)).size
+    ) {
+      throw new BadRequestException(`invalid return reasons IDs`);
     }
 
     const returnOrder = await this.ReturnOrderRepository.create({
       status: ReturnOrderStatus.PENDING,
       order,
       returnOrderProducts: req.returned_shipment_products,
-      customer_note: req.customer_note
-    })
+      customer_note: req.customer_note,
+    });
 
-    await this.shipmentProductRepository.update({
-      id: In(returned_shipment_products_id)
-    }, {
-      can_return: false
-    })
+    await this.shipmentProductRepository.update(
+      {
+        id: In(returned_shipment_products_id),
+      },
+      {
+        can_return: false,
+      },
+    );
 
     const savedReturnOrder = await this.ReturnOrderRepository.save(returnOrder);
     await this.orderGateway.notifyReturnOrder({
-      to_rooms: ["admin"],
+      to_rooms: ['admin'],
       body: {
         client: this.currentUser,
         driver: null,
         order,
         return_order: savedReturnOrder,
-        warehouse: shipment.warehouse
-      }
-    })
+        warehouse: shipment.warehouse,
+      },
+    });
 
     return savedReturnOrder;
   }
 
   // this method is used by the admin to update the return order status
-  async updateReturnOrderStatus(return_order_id: string, req: UpdateReturnOrderStatusRequest) {
+  async updateReturnOrderStatus(
+    return_order_id: string,
+    req: UpdateReturnOrderStatusRequest,
+  ) {
     const returnOrder = await this.ReturnOrderRepository.findOne({
       where: { id: return_order_id },
-      relations: ['order', 'order.user']
+      relations: ['order', 'order.user'],
     });
 
     if (!returnOrder) throw new NotFoundException('return order not found');
 
     const { return_order_products, admin_note, driver_id, status } = req;
-    const returned_products_id = return_order_products.map(p => p.return_order_product_id);
+    const returned_products_id = return_order_products.map(
+      (p) => p.return_order_product_id,
+    );
 
     // check if the return order products IDs are valid
     const returnOrderProducts = await this.returnOrderProductRepository.find({
       where: {
         id: In(returned_products_id),
-        return_order_id
-      }
-    })
+        return_order_id,
+      },
+    });
 
     if (returnOrderProducts.length !== return_order_products.length) {
-      throw new BadRequestException('invalid return order products IDs')
+      throw new BadRequestException('invalid return order products IDs');
     }
 
     // check if the accepted return products order quantity is valid
-    const invalidQuantityForProducts = return_order_products.filter(p => {
-      const product = returnOrderProducts.find(rp => rp.id === p.return_order_product_id);
-      return product.quantity < p.accepted_quantity && p.status === ReturnOrderStatus.ACCEPTED;
-    })
+    const invalidQuantityForProducts = return_order_products.filter((p) => {
+      const product = returnOrderProducts.find(
+        (rp) => rp.id === p.return_order_product_id,
+      );
+      return (
+        product.quantity < p.accepted_quantity &&
+        p.status === ReturnOrderStatus.ACCEPTED
+      );
+    });
 
     if (invalidQuantityForProducts.length > 0) {
-      throw new BadRequestException(`invalid accepted quantity for products ${JSON.stringify(invalidQuantityForProducts)}`)
+      throw new BadRequestException(
+        `invalid accepted quantity for products ${JSON.stringify(
+          invalidQuantityForProducts,
+        )}`,
+      );
     }
 
-    let driver:Driver = null;
+    let driver: Driver = null;
     if (driver_id) {
-      driver = await this.driverRepository.findOne({ where: { id: driver_id } });
+      driver = await this.driverRepository.findOne({
+        where: { id: driver_id },
+      });
       if (!driver) throw new BadRequestException('driver not found');
     }
 
-    const mappedUpdatedReturnOrderProducts = returnOrderProducts.map(p => {
-      const product = return_order_products.find(rp => rp.return_order_product_id === p.id);
+    const mappedUpdatedReturnOrderProducts = returnOrderProducts.map((p) => {
+      const product = return_order_products.find(
+        (rp) => rp.return_order_product_id === p.id,
+      );
       return {
         ...p,
         status: product.status,
         accepted_quantity: product.accepted_quantity,
         admin_note: product.admin_note,
-      }
-    })
+      };
+    });
 
-    await this.returnOrderProductRepository.save(mappedUpdatedReturnOrderProducts);
+    await this.returnOrderProductRepository.save(
+      mappedUpdatedReturnOrderProducts,
+    );
     const savedReturnOrder = await this.ReturnOrderRepository.save(returnOrder);
 
     const shipment = await this.shipmentRepository.findOne({
       where: { order_id: returnOrder.order_id },
-      relations: ['warehouse']
+      relations: ['warehouse'],
     });
 
     await this.orderGateway.notifyReturnOrder({
@@ -769,22 +828,30 @@ export class OrderService extends BaseUserService<Order> {
         driver: driver,
         order: returnOrder.order,
         return_order: savedReturnOrder,
-        warehouse: shipment.warehouse
-      }
-    })
+        warehouse: shipment.warehouse,
+      },
+    });
 
     return savedReturnOrder;
   }
 
   async broadcastOrderDrivers(order_id: string) {
-    const order = await this.orderRepository.findOne({ where: { id: order_id }, relations: ['user'] });
+    const order = await this.orderRepository.findOne({
+      where: { id: order_id },
+      relations: ['user'],
+    });
     if (!order) throw new NotFoundException('order not found');
 
-    const shipment = await this.shipmentRepository.findOne({ where: { order_id }, relations: ['warehouse'] });
+    const shipment = await this.shipmentRepository.findOne({
+      where: { order_id },
+      relations: ['warehouse'],
+    });
     if (!shipment) throw new NotFoundException('shipment not found');
 
     if (shipment.status !== ShipmentStatusEnum.PENDING) {
-      throw new BadRequestException('this order is already broadcasted to drivers')
+      throw new BadRequestException(
+        'this order is already broadcasted to drivers',
+      );
     }
 
     await this.orderGateway.notifyOrderStatusChange({
@@ -795,8 +862,8 @@ export class OrderService extends BaseUserService<Order> {
         shipment,
         driver: null,
         client: order.user,
-        warehouse: shipment.warehouse
-      }
-    })
+        warehouse: shipment.warehouse,
+      },
+    });
   }
 }
