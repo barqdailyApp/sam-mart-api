@@ -27,7 +27,6 @@ import { plainToInstance } from 'class-transformer';
 import { UserResponse } from '../user/dto/responses/user.response';
 import { ShipmentFeedback } from 'src/infrastructure/entities/order/shipment-feedback.entity';
 import { AddShipmentFeedBackRequest } from './dto/request/add-shipment-feedback.request';
-import { FastDeliveryGateway } from 'src/integration/gateways/fast-delivery.gateway';
 import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
 import { AddDriverShipmentOption } from 'src/infrastructure/data/enums/add-driver-shipment-option.enum';
 import { SendOfferToDriver } from 'src/integration/gateways/interfaces/fast-delivery/send-offer-payload.response';
@@ -48,7 +47,6 @@ export class ShipmentService extends BaseService<Shipment> {
     private shipmentChatAttachmentRepository: Repository<ShipmentChatAttachment>,
 
     private readonly shipmentChatGateway: ShipmentChatGateway,
-    private readonly fastdeliveryGateway: FastDeliveryGateway,
     private readonly orderGateway: OrderGateway,
 
     @InjectRepository(ShipmentFeedback)
@@ -430,12 +428,6 @@ export class ShipmentService extends BaseService<Shipment> {
 
     await this.shipmentRepository.save(shipment);
 
-
-    let fastDeliveryGatewayPayload: SendOfferToDriver = {
-      action: AddDriverShipmentOption.DRIVER_ACCEPT_SHIPMENT,
-      shipment,
-    };
-
     let intialShipmentMessage = action === AddDriverShipmentOption.DRIVER_ASSIGN_SHIPMENT
       ? 'Shipment has been assigned to driver'
       : 'Shipment has been accepted by driver';
@@ -447,10 +439,6 @@ export class ShipmentService extends BaseService<Shipment> {
     });
 
     await this.shipmentChatRepository.save(intialShipmentChat);
-
-    if (shipment.order.delivery_type === DeliveryType.FAST) {
-      await this.fastdeliveryGateway.notifyShipmentStatusChange(fastDeliveryGatewayPayload);
-    }
 
     const gateway_action = action === AddDriverShipmentOption.DRIVER_ASSIGN_SHIPMENT
       ? 'ASSIGNED'
