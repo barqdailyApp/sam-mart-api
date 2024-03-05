@@ -50,6 +50,7 @@ import { UserDashboardResponse } from './dto/responses/user-dashboard.response';
 import { UsersDashboardQuery } from './dto/filters/user-dashboard.query';
 import { PageDto } from 'src/core/helpers/pagination/page.dto';
 import { PageMetaDto } from 'src/core/helpers/pagination/page-meta.dto';
+import { UserStatusRequest } from './dto/requests/update-user-status.request';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -147,4 +148,23 @@ export class UserController {
       total,
     });
   }
+
+  @Roles(Role.ADMIN)
+  @Put('update-client-status')
+  async changeClientStatusDashboard(
+    @Query() userStatusRequest: UserStatusRequest,
+  ) {
+    const result = await this._service.changeClientStatusDashboard(
+      userStatusRequest,
+    );
+    return new ActionResponse(result);
+  }
+  //delete client
+  @Roles(Role.ADMIN)
+  @Delete('delete-client/:user_id')
+  async deleteClientDashboard(@Param('user_id') user_id: string) {
+    const result = await this._service.deleteClientDashboard(user_id);
+    return new ActionResponse(result);
+  }
+
 }
