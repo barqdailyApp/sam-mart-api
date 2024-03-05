@@ -787,25 +787,6 @@ export class OrderService extends BaseUserService<Order> {
       throw new BadRequestException('invalid return order products IDs');
     }
 
-    // check if the accepted return products order quantity is valid
-    const invalidQuantityForProducts = return_order_products.filter((p) => {
-      const product = returnOrderProducts.find(
-        (rp) => rp.id === p.return_order_product_id,
-      );
-      return (
-        product.quantity < p.accepted_quantity &&
-        p.status === ReturnOrderStatus.ACCEPTED
-      );
-    });
-
-    if (invalidQuantityForProducts.length > 0) {
-      throw new BadRequestException(
-        `invalid accepted quantity for products ${JSON.stringify(
-          invalidQuantityForProducts,
-        )}`,
-      );
-    }
-
     let driver: Driver = null;
     if (driver_id) {
       driver = await this.driverRepository.findOne({
@@ -814,6 +795,7 @@ export class OrderService extends BaseUserService<Order> {
       if (!driver) throw new BadRequestException('driver not found');
     }
 
+    // mapped the return order products with the updated status
     const mappedUpdatedReturnOrderProducts = returnOrderProducts.map((p) => {
       const product = return_order_products.find(
         (rp) => rp.return_order_product_id === p.id,
@@ -821,8 +803,6 @@ export class OrderService extends BaseUserService<Order> {
       return {
         ...p,
         status: product.status,
-        accepted_quantity: product.accepted_quantity,
-        admin_note: product.admin_note,
       };
     });
 

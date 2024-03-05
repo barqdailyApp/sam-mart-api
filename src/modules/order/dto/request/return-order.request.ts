@@ -13,11 +13,6 @@ class ReturnShipmentProductRequest {
     @IsUUID()
     reason_id: string;
 
-    @ApiProperty({nullable: true})
-    @IsOptional()
-    @IsString()
-    customer_note: string;
-
     @ApiProperty()
     @IsNotEmpty()
     @IsNumber()
