@@ -26,6 +26,7 @@ export class DriverDashboardResponse {
 
   constructor(driver: Driver) {
     this.id = driver.id;
+    console.log(driver);  
     this.username = driver.user.name;
     this.email = driver.user.email;
     this.phone = driver.user.phone;

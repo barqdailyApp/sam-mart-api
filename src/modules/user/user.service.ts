@@ -14,6 +14,8 @@ import { SendOtpTransaction } from '../authentication/transactions/send-otp.tran
 import { UpdateFcmTokenRequest } from './requests/update-fcm-token.request';
 import { UsersDashboardQuery } from './dto/filters/user-dashboard.query';
 import { UserStatus } from 'src/infrastructure/data/enums/user-status.enum';
+import { UserStatusRequest } from './dto/requests/update-user-status.request';
+import { Role } from 'src/infrastructure/data/enums/role.enum';
 
 @Injectable({ scope: Scope.REQUEST })
 export class UserService extends BaseService<User> {
@@ -106,6 +108,7 @@ export class UserService extends BaseService<User> {
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.wallet', 'wallet')
       .leftJoinAndSelect('user.addresses', 'addresses')
+      .where('user.roles = :role', { role: Role.CLIENT })
       .skip(skip)
       .take(limit);
 
@@ -165,5 +168,17 @@ export class UserService extends BaseService<User> {
       purchased: clientsPurchased,
       blocked: clientsBlocked,
     };
+  }
+  async changeClientStatusDashboard(userStatusRequest: UserStatusRequest) {
+    const { status, user_id } = userStatusRequest;
+    const user = await this.userRepo.findOne({ where: { id: user_id } });
+    if (!user) throw new NotFoundException('user not found');
+
+    return await this.userRepo.update({ id: user_id }, { user_status: status });
+  }
+  async deleteClientDashboard(user_id: string) {
+    const user = await this.userRepo.findOne({ where: { id: user_id } });
+    if (!user) throw new NotFoundException('user not found');
+    return await this.userRepo.softDelete({ id: user_id });
   }
 }
