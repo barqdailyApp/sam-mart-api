@@ -39,6 +39,10 @@ import { ShipmentSingleResponse } from './dto/response/client-response/shipment-
 import { OrdersResponse } from './dto/response/client-response/orders.response';
 import { OrderSingleResponse } from './dto/response/client-response/order-single.response';
 import { ReturnOrderService } from './return-order.service';
+import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
+import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
+import { ReturnOrderResponse } from 'src/integration/gateways/dto/response/return-order.response';
+import { ReturnOrder } from 'src/infrastructure/entities/order/return-order/return-order.entity';
 
 @ApiTags('Order')
 @ApiHeader({
@@ -228,6 +232,17 @@ export class OrderController {
     @Body() req: UpdateReturnOrderStatusRequest
   ) {
     return new ActionResponse(await this.returnOrderService.updateReturnOrderStatus(return_order_id, req));
+  }
+
+  @Get("/return-orders")
+  async getReturnOrder(
+    @Query() query: PaginatedRequest
+  ): Promise<PaginatedResponse<ReturnOrder[]>> {
+    const returnOrders = await this.returnOrderService.getReturnOrders(query);
+    const total = await this.returnOrderService.count(query);
+    return new PaginatedResponse<ReturnOrder[]>(returnOrders, {
+      meta: { total, ...query },
+    })
   }
 
   @Roles(Role.ADMIN)
