@@ -38,6 +38,7 @@ import { ShipmentsResponse } from './dto/response/client-response/shipments.resp
 import { ShipmentSingleResponse } from './dto/response/client-response/shipment-single.response';
 import { OrdersResponse } from './dto/response/client-response/orders.response';
 import { OrderSingleResponse } from './dto/response/client-response/order-single.response';
+import { ReturnOrderService } from './return-order.service';
 
 @ApiTags('Order')
 @ApiHeader({
@@ -51,6 +52,7 @@ import { OrderSingleResponse } from './dto/response/client-response/order-single
 export class OrderController {
   constructor(
     private readonly orderService: OrderService,
+    private readonly returnOrderService: ReturnOrderService,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
   ) { }
   @Post()
@@ -82,13 +84,13 @@ export class OrderController {
   async getSingleClientOrder(@Param('order_id') order_id: string) {
     const order = await this.orderService.getSingleOrder(order_id);
 
-    const orderResponse =  new OrderSingleResponse(order);
+    const orderResponse = new OrderSingleResponse(order);
 
     const data = this._i18nResponse.entity(orderResponse);
 
     return new ActionResponse(data);
   }
-  
+
 
   @Get('dashboard-orders')
   async getDashboardOrders(@Query() orderClientQuery: OrderClientQuery) {
@@ -115,7 +117,7 @@ export class OrderController {
   async getSingleDashboardOrder(@Param('order_id') order_id: string) {
     const order = await this.orderService.getSingleOrderDashboard(order_id);
 
-    const orderResponse =  new OrderSingleDashboardResponse(order);
+    const orderResponse = new OrderSingleDashboardResponse(order);
 
     const data = this._i18nResponse.entity(orderResponse);
 
@@ -139,8 +141,8 @@ export class OrderController {
     return new ActionResponse(ordersTotalResponse);
   }
 
- 
- 
+
+
   @Get('dashboard-shipments')
   async getShipmentsDashboard(
     @Query() driverShipmentsQuery: DriverShipmentsQuery,
@@ -200,12 +202,12 @@ export class OrderController {
 
     return new ActionResponse(pageDto);
   }
-  
+
   @Get('single-shipment/:shipment_id')
   async getSingleShipment(@Param('shipment_id') shipment_id: string) {
     const shipment = await this.orderService.getSingleShipment(shipment_id);
 
-  const shipmentResponse = new ShipmentSingleResponse(shipment);
+    const shipmentResponse = new ShipmentSingleResponse(shipment);
     const data = this._i18nResponse.entity(shipmentResponse);
 
     return new ActionResponse(data);
@@ -216,7 +218,7 @@ export class OrderController {
     @Param('order_id') order_id: string,
     @Body() req: ReturnOrderRequest
   ) {
-    return new ActionResponse(await this.orderService.returnOrder(order_id, req));
+    return new ActionResponse(await this.returnOrderService.returnOrder(order_id, req));
   }
 
   @Roles(Role.ADMIN)
@@ -225,7 +227,7 @@ export class OrderController {
     @Param('return_order_id') return_order_id: string,
     @Body() req: UpdateReturnOrderStatusRequest
   ) {
-    return new ActionResponse(await this.orderService.updateReturnOrderStatus(return_order_id, req));
+    return new ActionResponse(await this.returnOrderService.updateReturnOrderStatus(return_order_id, req));
   }
 
   @Roles(Role.ADMIN)
