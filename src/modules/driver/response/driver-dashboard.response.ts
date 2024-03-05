@@ -19,6 +19,7 @@ export class DriverDashboardResponse {
   @Expose() readonly driver_status: DriverStatus;
   @Expose() readonly idCard: any;
   @Expose() readonly address: any;
+  @Expose() readonly warehouse: any;
 
   @Expose() readonly vehicle: any;
   @Expose() readonly wallet_balance: number;
@@ -63,6 +64,11 @@ export class DriverDashboardResponse {
         id_card_number: driver.id_card_number,
         id_card_image: toUrl(driver.id_card_image),
       });
+      this.warehouse ={
+        id:driver.warehouse.id,
+        name_ar:driver.warehouse.name_ar,
+        name_en:driver.warehouse.name_en,
+      };
     this.wallet_balance =
       driver.user.wallet == undefined ? 0 : driver.user.wallet.balance;
   }
