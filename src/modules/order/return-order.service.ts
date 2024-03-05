@@ -18,6 +18,8 @@ import { ShipmentProduct } from "src/infrastructure/entities/order/shipment-prod
 import { ReturnOrderStatus } from "src/infrastructure/data/enums/return-order-status.enum";
 import { Driver } from "src/infrastructure/entities/driver/driver.entity";
 import { UpdateReturnOrderStatusRequest } from "./dto/request/update-return-order-statu.request";
+import { PaginatedRequest } from "src/core/base/requests/paginated.request";
+import { Role } from "src/infrastructure/data/enums/role.enum";
 
 @Injectable()
 export class ReturnOrderService extends BaseService<ReturnOrder> {
@@ -164,79 +166,88 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
 
         return savedReturnOrder;
     }
+    // this method is used by the admin to update the return order status
+    async updateReturnOrderStatus(
+        return_order_id: string,
+        req: UpdateReturnOrderStatusRequest,
+    ) {
+        const returnOrder = await this.returnOrderRepository.findOne({
+            where: { id: return_order_id },
+            relations: ['order', 'order.user'],
+        });
 
+        if (!returnOrder) throw new NotFoundException('return order not found');
 
-  // this method is used by the admin to update the return order status
-  async updateReturnOrderStatus(
-    return_order_id: string,
-    req: UpdateReturnOrderStatusRequest,
-  ) {
-    const returnOrder = await this.returnOrderRepository.findOne({
-      where: { id: return_order_id },
-      relations: ['order', 'order.user'],
-    });
+        const { return_order_products, admin_note, driver_id, status } = req;
+        const returned_products_id = return_order_products.map(
+            (p) => p.return_order_product_id,
+        );
 
-    if (!returnOrder) throw new NotFoundException('return order not found');
+        // check if the return order products IDs are valid
+        const returnOrderProducts = await this.returnOrderProductRepository.find({
+            where: {
+                id: In(returned_products_id),
+                return_order_id,
+            },
+        });
 
-    const { return_order_products, admin_note, driver_id, status } = req;
-    const returned_products_id = return_order_products.map(
-      (p) => p.return_order_product_id,
-    );
+        if (returnOrderProducts.length !== return_order_products.length) {
+            throw new BadRequestException('invalid return order products IDs');
+        }
 
-    // check if the return order products IDs are valid
-    const returnOrderProducts = await this.returnOrderProductRepository.find({
-      where: {
-        id: In(returned_products_id),
-        return_order_id,
-      },
-    });
+        let driver: Driver = null;
+        if (driver_id) {
+            driver = await this.driverRepository.findOne({
+                where: { id: driver_id },
+            });
+            if (!driver) throw new BadRequestException('driver not found');
+        }
 
-    if (returnOrderProducts.length !== return_order_products.length) {
-      throw new BadRequestException('invalid return order products IDs');
+        // mapped the return order products with the updated status
+        const mappedUpdatedReturnOrderProducts = returnOrderProducts.map((p) => {
+            const product = return_order_products.find(
+                (rp) => rp.return_order_product_id === p.id,
+            );
+            return {
+                ...p,
+                status: product.status,
+            };
+        });
+
+        await this.returnOrderProductRepository.save(
+            mappedUpdatedReturnOrderProducts,
+        );
+        const savedReturnOrder = await this.returnOrderRepository.save(returnOrder);
+
+        const shipment = await this.shipmentRepository.findOne({
+            where: { order_id: returnOrder.order_id },
+            relations: ['warehouse'],
+        });
+
+        await this.orderGateway.notifyReturnOrder({
+            to_rooms: [returnOrder.order.user.id, driver?.id],
+            body: {
+                client: returnOrder.order.user,
+                driver: driver,
+                order: returnOrder.order,
+                return_order: savedReturnOrder,
+                warehouse: shipment.warehouse,
+            },
+        });
+
+        return savedReturnOrder;
     }
 
-    let driver: Driver = null;
-    if (driver_id) {
-      driver = await this.driverRepository.findOne({
-        where: { id: driver_id },
-      });
-      if (!driver) throw new BadRequestException('driver not found');
+    async getReturnOrders(query: PaginatedRequest) {
+        query.filters ??= [];
+        if (this.currentUser.roles.includes(Role.CLIENT)) {
+            query.filters.push(`order.user_id=${this.currentUser.id}`);
+        } else if (this.currentUser.roles.includes(Role.DRIVER)) {
+            query.filters.push(`driver_id=${this.currentUser.id}`);
+        }
+        
+        return await this.findAll(query);
     }
-
-    // mapped the return order products with the updated status
-    const mappedUpdatedReturnOrderProducts = returnOrderProducts.map((p) => {
-      const product = return_order_products.find(
-        (rp) => rp.return_order_product_id === p.id,
-      );
-      return {
-        ...p,
-        status: product.status,
-      };
-    });
-
-    await this.returnOrderProductRepository.save(
-      mappedUpdatedReturnOrderProducts,
-    );
-    const savedReturnOrder = await this.returnOrderRepository.save(returnOrder);
-
-    const shipment = await this.shipmentRepository.findOne({
-      where: { order_id: returnOrder.order_id },
-      relations: ['warehouse'],
-    });
-
-    await this.orderGateway.notifyReturnOrder({
-      to_rooms: [returnOrder.order.user.id, driver?.id],
-      body: {
-        client: returnOrder.order.user,
-        driver: driver,
-        order: returnOrder.order,
-        return_order: savedReturnOrder,
-        warehouse: shipment.warehouse,
-      },
-    });
-
-    return savedReturnOrder;
-  }
 
     get currentUser(): User {
         return this.request.user
