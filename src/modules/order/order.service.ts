@@ -430,10 +430,9 @@ export class OrderService extends BaseUserService<Order> {
       delivery_type: DeliveryType.FAST,
     });
 
-    query = query.andWhere('shipments.warehouse_id = :warehouse_id',  {
-      warehouse_id: driver.warehouse_id
+    query = query.andWhere('shipments.warehouse_id = :warehouse_id', {
+      warehouse_id: driver.warehouse_id,
     });
-
 
     // Filter orders that are being delivered today.
     if (order_date) {
@@ -483,13 +482,15 @@ export class OrderService extends BaseUserService<Order> {
   }
   async getTotalDriverShipments() {
     const user = this.currentUser;
-
+    const driver = await this.driverRepository.findOne({
+      where: {
+        user_id: user.id,
+      },
+    });
     const ordersNew = await this.shipmentRepository.count({
       where: {
         status: ShipmentStatusEnum.PENDING,
-        driver: {
-          user_id: user.id,
-        },
+        warehouse_id: driver.warehouse_id,
       },
     });
     const ordersActive = await this.shipmentRepository.count({
@@ -499,12 +500,14 @@ export class OrderService extends BaseUserService<Order> {
           ShipmentStatusEnum.PROCESSING,
           ShipmentStatusEnum.PICKED_UP,
         ]),
+        driver_id: driver.id,
       },
     });
 
     const ordersDelivered = await this.shipmentRepository.count({
       where: {
         status: ShipmentStatusEnum.DELIVERED,
+        driver_id: driver.id,
       },
     });
 
