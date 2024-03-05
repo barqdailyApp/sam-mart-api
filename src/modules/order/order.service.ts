@@ -1,5 +1,7 @@
 import {
   BadRequestException,
+  HttpException,
+  HttpStatus,
   Inject,
   Injectable,
   NotFoundException,
@@ -425,10 +427,7 @@ export class OrderService extends BaseUserService<Order> {
         user_id: user.id,
       },
     });
-    // Filter orders by FAST delivery type.
-    query = query.andWhere('order.delivery_type = :delivery_type', {
-      delivery_type: DeliveryType.FAST,
-    });
+
 
     query = query.andWhere('shipments.warehouse_id = :warehouse_id', {
       warehouse_id: driver.warehouse_id,
@@ -464,6 +463,9 @@ export class OrderService extends BaseUserService<Order> {
         query = query.andWhere('shipments.status = :status', {
           status: ShipmentStatusEnum.PENDING,
         });
+        query = query.andWhere('order.delivery_type = :delivery_type', {
+          delivery_type: DeliveryType.FAST,
+        });
         // check driver is_receive_orders true
       } else {
         // For any other status, filter by the specific status and ensure the shipment belongs to the current user.
@@ -491,7 +493,13 @@ export class OrderService extends BaseUserService<Order> {
       where: {
         status: ShipmentStatusEnum.PENDING,
         warehouse_id: driver.warehouse_id,
+        order: {
+          delivery_day: new Date().toISOString().split('T')[0],
+          delivery_type: DeliveryType.FAST,
+        },
+        
       },
+      relations: { order: true },
     });
     const ordersActive = await this.shipmentRepository.count({
       where: {
@@ -501,6 +509,8 @@ export class OrderService extends BaseUserService<Order> {
           ShipmentStatusEnum.PICKED_UP,
         ]),
         driver_id: driver.id,
+        warehouse_id: driver.warehouse_id,
+
       },
     });
 
@@ -508,6 +518,8 @@ export class OrderService extends BaseUserService<Order> {
       where: {
         status: ShipmentStatusEnum.DELIVERED,
         driver_id: driver.id,
+        warehouse_id: driver.warehouse_id,
+
       },
     });
 
