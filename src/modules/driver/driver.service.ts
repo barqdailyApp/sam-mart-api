@@ -132,7 +132,10 @@ export class DriverService {
 
     let query = this.driverRepository
       .createQueryBuilder('driver')
+      .leftJoinAndSelect('driver.warehouse', 'warehouse')
+
       .leftJoinAndSelect('driver.user', 'user')
+
       .leftJoinAndSelect('user.wallet', 'wallet')
 
       .leftJoinAndSelect('driver.country', 'country')
