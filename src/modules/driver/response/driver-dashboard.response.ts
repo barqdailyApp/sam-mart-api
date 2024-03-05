@@ -64,11 +64,14 @@ export class DriverDashboardResponse {
         id_card_number: driver.id_card_number,
         id_card_image: toUrl(driver.id_card_image),
       });
-      this.warehouse ={
-        id:driver.warehouse.id,
-        name_ar:driver.warehouse.name_ar,
-        name_en:driver.warehouse.name_en,
-      };
+    this.warehouse =
+      driver.warehouse == undefined
+        ? null
+        : {
+            id: driver.warehouse.id,
+            name_ar: driver.warehouse.name_ar,
+            name_en: driver.warehouse.name_en,
+          };
     this.wallet_balance =
       driver.user.wallet == undefined ? 0 : driver.user.wallet.balance;
   }
