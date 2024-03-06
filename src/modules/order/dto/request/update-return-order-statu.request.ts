@@ -14,17 +14,6 @@ class UpdateReturnProductStatusRequest {
     @IsNotEmpty()
     @IsEnum(ReturnOrderStatus)
     status: ReturnOrderStatus;
-
-    @ApiProperty({ type: 'number' })
-    @ValidateIf((obj) => obj.status === ReturnOrderStatus.ACCEPTED)
-    @IsNotEmpty()
-    @IsNumber()
-    accepted_quantity: number;
-
-    @ApiProperty({ nullable: true })
-    @IsOptional()
-    @IsString()
-    admin_note: string;
 }
 
 export class UpdateReturnOrderStatusRequest {
