@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Inject,
   Param,
@@ -43,6 +44,7 @@ import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 import { ReturnOrderResponse } from 'src/integration/gateways/dto/response/return-order.response';
 import { ReturnOrder } from 'src/infrastructure/entities/order/return-order/return-order.entity';
+import { AddReturnOrderReason } from './dto/request/add-return-order-reason.request';
 
 @ApiTags('Order')
 @ApiHeader({
@@ -243,6 +245,37 @@ export class OrderController {
     return new PaginatedResponse<ReturnOrder[]>(returnOrders, {
       meta: { total, ...query },
     })
+  }
+
+  @Roles(Role.ADMIN)
+  @Post("/return-order-reasons")
+  async addReturnOrderReason(
+    @Body() req: AddReturnOrderReason
+  ) {
+    return new ActionResponse(await this.returnOrderService.addReturnProductReason(req.reason));
+  }
+
+  @Get("return-order-reasons")
+  async getReturnOrderReasons(
+  ) {
+    return new ActionResponse(await this.returnOrderService.getReturnProductReasons());
+  }
+
+  @Roles(Role.ADMIN)
+  @Patch("/return-order-reasons/:reason_id")
+  async updateReturnOrderReason(
+    @Param('reason_id') reason_id: string,
+    @Body() req: AddReturnOrderReason
+  ) {
+    return new ActionResponse(await this.returnOrderService.updateReturnProductReason(reason_id, req.reason));
+  }
+
+  @Roles(Role.ADMIN)
+  @Delete("/return-order-reasons/:reason_id")
+  async deleteReturnOrderReason(
+    @Param('reason_id') reason_id: string,
+  ) {
+    return new ActionResponse(await this.returnOrderService.deleteReturnProductReason(reason_id));
   }
 
   @Roles(Role.ADMIN)
