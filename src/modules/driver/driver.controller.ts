@@ -117,16 +117,6 @@ export class DriverController {
     const driverResponse = plainToClass(DriverResponse, driver);
     return new ActionResponse(this._i18nResponse.entity(driverResponse));
   }
-  @Roles(Role.ADMIN)
-  @Put('update-driver-status')
-  async changeDriverStatusDashboard(
-    @Query() driverStatusRequest: DriverStatusRequest,
-  ) {
-    const result = await this.driverService.changeDriverStatusDashboard(
-      driverStatusRequest,
-    );
-    return new ActionResponse(result);
-  }
   //delete client
   @Roles(Role.ADMIN)
   @Delete('delete-driver/:driver_id')

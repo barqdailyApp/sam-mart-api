@@ -145,8 +145,14 @@ export class DriverService {
       .skip(skip)
       .take(limit);
 
+    // if (created_at) {
+    //   query = query.andWhere('driver.created_at = :created_at', {
+    //     created_at,
+    //   });
+    // }
     if (created_at) {
-      query = query.andWhere('driver.created_at = :created_at', {
+      //*using database functions to truncate the time part of the order.created_at timestamp to compare only the date components
+      query = query.where('DATE(driver.created_at) = :created_at', {
         created_at,
       });
     }
@@ -226,15 +232,7 @@ export class DriverService {
   }
 
   //changeDriverStatusDashboard
-  async changeDriverStatusDashboard(driverStatusRequest: DriverStatusRequest) {
-    const { status, driver_id } = driverStatusRequest;
-    const driver = await this.driverRepository.findOne({
-      where: { id: driver_id },
-    });
-    if (!driver) throw new NotFoundException('driver not found');
 
-    return await this.driverRepository.update({ id: driver_id }, { status });
-  }
   async deleteDriverDashboard(driver_id: string) {
     const driver = await this.driverRepository.findOne({ where: { id: driver_id } });
     if (!driver) throw new NotFoundException('driver not found');
