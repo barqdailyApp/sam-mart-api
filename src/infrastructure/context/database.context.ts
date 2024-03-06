@@ -105,8 +105,7 @@ export const DB_ENTITIES = [
   ReturnProductReason,
   ReturnOrder,
   NotificationEntity,
-  Constant
-
+Constant
 ];
 
 export const DB_VIEWS = [];
