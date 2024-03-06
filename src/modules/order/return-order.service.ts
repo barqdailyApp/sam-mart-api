@@ -166,6 +166,7 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
 
         return savedReturnOrder;
     }
+    
     // this method is used by the admin to update the return order status
     async updateReturnOrderStatus(
         return_order_id: string,
@@ -245,8 +246,37 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
         } else if (this.currentUser.roles.includes(Role.DRIVER)) {
             query.filters.push(`driver_id=${this.currentUser.id}`);
         }
-        
+
         return await this.findAll(query);
+    }
+
+    async addReturnProductReason(reason: string) {
+        return await this.returnProductReasonRepository.save({ reason });
+    }
+
+    async getReturnProductReasons() {
+        return await this.returnProductReasonRepository.find();
+    }
+
+    async updateReturnProductReason(reason_id: string, reason: string) {
+        const reasonExists = await this.returnProductReasonRepository.findOne({
+            where: { id: reason_id },
+        });
+        if (!reasonExists) throw new BadRequestException('reason not found');
+
+        return await this.returnProductReasonRepository.update(
+            { id: reason_id },
+            { reason },
+        );
+    }
+
+    async deleteReturnProductReason(reason_id: string) {
+        const reasonExists = await this.returnProductReasonRepository.findOne({
+            where: { id: reason_id },
+        });
+        if (!reasonExists) throw new BadRequestException('reason not found');
+
+        return await this.returnProductReasonRepository.delete({ id: reason_id });
     }
 
     get currentUser(): User {
