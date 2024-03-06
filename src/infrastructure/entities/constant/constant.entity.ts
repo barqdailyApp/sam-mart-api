@@ -1,5 +1,6 @@
+import { BaseEntity } from 'src/infrastructure/base/base.entity';
 import { ConstantType } from 'src/infrastructure/data/enums/constant-type.enum';
-import { BaseEntity, Column, Entity } from 'typeorm';
+import {  Column, Entity } from 'typeorm';
 @Entity()
 export class Constant extends BaseEntity {
   @Column()
