@@ -1,4 +1,9 @@
-import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -17,6 +22,7 @@ import { REQUEST } from '@nestjs/core';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
 import { DriverStatus } from 'src/infrastructure/data/enums/driver-status.enum';
+import { UserStatus } from 'src/infrastructure/data/enums/user-status.enum';
 @Injectable()
 export class VerifyOtpTransaction extends BaseTransaction<
   VerifyOtpRequest,
@@ -31,7 +37,8 @@ export class VerifyOtpTransaction extends BaseTransaction<
     @Inject(RegisterUserTransaction)
     private readonly registerUserTransaction: RegisterUserTransaction,
     @Inject(REQUEST) readonly request: Request,
-    @InjectRepository(Driver) private readonly driverRepository: Repository<Driver>,
+    @InjectRepository(Driver)
+    private readonly driverRepository: Repository<Driver>,
   ) {
     super(dataSource);
   }
@@ -80,7 +87,15 @@ export class VerifyOtpTransaction extends BaseTransaction<
         if (!driver) throw new UnauthorizedException('invalid_driver');
 
         if (driver.status !== DriverStatus.VERIFIED) {
-          throw new UnauthorizedException(`You're not verified driver yet, your account is ${driver.status} now reason: ${driver.status_reason??'no reason specified'}`);
+          throw new UnauthorizedException(
+            `You're not verified driver yet, your account is ${
+              driver.status
+            } now reason: ${driver.status_reason ?? 'no reason specified'}`,
+          );
+        }
+      } else if (user.roles.includes(Role.CLIENT)) {
+        if (user.user_status === UserStatus.BlockedClient) {
+          throw new UnauthorizedException('Your account is blocked');
         }
       }
 

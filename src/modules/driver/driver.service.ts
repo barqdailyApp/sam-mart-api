@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
 import { In, Not, Repository, UpdateResult } from 'typeorm';
@@ -15,6 +15,7 @@ import { plainToClass } from 'class-transformer';
 import { I18nResponse } from 'src/core/helpers/i18n.helper';
 import { DriversDashboardQuery } from './filters/driver-dashboard.query';
 import { DriverStatus } from 'src/infrastructure/data/enums/driver-status.enum';
+import { DriverStatusRequest } from './requests/update-driver-status.request';
 @Injectable()
 export class DriverService {
   constructor(
@@ -27,9 +28,9 @@ export class DriverService {
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
   ) {}
 
-  async single(driver_id: string): Promise<Driver> {
+  async single(): Promise<Driver> {
     const driver = await this.driverRepository.findOne({
-      where: { id: driver_id },
+      where: { user_id: this._request.user.id },
       relations: { user: true },
     });
 
@@ -222,5 +223,21 @@ export class DriverService {
       totalVerified,
       totalBlocked,
     };
+  }
+
+  //changeDriverStatusDashboard
+  async changeDriverStatusDashboard(driverStatusRequest: DriverStatusRequest) {
+    const { status, driver_id } = driverStatusRequest;
+    const driver = await this.driverRepository.findOne({
+      where: { id: driver_id },
+    });
+    if (!driver) throw new NotFoundException('driver not found');
+
+    return await this.driverRepository.update({ id: driver_id }, { status });
+  }
+  async deleteDriverDashboard(driver_id: string) {
+    const driver = await this.driverRepository.findOne({ where: { id: driver_id } });
+    if (!driver) throw new NotFoundException('driver not found');
+    return await this.driverRepository.softDelete({ id: driver_id });
   }
 }

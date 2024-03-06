@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Inject,
   Param,
@@ -26,6 +27,8 @@ import { DriversDashboardQuery } from './filters/driver-dashboard.query';
 import { DriverDashboardResponse } from './response/driver-dashboard.response';
 import { PageMetaDto } from 'src/core/helpers/pagination/page-meta.dto';
 import { PageDto } from 'src/core/helpers/pagination/page.dto';
+import { DriverStatusRequest } from './requests/update-driver-status.request';
+import { DriverClientResponse } from './response/driver-client.response';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -79,10 +82,10 @@ export class DriverController {
     return new ActionResponse(total);
   }
 
-  @Get(':driver_id/single-driver')
-  async singleDriver(@Param('driver_id') id: string) {
-    const driver = await this.driverService.single(id);
-    const driverResponse = plainToClass(DriverResponse, driver);
+  @Get('single-driver')
+  async singleDriver() {
+    const driver = await this.driverService.single();
+    const driverResponse =new DriverClientResponse(driver);
     return new ActionResponse(this._i18nResponse.entity(driverResponse));
   }
 
@@ -113,5 +116,22 @@ export class DriverController {
     );
     const driverResponse = plainToClass(DriverResponse, driver);
     return new ActionResponse(this._i18nResponse.entity(driverResponse));
+  }
+  @Roles(Role.ADMIN)
+  @Put('update-driver-status')
+  async changeDriverStatusDashboard(
+    @Query() driverStatusRequest: DriverStatusRequest,
+  ) {
+    const result = await this.driverService.changeDriverStatusDashboard(
+      driverStatusRequest,
+    );
+    return new ActionResponse(result);
+  }
+  //delete client
+  @Roles(Role.ADMIN)
+  @Delete('delete-driver/:driver_id')
+  async deleteClientDashboard(@Param('driver_id') driver_id: string) {
+    const result = await this.driverService.deleteDriverDashboard(driver_id);
+    return new ActionResponse(result);
   }
 }

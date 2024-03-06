@@ -96,6 +96,9 @@ export class Driver extends AuditableEntity {
   @Column()
   id_card_number: string;
 
+  @Column({default: 0})
+  current_orders: number;
+
   @Column()
   id_card_image: string;
 
