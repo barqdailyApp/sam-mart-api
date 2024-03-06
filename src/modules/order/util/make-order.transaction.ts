@@ -74,8 +74,6 @@ export class MakeOrderTransaction extends BaseTransaction<
         throw new BadRequestException('Cart is empty');
       }
 
-
-
       const count = await context
         .createQueryBuilder(Order, 'order')
         .where('DATE(order.created_at) = CURDATE()')
@@ -197,13 +195,18 @@ export class MakeOrderTransaction extends BaseTransaction<
       let to_rooms = ['admin']
       if (order.delivery_type == DeliveryType.FAST) to_rooms.push(shipment.warehouse_id);
 
+      const warehouse = await context.findOne(Warehouse, {
+        where: { id: shipment.warehouse_id },
+      })
+      order.address = address;
+      
       await this.orderGateway.notifyOrderStatusChange({
         action: ShipmentStatusEnum.PENDING,
         to_rooms,
         body: {
           shipment: shipment,
           order: order,
-          warehouse: shipment.warehouse,
+          warehouse,
           client: user,
           driver: null,
         }

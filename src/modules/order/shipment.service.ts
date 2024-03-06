@@ -96,6 +96,7 @@ export class ShipmentService extends BaseService<Shipment> {
       where: {
         id: shipment.order_id,
       },
+      relations: ['address']
     });
     order.is_paid = true;
     await this.driverRepository.save(driver);
@@ -125,7 +126,7 @@ export class ShipmentService extends BaseService<Shipment> {
         id: id,
         warehouse_id: driver.warehouse_id,
       },
-      relations: ['order', 'warehouse', 'order.user'],
+      relations: ['order', 'warehouse', 'order.user','order.address'],
     });
     if (!shipment || shipment.status !== ShipmentStatusEnum.PROCESSING) {
       throw new NotFoundException('Shipment not found');
@@ -341,7 +342,7 @@ export class ShipmentService extends BaseService<Shipment> {
 
     const shipment = await this.shipmentRepository.findOne({
       where: { id: shipment_id },
-      relations: ['order', 'warehouse', 'order.user', 'driver', 'driver.user'],
+      relations: ['order', 'warehouse', 'order.user', 'driver', 'driver.user', 'order.address'],
     });
 
     if (!shipment) {
@@ -423,7 +424,7 @@ export class ShipmentService extends BaseService<Shipment> {
 
     const shipment = await this.shipmentRepository.findOne({
       where: { id: shipment_id },
-      relations: ['order', 'warehouse', 'order.user'],
+      relations: ['order', 'warehouse', 'order.user', 'order.address'],
     });
 
     if (!shipment) {
