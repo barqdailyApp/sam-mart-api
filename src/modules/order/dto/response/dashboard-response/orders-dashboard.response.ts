@@ -61,7 +61,7 @@ export class OrdersDashboardResponse {
     this.shipments = {
       id: order.shipments[0].id,
       order_id: order.shipments[0].order_id,
-      driver: order.shipments[0].driver_id !=null
+      driver: order.shipments[0].driver
         ? {
             id: order.shipments[0].driver.user.id,
             username: order.shipments[0].driver.user.name,
