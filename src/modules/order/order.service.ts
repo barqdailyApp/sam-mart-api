@@ -428,18 +428,22 @@ export class OrderService extends BaseUserService<Order> {
       },
     });
 
-
     query = query.andWhere('shipments.warehouse_id = :warehouse_id', {
       warehouse_id: driver.warehouse_id,
     });
 
     // Filter orders that are being delivered today.
+    // if (order_date) {
+    //   query = query.andWhere('order.delivery_day = :delivery_day', {
+    //     delivery_day: order_date,
+    //   });
+    // }
     if (order_date) {
-      query = query.andWhere('order.delivery_day = :delivery_day', {
-        delivery_day: order_date,
+      //*using database functions to truncate the time part of the order.created_at timestamp to compare only the date components
+      query = query.where('DATE(order.delivery_day) = :delivery_day', {
+        delivery_day:order_date,
       });
     }
-
     // Apply filters based on the shipment status.
     if (status) {
       if (status === ShipmentStatusEnum.ACTIVE) {
@@ -497,7 +501,6 @@ export class OrderService extends BaseUserService<Order> {
           delivery_day: new Date().toISOString().split('T')[0],
           delivery_type: DeliveryType.FAST,
         },
-        
       },
       relations: { order: true },
     });
@@ -510,7 +513,6 @@ export class OrderService extends BaseUserService<Order> {
         ]),
         driver_id: driver.id,
         warehouse_id: driver.warehouse_id,
-
       },
     });
 
@@ -519,7 +521,6 @@ export class OrderService extends BaseUserService<Order> {
         status: ShipmentStatusEnum.DELIVERED,
         driver_id: driver.id,
         warehouse_id: driver.warehouse_id,
-
       },
     });
 
@@ -530,11 +531,12 @@ export class OrderService extends BaseUserService<Order> {
     };
   }
   async getDashboardShipments(driverShipmentsQuery: DriverShipmentsQuery) {
-    const { limit, page, status, driver_id, order_date } = driverShipmentsQuery;
+    const { limit, page, status, driver_id, order_date,order_search } = driverShipmentsQuery;
     const skip = (page - 1) * limit;
     let query = this.shipmentRepository
       .createQueryBuilder('shipments')
       .leftJoinAndSelect('shipments.order', 'order')
+      .leftJoinAndSelect('order.user', 'user')
 
       .leftJoinAndSelect('shipments.driver', 'driver')
       .leftJoinAndSelect('driver.user', 'shipment_user_driver')
@@ -564,7 +566,20 @@ export class OrderService extends BaseUserService<Order> {
       .leftJoinAndSelect('product.product_images', 'product_images')
       .skip(skip)
       .take(limit);
-
+    // Filter orders that are being delivered today.
+ 
+    if (order_date) {
+      //*using database functions to truncate the time part of the order.created_at timestamp to compare only the date components
+      query = query.where('DATE(order.delivery_day) = :delivery_day', {
+        delivery_day:order_date,
+      });
+    }
+    if (order_search) {
+      query = query.andWhere(
+        '(user.name LIKE :order_search OR user.phone LIKE :order_search)',
+        { order_search: `%${order_search}%` },
+      );
+    }
     if (status) {
       if (status == ShipmentStatusEnum.ACTIVE) {
         console.log('status', status);
@@ -580,6 +595,7 @@ export class OrderService extends BaseUserService<Order> {
         query = query.andWhere('shipments.status = :status', { status });
       }
     }
+
     if (driver_id) {
       query = query.andWhere('shipments.driver_id = :driver_id', { driver_id });
     }

@@ -27,15 +27,21 @@ export class DriverShipmentsQuery {
   @IsEnum(ShipmentStatusEnum)
   status: ShipmentStatusEnum;
 
-
-  @ApiProperty({ nullable: true, required: false ,example: "2024-05-23"})
+  @ApiProperty({ nullable: true, required: false })
   @IsOptional()
   @IsString()
   order_date: string;
+
+  @ApiProperty({
+    required: false,
+    description: 'client name or client phone',
+  })
+  @IsOptional()
+  @IsString()
+  order_search: string;
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
   driver_id: string;
-
 }
