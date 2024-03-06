@@ -656,7 +656,7 @@ export class OrderService extends BaseUserService<Order> {
   async broadcastOrderDrivers(order_id: string) {
     const order = await this.orderRepository.findOne({
       where: { id: order_id },
-      relations: ['user'],
+      relations: ['user', 'address']
     });
     if (!order) throw new NotFoundException('order not found');
 
