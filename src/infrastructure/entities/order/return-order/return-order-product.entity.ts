@@ -14,19 +14,8 @@ export class ReturnOrderProduct extends AuditableEntity {
     })
     status: ReturnOrderStatus;
 
-    // this column for the admin to write notes about the return order in case of any issue
-    @Column({ type: 'text', nullable: true })
-    admin_note: string;
-
-    // this column for the customer to write notes about the return order in case of any issue
-    @Column({ type: 'text', nullable: true })
-    customer_note: string;
-
     @Column()
     quantity: number;
-
-    @Column({ nullable: true , type: 'int' })
-    accepted_quantity: number;
 
     @OneToOne(
         () => ShipmentProduct,
