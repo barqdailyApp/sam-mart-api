@@ -84,6 +84,7 @@ export class OrderGateway
           order_on_processed_at: body.shipment.order_on_processed_at,
           order_shipped_at: body.shipment.order_shipped_at,
           order_delivered_at: body.shipment.order_delivered_at,
+          shipment_id: body.shipment.id
         },
       },
       {

@@ -14,6 +14,7 @@ export class OrderGatewayResponse {
     @Expose() slot_id: string;
     @Expose() delivery_day: string;
     @Expose() @Type(() => AddressResponse) address: AddressResponse;
+    @Expose() shipment_id: string;
     @Expose() number: string;
     @Expose() delivery_fee: number;
     @Expose() status: ShipmentStatusEnum;
