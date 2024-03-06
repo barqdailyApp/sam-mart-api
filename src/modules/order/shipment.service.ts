@@ -32,6 +32,8 @@ import { AddDriverShipmentOption } from 'src/infrastructure/data/enums/add-drive
 import { SendOfferToDriver } from 'src/integration/gateways/interfaces/fast-delivery/send-offer-payload.response';
 import { CancelShipmentRequest } from './dto/request/cancel-shipment.request';
 import { OrderGateway } from 'src/integration/gateways/order.gateway';
+import { Constant } from 'src/infrastructure/entities/constant/constant.entity';
+import { ConstantType } from 'src/infrastructure/data/enums/constant-type.enum';
 @Injectable()
 export class ShipmentService extends BaseService<Shipment> {
   constructor(
@@ -43,6 +45,8 @@ export class ShipmentService extends BaseService<Shipment> {
     private shipmentRepository: Repository<Shipment>,
     @InjectRepository(ShipmentChat)
     private shipmentChatRepository: Repository<ShipmentChat>,
+    @InjectRepository(Constant)
+    private constantRepository: Repository<Constant>,
     @InjectRepository(ShipmentChatAttachment)
     private shipmentChatAttachmentRepository: Repository<ShipmentChatAttachment>,
 
@@ -71,6 +75,7 @@ export class ShipmentService extends BaseService<Shipment> {
     if (!driver) {
       throw new NotFoundException('Driver not found');
     }
+    driver.current_orders = driver.current_orders - 1;
     const shipment = await this.shipmentRepository.findOne({
       where: {
         id: id,
@@ -93,18 +98,19 @@ export class ShipmentService extends BaseService<Shipment> {
       },
     });
     order.is_paid = true;
+    await this.driverRepository.save(driver);
     await this.orderRepository.save(order);
 
     await this.orderGateway.notifyOrderStatusChange({
       action: ShipmentStatusEnum.DELIVERED,
-      to_rooms: ["admin", shipment.order.user_id],
+      to_rooms: ['admin', shipment.order.user_id],
       body: {
         shipment,
         order,
         warehouse: shipment.warehouse,
         client: shipment.order.user,
         driver,
-      }
+      },
     });
 
     return shipment;
@@ -132,14 +138,14 @@ export class ShipmentService extends BaseService<Shipment> {
 
     await this.orderGateway.notifyOrderStatusChange({
       action: ShipmentStatusEnum.PICKED_UP,
-      to_rooms: ["admin", shipment.order.user_id, shipment.driver_id],
+      to_rooms: ['admin', shipment.order.user_id, shipment.driver_id],
       body: {
         shipment,
         order: shipment.order,
         warehouse: shipment.warehouse,
         client: shipment.order.user,
         driver,
-      }
+      },
     });
 
     return shipment;
@@ -168,21 +174,24 @@ export class ShipmentService extends BaseService<Shipment> {
 
     await this.orderGateway.notifyOrderStatusChange({
       action: ShipmentStatusEnum.PROCESSING,
-      to_rooms: ["admin", shipment.driver_id, shipment.order.user_id],
+      to_rooms: ['admin', shipment.driver_id, shipment.order.user_id],
       body: {
         shipment,
         order: shipment.order,
         warehouse: shipment.warehouse,
         client: shipment.order.user,
         driver,
-      }
+      },
     });
 
     return shipment;
   }
 
   async acceptShipment(id: string) {
-    return this.addDriverToShipment(id, AddDriverShipmentOption.DRIVER_ACCEPT_SHIPMENT);
+    return this.addDriverToShipment(
+      id,
+      AddDriverShipmentOption.DRIVER_ACCEPT_SHIPMENT,
+    );
   }
 
   async addChatMessage(
@@ -320,7 +329,11 @@ export class ShipmentService extends BaseService<Shipment> {
   }
 
   async assignDriver(shipment_id: string, driver_id: string) {
-    return this.addDriverToShipment(shipment_id, AddDriverShipmentOption.DRIVER_ASSIGN_SHIPMENT, driver_id);
+    return this.addDriverToShipment(
+      shipment_id,
+      AddDriverShipmentOption.DRIVER_ASSIGN_SHIPMENT,
+      driver_id,
+    );
   }
 
   async cancelShipment(shipment_id: string, req: CancelShipmentRequest) {
@@ -328,13 +341,7 @@ export class ShipmentService extends BaseService<Shipment> {
 
     const shipment = await this.shipmentRepository.findOne({
       where: { id: shipment_id },
-      relations: [
-        'order',
-        'warehouse',
-        'order.user',
-        'driver',
-        'driver.user'
-      ],
+      relations: ['order', 'warehouse', 'order.user', 'driver', 'driver.user'],
     });
 
     if (!shipment) {
@@ -345,23 +352,26 @@ export class ShipmentService extends BaseService<Shipment> {
     const shipmentStatus = shipment.status;
 
     if (
-      (currentUserRole.includes(Role.CLIENT) && shipment.order.user_id !== this.currentUser.id) ||
-      (currentUserRole.includes(Role.DRIVER) && shipment.driver_id !== this.currentUser.id)
+      (currentUserRole.includes(Role.CLIENT) &&
+        shipment.order.user_id !== this.currentUser.id) ||
+      (currentUserRole.includes(Role.DRIVER) &&
+        shipment.driver_id !== this.currentUser.id)
     ) {
-      throw new UnauthorizedException('You are not allowed to cancel this shipment');
+      throw new UnauthorizedException(
+        'You are not allowed to cancel this shipment',
+      );
     }
 
     if (
-      (currentUserRole.includes(Role.CLIENT) && shipmentStatus === ShipmentStatusEnum.PICKED_UP) ||
-      (currentUserRole.includes(Role.DRIVER) && shipmentStatus === ShipmentStatusEnum.PENDING) ||
-      (shipmentStatus ===
-        (
-          ShipmentStatusEnum.CANCELED ||
+      (currentUserRole.includes(Role.CLIENT) &&
+        shipmentStatus === ShipmentStatusEnum.PICKED_UP) ||
+      (currentUserRole.includes(Role.DRIVER) &&
+        shipmentStatus === ShipmentStatusEnum.PENDING) ||
+      shipmentStatus ===
+        (ShipmentStatusEnum.CANCELED ||
           ShipmentStatusEnum.DELIVERED ||
           ShipmentStatusEnum.RETRUNED ||
-          ShipmentStatusEnum.COMPLETED
-        )
-      )
+          ShipmentStatusEnum.COMPLETED)
     ) {
       throw new BadRequestException('Shipment cannot be canceled');
     }
@@ -374,14 +384,14 @@ export class ShipmentService extends BaseService<Shipment> {
 
     await this.orderGateway.notifyOrderStatusChange({
       action: ShipmentStatusEnum.CANCELED,
-      to_rooms: ["admin", shipment.driver_id, shipment.order.user_id],
+      to_rooms: ['admin', shipment.driver_id, shipment.order.user_id],
       body: {
         shipment,
         order: shipment.order,
         warehouse: shipment.warehouse,
         client: shipment.order.user,
         driver: shipment.driver,
-      }
+      },
     });
 
     return shipment;
@@ -391,18 +401,25 @@ export class ShipmentService extends BaseService<Shipment> {
     return this.request.user;
   }
 
-
   private async addDriverToShipment(
     shipment_id: string,
     action: AddDriverShipmentOption,
-    driver_id?: string
+    driver_id?: string,
   ): Promise<Shipment> {
     const driver = await this.getDriver(driver_id);
 
     if (!driver) {
       throw new NotFoundException('Driver not found');
     }
-
+    const max_orders = await this.constantRepository.findOne({
+      where: { type: ConstantType.ORDER_LIMIT },
+    });
+    if (driver.current_orders >= Number(max_orders.variable)) {
+      throw new BadRequestException(
+        'Driver has reached the maximum number of orders',
+      );
+    }
+    driver.current_orders = driver.current_orders + 1;
 
     const shipment = await this.shipmentRepository.findOne({
       where: { id: shipment_id },
@@ -428,21 +445,23 @@ export class ShipmentService extends BaseService<Shipment> {
 
     await this.shipmentRepository.save(shipment);
 
-    let intialShipmentMessage = action === AddDriverShipmentOption.DRIVER_ASSIGN_SHIPMENT
-      ? 'Shipment has been assigned to driver'
-      : 'Shipment has been accepted by driver';
+    let intialShipmentMessage =
+      action === AddDriverShipmentOption.DRIVER_ASSIGN_SHIPMENT
+        ? 'Shipment has been assigned to driver'
+        : 'Shipment has been accepted by driver';
 
     const intialShipmentChat = this.shipmentChatRepository.create({
       message: `${intialShipmentMessage} ${driver.user.name}`,
       user_id: this.currentUser.id,
       shipment_id: shipment.id,
     });
-
+    await this.driverRepository.save(driver);
     await this.shipmentChatRepository.save(intialShipmentChat);
 
-    const gateway_action = action === AddDriverShipmentOption.DRIVER_ASSIGN_SHIPMENT
-      ? 'ASSIGNED'
-      : ShipmentStatusEnum.CONFIRMED;
+    const gateway_action =
+      action === AddDriverShipmentOption.DRIVER_ASSIGN_SHIPMENT
+        ? 'ASSIGNED'
+        : ShipmentStatusEnum.CONFIRMED;
 
     const to_rooms = ['admin'];
     if (action === AddDriverShipmentOption.DRIVER_ASSIGN_SHIPMENT) {
@@ -465,7 +484,7 @@ export class ShipmentService extends BaseService<Shipment> {
         warehouse: shipment.warehouse,
         client: shipment.order.user,
         driver: driver,
-      }
+      },
     });
 
     return shipment;

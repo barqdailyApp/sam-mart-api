@@ -49,6 +49,7 @@ import { ReturnOrderProduct } from '../entities/order/return-order/return-order-
 import { ReturnProductReason } from '../entities/order/return-order/return-product-reason.entity';
 import { ReturnOrder } from '../entities/order/return-order/return-order.entity';
 import { NotificationEntity } from '../entities/notification/notification.entity';
+import { Constant } from '../entities/constant/constant.entity';
 
 
 export const DB_ENTITIES = [
@@ -103,7 +104,8 @@ export const DB_ENTITIES = [
   ReturnOrderProduct,
   ReturnProductReason,
   ReturnOrder,
-  NotificationEntity
+  NotificationEntity,
+  Constant
 
 ];
 

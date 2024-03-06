@@ -11,17 +11,20 @@ import { WareHouseSeeder } from './warehouse.seeder';
 import { WareHouseProductsSeeder } from './warehouse-product.seeder';
 import { SupportTicketSubjectSeeder } from './suppot-ticket-subjects.seeder';
 
+import { ConstantSeeder } from './constant-seeder';
+
 export const DB_SEEDERS = [
   // UsersSeeder,
-  CountryCityRegionSeeder,
-  MeasurementUnitSeeder,
-  AdditionalServiceSeeder,
-  CategorySeeder,
-  ProductSeeder,
-  BanarSeeder,
-  StaticPageSeeder,
-  SlotSeeder,
-  WareHouseSeeder,
-  WareHouseProductsSeeder,
-  SupportTicketSubjectSeeder
+  // CountryCityRegionSeeder,
+  // MeasurementUnitSeeder,
+  // AdditionalServiceSeeder,
+  // CategorySeeder,
+  // ProductSeeder,
+  // BanarSeeder,
+  // StaticPageSeeder,
+  // SlotSeeder,
+  // WareHouseSeeder,
+  // WareHouseProductsSeeder,
+  // SupportTicketSubjectSeeder,
+  ConstantSeeder
 ];
