@@ -71,10 +71,10 @@ export class OrderGateway
       {
         action: action,
         client: body.client,
-        driver: {
+        driver: body.driver ? {
           ...body.driver,
-          user: body.driver?.user,
-        },
+          user: body.driver.user,
+        } : null,
         warehouse: body.warehouse,
         order: {
           ...body.order,
