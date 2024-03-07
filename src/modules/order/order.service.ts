@@ -271,6 +271,13 @@ export class OrderService extends BaseUserService<Order> {
   }
 
   async getSingleOrderDashboard(order_id: string) {
+    const order = await this.orderRepository.findOne({
+      where: { id: order_id },
+    });
+
+    if (!order) {
+      throw new BadRequestException('Order not found');
+    }
     let query = this.orderRepository
       .createQueryBuilder('order')
 
