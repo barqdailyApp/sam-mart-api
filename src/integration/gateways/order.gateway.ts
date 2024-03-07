@@ -24,6 +24,8 @@ import { plainToInstance } from 'class-transformer';
 import { OrderStatusChangeResponse } from './dto/response/order-status-change.response';
 import { ReturnOrderPayload } from './interfaces/order/return-order.payload';
 import { ReturnOrderResponse } from './dto/response/return-order.response';
+import { i18nEntity } from 'src/core/helpers/i18n.helper';
+
 @WebSocketGateway({ namespace: Gateways.Order.Namespace, cors: { origin: '*' } })
 export class OrderGateway
   implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
@@ -75,7 +77,7 @@ export class OrderGateway
           ...body.driver,
           user: body.driver.user,
         } : null,
-        warehouse: body.warehouse,
+        warehouse: { ...i18nEntity(body.warehouse, 'en') },
         order: {
           ...body.order,
           status: body.shipment.status,
