@@ -13,4 +13,5 @@ export class UserResponse {
   readonly avatar: string;
   @Expose() readonly birth_date: string;
   @Expose() readonly gender: Gender;
+  @Expose() readonly name:string;
 }
