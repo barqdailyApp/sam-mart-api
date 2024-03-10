@@ -255,7 +255,6 @@ export class SectionService extends BaseService<Section> {
 
       await this.section_category_repo.save(itemsToUpdate);
 
-      console.log('Section categories reordered successfully.');
     } catch (error) {
       console.error('Error occurred:', error.message);
     }

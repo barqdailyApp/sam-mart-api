@@ -123,7 +123,6 @@ export class SectionController {
     @UploadedFile(new UploadValidator().build())
     logo: Express.Multer.File,
   ) {
-    console.log(req);
     req.logo = logo;
     return new ActionResponse(await this.sectionService.updateSection(req));
   }

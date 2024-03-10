@@ -453,7 +453,6 @@ export class ProductDashboardService {
         productsSort = { 'product.created_at': 'DESC' };
         break;
     }
-    console.log(productsSort);
     let query = this.productRepository
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.product_images', 'product_images')
@@ -504,7 +503,6 @@ export class ProductDashboardService {
 
     // Conditional where clause based on sub category
     if (category_sub_category_id) {
-      console.log('category_sub_category_id = ', category_sub_category_id);
       query = query.andWhere(
         'product_sub_categories.category_sub_category_id = :category_sub_category_id',
         {
@@ -721,6 +719,16 @@ export class ProductDashboardService {
   ) {
     const { category_sub_category_id, product_id } =
       singleProductDashboardQuery;
+    const productSubCategory = await this.productSubCategory_repo.findOne({
+      where: {
+        product_id,
+        category_sub_category_id,
+      }
+    });
+    if(!productSubCategory){
+      throw new NotFoundException('No Relation bettwen product and sub category');
+    }
+
     // For guests and individuals, orders are taken from the nearest warehouse
     // Start building the query
     let query = this.productRepository
@@ -772,20 +780,33 @@ export class ProductDashboardService {
     // Get single product
     query = query.where('product.id = :product_id', { product_id });
     if (category_sub_category_id) {
-      console.log('category_sub_category_id = ', category_sub_category_id);
       query = query.andWhere(
         'product_sub_categories.category_sub_category_id = :category_sub_category_id',
         {
           category_sub_category_id,
         },
       );
+      //  const productPrice = await this.productCategoryPrice_repo.findOne({
+      //    where: { 
+      //     product_sub_category:{
+      //       category_sub_category_id,
+      //       product_id
+      //     },
 
-      query = query.andWhere(
-        'product_sub_category.category_sub_category_id = :category_sub_category_id',
-        {
-          category_sub_category_id,
-        },
-      );
+      //    },
+      //    relations: { product_sub_category: true }
+      //  });
+      //  console.log(productPrice);
+      //  if(productPrice){
+      //   query = query.andWhere(
+      //     'product_sub_category.category_sub_category_id = :category_sub_category_id',
+      //     {
+      //       category_sub_category_id,
+      //     },
+      //   );
+      //  }
+
+     
     }
     return await query.getOne();
   }

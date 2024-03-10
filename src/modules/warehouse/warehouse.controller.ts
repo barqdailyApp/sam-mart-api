@@ -82,7 +82,6 @@ export class WarehouseController {
     const products = await this.warehouseService.getWarehouseProduct(query);
   
 
-    console.log(products[0]);
     const product_response = products[0].map((product) => {
       return new WarehouseProductRespone(product);
     })
