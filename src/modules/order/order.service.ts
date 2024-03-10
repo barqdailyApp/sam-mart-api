@@ -401,7 +401,6 @@ export class OrderService extends BaseUserService<Order> {
         user_id: user.id,
       },
     });
-    console.log('driver',driver);
     // Start building the query with necessary joins to fetch related entities.
     let query = this.shipmentRepository
       .createQueryBuilder('shipments')
@@ -581,7 +580,6 @@ export class OrderService extends BaseUserService<Order> {
     }
     if (status) {
       if (status == ShipmentStatusEnum.ACTIVE) {
-        console.log('status', status);
         // i want all shipments have status DELIVERED or CONFIRMED or PROCESSING
         query = query.andWhere('shipments.status IN (:...statuses)', {
           statuses: [
