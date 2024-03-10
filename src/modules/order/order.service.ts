@@ -551,6 +551,7 @@ export class OrderService extends BaseUserService<Order> {
       .createQueryBuilder('shipments')
       .leftJoinAndSelect('shipments.order', 'order')
       .leftJoinAndSelect('order.user', 'user')
+      .leftJoinAndSelect('order.address', 'address')
 
       .leftJoinAndSelect('shipments.driver', 'driver')
       .leftJoinAndSelect('driver.user', 'shipment_user_driver')
