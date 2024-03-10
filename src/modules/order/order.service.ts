@@ -401,7 +401,6 @@ export class OrderService extends BaseUserService<Order> {
         user_id: user.id,
       },
     });
-    console.log('driver',driver);
     // Start building the query with necessary joins to fetch related entities.
     let query = this.shipmentRepository
       .createQueryBuilder('shipments')
@@ -432,6 +431,7 @@ export class OrderService extends BaseUserService<Order> {
       .leftJoinAndSelect('product_sub_category.product', 'product')
       .leftJoinAndSelect('product.product_images', 'product_images')
       .where('shipments.warehouse_id = :warehouse_id', { warehouse_id: driver.warehouse_id })
+      .orderBy('shipments.updated_at', 'DESC')
       .skip(skip) // Apply pagination offset.
       .take(limit); // Limit the number of results returned.
 
@@ -445,7 +445,22 @@ export class OrderService extends BaseUserService<Order> {
     }
     // Apply filters based on the shipment status.
     if (status) {
-      if (status === ShipmentStatusEnum.ACTIVE) {
+     if(status === ShipmentStatusEnum.WITHOUT_NEW){
+      query = query.andWhere('shipments.status IN (:...statuses)', {
+        statuses: [
+          ShipmentStatusEnum.PICKED_UP,
+          ShipmentStatusEnum.CONFIRMED,
+          ShipmentStatusEnum.PROCESSING,
+          ShipmentStatusEnum.DELIVERED
+        
+        ],
+      });
+      query = query.andWhere('driver.user_id = :user_id', {
+        user_id: user.id,
+      });
+
+     }
+     else if (status === ShipmentStatusEnum.ACTIVE) {
         // For ACTIVE status, filter shipments that are either picked up, CONFIRMED, or PROCESSING.
         query = query.andWhere('shipments.status IN (:...statuses)', {
           statuses: [
@@ -581,7 +596,6 @@ export class OrderService extends BaseUserService<Order> {
     }
     if (status) {
       if (status == ShipmentStatusEnum.ACTIVE) {
-        console.log('status', status);
         // i want all shipments have status DELIVERED or CONFIRMED or PROCESSING
         query = query.andWhere('shipments.status IN (:...statuses)', {
           statuses: [

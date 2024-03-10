@@ -162,7 +162,6 @@ export class SubcategoryService extends BaseService<Subcategory> {
           position: sharp.strategy.entropy,
         },
       });
-      console.log(req.logo.originalname);
       // save image
       const path = await this.storageManager.store(
         { buffer: resizedImage, originalname: req.logo.originalname },
