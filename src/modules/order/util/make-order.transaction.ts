@@ -30,6 +30,10 @@ import { ProductOffer } from 'src/infrastructure/entities/product/product-offer.
 import { ShipmentStatusEnum } from 'src/infrastructure/data/enums/shipment_status.enum';
 import { WarehouseOpreationProducts } from 'src/infrastructure/entities/warehouse/wahouse-opreation-products.entity';
 import { OrderGateway } from 'src/integration/gateways/order.gateway';
+import { NotificationService } from 'src/modules/notification/services/notification.service';
+import { NotificationEntity } from 'src/infrastructure/entities/notification/notification.entity';
+import { NotificationTypes } from 'src/infrastructure/data/enums/notification-types.enum';
+import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
 @Injectable()
 export class MakeOrderTransaction extends BaseTransaction<
   MakeOrderRequest,
@@ -39,6 +43,7 @@ export class MakeOrderTransaction extends BaseTransaction<
     dataSource: DataSource,
     @Inject(REQUEST) readonly request: Request,
     private readonly orderGateway: OrderGateway,
+    private readonly notificationService: NotificationService,
   ) {
     super(dataSource);
   }
@@ -73,8 +78,6 @@ export class MakeOrderTransaction extends BaseTransaction<
       if (cart_products.length == 0) {
         throw new BadRequestException('Cart is empty');
       }
-
-
 
       const count = await context
         .createQueryBuilder(Order, 'order')
@@ -111,8 +114,6 @@ export class MakeOrderTransaction extends BaseTransaction<
         order_id: order.id,
         warehouse_id: cart_products[0].warehouse_id,
       });
-
-
 
       const shipment_products = await Promise.all(
         cart_products.map(async (e) => {
@@ -166,12 +167,14 @@ export class MakeOrderTransaction extends BaseTransaction<
           },
         });
         if (!warehouse_product) {
-          throw new BadRequestException('message.warehouse_product_not_enough' + index);
+          throw new BadRequestException(
+            'message.warehouse_product_not_enough' + index,
+          );
         }
         warehouse_product.quantity =
           warehouse_product.quantity -
           shipment_products[index].quantity *
-          shipment_products[index].conversion_factor;
+            shipment_products[index].conversion_factor;
         if (warehouse_product.quantity < 0) {
           throw new BadRequestException(
             'message.warehouse_product_not_enough' + index,
@@ -181,7 +184,6 @@ export class MakeOrderTransaction extends BaseTransaction<
         await context.save(
           WarehouseOpreationProducts,
           new WarehouseOpreationProducts({
-
             product_id: shipment_products[index].product_id,
             operation_id: warehouse_operations.id,
 
@@ -194,8 +196,9 @@ export class MakeOrderTransaction extends BaseTransaction<
         );
       }
 
-      let to_rooms = ['admin']
-      if (order.delivery_type == DeliveryType.FAST) to_rooms.push(shipment.warehouse_id);
+      let to_rooms = ['admin'];
+      if (order.delivery_type == DeliveryType.FAST)
+        to_rooms.push(shipment.warehouse_id);
 
       await this.orderGateway.notifyOrderStatusChange({
         action: ShipmentStatusEnum.PENDING,
@@ -206,8 +209,26 @@ export class MakeOrderTransaction extends BaseTransaction<
           warehouse: shipment.warehouse,
           client: user,
           driver: null,
-        }
+        },
       });
+      const driversWarehouse = await context.find(Driver, {
+        where: {
+          warehouse_id: shipment.warehouse_id,
+        },
+      });
+      for (let index = 0; index < driversWarehouse.length; index++) {
+        await this.notificationService.create(
+          new NotificationEntity({
+            user_id: user.id,
+            url: shipment.id,
+            type: NotificationTypes.ORDERS,
+            title_ar: 'طلب جديد',
+            title_en: 'new order',
+            text_ar: 'هل تريد اخذ هذا الطلب ؟',
+            text_en: 'Do you want to take this order?',
+          }),
+        );
+      }
 
       return order;
     } catch (error) {
@@ -224,6 +245,7 @@ export const generateOrderNumber = (count: number) => {
   const day = date.getDate().toString().padStart(2, '0');
   // order number is the count of orders created today + 1 with 4 digits and leading zeros
   const orderNumber = (count + 1).toString().padStart(4, '0');
-  return `${100 - parseInt(year)}${100 - parseInt(month)}${100 - parseInt(day)
-    }${orderNumber}`;
+  return `${100 - parseInt(year)}${100 - parseInt(month)}${
+    100 - parseInt(day)
+  }${orderNumber}`;
 };
