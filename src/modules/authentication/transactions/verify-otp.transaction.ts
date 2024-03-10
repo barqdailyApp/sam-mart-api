@@ -23,6 +23,9 @@ import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
 import { DriverStatus } from 'src/infrastructure/data/enums/driver-status.enum';
 import { UserStatus } from 'src/infrastructure/data/enums/user-status.enum';
+import { Address } from 'src/infrastructure/entities/user/address.entity';
+import { plainToInstance } from 'class-transformer';
+import { AddressResponse } from 'src/modules/address/dto/responses/address.respone';
 @Injectable()
 export class VerifyOtpTransaction extends BaseTransaction<
   VerifyOtpRequest,
@@ -98,9 +101,29 @@ export class VerifyOtpTransaction extends BaseTransaction<
           throw new UnauthorizedException('Your account is blocked');
         }
       }
+      if (user.roles.includes(Role.CLIENT)) {
+        const address = plainToInstance(
+          AddressResponse,
+          await context.findOne(Address, {
+            where: {
+              user_id: user.id,
+              is_favorite: true,
+            },
+          }),
+        );
+        return {
+          ...user,
+          address,
 
+          access_token: this.jwtService.sign(
+            payload,
+            jwtSignOptions(this._config),
+          ),
+        };
+      }
       return {
         ...user,
+
         access_token: this.jwtService.sign(
           payload,
           jwtSignOptions(this._config),

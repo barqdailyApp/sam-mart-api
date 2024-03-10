@@ -15,4 +15,6 @@ export class VerifyOtpRequest {
     @IsNotEmpty() @IsString()
     code: string;
 
+    
+
 }

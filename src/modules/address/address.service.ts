@@ -50,6 +50,11 @@ export class AddressService extends BaseUserService<Address> {
     this.entityRelatedValidator.ownership(item, super.currentUser);
     return item;
   }
+  async findFavorite(user_id: string): Promise<Address> {
+    const item = await this._repo.findOneBy({ id: user_id, is_favorite: true });
+
+    return item;
+  }
 
   async findByAccount(query: AddressByAccountRequest): Promise<Address[]> {
     if (!query.account) return [];
