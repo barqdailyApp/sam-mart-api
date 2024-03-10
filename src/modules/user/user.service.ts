@@ -144,22 +144,29 @@ export class UserService extends BaseService<User> {
     return user;
   }
   async getTotalClientsDashboard() {
-    const clientsTotal = await this.userRepo.count({});
+    const clientsTotal = await this.userRepo.count({
+      where: {
+        roles: Role.CLIENT,
+      },
+    });
     const clientsActive = await this.userRepo.count({
       where: {
         user_status: UserStatus.ActiveClient,
+        roles: Role.CLIENT,
       },
     });
 
     const clientsPurchased = await this.userRepo.count({
       where: {
         user_status: UserStatus.CustomerPurchase,
+        roles: Role.CLIENT,
       },
     });
 
     const clientsBlocked = await this.userRepo.count({
       where: {
         user_status: UserStatus.BlockedClient,
+        roles: Role.CLIENT,
       },
     });
     return {
