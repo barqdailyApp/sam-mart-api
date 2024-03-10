@@ -45,6 +45,7 @@ import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 import { ReturnOrderResponse } from 'src/integration/gateways/dto/response/return-order.response';
 import { ReturnOrder } from 'src/infrastructure/entities/order/return-order/return-order.entity';
 import { AddReturnOrderReason } from './dto/request/add-return-order-reason.request';
+import { ShipmentDashboardResponse } from './dto/response/dashboard-response/shipment-dashboard.response';
 
 @ApiTags('Order')
 @ApiHeader({
@@ -160,7 +161,7 @@ export class OrderController {
     );
 
     const shipmentsResponse = orders.map((order) => {
-      const shipmentResponse = plainToClass(ShipmentDriverResponse, order);
+      const shipmentResponse = new ShipmentDashboardResponse(order);
 
       return shipmentResponse;
     });
