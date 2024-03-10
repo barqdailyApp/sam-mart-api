@@ -9,4 +9,5 @@ export enum ShipmentStatusEnum {
   COMPLETED = 'COMPLETED',
   RETRUNED = 'RETRUNED',
   CANCELED = 'CANCELED',
+  WITHOUT_NEW ='WITHOUT_NEW'
 }
