@@ -1,4 +1,9 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { REQUEST } from '@nestjs/core';
@@ -74,31 +79,29 @@ export class NotificationService extends BaseUserService<NotificationEntity> {
 
     return await super.findAll(options);
   }
-  async sendToUsers(sendToUsersNotificationRequest: SendToUsersNotificationRequest){
+  async sendToUsers(
+    sendToUsersNotificationRequest: SendToUsersNotificationRequest,
+  ) {
     const { users_id, message_ar, message_en, title_ar, title_en } =
-    sendToUsersNotificationRequest;
+      sendToUsersNotificationRequest;
     //* Check if user exists
     for (let index = 0; index < users_id.length; index++) {
       const user = await this.userRepository.findOne({
         where: { id: users_id[index] },
       });
-      if (!user) {
-        throw new NotFoundException('message.user_not_found');
+      if (user) {
+        this._repo.create(
+          new NotificationEntity({
+            user_id: users_id[index],
+            url: users_id[index],
+            type: NotificationTypes.USERS,
+            title_ar: title_ar,
+            title_en: title_en,
+            text_ar: message_ar,
+            text_en: message_en,
+          }),
+        );
       }
-    }
-
-    for (let index = 0; index < users_id.length; index++) {
-      this._repo.create(
-        new NotificationEntity({
-          user_id: users_id[index],
-          url: users_id[index],
-          type: NotificationTypes.USERS,
-          title_ar: title_ar,
-          title_en: title_en,
-          text_ar: message_ar,
-          text_en: message_en,
-        })
-      );
     }
   }
 }

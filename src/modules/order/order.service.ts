@@ -396,7 +396,12 @@ export class OrderService extends BaseUserService<Order> {
     // Destructure the query parameters for easier access.
     const { limit, page, status, order_date } = driverShipmentsQuery;
     const skip = (page - 1) * limit; // Calculate the offset for pagination.
-
+    const driver = await this.driverRepository.findOne({
+      where: {
+        user_id: user.id,
+      },
+    });
+    console.log('driver',driver);
     // Start building the query with necessary joins to fetch related entities.
     let query = this.shipmentRepository
       .createQueryBuilder('shipments')
@@ -426,28 +431,15 @@ export class OrderService extends BaseUserService<Order> {
       )
       .leftJoinAndSelect('product_sub_category.product', 'product')
       .leftJoinAndSelect('product.product_images', 'product_images')
+      .where('shipments.warehouse_id = :warehouse_id', { warehouse_id: driver.warehouse_id })
       .skip(skip) // Apply pagination offset.
       .take(limit); // Limit the number of results returned.
 
-    const driver = await this.driverRepository.findOne({
-      where: {
-        user_id: user.id,
-      },
-    });
 
-    query = query.andWhere('shipments.warehouse_id = :warehouse_id', {
-      warehouse_id: driver.warehouse_id,
-    });
-
-    // Filter orders that are being delivered today.
-    // if (order_date) {
-    //   query = query.andWhere('order.delivery_day = :delivery_day', {
-    //     delivery_day: order_date,
-    //   });
-    // }
+    
     if (order_date) {
       //*using database functions to truncate the time part of the order.created_at timestamp to compare only the date components
-      query = query.where('DATE(order.delivery_day) = :delivery_day', {
+      query = query.andWhere('order.delivery_day = :delivery_day', {
         delivery_day:order_date,
       });
     }
@@ -577,7 +569,7 @@ export class OrderService extends BaseUserService<Order> {
  
     if (order_date) {
       //*using database functions to truncate the time part of the order.created_at timestamp to compare only the date components
-      query = query.where('DATE(order.delivery_day) = :delivery_day', {
+      query = query.andWhere('order.delivery_day = :delivery_day', {
         delivery_day:order_date,
       });
     }

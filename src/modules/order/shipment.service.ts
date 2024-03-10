@@ -34,6 +34,9 @@ import { CancelShipmentRequest } from './dto/request/cancel-shipment.request';
 import { OrderGateway } from 'src/integration/gateways/order.gateway';
 import { Constant } from 'src/infrastructure/entities/constant/constant.entity';
 import { ConstantType } from 'src/infrastructure/data/enums/constant-type.enum';
+import { NotificationService } from '../notification/services/notification.service';
+import { NotificationEntity } from 'src/infrastructure/entities/notification/notification.entity';
+import { NotificationTypes } from 'src/infrastructure/data/enums/notification-types.enum';
 @Injectable()
 export class ShipmentService extends BaseService<Shipment> {
   constructor(
@@ -57,6 +60,7 @@ export class ShipmentService extends BaseService<Shipment> {
     private orderFeedBackRepository: Repository<ShipmentFeedback>,
     @Inject(REQUEST) private readonly request: Request,
     @Inject(FileService) private _fileService: FileService,
+    private readonly notificationService: NotificationService,
   ) {
     super(shipmentRepository);
   }
@@ -113,7 +117,17 @@ export class ShipmentService extends BaseService<Shipment> {
         driver,
       },
     });
-
+    await this.notificationService.create(
+      new NotificationEntity({
+        user_id: order.user_id,
+        url: order.id,
+        type: NotificationTypes.ORDERS,
+        title_ar: 'تحديث الطلب',
+        title_en: 'order updated',
+        text_ar: 'تم توصيل الطلب بنجاح',
+        text_en: 'The order was delivered successfully',
+      }),
+    );
     return shipment;
   }
   async pickupShipment(id: string) {
@@ -148,7 +162,17 @@ export class ShipmentService extends BaseService<Shipment> {
         driver,
       },
     });
-
+    await this.notificationService.create(
+      new NotificationEntity({
+        user_id: shipment.order.user_id,
+        url: shipment.order.id,
+        type: NotificationTypes.ORDERS,
+        title_ar: 'تحديث الطلب',
+        title_en: 'order updated',
+        text_ar: 'تم خروج الطلب من المخزن بنجاح',
+        text_en: 'The order has been successfully removed from the warehouse',
+      }),
+    );
     return shipment;
   }
 
@@ -184,11 +208,22 @@ export class ShipmentService extends BaseService<Shipment> {
         driver,
       },
     });
-
+    await this.notificationService.create(
+      new NotificationEntity({
+        user_id: shipment.order.user_id,
+        url: shipment.order.id,
+        type: NotificationTypes.ORDERS,
+        title_ar: 'تحديث الطلب',
+        title_en: 'order updated',
+        text_ar: 'تم تجهز الطلب من المخزن بنجاح',
+        text_en: 'The order has been successfully removed from the warehouse',
+      }),
+    );
     return shipment;
   }
 
   async acceptShipment(id: string) {
+   
     return this.addDriverToShipment(
       id,
       AddDriverShipmentOption.DRIVER_ACCEPT_SHIPMENT,
@@ -487,7 +522,18 @@ export class ShipmentService extends BaseService<Shipment> {
         driver: driver,
       },
     });
-
+ 
+    await this.notificationService.create(
+      new NotificationEntity({
+        user_id: shipment.order.user_id,
+        url: shipment.order.id,
+        type: NotificationTypes.ORDERS,
+        title_ar: 'تحديث الطلب',
+        title_en: 'order updated',
+        text_ar: 'تم تعيين سائق للطلب',
+        text_en: 'A driver has been assigned to the request',
+      }),
+    );
     return shipment;
   }
 }
