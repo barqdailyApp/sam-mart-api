@@ -33,6 +33,7 @@ import { plainToInstance } from 'class-transformer';
 import { GetCommentQueryRequest } from '../support-ticket/dto/request/get-comment-query.request';
 import { AddShipmentFeedBackRequest } from './dto/request/add-shipment-feedback.request';
 import { CancelShipmentRequest } from './dto/request/cancel-shipment.request';
+import { ShipmentsResponse } from './dto/response/client-response/shipments.response';
 
 @ApiTags('Shipment')
 @ApiHeader({
@@ -128,7 +129,9 @@ export class ShipmentController {
     @Param('shipment_id') shipment_id: string,
     @Body() req: CancelShipmentRequest
   ) {
-    return new ActionResponse(await this.shipmentService.cancelShipment(shipment_id, req));
+    const canceledShipment = await this.shipmentService.cancelShipment(shipment_id, req);
+    const result = new ShipmentsResponse(canceledShipment);
+    return new ActionResponse(result);
   }
 
   // admin convert order from scheduled to fast delivery [Order Controller]
