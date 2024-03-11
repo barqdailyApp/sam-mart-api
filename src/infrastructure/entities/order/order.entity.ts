@@ -11,7 +11,6 @@ import { Slot } from './slot.entity';
 import { Shipment } from './shipment.entity';
 import { Transaction } from '../wallet/transaction.entity';
 import { ReturnOrder } from './return-order/return-order.entity';
-import { Col } from 'sequelize/types/utils';
 import { PaymentMethod } from '../payment_method/payment_method.entity';
 
 @Entity()
