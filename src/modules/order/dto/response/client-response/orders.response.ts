@@ -1,7 +1,7 @@
 import { Exclude, Expose } from 'class-transformer';
 import { toUrl } from 'src/core/helpers/file.helper';
 import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
-import { PaymentMethod } from 'src/infrastructure/data/enums/payment-method';
+import { PaymentMethodEnum } from 'src/infrastructure/data/enums/payment-method';
 import { Order } from 'src/infrastructure/entities/order/order.entity';
 
 @Exclude()

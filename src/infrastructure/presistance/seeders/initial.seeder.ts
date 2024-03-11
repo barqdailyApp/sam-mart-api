@@ -12,6 +12,7 @@ import { WareHouseProductsSeeder } from './warehouse-product.seeder';
 import { SupportTicketSubjectSeeder } from './suppot-ticket-subjects.seeder';
 
 import { ConstantSeeder } from './constant-seeder';
+import { PaymentSeeder } from './payment.seeder';
 
 export const DB_SEEDERS = [
   // UsersSeeder,
@@ -26,5 +27,6 @@ export const DB_SEEDERS = [
   // WareHouseSeeder,
   // WareHouseProductsSeeder,
   // SupportTicketSubjectSeeder,
-  ConstantSeeder
+  // ConstantSeeder
+  PaymentSeeder
 ];

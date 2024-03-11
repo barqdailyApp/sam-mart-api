@@ -8,7 +8,7 @@ import {
   IsString,
 } from 'class-validator';
 import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
-import { PaymentMethod } from 'src/infrastructure/data/enums/payment-method';
+import { PaymentMethodEnum } from 'src/infrastructure/data/enums/payment-method';
 import { ShipmentStatusEnum } from 'src/infrastructure/data/enums/shipment_status.enum';
 
 export class OrderClientQuery {
@@ -39,10 +39,10 @@ export class OrderClientQuery {
   @IsBoolean()
   is_paid: boolean;
 
-  @ApiProperty({ required: false, enum: PaymentMethod })
+  @ApiProperty({ required: false, enum: PaymentMethodEnum })
   @IsOptional()
   @IsString()
-  payment_method: PaymentMethod;
+  payment_method: PaymentMethodEnum;
 
   @ApiProperty({ required: false, enum: DeliveryType })
   @IsOptional()

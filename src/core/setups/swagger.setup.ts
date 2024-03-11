@@ -1,6 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { PaymentMethod } from 'src/infrastructure/entities/payment_method/payment_method.entity';
 
 import { AdditionalServiceModule } from 'src/modules/additional-service/additional-service.module';
 import { AddressModule } from 'src/modules/address/address.module';
@@ -18,6 +19,7 @@ import { MeasurementUnitModule } from 'src/modules/measurement-unit/measurement-
 import { NotificationModule } from 'src/modules/notification/notification.module';
 import { OrderModule } from 'src/modules/order/order.module';
 import { ShipmentController } from 'src/modules/order/shipment.controller';
+import { PaymentMethodModule } from 'src/modules/payment_method/payment_method.module';
 import { ProductCategoryPriceModule } from 'src/modules/product-category-price/product-category-price.module';
 import { ProductModule } from 'src/modules/product/product.module';
 import { RegionModule } from 'src/modules/region/region.module';
@@ -70,7 +72,8 @@ export default (app: INestApplication, config: ConfigService) => {
       EmployeeModule,
       ShipmentController,
       WorkingAreaModule,
-      NotificationModule
+      NotificationModule,
+      PaymentMethodModule
     ],
     operationIdFactory,
   });

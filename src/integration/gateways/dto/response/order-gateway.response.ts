@@ -1,13 +1,13 @@
 import { Expose, Type } from "class-transformer";
 import { DeliveryType } from "src/infrastructure/data/enums/delivery-type.enum";
-import { PaymentMethod } from "src/infrastructure/data/enums/payment-method";
+import { PaymentMethodEnum } from "src/infrastructure/data/enums/payment-method";
 import { ShipmentStatusEnum } from "src/infrastructure/data/enums/shipment_status.enum";
 import { AddressResponse } from "src/modules/address/dto/responses/address.respone";
 
 export class OrderGatewayResponse {
     @Expose() id: string;
     @Expose() total_price: number;
-    @Expose() payment_method: PaymentMethod;
+    @Expose() payment_method: PaymentMethodEnum;
     @Expose() is_paid: boolean;
     @Expose() delivery_type: DeliveryType;
     @Expose() estimated_delivery_time: Date;

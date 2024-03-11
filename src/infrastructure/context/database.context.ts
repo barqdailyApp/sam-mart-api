@@ -50,7 +50,7 @@ import { ReturnProductReason } from '../entities/order/return-order/return-produ
 import { ReturnOrder } from '../entities/order/return-order/return-order.entity';
 import { NotificationEntity } from '../entities/notification/notification.entity';
 import { Constant } from '../entities/constant/constant.entity';
-
+import { PaymentMethod } from '../entities/payment_method/payment_method.entity';
 
 export const DB_ENTITIES = [
   User,
@@ -105,7 +105,8 @@ export const DB_ENTITIES = [
   ReturnProductReason,
   ReturnOrder,
   NotificationEntity,
-Constant
+  Constant,
+  PaymentMethod,
 ];
 
 export const DB_VIEWS = [];

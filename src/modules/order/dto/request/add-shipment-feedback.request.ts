@@ -11,7 +11,7 @@ import {
   ValidateIf,
 } from 'class-validator';
 import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
-import { PaymentMethod } from 'src/infrastructure/data/enums/payment-method';
+import { PaymentMethodEnum } from 'src/infrastructure/data/enums/payment-method';
 
 export class AddShipmentFeedBackRequest {
   @ApiProperty()

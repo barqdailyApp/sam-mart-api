@@ -9,7 +9,7 @@ import {
 } from 'class-validator';
 import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
 import { DriverStatus } from 'src/infrastructure/data/enums/driver-status.enum';
-import { PaymentMethod } from 'src/infrastructure/data/enums/payment-method';
+import { PaymentMethodEnum } from 'src/infrastructure/data/enums/payment-method';
 import { ShipmentStatusEnum } from 'src/infrastructure/data/enums/shipment_status.enum';
 import { UserStatus } from 'src/infrastructure/data/enums/user-status.enum';
 

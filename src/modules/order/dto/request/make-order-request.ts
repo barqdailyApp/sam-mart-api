@@ -1,7 +1,19 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty, IsString, ValidateIf } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString, ValidateIf } from 'class-validator';
 import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
-import { PaymentMethod } from 'src/infrastructure/data/enums/payment-method';
+import { PaymentMethodEnum } from 'src/infrastructure/data/enums/payment-method';
+
+export class PaymentMethodRequest {
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  payment_method_id: string;
+
+  @ApiProperty({required: false})
+  @IsOptional()
+  @IsString()
+  transaction_number: string;
+}
 
 export class OrderSlotRequest {
   @ApiProperty()
@@ -21,15 +33,17 @@ export class MakeOrderRequest {
   @IsString()
   section_id: string;
 
+  // @ApiProperty({
+  //   type: 'enum',
+  //   enum: [PaymentMethodEnum.CASH, PaymentMethodEnum.WALLET],
+  // })
+  // @IsEnum(PaymentMethodEnum)
+  // @IsNotEmpty()
+  // payment_method: PaymentMethodEnum;
 
-
-  @ApiProperty({
-    type: 'enum',
-    enum: [PaymentMethod.CASH, PaymentMethod.ONLINE],
-  })
-  @IsEnum(PaymentMethod)
+  @ApiProperty()
   @IsNotEmpty()
-  payment_method: PaymentMethod;
+  payment_method: PaymentMethodRequest;
 
   @ApiProperty({
     type: 'enum',
@@ -41,7 +55,6 @@ export class MakeOrderRequest {
 
   @ApiProperty()
   @IsNotEmpty()
-  
   @ValidateIf((obj) => obj.delivery_type === DeliveryType.SCHEDULED)
   slot_day: OrderSlotRequest;
 }

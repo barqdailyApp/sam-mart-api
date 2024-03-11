@@ -5,12 +5,14 @@ import { Section } from '../section/section.entity';
 import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
 import { User } from '../user/user.entity';
 import { Warehouse } from '../warehouse/warehouse.entity';
-import { PaymentMethod } from 'src/infrastructure/data/enums/payment-method';
+import { PaymentMethodEnum } from 'src/infrastructure/data/enums/payment-method';
 
 import { Slot } from './slot.entity';
 import { Shipment } from './shipment.entity';
 import { Transaction } from '../wallet/transaction.entity';
 import { ReturnOrder } from './return-order/return-order.entity';
+import { Col } from 'sequelize/types/utils';
+import { PaymentMethod } from '../payment_method/payment_method.entity';
 
 @Entity()
 export class Order extends OwnedEntity {
@@ -53,7 +55,7 @@ export class Order extends OwnedEntity {
   delivery_fee: number;
 
   @Column()
-  payment_method: PaymentMethod;
+  payment_method: PaymentMethodEnum;
 
   @Column({ default: false })
   is_paid: boolean;
@@ -70,6 +72,15 @@ export class Order extends OwnedEntity {
   @ManyToOne(() => Slot, (slot) => slot.orders)
   @JoinColumn()
   slot: Slot;
+
+  @ManyToOne(() => PaymentMethod, (paymentMethod) => paymentMethod.orders)
+  @JoinColumn()
+  paymentMethod: PaymentMethod;
+  @Column({ nullable: true })
+  payment_method_id: string;
+
+  @Column({ nullable: true })
+  transaction_number: string;
 
   @Column({ nullable: true })
   delivery_day: string;

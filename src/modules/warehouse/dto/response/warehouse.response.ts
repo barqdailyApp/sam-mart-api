@@ -1,6 +1,6 @@
 import { Exclude, Expose, Transform, plainToClass } from 'class-transformer';
 import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
-import { PaymentMethod } from 'src/infrastructure/data/enums/payment-method';
+import { PaymentMethodEnum } from 'src/infrastructure/data/enums/payment-method';
 import { User } from 'src/infrastructure/entities/user/user.entity';
 import { RegionResponse } from 'src/modules/region/dto/responses/region.response';
 import { ProfileResponse } from 'src/modules/user/dto/responses/profile.response';

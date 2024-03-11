@@ -1,6 +1,6 @@
 import { Exclude, Expose, Transform, plainToClass } from 'class-transformer';
 import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
-import { PaymentMethod } from 'src/infrastructure/data/enums/payment-method';
+import { PaymentMethodEnum } from 'src/infrastructure/data/enums/payment-method';
 import { User } from 'src/infrastructure/entities/user/user.entity';
 import { AddressResponse } from 'src/modules/address/dto/responses/address.respone';
 import { SectionResponse } from 'src/modules/section/dto/response/section.response';
@@ -31,7 +31,7 @@ export class OrderDriverResponse {
 
   @Expose() readonly total_price: number;
 
-  @Expose() readonly payment_method: PaymentMethod;
+  @Expose() readonly payment_method: PaymentMethodEnum;
 
   @Expose() readonly is_paid: boolean;
 

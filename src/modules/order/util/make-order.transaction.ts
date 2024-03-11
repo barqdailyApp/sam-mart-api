@@ -34,6 +34,8 @@ import { NotificationService } from 'src/modules/notification/services/notificat
 import { NotificationEntity } from 'src/infrastructure/entities/notification/notification.entity';
 import { NotificationTypes } from 'src/infrastructure/data/enums/notification-types.enum';
 import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
+import { PaymentMethodEnum } from 'src/infrastructure/data/enums/payment-method';
+import { PaymentMethod } from 'src/infrastructure/entities/payment_method/payment_method.entity';
 @Injectable()
 export class MakeOrderTransaction extends BaseTransaction<
   MakeOrderRequest,
@@ -78,11 +80,18 @@ export class MakeOrderTransaction extends BaseTransaction<
       if (cart_products.length == 0) {
         throw new BadRequestException('Cart is empty');
       }
+      const payment_method = await context.findOne(PaymentMethod, {
+        where: {
+          id: req.payment_method.payment_method_id,
+          is_active: true,
+        },
+      }); 
 
       const count = await context
         .createQueryBuilder(Order, 'order')
         .where('DATE(order.created_at) = CURDATE()')
         .getCount();
+
       const order = await context.save(Order, {
         ...plainToInstance(Order, req),
         user_id: user.id,
@@ -90,6 +99,12 @@ export class MakeOrderTransaction extends BaseTransaction<
         delivery_fee: section.delivery_price,
         number: generateOrderNumber(count),
         address_id: address.id,
+        payment_method: payment_method.type,
+        payment_method_id: req.payment_method.payment_method_id,
+        transaction_number:
+          payment_method.type == PaymentMethodEnum.CASH
+            ? null
+            : req.payment_method.transaction_number,
       });
 
       if (order.delivery_type == DeliveryType.FAST) {
@@ -202,9 +217,9 @@ export class MakeOrderTransaction extends BaseTransaction<
 
       const warehouse = await context.findOne(Warehouse, {
         where: { id: shipment.warehouse_id },
-      })
+      });
       order.address = address;
-      
+
       await this.orderGateway.notifyOrderStatusChange({
         action: ShipmentStatusEnum.PENDING,
         to_rooms,

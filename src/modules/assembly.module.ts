@@ -23,6 +23,7 @@ import { EmployeeModule } from "./employee/employee.module";
 import { WorkingAreaModule } from './working-area/working-area.module';
 import { TransactionModule } from './transaction/transaction.module';
 import { NotificationModule } from "./notification/notification.module";
+import { PaymentMethodModule } from './payment_method/payment_method.module';
 
 
 @Module({
@@ -50,7 +51,8 @@ import { NotificationModule } from "./notification/notification.module";
     EmployeeModule,
     WorkingAreaModule,
     TransactionModule,
-    NotificationModule
+    NotificationModule,
+    PaymentMethodModule
   ],
   exports: [],
   providers: [],

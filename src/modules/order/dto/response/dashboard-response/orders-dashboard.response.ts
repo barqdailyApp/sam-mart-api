@@ -1,6 +1,6 @@
 import { Exclude, Expose } from 'class-transformer';
 import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
-import { PaymentMethod } from 'src/infrastructure/data/enums/payment-method';
+import { PaymentMethodEnum } from 'src/infrastructure/data/enums/payment-method';
 import { Order } from 'src/infrastructure/entities/order/order.entity';
 
 @Exclude()
@@ -15,7 +15,7 @@ export class OrdersDashboardResponse {
 
   
   @Expose() total_price: number;
-  @Expose() payment_method: PaymentMethod;
+  @Expose() payment_method: PaymentMethodEnum;
   @Expose() is_paid: boolean;
   @Expose() delivery_day: string;
 
