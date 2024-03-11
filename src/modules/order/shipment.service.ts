@@ -414,6 +414,13 @@ export class ShipmentService extends BaseService<Shipment> {
       throw new BadRequestException('Shipment cannot be canceled');
     }
 
+    let to_rooms = ['admin', shipment.order.user_id];
+    if (shipment.status === ShipmentStatusEnum.PENDING) {
+      to_rooms.push(shipment.warehouse_id);
+    } else {
+      to_rooms.push(shipment.driver_id);
+    }
+
     shipment.status = ShipmentStatusEnum.CANCELED;
     shipment.order_canceled_at = new Date();
     shipment.status_reason = reason;
@@ -422,7 +429,7 @@ export class ShipmentService extends BaseService<Shipment> {
 
     await this.orderGateway.notifyOrderStatusChange({
       action: ShipmentStatusEnum.CANCELED,
-      to_rooms: ['admin', shipment.driver_id, shipment.order.user_id],
+      to_rooms,
       body: {
         shipment,
         order: shipment.order,
