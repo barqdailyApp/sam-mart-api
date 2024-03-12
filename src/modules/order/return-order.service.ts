@@ -20,6 +20,9 @@ import { Driver } from "src/infrastructure/entities/driver/driver.entity";
 import { UpdateReturnOrderStatusRequest } from "./dto/request/update-return-order-statu.request";
 import { PaginatedRequest } from "src/core/base/requests/paginated.request";
 import { Role } from "src/infrastructure/data/enums/role.enum";
+import { where } from "sequelize";
+import { Reason } from "src/infrastructure/entities/reason/reason.entity";
+import { ReasonType } from "src/infrastructure/data/enums/reason-type.enum";
 
 @Injectable()
 export class ReturnOrderService extends BaseService<ReturnOrder> {
@@ -37,8 +40,8 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
         private returnOrderRepository: Repository<ReturnOrder>,
         @InjectRepository(ReturnOrderProduct)
         private returnOrderProductRepository: Repository<ReturnOrderProduct>,
-        @InjectRepository(ReturnProductReason)
-        private returnProductReasonRepository: Repository<ReturnProductReason>,
+        @InjectRepository(Reason)
+        private readonly reasonRepository: Repository<Reason>,
 
         @Inject(REQUEST) readonly request: Request,
         private readonly orderGateway: OrderGateway,
@@ -122,13 +125,13 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
         }
 
         // check if the return products reasons IDs are valid
-        const returnedProductsReasons =
-            await this.returnProductReasonRepository.find({
-                where: {
-                    id: In(returned_shipment_products.map((p) => p.reason_id)),
-                },
-            });
-
+        const returnedProductsReasons = await this.reasonRepository.find({
+            where: {
+                id: In(returned_shipment_products.map((p) => p.reason_id)),
+                type: ReasonType.RETURN_ORDER
+            }
+        })
+        
         if (
             returnedProductsReasons.length !==
             new Set(returned_shipment_products.map((p) => p.reason_id)).size
@@ -166,7 +169,7 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
 
         return savedReturnOrder;
     }
-    
+
     // this method is used by the admin to update the return order status
     async updateReturnOrderStatus(
         return_order_id: string,
@@ -248,35 +251,6 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
         }
 
         return await this.findAll(query);
-    }
-
-    async addReturnProductReason(reason: string) {
-        return await this.returnProductReasonRepository.save({ reason });
-    }
-
-    async getReturnProductReasons() {
-        return await this.returnProductReasonRepository.find();
-    }
-
-    async updateReturnProductReason(reason_id: string, reason: string) {
-        const reasonExists = await this.returnProductReasonRepository.findOne({
-            where: { id: reason_id },
-        });
-        if (!reasonExists) throw new BadRequestException('reason not found');
-
-        return await this.returnProductReasonRepository.update(
-            { id: reason_id },
-            { reason },
-        );
-    }
-
-    async deleteReturnProductReason(reason_id: string) {
-        const reasonExists = await this.returnProductReasonRepository.findOne({
-            where: { id: reason_id },
-        });
-        if (!reasonExists) throw new BadRequestException('reason not found');
-
-        return await this.returnProductReasonRepository.delete({ id: reason_id });
     }
 
     get currentUser(): User {
