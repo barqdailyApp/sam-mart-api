@@ -9,6 +9,7 @@ import {
     Delete,
     Inject,
     Query,
+    Patch,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags, ApiHeader } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
@@ -22,6 +23,7 @@ import { CreateReasonRequest } from './dto/request/create-reason.request';
 import { ReasonService } from './reason.service';
 import { Reason } from 'src/infrastructure/entities/reason/reason.entity';
 import { GetReasonQueryRequest } from './dto/request/get-reason-query.requst';
+import { UpdateReasonRequest } from './dto/request/update-reason.request';
 @ApiBearerAuth()
 @ApiHeader({
     name: 'Accept-Language',
@@ -54,6 +56,17 @@ export class ReasonController {
         const reasons = await this.reasonService.getAll(query);
         return new ActionResponse<Reason[]>(
             this._i18nResponse.entity(reasons)
+        );
+    }
+
+    @Patch("update/:id")
+    @Roles(Role.ADMIN)
+    async updateReason(
+        @Param('id') id: string,
+        @Body() req: UpdateReasonRequest
+    ): Promise<ActionResponse<Reason>> {
+        return new ActionResponse<Reason>(
+            await this.reasonService.updateReason(id, req)
         );
     }
 }
