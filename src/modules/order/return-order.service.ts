@@ -1,28 +1,35 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import {
+    BadRequestException,
+    Inject,
+    Injectable,
+    NotFoundException,
+} from '@nestjs/common';
 import { Request } from 'express';
-import { REQUEST } from "@nestjs/core";
-import { InjectRepository } from "@nestjs/typeorm";
-import { BaseUserService } from "src/core/base/service/user-service.base";
-import { ReturnOrderProduct } from "src/infrastructure/entities/order/return-order/return-order-product.entity";
-import { ReturnOrder } from "src/infrastructure/entities/order/return-order/return-order.entity";
-import { ReturnProductReason } from "src/infrastructure/entities/order/return-order/return-product-reason.entity";
-import { In, Repository } from "typeorm";
-import { BaseService } from "src/core/base/service/service.base";
-import { User } from "src/infrastructure/entities/user/user.entity";
-import { ReturnOrderRequest } from "./dto/request/return-order.request";
-import { OrderGateway } from "src/integration/gateways/order.gateway";
-import { Order } from "src/infrastructure/entities/order/order.entity";
-import { Shipment } from "src/infrastructure/entities/order/shipment.entity";
-import { ShipmentStatusEnum } from "src/infrastructure/data/enums/shipment_status.enum";
-import { ShipmentProduct } from "src/infrastructure/entities/order/shipment-product.entity";
-import { ReturnOrderStatus } from "src/infrastructure/data/enums/return-order-status.enum";
-import { Driver } from "src/infrastructure/entities/driver/driver.entity";
-import { UpdateReturnOrderStatusRequest } from "./dto/request/update-return-order-statu.request";
-import { PaginatedRequest } from "src/core/base/requests/paginated.request";
-import { Role } from "src/infrastructure/data/enums/role.enum";
-import { where } from "sequelize";
-import { Reason } from "src/infrastructure/entities/reason/reason.entity";
-import { ReasonType } from "src/infrastructure/data/enums/reason-type.enum";
+import { REQUEST } from '@nestjs/core';
+import { InjectRepository } from '@nestjs/typeorm';
+import { BaseUserService } from 'src/core/base/service/user-service.base';
+import { ReturnOrderProduct } from 'src/infrastructure/entities/order/return-order/return-order-product.entity';
+import { ReturnOrder } from 'src/infrastructure/entities/order/return-order/return-order.entity';
+import { ReturnProductReason } from 'src/infrastructure/entities/order/return-order/return-product-reason.entity';
+import { In, Repository } from 'typeorm';
+import { BaseService } from 'src/core/base/service/service.base';
+import { User } from 'src/infrastructure/entities/user/user.entity';
+import { ReturnOrderRequest } from './dto/request/return-order.request';
+import { OrderGateway } from 'src/integration/gateways/order.gateway';
+import { Order } from 'src/infrastructure/entities/order/order.entity';
+import { Shipment } from 'src/infrastructure/entities/order/shipment.entity';
+import { ShipmentStatusEnum } from 'src/infrastructure/data/enums/shipment_status.enum';
+import { ShipmentProduct } from 'src/infrastructure/entities/order/shipment-product.entity';
+import { ReturnOrderStatus } from 'src/infrastructure/data/enums/return-order-status.enum';
+import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
+import { UpdateReturnOrderStatusRequest } from './dto/request/update-return-order-statu.request';
+import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
+import { Role } from 'src/infrastructure/data/enums/role.enum';
+import { NotificationService } from '../notification/notification.service';
+import { NotificationTypes } from 'src/infrastructure/data/enums/notification-types.enum';
+import { NotificationEntity } from 'src/infrastructure/entities/notification/notification.entity';
+import { Reason } from 'src/infrastructure/entities/reason/reason.entity';
+import { ReasonType } from 'src/infrastructure/data/enums/reason-type.enum';
 
 @Injectable()
 export class ReturnOrderService extends BaseService<ReturnOrder> {
@@ -40,11 +47,14 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
         private returnOrderRepository: Repository<ReturnOrder>,
         @InjectRepository(ReturnOrderProduct)
         private returnOrderProductRepository: Repository<ReturnOrderProduct>,
+        @InjectRepository(ReturnProductReason)
+        private returnProductReasonRepository: Repository<ReturnProductReason>,
         @InjectRepository(Reason)
-        private readonly reasonRepository: Repository<Reason>,
+        private reasonRepository: Repository<Reason>,
 
         @Inject(REQUEST) readonly request: Request,
         private readonly orderGateway: OrderGateway,
+        private readonly notificationService: NotificationService,
     ) {
         super(returnOrderRepository);
     }
@@ -131,7 +141,7 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
                 type: ReasonType.RETURN_ORDER
             }
         })
-        
+
         if (
             returnedProductsReasons.length !==
             new Set(returned_shipment_products.map((p) => p.reason_id)).size
@@ -166,6 +176,17 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
                 warehouse: shipment.warehouse,
             },
         });
+        await this.notificationService.create(
+            new NotificationEntity({
+                user_id: this.currentUser.id,
+                url: savedReturnOrder.id,
+                type: NotificationTypes.ORDERS,
+                title_ar: 'منتجع',
+                title_en: 'return order',
+                text_ar: 'هل تريد ارجاع هذا الطلب ؟',
+                text_en: 'Do you want to return this order?',
+            }),
+        );
 
         return savedReturnOrder;
     }
@@ -238,7 +259,17 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
                 warehouse: shipment.warehouse,
             },
         });
-
+        await this.notificationService.create(
+            new NotificationEntity({
+                user_id: returnOrder.order.user_id,
+                url: returnOrder.id,
+                type: NotificationTypes.ORDERS,
+                title_ar: 'منتجع',
+                title_en: 'return order',
+                text_ar: 'تم تحديث طلب المرتجع',
+                text_en: 'Return request has been updated',
+            }),
+        );
         return savedReturnOrder;
     }
 
@@ -254,6 +285,6 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
     }
 
     get currentUser(): User {
-        return this.request.user
+        return this.request.user;
     }
 }

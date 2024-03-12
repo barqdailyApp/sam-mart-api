@@ -34,7 +34,7 @@ import { CancelShipmentRequest } from './dto/request/cancel-shipment.request';
 import { OrderGateway } from 'src/integration/gateways/order.gateway';
 import { Constant } from 'src/infrastructure/entities/constant/constant.entity';
 import { ConstantType } from 'src/infrastructure/data/enums/constant-type.enum';
-import { NotificationService } from '../notification/services/notification.service';
+import { NotificationService } from '../notification/notification.service';
 import { NotificationEntity } from 'src/infrastructure/entities/notification/notification.entity';
 import { NotificationTypes } from 'src/infrastructure/data/enums/notification-types.enum';
 import { ReasonService } from '../reason/reason.service';
@@ -105,7 +105,7 @@ export class ShipmentService extends BaseService<Shipment> {
       where: {
         id: shipment.order_id,
       },
-      relations: ['address']
+      relations: ['address'],
     });
     order.is_paid = true;
     await this.driverRepository.save(driver);
@@ -228,7 +228,6 @@ export class ShipmentService extends BaseService<Shipment> {
   }
 
   async acceptShipment(id: string) {
-
     return this.addDriverToShipment(
       id,
       AddDriverShipmentOption.DRIVER_ACCEPT_SHIPMENT,
@@ -382,7 +381,14 @@ export class ShipmentService extends BaseService<Shipment> {
 
     const shipment = await this.shipmentRepository.findOne({
       where: { id: shipment_id },
-      relations: ['order', 'warehouse', 'order.user', 'driver', 'driver.user', 'order.address'],
+      relations: [
+        'order',
+        'warehouse',
+        'order.user',
+        'driver',
+        'driver.user',
+        'order.address',
+      ],
     });
 
     if (!shipment) {
@@ -460,6 +466,28 @@ export class ShipmentService extends BaseService<Shipment> {
       },
     });
 
+    await this.notificationService.create(
+      new NotificationEntity({
+        user_id: shipment.order.user_id,
+        url: shipment.order.id,
+        type: NotificationTypes.ORDERS,
+        title_ar: 'الغاء الطلب',
+        title_en: 'order cancel',
+        text_ar: 'تم الغاء الطلب',
+        text_en: 'the request has been canceled',
+      }),
+    );
+    await this.notificationService.create(
+      new NotificationEntity({
+        user_id: shipment.driver.user_id,
+        url: shipment.order.id,
+        type: NotificationTypes.ORDERS,
+        title_ar: 'تحديث الطلب',
+        title_en: 'order updated',
+        text_ar: 'تم الغاء الطلب',
+        text_en: 'the request has been canceled',
+      }),
+    );
     return shipment;
   }
 
@@ -556,6 +584,18 @@ export class ShipmentService extends BaseService<Shipment> {
     await this.notificationService.create(
       new NotificationEntity({
         user_id: shipment.order.user_id,
+        url: shipment.order.id,
+        type: NotificationTypes.ORDERS,
+        title_ar: 'تحديث الطلب',
+        title_en: 'order updated',
+        text_ar: 'تم تعيين سائق للطلب',
+        text_en: 'A driver has been assigned to the request',
+      }),
+    );
+    
+    await this.notificationService.create(
+      new NotificationEntity({
+        user_id: driver.user_id,
         url: shipment.order.id,
         type: NotificationTypes.ORDERS,
         title_ar: 'تحديث الطلب',

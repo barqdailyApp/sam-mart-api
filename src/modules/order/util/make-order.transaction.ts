@@ -30,7 +30,7 @@ import { ProductOffer } from 'src/infrastructure/entities/product/product-offer.
 import { ShipmentStatusEnum } from 'src/infrastructure/data/enums/shipment_status.enum';
 import { WarehouseOpreationProducts } from 'src/infrastructure/entities/warehouse/wahouse-opreation-products.entity';
 import { OrderGateway } from 'src/integration/gateways/order.gateway';
-import { NotificationService } from 'src/modules/notification/services/notification.service';
+import { NotificationService } from 'src/modules/notification/notification.service';
 import { NotificationEntity } from 'src/infrastructure/entities/notification/notification.entity';
 import { NotificationTypes } from 'src/infrastructure/data/enums/notification-types.enum';
 import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
@@ -85,7 +85,7 @@ export class MakeOrderTransaction extends BaseTransaction<
           id: req.payment_method.payment_method_id,
           is_active: true,
         },
-      }); 
+      });
 
       const count = await context
         .createQueryBuilder(Order, 'order')

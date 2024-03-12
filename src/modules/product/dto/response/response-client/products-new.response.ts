@@ -14,6 +14,8 @@ export class ProductsNewResponse {
   @Expose() section_id: string;
   @Expose() product_category_price_id: string;
   @Expose() is_quantity_available: boolean;
+  @Expose() warehouse_quantity: number;
+
   @Expose() offer_id: string | null;
   @Expose() offer_price: number | null;
   @Expose() product_id: string;
@@ -52,6 +54,9 @@ export class ProductsNewResponse {
       0
         ? false
         : true;
+    this.warehouse_quantity =
+      product.warehouses_products.reduce((acc, cur) => acc + cur.quantity, 0) /
+      product_measurement.conversion_factor;
     this.product_id = product.id;
     this.product_name_ar = product.name_ar;
     this.product_name_en = product.name_en;
@@ -70,6 +75,7 @@ export class ProductsNewResponse {
     this.measurement_unit_id = measurement_unit.id;
     this.measurement_unit_ar = measurement_unit.name_ar;
     this.measurement_unit_en = measurement_unit.name_en;
+
     if (cart_products == undefined || cart_products.length == 0) {
       this.cart_products = null;
     } else {

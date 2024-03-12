@@ -45,10 +45,15 @@ import {
 import { toUrl } from 'src/core/helpers/file.helper';
 import { SingleProductDashboardQuery } from './dto/filter/single-product-dashboard.query';
 import { UpdateProductOfferRequest } from './dto/request/update-product-offer.request';
+import { NotificationService } from '../notification/notification.service';
+import { SendToUsersNotificationRequest } from '../notification/dto/requests/send-to-users-notification.request';
+import { User } from 'src/infrastructure/entities/user/user.entity';
 
 @Injectable()
 export class ProductDashboardService {
   constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
     @InjectRepository(ProductImage)
@@ -87,6 +92,7 @@ export class ProductDashboardService {
     @Inject(ImageManager) private readonly imageManager: ImageManager,
 
     @Inject(FileService) private _fileService: FileService,
+    private readonly notificationService: NotificationService,
   ) {}
   isArabic(text: string): boolean {
     return /[\u0600-\u06FF]/.test(text);
@@ -137,8 +143,21 @@ export class ProductDashboardService {
       createProductOffer.price =
         productCategoryPrice.price - discountedPercentage;
     }
+    const newOffer = await this.productOffer_repo.save(createProductOffer);
 
-    return await this.productOffer_repo.save(createProductOffer);
+    const users = await this.userRepository
+      .createQueryBuilder('user')
+      .where('user.fcm_token IS NOT NULL')
+      .getMany();
+    const sendToUsersNotificationRequest: SendToUsersNotificationRequest = {
+      users_id: users.map((user) => user.id),
+      title_ar: 'عروض',
+      title_en: 'offers',
+      message_ar: 'تم اضافة عرض جديد',
+      message_en: 'new offer added',
+    };
+    await this.notificationService.sendToUsers(sendToUsersNotificationRequest);
+    return newOffer;
   }
   async updateProductOffer(
     offer_id: string,
@@ -151,7 +170,8 @@ export class ProductDashboardService {
       is_active,
       max_offer_quantity,
       min_offer_quantity,
-      start_date,offer_quantity
+      start_date,
+      offer_quantity,
     } = updateProductOfferRequest;
     const productOffer = await this.productOffer_repo.findOne({
       where: { id: offer_id },
@@ -185,7 +205,7 @@ export class ProductDashboardService {
         max_offer_quantity,
         min_offer_quantity,
         price: productOfferPrice,
-        offer_quantity
+        offer_quantity,
       },
     );
     return await this.productOffer_repo.findOne({
@@ -528,7 +548,6 @@ export class ProductDashboardService {
     return { products, total };
   }
 
-
   async getAllProductsOffersForDashboard2(
     productsDashboardQuery: ProductsDashboardQuery,
   ) {
@@ -594,10 +613,7 @@ export class ProductDashboardService {
       .leftJoinAndSelect('section_category.section', 'section')
       .leftJoinAndSelect('product_sub_category.product', 'product')
       .leftJoinAndSelect('product.warehouses_products', 'warehousesProduct')
-      .leftJoinAndSelect(
-        'product.product_measurements',
-        'product_measurements',
-      )
+      .leftJoinAndSelect('product.product_measurements', 'product_measurements')
 
       .leftJoinAndSelect('product.product_images', 'product_images')
 
@@ -696,10 +712,7 @@ export class ProductDashboardService {
       .leftJoinAndSelect('section_category.section', 'section')
       .leftJoinAndSelect('product_sub_category.product', 'product')
       .leftJoinAndSelect('product.warehouses_products', 'warehousesProduct')
-      .leftJoinAndSelect(
-        'product.product_measurements',
-        'product_measurements',
-      )
+      .leftJoinAndSelect('product.product_measurements', 'product_measurements')
 
       .leftJoinAndSelect('product.product_images', 'product_images')
 
@@ -723,10 +736,12 @@ export class ProductDashboardService {
       where: {
         product_id,
         category_sub_category_id,
-      }
+      },
     });
-    if(!productSubCategory){
-      throw new NotFoundException('No Relation bettwen product and sub category');
+    if (!productSubCategory) {
+      throw new NotFoundException(
+        'No Relation bettwen product and sub category',
+      );
     }
 
     // For guests and individuals, orders are taken from the nearest warehouse
@@ -787,7 +802,7 @@ export class ProductDashboardService {
         },
       );
       //  const productPrice = await this.productCategoryPrice_repo.findOne({
-      //    where: { 
+      //    where: {
       //     product_sub_category:{
       //       category_sub_category_id,
       //       product_id
@@ -805,8 +820,6 @@ export class ProductDashboardService {
       //     },
       //   );
       //  }
-
-     
     }
     return await query.getOne();
   }
