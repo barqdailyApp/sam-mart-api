@@ -140,7 +140,10 @@ export class ShipmentController {
     @Param('driver_id') driver_id: string,
   ) {
     return new ActionResponse(
-      await this.shipmentService.assignDriver(shipment_id, driver_id),
+      plainToInstance(
+        ShipmentResponse,
+        await this.shipmentService.assignDriver(shipment_id, driver_id),
+      ),
     );
   }
 
@@ -150,7 +153,10 @@ export class ShipmentController {
     @Body() req: CancelShipmentRequest,
   ) {
     return new ActionResponse(
-      await this.shipmentService.cancelShipment(shipment_id, req),
+      plainToInstance(
+        ShipmentResponse,
+        await this.shipmentService.cancelShipment(shipment_id, req),
+      ),
     );
   }
 
