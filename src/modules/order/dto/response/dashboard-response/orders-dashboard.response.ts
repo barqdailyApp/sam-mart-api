@@ -11,6 +11,9 @@ export class OrdersDashboardResponse {
   @Expose() order_created_at: Date;
   
   @Expose() order_number: string;
+  @Expose() transaction_number: string;
+
+   
   @Expose() delivery_type: DeliveryType;
 
   
@@ -32,6 +35,7 @@ export class OrdersDashboardResponse {
     this.section_id = order.section_id;
     this.order_created_at = order.created_at;
     this.order_number = order.number;
+    this.transaction_number = order.transaction_number;
     this.order_products = order.shipments[0].shipment_products.length;
     this.total_price = order.total_price;
     this.payment_method = order.payment_method;
