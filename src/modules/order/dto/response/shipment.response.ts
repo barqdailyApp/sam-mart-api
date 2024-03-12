@@ -38,4 +38,9 @@ export class ShipmentResponse {
   @Expose() readonly order_shipped_at: Date;
 
   @Expose() readonly order_delivered_at: Date;
+
+  @Expose() readonly order_canceled_at: Date;
+
+  @Expose() readonly cancel_reason_id: string;
+
 }

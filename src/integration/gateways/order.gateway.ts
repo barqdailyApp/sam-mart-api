@@ -81,11 +81,12 @@ export class OrderGateway
         order: {
           ...body.order,
           status: body.shipment.status,
-          status_reason: body.shipment.status_reason,
           order_confirmed_at: body.shipment.order_confirmed_at,
           order_on_processed_at: body.shipment.order_on_processed_at,
           order_shipped_at: body.shipment.order_shipped_at,
           order_delivered_at: body.shipment.order_delivered_at,
+          cancel_reason_id: body.shipment.cancel_reason_id,
+          order_canceled_at: body.shipment.order_canceled_at,
           shipment_id: body.shipment.id
         },
       },

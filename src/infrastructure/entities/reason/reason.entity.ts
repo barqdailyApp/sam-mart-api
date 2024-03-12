@@ -5,6 +5,7 @@ import { SupportTicket } from "../support-ticket/support-ticket.entity";
 import { ReturnOrderProduct } from "../order/return-order/return-order-product.entity";
 import { Order } from "../order/order.entity";
 import { Role } from "src/infrastructure/data/enums/role.enum";
+import { Shipment } from "../order/shipment.entity";
 
 @Entity()
 export class Reason extends AuditableEntity {
@@ -30,6 +31,6 @@ export class Reason extends AuditableEntity {
     @OneToMany(() => ReturnOrderProduct, returnOrderProduct => returnOrderProduct.returnProductReason)
     returnOrderProducts: ReturnOrderProduct[];
 
-    @OneToMany(() => Order, order => order.cancelOrderReason)
-    cancelOrder: Order[];
+    @OneToMany(() => Shipment, shipment => shipment.cancelShipmentReason)
+    cancelShipment: Order[];
 }

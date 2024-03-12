@@ -37,6 +37,8 @@ import { ConstantType } from 'src/infrastructure/data/enums/constant-type.enum';
 import { NotificationService } from '../notification/services/notification.service';
 import { NotificationEntity } from 'src/infrastructure/entities/notification/notification.entity';
 import { NotificationTypes } from 'src/infrastructure/data/enums/notification-types.enum';
+import { ReasonService } from '../reason/reason.service';
+import { ReasonType } from 'src/infrastructure/data/enums/reason-type.enum';
 @Injectable()
 export class ShipmentService extends BaseService<Shipment> {
   constructor(
@@ -60,6 +62,9 @@ export class ShipmentService extends BaseService<Shipment> {
     private orderFeedBackRepository: Repository<ShipmentFeedback>,
     @Inject(REQUEST) private readonly request: Request,
     @Inject(FileService) private _fileService: FileService,
+    @Inject(ReasonService)
+    private readonly reasonService: ReasonService,
+
     private readonly notificationService: NotificationService,
   ) {
     super(shipmentRepository);
@@ -373,7 +378,7 @@ export class ShipmentService extends BaseService<Shipment> {
   }
 
   async cancelShipment(shipment_id: string, req: CancelShipmentRequest) {
-    const { reason } = req;
+    const { reason_id } = req;
 
     const shipment = await this.shipmentRepository.findOne({
       where: { id: shipment_id },
@@ -414,6 +419,11 @@ export class ShipmentService extends BaseService<Shipment> {
       throw new BadRequestException('Shipment cannot be canceled');
     }
 
+    const reason = await this.reasonService.findOne({
+      id: reason_id,
+      type: ReasonType.CANCEL_ORDER
+    });
+
     let to_rooms = ['admin', shipment.order.user_id];
     if (shipment.status === ShipmentStatusEnum.PENDING) {
       to_rooms.push(shipment.warehouse_id);
@@ -423,7 +433,7 @@ export class ShipmentService extends BaseService<Shipment> {
 
     shipment.status = ShipmentStatusEnum.CANCELED;
     shipment.order_canceled_at = new Date();
-    shipment.status_reason = reason;
+    shipment.cancelShipmentReason = reason;
 
     await this.shipmentRepository.save(shipment);
 

@@ -87,11 +87,4 @@ export class Order extends OwnedEntity {
 
   @Column({ nullable: true })
   slot_id: string;
-
-  @ManyToOne(()=> Reason, reason => reason.cancelOrder, {onDelete: 'SET NULL'})
-  @JoinColumn({name: 'cancel_reason_id'})
-  cancelOrderReason: Reason;
-
-  @Column({nullable: true})
-  cancel_reason_id: string;
 }
