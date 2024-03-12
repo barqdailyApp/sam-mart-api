@@ -12,6 +12,7 @@ import { Shipment } from './shipment.entity';
 import { Transaction } from '../wallet/transaction.entity';
 import { ReturnOrder } from './return-order/return-order.entity';
 import { PaymentMethod } from '../payment_method/payment_method.entity';
+import { Reason } from '../reason/reason.entity';
 
 @Entity()
 export class Order extends OwnedEntity {
@@ -86,4 +87,11 @@ export class Order extends OwnedEntity {
 
   @Column({ nullable: true })
   slot_id: string;
+
+  @ManyToOne(()=> Reason, reason => reason.cancelOrder, {onDelete: 'SET NULL'})
+  @JoinColumn({name: 'cancel_reason_id'})
+  cancelOrderReason: Reason;
+
+  @Column({nullable: true})
+  cancel_reason_id: string;
 }

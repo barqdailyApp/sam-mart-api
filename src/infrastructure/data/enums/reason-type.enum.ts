@@ -1,0 +1,5 @@
+export enum ReasonType {
+    SUPPORT_TICKET = "SUPPORT_TICKET",
+    RETURN_ORDER = "RETURN_ORDER",
+    CANCEL_ORDER = "CANCEL_ORDER",
+}
