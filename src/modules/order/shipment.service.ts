@@ -141,6 +141,7 @@ export class ShipmentService extends BaseService<Shipment> {
         warehouse_id: driver.warehouse_id,
       },
       relations: ['order', 'warehouse', 'order.user', 'order.address'],
+      relations: ['order', 'warehouse', 'order.user', 'order.address'],
     });
     if (!shipment || shipment.status !== ShipmentStatusEnum.PROCESSING) {
       throw new NotFoundException('Shipment not found');
@@ -392,12 +393,14 @@ export class ShipmentService extends BaseService<Shipment> {
 
     const currentUserRole = this.currentUser.roles;
     const shipmentStatus = shipment.status;
+    const driver = await this.getDriver(this.currentUser.id)
 
     if (
       (currentUserRole.includes(Role.CLIENT) &&
         shipment.order.user_id !== this.currentUser.id) ||
       (currentUserRole.includes(Role.DRIVER) &&
-        shipment.driver_id !== this.currentUser.id)
+        shipment.driver_id !== driver.id) &&
+      !currentUserRole.includes(Role.ADMIN)
     ) {
       throw new UnauthorizedException(
         'You are not allowed to cancel this shipment',
@@ -410,12 +413,19 @@ export class ShipmentService extends BaseService<Shipment> {
       (currentUserRole.includes(Role.DRIVER) &&
         shipmentStatus === ShipmentStatusEnum.PENDING) ||
       shipmentStatus ===
-        (ShipmentStatusEnum.CANCELED ||
-          ShipmentStatusEnum.DELIVERED ||
-          ShipmentStatusEnum.RETRUNED ||
-          ShipmentStatusEnum.COMPLETED)
+      (ShipmentStatusEnum.CANCELED ||
+        ShipmentStatusEnum.DELIVERED ||
+        ShipmentStatusEnum.RETRUNED ||
+        ShipmentStatusEnum.COMPLETED)
     ) {
       throw new BadRequestException('Shipment cannot be canceled');
+    }
+
+    let to_rooms = ['admin', shipment.order.user_id];
+    if (shipment.status === ShipmentStatusEnum.PENDING) {
+      to_rooms.push(shipment.warehouse_id);
+    } else {
+      to_rooms.push(shipment.driver_id);
     }
 
     shipment.status = ShipmentStatusEnum.CANCELED;
@@ -426,7 +436,7 @@ export class ShipmentService extends BaseService<Shipment> {
 
     await this.orderGateway.notifyOrderStatusChange({
       action: ShipmentStatusEnum.CANCELED,
-      to_rooms: ['admin', shipment.driver_id, shipment.order.user_id],
+      to_rooms,
       body: {
         shipment,
         order: shipment.order,

@@ -33,6 +33,7 @@ import { plainToInstance } from 'class-transformer';
 import { GetCommentQueryRequest } from '../support-ticket/dto/request/get-comment-query.request';
 import { AddShipmentFeedBackRequest } from './dto/request/add-shipment-feedback.request';
 import { CancelShipmentRequest } from './dto/request/cancel-shipment.request';
+import { ShipmentResponse } from './dto/response/shipment.response';
 
 @ApiTags('Shipment')
 @ApiHeader({
@@ -44,26 +45,46 @@ import { CancelShipmentRequest } from './dto/request/cancel-shipment.request';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('shipment')
 export class ShipmentController {
-  constructor(private readonly shipmentService: ShipmentService) { }
+  constructor(private readonly shipmentService: ShipmentService) {}
 
   @Post('driver/accept/:id')
   async acceptShipment(@Param('id') id: string) {
-    return new ActionResponse(await this.shipmentService.acceptShipment(id));
+    return new ActionResponse(
+      plainToInstance(
+        ShipmentResponse,
+        await this.shipmentService.acceptShipment(id),
+      ),
+    );
   }
 
   @Post('driver/process/:id')
   async processShipment(@Param('id') id: string) {
-    return new ActionResponse(await this.shipmentService.prepareShipment(id));
+    return new ActionResponse(
+      plainToInstance(
+        ShipmentResponse,
+        await this.shipmentService.prepareShipment(id),
+      ),
+    );
   }
 
   @Post('driver/pick-up/:id')
   async pickUpShipment(@Param('id') id: string) {
-    return new ActionResponse(await this.shipmentService.pickupShipment(id));
+    return new ActionResponse(
+      plainToInstance(
+        ShipmentResponse,
+        await this.shipmentService.pickupShipment(id),
+      ),
+    );
   }
 
   @Post('driver/deliver/:id')
   async processhipment(@Param('id') id: string) {
-    return new ActionResponse(await this.shipmentService.deliverShipment(id));
+    return new ActionResponse(
+      plainToInstance(
+        ShipmentResponse,
+        await this.shipmentService.deliverShipment(id),
+      ),
+    );
   }
 
   @Post('add-chat-message/:shipment_id')
@@ -119,16 +140,24 @@ export class ShipmentController {
     @Param('driver_id') driver_id: string,
   ) {
     return new ActionResponse(
-      await this.shipmentService.assignDriver(shipment_id, driver_id),
+      plainToInstance(
+        ShipmentResponse,
+        await this.shipmentService.assignDriver(shipment_id, driver_id),
+      ),
     );
   }
 
   @Post('cancel-shipment/:shipment_id')
   async cancelShipment(
     @Param('shipment_id') shipment_id: string,
-    @Body() req: CancelShipmentRequest
+    @Body() req: CancelShipmentRequest,
   ) {
-    return new ActionResponse(await this.shipmentService.cancelShipment(shipment_id, req));
+    return new ActionResponse(
+      plainToInstance(
+        ShipmentResponse,
+        await this.shipmentService.cancelShipment(shipment_id, req),
+      ),
+    );
   }
 
   // admin convert order from scheduled to fast delivery [Order Controller]
