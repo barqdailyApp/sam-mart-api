@@ -35,6 +35,13 @@ export class CreateProductRequest {
   @IsString()
   description_en: string;
 
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  barcode: string;
+
+
+
   @ApiProperty({ default: true })
   @IsNotEmpty()
   @Transform(({ value }) => {

@@ -33,7 +33,6 @@ import { plainToInstance } from 'class-transformer';
 import { GetCommentQueryRequest } from '../support-ticket/dto/request/get-comment-query.request';
 import { AddShipmentFeedBackRequest } from './dto/request/add-shipment-feedback.request';
 import { CancelShipmentRequest } from './dto/request/cancel-shipment.request';
-import { ShipmentsResponse } from './dto/response/client-response/shipments.response';
 import { ShipmentResponse } from './dto/response/shipment.response';
 
 @ApiTags('Shipment')
@@ -46,26 +45,46 @@ import { ShipmentResponse } from './dto/response/shipment.response';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('shipment')
 export class ShipmentController {
-  constructor(private readonly shipmentService: ShipmentService) { }
+  constructor(private readonly shipmentService: ShipmentService) {}
 
   @Post('driver/accept/:id')
   async acceptShipment(@Param('id') id: string) {
-    return new ActionResponse(await this.shipmentService.acceptShipment(id));
+    return new ActionResponse(
+      plainToInstance(
+        ShipmentResponse,
+        await this.shipmentService.acceptShipment(id),
+      ),
+    );
   }
 
   @Post('driver/process/:id')
   async processShipment(@Param('id') id: string) {
-    return new ActionResponse(await this.shipmentService.prepareShipment(id));
+    return new ActionResponse(
+      plainToInstance(
+        ShipmentResponse,
+        await this.shipmentService.prepareShipment(id),
+      ),
+    );
   }
 
   @Post('driver/pick-up/:id')
   async pickUpShipment(@Param('id') id: string) {
-    return new ActionResponse(await this.shipmentService.pickupShipment(id));
+    return new ActionResponse(
+      plainToInstance(
+        ShipmentResponse,
+        await this.shipmentService.pickupShipment(id),
+      ),
+    );
   }
 
   @Post('driver/deliver/:id')
   async processhipment(@Param('id') id: string) {
-    return new ActionResponse(await this.shipmentService.deliverShipment(id));
+    return new ActionResponse(
+      plainToInstance(
+        ShipmentResponse,
+        await this.shipmentService.deliverShipment(id),
+      ),
+    );
   }
 
   @Post('add-chat-message/:shipment_id')
@@ -131,7 +150,7 @@ export class ShipmentController {
   @Post('cancel-shipment/:shipment_id')
   async cancelShipment(
     @Param('shipment_id') shipment_id: string,
-    @Body() req: CancelShipmentRequest
+    @Body() req: CancelShipmentRequest,
   ) {
     return new ActionResponse(
       plainToInstance(
