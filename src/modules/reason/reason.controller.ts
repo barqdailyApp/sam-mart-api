@@ -69,4 +69,14 @@ export class ReasonController {
             await this.reasonService.updateReason(id, req)
         );
     }
+
+    @Delete("delete/:id")
+    @Roles(Role.ADMIN)
+    async deleteReason(
+        @Param('id') id: string
+    ): Promise<ActionResponse<Boolean>> {
+        return new ActionResponse<Boolean>(
+            await this.reasonService.deleteReason(id)
+        );
+    }
 }
