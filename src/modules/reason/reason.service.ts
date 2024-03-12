@@ -35,7 +35,7 @@ export class ReasonService extends BaseService<Reason>{
         if (!currentUserRole.includes(Role.ADMIN)) {
             reasons = reasons.filter(reason => reason.roles.some(role => currentUserRole.includes(role)));
         }
-        
+
         return reasons;
     }
 
@@ -50,6 +50,16 @@ export class ReasonService extends BaseService<Reason>{
         const updatedReason = await this.reasonRepository.save(reason);
 
         return updatedReason;
+    }
+
+    async deleteReason(id: string): Promise<boolean> {
+        const reason = await this.findOne(id);
+        if (!reason) {
+            throw new NotFoundException(`Reason with id ${id} not found`);
+        }
+
+        const deletedReason = await this.reasonRepository.delete(id);
+        return deletedReason.affected > 0;
     }
 
     get currentUser() {
