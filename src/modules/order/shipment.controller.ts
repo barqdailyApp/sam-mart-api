@@ -34,6 +34,7 @@ import { GetCommentQueryRequest } from '../support-ticket/dto/request/get-commen
 import { AddShipmentFeedBackRequest } from './dto/request/add-shipment-feedback.request';
 import { CancelShipmentRequest } from './dto/request/cancel-shipment.request';
 import { ShipmentsResponse } from './dto/response/client-response/shipments.response';
+import { ShipmentResponse } from './dto/response/shipment.response';
 
 @ApiTags('Shipment')
 @ApiHeader({
@@ -120,7 +121,10 @@ export class ShipmentController {
     @Param('driver_id') driver_id: string,
   ) {
     return new ActionResponse(
-      await this.shipmentService.assignDriver(shipment_id, driver_id),
+      plainToInstance(
+        ShipmentResponse,
+        await this.shipmentService.assignDriver(shipment_id, driver_id),
+      ),
     );
   }
 
@@ -129,9 +133,12 @@ export class ShipmentController {
     @Param('shipment_id') shipment_id: string,
     @Body() req: CancelShipmentRequest
   ) {
-    const canceledShipment = await this.shipmentService.cancelShipment(shipment_id, req);
-    const result = new ShipmentsResponse(canceledShipment);
-    return new ActionResponse(result);
+    return new ActionResponse(
+      plainToInstance(
+        ShipmentResponse,
+        await this.shipmentService.cancelShipment(shipment_id, req),
+      ),
+    );
   }
 
   // admin convert order from scheduled to fast delivery [Order Controller]
