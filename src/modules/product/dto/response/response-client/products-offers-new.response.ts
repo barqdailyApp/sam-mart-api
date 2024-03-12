@@ -22,6 +22,8 @@ export class ProductsOffersNewResponse {
   @Expose() section_id: string;
   @Expose() product_category_price_id: string;
   @Expose() is_quantity_available: boolean;
+  @Expose() warehouse_quantity: number;
+
   @Expose() offer_id: string;
   @Expose() offer_price: number;
   @Expose() product_id: string;
@@ -62,6 +64,9 @@ export class ProductsOffersNewResponse {
       0
         ? false
         : true;
+        this.warehouse_quantity =
+        product.warehouses_products.reduce((acc, cur) => acc + cur.quantity, 0) /
+        product_measurement.conversion_factor; 
     this.product_id = product.id;
     this.product_name_ar = product.name_ar;
     this.product_name_en = product.name_en;

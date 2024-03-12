@@ -22,6 +22,7 @@ export class ShipmentDashboardResponse {
     this.order = {
       id: shipments.order.id,
       number: shipments.order.number,
+      transaction_number:shipments.order.transaction_number,
       total_price: shipments.order.total_price,
       is_paid: shipments.order.is_paid,
       payment_method: shipments.order.payment_method,

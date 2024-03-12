@@ -6,6 +6,7 @@ import { MeasurementUnitModule } from '../measurement-unit/measurement-unit.modu
 import { SubcategoryService } from '../subcategory/subcategory.service';
 import { ProductClientService } from './product-client.service';
 import { ProductClientController } from './product-client.controller';
+import { NotificationModule } from '../notification/notification.module';
 
 @Module({
   controllers: [ProductDashboardController, ProductClientController],
@@ -15,7 +16,7 @@ import { ProductClientController } from './product-client.controller';
     ProductClientService,
     ProductDashboardService,
   ],
-  imports: [MeasurementUnitModule],
+  imports: [MeasurementUnitModule,NotificationModule],
   exports: [],
 })
 export class ProductModule {}

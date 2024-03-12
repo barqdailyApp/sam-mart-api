@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
-import { FcmIntegrationService } from '../../../integration/notify/fcm-integration.service';
+import { FcmIntegrationService } from '../../integration/notify/fcm-integration.service';
 import { UserService } from 'src/modules/user/user.service';
 import { User } from 'src/infrastructure/entities/user/user.entity';
 import { BaseUserService } from 'src/core/base/service/user-service.base';
@@ -18,8 +18,9 @@ import {
   applyQueryFilters,
   applyQuerySort,
 } from 'src/core/helpers/service-related.helper';
-import { SendToUsersNotificationRequest } from '../dto/requests/send-to-users-notification.request';
+import { SendToUsersNotificationRequest } from './dto/requests/send-to-users-notification.request';
 import { NotificationTypes } from 'src/infrastructure/data/enums/notification-types.enum';
+import { NotificationQuery } from './dto/filters/notification.query';
 
 @Injectable()
 export class NotificationService extends BaseUserService<NotificationEntity> {
@@ -35,15 +36,7 @@ export class NotificationService extends BaseUserService<NotificationEntity> {
     super(_repo, request);
   }
   //get id and status from argument and update is read
-  async toggleRead(isRead: boolean, id: string) {
-    const notification = await this._repo.findOneBy({ id: id });
-    if (!notification)
-      throw new BadRequestException('message.notification_not_found');
-    notification.is_read = isRead;
-    if (isRead) notification.seen_at = new Date();
 
-    return await this._repo.save(notification);
-  }
   override async create(data: NotificationEntity) {
     data.is_read = false;
     console.log(data);
@@ -66,19 +59,30 @@ export class NotificationService extends BaseUserService<NotificationEntity> {
       throw new BadRequestException('message.notification_not_found');
     return notification;
   }
-  async getAllMyNotifications() {
-    const notifications = await this._repo.find({
-      where: { user_id: this.currentUser.id },
-    });
-    return notifications;
-  }
-  async findAll(options?: PaginatedRequest): Promise<NotificationEntity[]> {
-    applyQueryFilters(options, `user_id=${super.currentUser.id}`);
+  async getAllMyNotifications(notificationQuery: NotificationQuery) {
+    const { limit, page } = notificationQuery;
+    const skip = (page - 1) * limit;
 
-    applyQuerySort(options, 'created_at=desc');
+    const [notifications, total] = await this._repo
+      .createQueryBuilder('notification')
+      .where('notification.user_id = :user_id', {
+        user_id: this.currentUser.id,
+      })
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
 
-    return await super.findAll(options);
+    // notifications Be seen by user
+    for (let index = 0; index < notifications.length; index++) {
+      this._repo.update(notifications[index].id, {
+        is_read: true,
+        seen_at: new Date(),
+      });
+    }
+
+    return { notifications, total };
   }
+
   async sendToUsers(
     sendToUsersNotificationRequest: SendToUsersNotificationRequest,
   ) {
@@ -104,4 +108,5 @@ export class NotificationService extends BaseUserService<NotificationEntity> {
       }
     }
   }
+  
 }
