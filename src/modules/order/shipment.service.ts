@@ -141,7 +141,6 @@ export class ShipmentService extends BaseService<Shipment> {
         warehouse_id: driver.warehouse_id,
       },
       relations: ['order', 'warehouse', 'order.user', 'order.address'],
-      relations: ['order', 'warehouse', 'order.user', 'order.address'],
     });
     if (!shipment || shipment.status !== ShipmentStatusEnum.PROCESSING) {
       throw new NotFoundException('Shipment not found');
