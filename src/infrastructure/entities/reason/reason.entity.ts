@@ -9,7 +9,10 @@ import { Role } from "src/infrastructure/data/enums/role.enum";
 @Entity()
 export class Reason extends AuditableEntity {
     @Column()
-    title: string;
+    name_en: string;
+
+    @Column()
+    name_ar: string;
 
     @Column({
         type: 'enum',

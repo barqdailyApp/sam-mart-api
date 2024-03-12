@@ -24,6 +24,7 @@ import { WorkingAreaModule } from './working-area/working-area.module';
 import { TransactionModule } from './transaction/transaction.module';
 import { NotificationModule } from "./notification/notification.module";
 import { PaymentMethodModule } from './payment_method/payment_method.module';
+import { ReasonModule } from "./reason/reason.module";
 
 
 @Module({
@@ -52,7 +53,8 @@ import { PaymentMethodModule } from './payment_method/payment_method.module';
     WorkingAreaModule,
     TransactionModule,
     NotificationModule,
-    PaymentMethodModule
+    PaymentMethodModule,
+    ReasonModule
   ],
   exports: [],
   providers: [],
