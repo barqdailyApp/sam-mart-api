@@ -9,9 +9,10 @@ export class PaymentMethodRequest {
   @IsString()
   payment_method_id: string;
 
-  @ApiProperty({required: false})
+  @ApiProperty()
   @IsOptional()
   @IsString()
+  @ValidateIf((obj) => obj. payment_method_id !=null)
   transaction_number: string;
 }
 
