@@ -8,6 +8,7 @@ import {
     Put,
     Delete,
     Inject,
+    Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags, ApiHeader } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
@@ -20,6 +21,7 @@ import { Roles } from '../authentication/guards/roles.decorator';
 import { CreateReasonRequest } from './dto/request/create-reason.request';
 import { ReasonService } from './reason.service';
 import { Reason } from 'src/infrastructure/entities/reason/reason.entity';
+import { GetReasonQueryRequest } from './dto/request/get-reason-query.requst';
 @ApiBearerAuth()
 @ApiHeader({
     name: 'Accept-Language',
@@ -31,7 +33,8 @@ import { Reason } from 'src/infrastructure/entities/reason/reason.entity';
 @Controller('reason')
 export class ReasonController {
     constructor(
-        private readonly reasonService: ReasonService
+        private readonly reasonService: ReasonService,
+        private readonly _i18nResponse: I18nResponse,
     ) { }
 
     @Post("create")
@@ -44,4 +47,13 @@ export class ReasonController {
         );
     }
 
+    @Get("all")
+    async getAllReasons(
+        @Query() query: GetReasonQueryRequest
+    ): Promise<ActionResponse<Reason[]>> {
+        const reasons = await this.reasonService.getAll(query);
+        return new ActionResponse<Reason[]>(
+            this._i18nResponse.entity(reasons)
+        );
+    }
 }
