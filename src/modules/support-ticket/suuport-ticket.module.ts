@@ -4,10 +4,11 @@ import { FileService } from '../file/file.service';
 import { SupportTicketController } from './support-ticket.controller';
 import { TicketCommentService } from './ticket-comment.service';
 import { GatewaysModule } from 'src/integration/gateways/gateways.module';
+import { ReasonService } from '../reason/reason.service';
 
 @Module({
     controllers: [SupportTicketController],
-    providers: [SupportTicketService, TicketCommentService, FileService],
+    providers: [SupportTicketService, TicketCommentService, FileService, ReasonService],
     imports: [GatewaysModule]
 })
 export class SupportTicketModule {

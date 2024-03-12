@@ -6,16 +6,14 @@ import { BaseService } from 'src/core/base/service/service.base';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { CreateTicketRequest } from './dto/request/create-ticket.request';
-import { UploadFileRequest } from '../file/dto/requests/upload-file.request';
 import { FileService } from '../file/file.service';
 import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 import { SupportTicketStatus } from 'src/infrastructure/data/enums/support-ticket-status.enum';
 import { TicketAttachment } from 'src/infrastructure/entities/support-ticket/ticket-attachement.entity';
-import { SupportTicketSubject } from 'src/infrastructure/entities/support-ticket/suppot-ticket-subject.entity';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
-import { CreateSupportTicketSubjectRequest } from './dto/request/create-support-subject.request';
 import { TicketCommentService } from './ticket-comment.service';
-import { SupportTicketGateway } from 'src/integration/gateways/support-ticket.gateway';
+import { ReasonService } from '../reason/reason.service';
+import { ReasonType } from 'src/infrastructure/data/enums/reason-type.enum';
 
 
 @Injectable()
@@ -23,10 +21,10 @@ export class SupportTicketService extends BaseService<SupportTicket> {
     constructor(
         @InjectRepository(SupportTicket) private readonly supportTicketRepository: Repository<SupportTicket>,
         @InjectRepository(TicketAttachment) private readonly ticketAttachmentRepository: Repository<TicketAttachment>,
-        @InjectRepository(SupportTicketSubject) private readonly supportTicketSubjectRepository: Repository<SupportTicketSubject>,
 
         @Inject(REQUEST) private readonly request: Request,
         @Inject(FileService) private _fileService: FileService,
+        @Inject(ReasonService) private readonly reasonService: ReasonService,
 
         private readonly ticketCommentService: TicketCommentService,
 
@@ -51,7 +49,7 @@ export class SupportTicketService extends BaseService<SupportTicket> {
             attachedFile = await this.ticketAttachmentRepository.save(createAttachedFile);
         }
 
-        const subject = await this.supportTicketSubjectRepository.findOne({ where: { id: subject_id } });
+        const subject = await this.reasonService.findOne({ id: subject_id, type: ReasonType.SUPPORT_TICKET });
         if (!subject) throw new BadRequestException('Subject not found');
 
         const newTicket = await this.supportTicketRepository.create({
@@ -63,7 +61,7 @@ export class SupportTicketService extends BaseService<SupportTicket> {
 
         const savedTicket = await this.supportTicketRepository.save(newTicket);
         await this.ticketCommentService.addComment(savedTicket.id, {
-            comment_text: description ?? subject.title,
+            comment_text: description ?? subject.name_en,
             file: file ?? null
         });
 
@@ -92,30 +90,6 @@ export class SupportTicketService extends BaseService<SupportTicket> {
 
         ticket.status = status;
         return await this.supportTicketRepository.save(ticket);
-    }
-
-    async createSubject(subject: CreateSupportTicketSubjectRequest) {
-        const savedSubject = await this.supportTicketSubjectRepository.create(subject);
-        return await this.supportTicketSubjectRepository.save(savedSubject);
-    }
-
-    async getSubjects() {
-        return await this.supportTicketSubjectRepository.find();
-    }
-
-    async updateSubject(subjectId: string, subject: CreateSupportTicketSubjectRequest) {
-        const foundSubject = await this.supportTicketSubjectRepository.findOne({ where: { id: subjectId } });
-        if (!foundSubject) throw new BadRequestException('Subject not found');
-
-        foundSubject.title = subject.title;
-        return await this.supportTicketSubjectRepository.save(foundSubject);
-    }
-
-    async deleteSubject(subjectId: string) {
-        const foundSubject = await this.supportTicketSubjectRepository.findOne({ where: { id: subjectId } });
-        if (!foundSubject) throw new BadRequestException('Subject not found');
-
-        return await this.supportTicketSubjectRepository.remove(foundSubject);
     }
 
     get currentUser() {
