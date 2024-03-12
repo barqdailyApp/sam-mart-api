@@ -424,6 +424,17 @@ export class ShipmentService extends BaseService<Shipment> {
       type: ReasonType.CANCEL_ORDER
     });
 
+    if (
+      !reason ||
+      !reason.roles.some(role => currentUserRole.includes(role))
+    ) {
+      throw new BadRequestException('Reason not found');
+    }
+
+    if (!reason) {
+      throw new BadRequestException('Reason not found');
+    }
+
     let to_rooms = ['admin', shipment.order.user_id];
     if (shipment.status === ShipmentStatusEnum.PENDING) {
       to_rooms.push(shipment.warehouse_id);
