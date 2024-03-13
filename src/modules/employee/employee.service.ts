@@ -121,6 +121,16 @@ export class EmployeeService extends BaseService<Employee> {
         applyQueryIncludes(query, 'user');
         return await this.findAll(query);
     }
+    async singleEmployees(id_employee:string){
+        const employee = await this.employeeRepository.findOne({
+            where: { id: id_employee },
+            relations: ['user']
+        });
+        if (!employee) {
+            throw new BadRequestException('Employee not found');
+        }
+        return employee
+    }
 
     async updateEmployee(req: UpdateEmployeeRequest, employee_id: string) {
         const employee = await this.employeeRepository.findOne({
