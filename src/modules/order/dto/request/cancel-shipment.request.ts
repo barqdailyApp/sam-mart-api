@@ -1,9 +1,9 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsString, IsOptional } from "class-validator";
+import { IsNotEmpty, IsString, IsOptional, IsUUID } from "class-validator";
 
 export class CancelShipmentRequest {
-    @ApiProperty({ nullable: true })
+    @ApiProperty({ nullable: false })
     @IsOptional()
-    @IsString()
-    reason: string;
+    @IsUUID()
+    reason_id: string;
 }

@@ -249,37 +249,6 @@ export class OrderController {
   }
 
   @Roles(Role.ADMIN)
-  @Post("/return-order-reasons")
-  async addReturnOrderReason(
-    @Body() req: AddReturnOrderReason
-  ) {
-    return new ActionResponse(await this.returnOrderService.addReturnProductReason(req.reason));
-  }
-
-  @Get("return-order-reasons")
-  async getReturnOrderReasons(
-  ) {
-    return new ActionResponse(await this.returnOrderService.getReturnProductReasons());
-  }
-
-  @Roles(Role.ADMIN)
-  @Patch("/return-order-reasons/:reason_id")
-  async updateReturnOrderReason(
-    @Param('reason_id') reason_id: string,
-    @Body() req: AddReturnOrderReason
-  ) {
-    return new ActionResponse(await this.returnOrderService.updateReturnProductReason(reason_id, req.reason));
-  }
-
-  @Roles(Role.ADMIN)
-  @Delete("/return-order-reasons/:reason_id")
-  async deleteReturnOrderReason(
-    @Param('reason_id') reason_id: string,
-  ) {
-    return new ActionResponse(await this.returnOrderService.deleteReturnProductReason(reason_id));
-  }
-
-  @Roles(Role.ADMIN)
   @Post('broadcast-order-drivers/:order_id')
   async broadcastOrderDrivers(@Param('order_id') order_id: string) {
     return new ActionResponse(await this.orderService.broadcastOrderDrivers(order_id));

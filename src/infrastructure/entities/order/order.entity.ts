@@ -12,6 +12,7 @@ import { Shipment } from './shipment.entity';
 import { Transaction } from '../wallet/transaction.entity';
 import { ReturnOrder } from './return-order/return-order.entity';
 import { PaymentMethod } from '../payment_method/payment_method.entity';
+import { Reason } from '../reason/reason.entity';
 
 @Entity()
 export class Order extends OwnedEntity {
