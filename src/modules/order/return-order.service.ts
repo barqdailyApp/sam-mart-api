@@ -1,8 +1,8 @@
 import {
-    BadRequestException,
-    Inject,
-    Injectable,
-    NotFoundException,
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { REQUEST } from '@nestjs/core';
@@ -33,258 +33,257 @@ import { ReasonType } from 'src/infrastructure/data/enums/reason-type.enum';
 
 @Injectable()
 export class ReturnOrderService extends BaseService<ReturnOrder> {
-    constructor(
-        @InjectRepository(Order)
-        private orderRepository: Repository<Order>,
-        @InjectRepository(Shipment)
-        private shipmentRepository: Repository<Shipment>,
-        @InjectRepository(ShipmentProduct)
-        private shipmentProductRepository: Repository<ShipmentProduct>,
-        @InjectRepository(Driver)
-        private driverRepository: Repository<Driver>,
+  constructor(
+    @InjectRepository(Order)
+    private orderRepository: Repository<Order>,
+    @InjectRepository(Shipment)
+    private shipmentRepository: Repository<Shipment>,
+    @InjectRepository(ShipmentProduct)
+    private shipmentProductRepository: Repository<ShipmentProduct>,
+    @InjectRepository(Driver)
+    private driverRepository: Repository<Driver>,
 
-        @InjectRepository(ReturnOrder)
-        private returnOrderRepository: Repository<ReturnOrder>,
-        @InjectRepository(ReturnOrderProduct)
-        private returnOrderProductRepository: Repository<ReturnOrderProduct>,
-        @InjectRepository(ReturnProductReason)
-        private returnProductReasonRepository: Repository<ReturnProductReason>,
-        @InjectRepository(Reason)
-        private reasonRepository: Repository<Reason>,
+    @InjectRepository(ReturnOrder)
+    private returnOrderRepository: Repository<ReturnOrder>,
+    @InjectRepository(ReturnOrderProduct)
+    private returnOrderProductRepository: Repository<ReturnOrderProduct>,
+    @InjectRepository(ReturnProductReason)
+    private returnProductReasonRepository: Repository<ReturnProductReason>,
+    @InjectRepository(Reason)
+    private reasonRepository: Repository<Reason>,
 
-        @Inject(REQUEST) readonly request: Request,
-        private readonly orderGateway: OrderGateway,
-        private readonly notificationService: NotificationService,
+    @Inject(REQUEST) readonly request: Request,
+    private readonly orderGateway: OrderGateway,
+    private readonly notificationService: NotificationService,
+  ) {
+    super(returnOrderRepository);
+  }
+
+  async returnOrder(order_id: string, req: ReturnOrderRequest) {
+    const { returned_shipment_products } = req;
+    const returned_shipment_products_id = returned_shipment_products.map(
+      (p) => p.shipment_product_id,
+    );
+
+    // check if the order exists
+    const order = await this.orderRepository.findOne({
+      where: { id: order_id },
+    });
+    if (!order) throw new NotFoundException('message.order_not_found');
+
+    // check if the order belongs to the current user
+    if (order.user_id !== this.currentUser.id) {
+      throw new BadRequestException('message.not_allowed_to_return');
+    }
+
+    // check if the order is delivered
+    const shipment = await this.shipmentRepository.findOne({
+      where: { order_id },
+      relations: ['warehouse'],
+    });
+    if (!shipment) throw new NotFoundException('shipment not found');
+
+    if (
+      shipment.status !== ShipmentStatusEnum.DELIVERED &&
+      shipment.status !== ShipmentStatusEnum.COMPLETED &&
+      shipment.status !== ShipmentStatusEnum.CANCELED
     ) {
-        super(returnOrderRepository);
+      throw new BadRequestException(
+        'message.not_allowed_to_return_not_delivered',
+      );
     }
 
-    async returnOrder(order_id: string, req: ReturnOrderRequest) {
-        const { returned_shipment_products } = req;
-        const returned_shipment_products_id = returned_shipment_products.map(
-            (p) => p.shipment_product_id,
-        );
+    // check if the return products IDs are valid and belongs to the order
+    const shipmentProducts = await this.shipmentProductRepository.find({
+      where: {
+        shipment_id: shipment.id,
+        id: In(returned_shipment_products_id),
+      },
+    });
 
-        // check if the order exists
-        const order = await this.orderRepository.findOne({
-            where: { id: order_id },
-        });
-        if (!order) throw new NotFoundException('order not found');
-
-        // check if the order belongs to the current user
-        if (order.user_id !== this.currentUser.id) {
-            throw new BadRequestException('you are not allowed to return this order');
-        }
-
-        // check if the order is delivered
-        const shipment = await this.shipmentRepository.findOne({
-            where: { order_id },
-            relations: ['warehouse'],
-        });
-        if (!shipment) throw new NotFoundException('shipment not found');
-
-        if (
-            shipment.status !== ShipmentStatusEnum.DELIVERED &&
-            shipment.status !== ShipmentStatusEnum.COMPLETED &&
-            shipment.status !== ShipmentStatusEnum.CANCELED
-        ) {
-            throw new BadRequestException(
-                'you can not return this order that is not delivered yet',
-            );
-        }
-
-        // check if the return products IDs are valid and belongs to the order
-        const shipmentProducts = await this.shipmentProductRepository.find({
-            where: {
-                shipment_id: shipment.id,
-                id: In(returned_shipment_products_id),
-            },
-        });
-
-        if (shipmentProducts.length !== returned_shipment_products.length) {
-            throw new BadRequestException('invalid products IDs');
-        }
-
-        const canNotReturnProducts = shipmentProducts.find(
-            (p) => p.can_return === false,
-        );
-        if (canNotReturnProducts) {
-            throw new BadRequestException(
-                `you can't return this product alread returned ${JSON.stringify(
-                    canNotReturnProducts,
-                )}`,
-            );
-        }
-
-        // check if the return products quantities are valid based on the shipment products
-        const invalidQuantityForProducts = returned_shipment_products.filter(
-            (p) => {
-                const product = shipmentProducts.find(
-                    (sp) => sp.id === p.shipment_product_id,
-                );
-                return product.quantity < p.quantity;
-            },
-        );
-
-        if (invalidQuantityForProducts.length > 0) {
-            throw new BadRequestException(
-                `invalid quantity for products ${JSON.stringify(
-                    invalidQuantityForProducts,
-                )}`,
-            );
-        }
-
-        // check if the return products reasons IDs are valid
-        const returnedProductsReasons = await this.reasonRepository.find({
-            where: {
-                id: In(returned_shipment_products.map((p) => p.reason_id)),
-                type: ReasonType.RETURN_ORDER
-            }
-        })
-
-        if (
-            returnedProductsReasons.length !==
-            new Set(returned_shipment_products.map((p) => p.reason_id)).size
-        ) {
-            throw new BadRequestException(`invalid return reasons IDs`);
-        }
-
-        const returnOrder = await this.returnOrderRepository.create({
-            status: ReturnOrderStatus.PENDING,
-            order,
-            returnOrderProducts: req.returned_shipment_products,
-            customer_note: req.customer_note,
-        });
-
-        await this.shipmentProductRepository.update(
-            {
-                id: In(returned_shipment_products_id),
-            },
-            {
-                can_return: false,
-            },
-        );
-
-        const savedReturnOrder = await this.returnOrderRepository.save(returnOrder);
-        await this.orderGateway.notifyReturnOrder({
-            to_rooms: ['admin'],
-            body: {
-                client: this.currentUser,
-                driver: null,
-                order,
-                return_order: savedReturnOrder,
-                warehouse: shipment.warehouse,
-            },
-        });
-        await this.notificationService.create(
-            new NotificationEntity({
-                user_id: this.currentUser.id,
-                url: savedReturnOrder.id,
-                type: NotificationTypes.ORDERS,
-                title_ar: 'منتجع',
-                title_en: 'return order',
-                text_ar: 'هل تريد ارجاع هذا الطلب ؟',
-                text_en: 'Do you want to return this order?',
-            }),
-        );
-
-        return savedReturnOrder;
+    if (shipmentProducts.length !== returned_shipment_products.length) {
+      throw new BadRequestException('message.invalid_products_ids');
     }
 
-    // this method is used by the admin to update the return order status
-    async updateReturnOrderStatus(
-        return_order_id: string,
-        req: UpdateReturnOrderStatusRequest,
+    const canNotReturnProducts = shipmentProducts.find(
+      (p) => p.can_return === false,
+    );
+    if (canNotReturnProducts) {
+      throw new BadRequestException(
+        "message.not_allowed_to_return_already_returned" +
+          JSON.stringify(canNotReturnProducts),
+      );
+    }
+
+    // check if the return products quantities are valid based on the shipment products
+    const invalidQuantityForProducts = returned_shipment_products.filter(
+      (p) => {
+        const product = shipmentProducts.find(
+          (sp) => sp.id === p.shipment_product_id,
+        );
+        return product.quantity < p.quantity;
+      },
+    );
+
+    if (invalidQuantityForProducts.length > 0) {
+      throw new BadRequestException(
+        `invalid quantity for products ${JSON.stringify(
+          invalidQuantityForProducts,
+        )}`,
+      );
+    }
+
+    // check if the return products reasons IDs are valid
+    const returnedProductsReasons = await this.reasonRepository.find({
+      where: {
+        id: In(returned_shipment_products.map((p) => p.reason_id)),
+        type: ReasonType.RETURN_ORDER,
+      },
+    });
+
+    if (
+      returnedProductsReasons.length !==
+      new Set(returned_shipment_products.map((p) => p.reason_id)).size
     ) {
-        const returnOrder = await this.returnOrderRepository.findOne({
-            where: { id: return_order_id },
-            relations: ['order', 'order.user'],
-        });
-
-        if (!returnOrder) throw new NotFoundException('return order not found');
-
-        const { return_order_products, admin_note, driver_id, status } = req;
-        const returned_products_id = return_order_products.map(
-            (p) => p.return_order_product_id,
-        );
-
-        // check if the return order products IDs are valid
-        const returnOrderProducts = await this.returnOrderProductRepository.find({
-            where: {
-                id: In(returned_products_id),
-                return_order_id,
-            },
-        });
-
-        if (returnOrderProducts.length !== return_order_products.length) {
-            throw new BadRequestException('invalid return order products IDs');
-        }
-
-        let driver: Driver = null;
-        if (driver_id) {
-            driver = await this.driverRepository.findOne({
-                where: { id: driver_id },
-            });
-            if (!driver) throw new BadRequestException('driver not found');
-        }
-
-        // mapped the return order products with the updated status
-        const mappedUpdatedReturnOrderProducts = returnOrderProducts.map((p) => {
-            const product = return_order_products.find(
-                (rp) => rp.return_order_product_id === p.id,
-            );
-            return {
-                ...p,
-                status: product.status,
-            };
-        });
-
-        await this.returnOrderProductRepository.save(
-            mappedUpdatedReturnOrderProducts,
-        );
-        const savedReturnOrder = await this.returnOrderRepository.save(returnOrder);
-
-        const shipment = await this.shipmentRepository.findOne({
-            where: { order_id: returnOrder.order_id },
-            relations: ['warehouse'],
-        });
-
-        await this.orderGateway.notifyReturnOrder({
-            to_rooms: [returnOrder.order.user.id, driver?.id],
-            body: {
-                client: returnOrder.order.user,
-                driver: driver,
-                order: returnOrder.order,
-                return_order: savedReturnOrder,
-                warehouse: shipment.warehouse,
-            },
-        });
-        await this.notificationService.create(
-            new NotificationEntity({
-                user_id: returnOrder.order.user_id,
-                url: returnOrder.id,
-                type: NotificationTypes.ORDERS,
-                title_ar: 'منتجع',
-                title_en: 'return order',
-                text_ar: 'تم تحديث طلب المرتجع',
-                text_en: 'Return request has been updated',
-            }),
-        );
-        return savedReturnOrder;
+      throw new BadRequestException("message.invalid_return_reasons_ids");
     }
 
-    async getReturnOrders(query: PaginatedRequest) {
-        query.filters ??= [];
-        if (this.currentUser.roles.includes(Role.CLIENT)) {
-            query.filters.push(`order.user_id=${this.currentUser.id}`);
-        } else if (this.currentUser.roles.includes(Role.DRIVER)) {
-            query.filters.push(`driver_id=${this.currentUser.id}`);
-        }
+    const returnOrder = await this.returnOrderRepository.create({
+      status: ReturnOrderStatus.PENDING,
+      order,
+      returnOrderProducts: req.returned_shipment_products,
+      customer_note: req.customer_note,
+    });
 
-        return await this.findAll(query);
+    await this.shipmentProductRepository.update(
+      {
+        id: In(returned_shipment_products_id),
+      },
+      {
+        can_return: false,
+      },
+    );
+
+    const savedReturnOrder = await this.returnOrderRepository.save(returnOrder);
+    await this.orderGateway.notifyReturnOrder({
+      to_rooms: ['admin'],
+      body: {
+        client: this.currentUser,
+        driver: null,
+        order,
+        return_order: savedReturnOrder,
+        warehouse: shipment.warehouse,
+      },
+    });
+    await this.notificationService.create(
+      new NotificationEntity({
+        user_id: this.currentUser.id,
+        url: savedReturnOrder.id,
+        type: NotificationTypes.ORDERS,
+        title_ar: 'منتجع',
+        title_en: 'return order',
+        text_ar: 'هل تريد ارجاع هذا الطلب ؟',
+        text_en: 'Do you want to return this order?',
+      }),
+    );
+
+    return savedReturnOrder;
+  }
+
+  // this method is used by the admin to update the return order status
+  async updateReturnOrderStatus(
+    return_order_id: string,
+    req: UpdateReturnOrderStatusRequest,
+  ) {
+    const returnOrder = await this.returnOrderRepository.findOne({
+      where: { id: return_order_id },
+      relations: ['order', 'order.user'],
+    });
+
+    if (!returnOrder) throw new NotFoundException('return order not found');
+
+    const { return_order_products, admin_note, driver_id, status } = req;
+    const returned_products_id = return_order_products.map(
+      (p) => p.return_order_product_id,
+    );
+
+    // check if the return order products IDs are valid
+    const returnOrderProducts = await this.returnOrderProductRepository.find({
+      where: {
+        id: In(returned_products_id),
+        return_order_id,
+      },
+    });
+
+    if (returnOrderProducts.length !== return_order_products.length) {
+      throw new BadRequestException("message.invalid_return_order_products_ids");
     }
 
-    get currentUser(): User {
-        return this.request.user;
+    let driver: Driver = null;
+    if (driver_id) {
+      driver = await this.driverRepository.findOne({
+        where: { id: driver_id },
+      });
+      if (!driver) throw new BadRequestException("message.driver_not_found");
     }
+
+    // mapped the return order products with the updated status
+    const mappedUpdatedReturnOrderProducts = returnOrderProducts.map((p) => {
+      const product = return_order_products.find(
+        (rp) => rp.return_order_product_id === p.id,
+      );
+      return {
+        ...p,
+        status: product.status,
+      };
+    });
+
+    await this.returnOrderProductRepository.save(
+      mappedUpdatedReturnOrderProducts,
+    );
+    const savedReturnOrder = await this.returnOrderRepository.save(returnOrder);
+
+    const shipment = await this.shipmentRepository.findOne({
+      where: { order_id: returnOrder.order_id },
+      relations: ['warehouse'],
+    });
+
+    await this.orderGateway.notifyReturnOrder({
+      to_rooms: [returnOrder.order.user.id, driver?.id],
+      body: {
+        client: returnOrder.order.user,
+        driver: driver,
+        order: returnOrder.order,
+        return_order: savedReturnOrder,
+        warehouse: shipment.warehouse,
+      },
+    });
+    await this.notificationService.create(
+      new NotificationEntity({
+        user_id: returnOrder.order.user_id,
+        url: returnOrder.id,
+        type: NotificationTypes.ORDERS,
+        title_ar: 'منتجع',
+        title_en: 'return order',
+        text_ar: 'تم تحديث طلب المرتجع',
+        text_en: 'Return request has been updated',
+      }),
+    );
+    return savedReturnOrder;
+  }
+
+  async getReturnOrders(query: PaginatedRequest) {
+    query.filters ??= [];
+    if (this.currentUser.roles.includes(Role.CLIENT)) {
+      query.filters.push(`order.user_id=${this.currentUser.id}`);
+    } else if (this.currentUser.roles.includes(Role.DRIVER)) {
+      query.filters.push(`driver_id=${this.currentUser.id}`);
+    }
+
+    return await this.findAll(query);
+  }
+
+  get currentUser(): User {
+    return this.request.user;
+  }
 }

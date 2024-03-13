@@ -181,7 +181,7 @@ export class EmployeeService extends BaseService<Employee> {
             relations: ['user']
         });
         if (!employee) {
-            throw new BadRequestException('Employee not found');
+            throw new BadRequestException('message.employee_not_found');
         }
 
         const timestamp = new Date().getTime();

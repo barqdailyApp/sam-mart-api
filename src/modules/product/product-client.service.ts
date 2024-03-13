@@ -569,7 +569,7 @@ export class ProductClientService {
     if (user_id) {
       const cartUser = await this.cart_repo.findOne({ where: { user_id } });
       if (!cartUser) {
-        throw new NotFoundException('user not found');
+        throw new NotFoundException("message.user_not_found");
       }
 
       query = query.leftJoinAndSelect(
@@ -637,13 +637,13 @@ export class ProductClientService {
       where: { id: product_id },
     });
     if (!product) {
-      throw new NotFoundException('message_product_not_found');
+      throw new NotFoundException('message.product_not_found');
     }
     const section = await this.section_repo.findOne({
       where: { id: section_id },
     });
     if (!section) {
-      throw new NotFoundException('message_section_not_found');
+      throw new NotFoundException('message.section_not_found');
     }
     const favorite = await this.productFavorite_repo.findOne({
       where: {

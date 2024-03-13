@@ -111,23 +111,23 @@ export class ProductDashboardService {
       createProductOfferRequest;
     if (max_offer_quantity < min_offer_quantity) {
       throw new BadRequestException(
-        'max_offer_quantity_must_be_greater_than_min_offer_quantity',
+        'message.max_offer_quantity_must_be_greater_than_min_offer_quantity',
       );
     }
     if (end_date < start_date) {
-      throw new BadRequestException('end_date_must_be_greater_than_start_date');
+      throw new BadRequestException('message.end_date_must_be_greater_than_start_date');
     }
     const productCategoryPrice = await this.productCategoryPrice_repo.findOne({
       where: { id: product_category_price_id },
     });
     if (!productCategoryPrice) {
-      throw new NotFoundException('message_product_category_price_not_found');
+      throw new NotFoundException('message.product_category_price_not_found');
     }
     const productOffer = await this.productOffer_repo.findOne({
       where: { product_category_price_id: product_category_price_id },
     });
     if (productOffer) {
-      throw new BadRequestException('message_product_offer_already_exist');
+      throw new BadRequestException('message.product_offer_already_exist');
     }
 
     const createProductOffer = this.productOffer_repo.create(
@@ -180,7 +180,7 @@ export class ProductDashboardService {
     let productOfferPrice = productOffer.price;
 
     if (!productOffer) {
-      throw new NotFoundException('message_product_offer_not_found');
+      throw new NotFoundException('message.product_offer_not_found');
     }
     if (discount_type != undefined && discount_value != undefined) {
       if (discount_type == DiscountType.VALUE) {
@@ -218,7 +218,7 @@ export class ProductDashboardService {
       where: { id: product_id },
     });
     if (!productOffer) {
-      throw new NotFoundException('message_product_offer_not_found');
+      throw new NotFoundException('message.product_offer_not_found');
     }
     return await this.productOffer_repo.delete({ id: product_id });
   }
@@ -233,7 +233,7 @@ export class ProductDashboardService {
       relations: { product_images: true },
     });
     if (!product) {
-      throw new NotFoundException('message_product_not_found');
+      throw new NotFoundException('message.product_not_found');
     }
 
     const resizedImage = await this.imageManager.resize(file, {
@@ -285,7 +285,7 @@ export class ProductDashboardService {
       where: { id: product_id },
     });
     if (!product) {
-      throw new NotFoundException('message_product_not_found');
+      throw new NotFoundException('message.product_not_found');
     }
     const productMeasurement = this.productMeasurementRepository.create({
       conversion_factor,
@@ -321,7 +321,7 @@ export class ProductDashboardService {
       where: { id: product_id },
     });
     if (!product) {
-      throw new NotFoundException('message_product_not_found');
+      throw new NotFoundException('message.product_not_found');
     }
     await this.productRepository.update(
       { id: product_id },
@@ -351,7 +351,7 @@ export class ProductDashboardService {
       where: { id: product_id },
     });
     if (!product) {
-      throw new NotFoundException('Product not found');
+      throw new NotFoundException("message.product_not_found");
     }
 
     // Check if the product measurement exists
@@ -359,7 +359,7 @@ export class ProductDashboardService {
       where: { id: product_measurement_unit_id },
     });
     if (!productMeasurement) {
-      throw new NotFoundException('Product measurement not found');
+      throw new NotFoundException('message.product_measurement_not_found');
     }
 
     // Prepare the update data
@@ -374,7 +374,7 @@ export class ProductDashboardService {
       is_main_unit == true
     ) {
       throw new BadRequestException(
-        'The conversion factor must be 1 for the main unit',
+        "message.conversion_factor_must_be_1_for_main_unit",
       );
     }
 
@@ -394,7 +394,7 @@ export class ProductDashboardService {
 
         // If a main unit doesn't exist, throw an error
         if (!mainProductMeasurement) {
-          throw new NotFoundException('Main product measurement not found');
+          throw new NotFoundException('message.main_product_measurement_not_found');
         }
 
         // Link this unit to the found main unit by setting `base_unit_id` to the main unit's ID
@@ -421,7 +421,7 @@ export class ProductDashboardService {
       },
     });
     if (!product) {
-      throw new NotFoundException('message_product_not_found');
+      throw new NotFoundException('message.product_not_found');
     }
 
     //* Check if image exist
@@ -429,7 +429,7 @@ export class ProductDashboardService {
       where: { id: image_id },
     });
     if (!productImage) {
-      throw new NotFoundException('message_product_image_not_found');
+      throw new NotFoundException('message.product_image_not_found');
     }
 
     for (let index = 0; index < product.product_images.length; index++) {
@@ -829,7 +829,7 @@ export class ProductDashboardService {
       where: { id: product_id },
     });
     if (!product) {
-      throw new NotFoundException('message_product_not_found');
+      throw new NotFoundException('message.product_not_found');
     }
     return await this.productRepository.delete({ id: product_id });
   }
@@ -843,7 +843,7 @@ export class ProductDashboardService {
       relations: { product_images: true },
     });
     if (!product) {
-      throw new NotFoundException('message_product_not_found');
+      throw new NotFoundException('message.product_not_found');
     }
     if (product.product_images.length == 1) {
       throw new NotFoundException('There must be at least one photo');
@@ -860,7 +860,7 @@ export class ProductDashboardService {
       where: { id: product_id },
     });
     if (!product) {
-      throw new NotFoundException('message_product_not_found');
+      throw new NotFoundException('message.product_not_found');
     }
     // const measurement = await this.SingleProductMeasurement(
     //   product_id,
@@ -1008,7 +1008,7 @@ export class ProductDashboardService {
       where: { id: image_id },
     });
     if (!productImage) {
-      throw new NotFoundException('message_product_image_not_found');
+      throw new NotFoundException('message.product_image_not_found');
     }
     return productImage;
   }
@@ -1021,13 +1021,13 @@ export class ProductDashboardService {
       where: { id: product_id },
     });
     if (!product) {
-      throw new NotFoundException('message_product_not_found');
+      throw new NotFoundException('message.product_not_found');
     }
     const productMeasurement = await this.productMeasurementRepository.findOne({
       where: { id: product_measurement_id },
     });
     if (!productMeasurement) {
-      throw new NotFoundException('Product Measurement not found');
+      throw new NotFoundException('message.product_measurement_not_found');
     }
     return productMeasurement;
   }
