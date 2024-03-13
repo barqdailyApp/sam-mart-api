@@ -451,7 +451,8 @@ export class OrderService extends BaseUserService<Order> {
           ShipmentStatusEnum.PICKED_UP,
           ShipmentStatusEnum.CONFIRMED,
           ShipmentStatusEnum.PROCESSING,
-          ShipmentStatusEnum.DELIVERED
+          ShipmentStatusEnum.DELIVERED,
+          ShipmentStatusEnum.CANCELED
         
         ],
       });
