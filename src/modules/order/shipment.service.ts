@@ -259,7 +259,7 @@ export class ShipmentService extends BaseService<Shipment> {
       throw new NotFoundException('Shipment not found');
     }
 
-    shipment.order_on_processed_at = new Date();
+    shipment.order_ready_for_pickup_at = new Date();
     shipment.status = ShipmentStatusEnum.READY_FOR_PICKUP;
 
     await this.shipmentRepository.save(shipment);

@@ -47,6 +47,9 @@ export class Shipment extends AuditableEntity {
   order_on_processed_at: Date;
 
   @Column({ nullable: true })
+  order_ready_for_pickup_at: Date;
+
+  @Column({ nullable: true })
   order_shipped_at: Date;
 
   @Column({ nullable: true })
