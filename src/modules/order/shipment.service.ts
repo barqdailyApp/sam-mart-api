@@ -66,6 +66,7 @@ export class ShipmentService extends BaseService<Shipment> {
   }
 
   async getDriver(driver_id?: string) {
+
     return await this.driverRepository.findOne({
       where: {
         user_id: driver_id ?? this.request.user.id,
@@ -100,7 +101,7 @@ export class ShipmentService extends BaseService<Shipment> {
       where: {
         id: shipment.order_id,
       },
-      relations: ['address']
+      relations: ['address'],
     });
     order.is_paid = true;
     await this.driverRepository.save(driver);
@@ -177,17 +178,17 @@ export class ShipmentService extends BaseService<Shipment> {
   }
 
   async prepareShipment(id: string) {
-    const driver = await this.getDriver();
-    if (!driver) {
-      throw new NotFoundException('Driver not found');
-    }
     const shipment = await this.shipmentRepository.findOne({
       where: {
         id: id,
-        warehouse_id: driver.warehouse_id,
       },
-      relations: ['order', 'warehouse', 'order.user'],
+      relations: ['order', 'warehouse', 'order.user', 'driver', 'driver.user'],
     });
+  
+    const driver = await this.getDriver(shipment.driver.user_id);
+    if (!driver) {
+      throw new NotFoundException('Driver not found');
+    }
     if (!shipment || shipment.status !== ShipmentStatusEnum.CONFIRMED) {
       throw new NotFoundException('Shipment not found');
     }
@@ -215,6 +216,79 @@ export class ShipmentService extends BaseService<Shipment> {
         type: NotificationTypes.ORDERS,
         title_ar: 'تحديث الطلب',
         title_en: 'order updated',
+        text_ar: 'جارى تجهيز الطلب',
+        text_en: 'order is being prepared',
+      }),
+    );
+
+    await this.notificationService.create(
+      new NotificationEntity({
+        user_id: shipment.driver.user_id,
+        url: shipment.order.id,
+        type: NotificationTypes.ORDERS,
+        title_ar: 'تحديث الطلب',
+        title_en: 'order updated',
+        text_ar: 'جارى تجهيز الطلب',
+        text_en: 'order is being prepared',
+      }),
+    );
+    return shipment;
+  }
+
+  async shipmentReadyForPickup(id: string) {
+    // const driver = await this.getDriver();
+    // if (!driver) {
+    //   throw new NotFoundException('Driver not found');
+    // }
+    const shipment = await this.shipmentRepository.findOne({
+      where: {
+        id: id,
+      },
+      relations: ['order', 'warehouse', 'order.user', 'driver', 'driver.user'],
+    });
+    const driver = await this.getDriver(shipment.driver.user_id);
+    if (!driver) {
+      throw new NotFoundException('Driver not found');
+    }
+    if (!shipment || shipment.status !== ShipmentStatusEnum.PROCESSING) {
+      throw new NotFoundException('Shipment not found');
+    }
+
+    shipment.order_on_processed_at = new Date();
+    shipment.status = ShipmentStatusEnum.READY_FOR_PICKUP;
+
+    await this.shipmentRepository.save(shipment);
+
+    await this.orderGateway.notifyOrderStatusChange({
+      action: ShipmentStatusEnum.READY_FOR_PICKUP,
+      to_rooms: ['admin', shipment.driver_id, shipment.order.user_id],
+      body: {
+        shipment,
+        order: shipment.order,
+        warehouse: shipment.warehouse,
+        client: shipment.order.user,
+        driver,
+      },
+    });
+    await this.notificationService.create(
+      new NotificationEntity({
+        user_id: shipment.order.user_id,
+        url: shipment.order.id,
+        type: NotificationTypes.ORDERS,
+        title_ar: 'تحديث الطلب',
+        title_en: 'order updated',
+        text_ar: 'تم تجهز الطلب من المخزن بنجاح',
+        text_en: 'The order has been successfully removed from the warehouse',
+      }),
+    );
+
+    await this.notificationService.create(
+      new NotificationEntity({
+        user_id: shipment.driver.user_id,
+        url: shipment.order.id,
+        type: NotificationTypes.ORDERS,
+        title_ar: 'تحديث الطلب',
+        title_en: 'order updated',
         text_ar: 'تم تجهز الطلب من المخزن بنجاح',
         text_en: 'The order has been successfully removed from the warehouse',
       }),
@@ -223,7 +297,6 @@ export class ShipmentService extends BaseService<Shipment> {
   }
 
   async acceptShipment(id: string) {
-
     return this.addDriverToShipment(
       id,
       AddDriverShipmentOption.DRIVER_ACCEPT_SHIPMENT,
@@ -377,7 +450,14 @@ export class ShipmentService extends BaseService<Shipment> {
 
     const shipment = await this.shipmentRepository.findOne({
       where: { id: shipment_id },
-      relations: ['order', 'warehouse', 'order.user', 'driver', 'driver.user', 'order.address'],
+      relations: [
+        'order',
+        'warehouse',
+        'order.user',
+        'driver',
+        'driver.user',
+        'order.address',
+      ],
     });
 
     if (!shipment) {
@@ -386,14 +466,14 @@ export class ShipmentService extends BaseService<Shipment> {
 
     const currentUserRole = this.currentUser.roles;
     const shipmentStatus = shipment.status;
-    const driver = await this.getDriver(this.currentUser.id)
+    const driver = await this.getDriver(this.currentUser.id);
 
     if (
       (currentUserRole.includes(Role.CLIENT) &&
         shipment.order.user_id !== this.currentUser.id) ||
       (currentUserRole.includes(Role.DRIVER) &&
-        shipment.driver_id !== driver.id) &&
-      !currentUserRole.includes(Role.ADMIN)
+        shipment.driver_id !== driver.id &&
+        !currentUserRole.includes(Role.ADMIN))
     ) {
       throw new UnauthorizedException(
         'You are not allowed to cancel this shipment',
@@ -406,10 +486,10 @@ export class ShipmentService extends BaseService<Shipment> {
       (currentUserRole.includes(Role.DRIVER) &&
         shipmentStatus === ShipmentStatusEnum.PENDING) ||
       shipmentStatus ===
-      (ShipmentStatusEnum.CANCELED ||
-        ShipmentStatusEnum.DELIVERED ||
-        ShipmentStatusEnum.RETRUNED ||
-        ShipmentStatusEnum.COMPLETED)
+        (ShipmentStatusEnum.CANCELED ||
+          ShipmentStatusEnum.DELIVERED ||
+          ShipmentStatusEnum.RETRUNED ||
+          ShipmentStatusEnum.COMPLETED)
     ) {
       throw new BadRequestException('Shipment cannot be canceled');
     }

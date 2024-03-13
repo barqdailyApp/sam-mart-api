@@ -57,12 +57,24 @@ export class ShipmentController {
     );
   }
 
-  @Post('driver/process/:id')
+  @Post('admin/process/:id')
+  @Roles(Role.ADMIN)
   async processShipment(@Param('id') id: string) {
     return new ActionResponse(
       plainToInstance(
         ShipmentResponse,
         await this.shipmentService.prepareShipment(id),
+      ),
+    );
+  }
+
+  @Post('admin/ready-for-pickup/:id')
+  @Roles(Role.ADMIN)
+  async readyForPickup(@Param('id') id: string) {
+    return new ActionResponse(
+      plainToInstance(
+        ShipmentResponse,
+        await this.shipmentService.shipmentReadyForPickup(id),
       ),
     );
   }
