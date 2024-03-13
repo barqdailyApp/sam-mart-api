@@ -58,8 +58,15 @@ export class WarehouseOperationTransaction extends BaseTransaction<
 
     await Promise.all(
       request.products.map(async (item) => {
+        const find_product = await context.findOne(Product, {
+          where: [{
+            id: item.product_id,
+          },{barcode:item.barcode}],
+          
+        })
         const product = plainToInstance(WarehouseOpreationProduct, {
           ...item,
+          product_id: find_product.id,
           operation_id: warehouseOperation.id,
         });
         const product_measurement = await context.find(ProductMeasurement, {

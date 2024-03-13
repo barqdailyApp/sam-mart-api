@@ -526,6 +526,10 @@ export class ShipmentService extends BaseService<Shipment> {
     shipment.order_canceled_at = new Date();
     shipment.cancelShipmentReason = reason;
 
+
+    driver.current_orders=driver.current_orders-1;
+    await this.driverRepository.save(driver);
+
     await this.shipmentRepository.save(shipment);
 
     await this.orderGateway.notifyOrderStatusChange({
