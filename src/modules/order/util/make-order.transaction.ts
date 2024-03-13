@@ -61,7 +61,7 @@ export class MakeOrderTransaction extends BaseTransaction<
       });
       if (!section.delivery_type.includes(req.delivery_type)) {
         throw new BadRequestException(
-          'Section does not support this type of delivery',
+          "message.section_does_not_support_this_type_of_delivery",
         );
       }
 
@@ -70,7 +70,7 @@ export class MakeOrderTransaction extends BaseTransaction<
         where: [{ is_favorite: true, user_id: user.id }],
       });
       if (!address) {
-        throw new BadRequestException('user does not have a default address');
+        throw new BadRequestException("message.user_does_not_have_a_default_address");
       }
       const cart = await context.findOne(Cart, { where: { user_id: user.id } });
 
@@ -78,7 +78,7 @@ export class MakeOrderTransaction extends BaseTransaction<
         where: { cart_id: cart.id, section_id: req.section_id },
       });
       if (cart_products.length == 0) {
-        throw new BadRequestException('Cart is empty');
+        throw new BadRequestException("message.cart_is_empty");
       }
       const payment_method = await context.findOne(PaymentMethod, {
         where: {
@@ -158,7 +158,7 @@ export class MakeOrderTransaction extends BaseTransaction<
       );
       if (order.total_price < section.min_order_price) {
         throw new BadRequestException(
-          'total price is less than min order price',
+          "message.total_price_is_less_than_min_order_price",
         );
       }
 

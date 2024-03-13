@@ -276,7 +276,7 @@ export class OrderService extends BaseUserService<Order> {
     });
 
     if (!order) {
-      throw new BadRequestException('Order not found');
+      throw new BadRequestException("message.order_not_found");
     }
     let query = this.orderRepository
       .createQueryBuilder('order')
@@ -451,7 +451,8 @@ export class OrderService extends BaseUserService<Order> {
           ShipmentStatusEnum.PICKED_UP,
           ShipmentStatusEnum.CONFIRMED,
           ShipmentStatusEnum.PROCESSING,
-          ShipmentStatusEnum.DELIVERED
+          ShipmentStatusEnum.DELIVERED,
+          ShipmentStatusEnum.CANCELED
         
         ],
       });
@@ -659,7 +660,7 @@ export class OrderService extends BaseUserService<Order> {
 
   async sendOrderToDrivers(id: string) {
     const order = await this.orderRepository.findOne({ where: { id } });
-    if (!order) throw new NotFoundException('order not found');
+    if (!order) throw new NotFoundException("message.order_not_found");
     order.delivery_type = DeliveryType.FAST;
     return await this.orderRepository.save(order);
   }
@@ -672,17 +673,17 @@ export class OrderService extends BaseUserService<Order> {
       where: { id: order_id },
       relations: ['user', 'address']
     });
-    if (!order) throw new NotFoundException('order not found');
+    if (!order) throw new NotFoundException("message.order_not_found");
 
     const shipment = await this.shipmentRepository.findOne({
       where: { order_id },
       relations: ['warehouse'],
     });
-    if (!shipment) throw new NotFoundException('shipment not found');
+    if (!shipment) throw new NotFoundException("message.shipment_not_found");
 
     if (shipment.status !== ShipmentStatusEnum.PENDING) {
       throw new BadRequestException(
-        'this order is already broadcasted to drivers',
+        "message.order_already_broadcasted",
       );
     }
 

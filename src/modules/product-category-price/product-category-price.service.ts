@@ -43,12 +43,8 @@ export class ProductCategoryPriceService {
   async createLinkProductSubcategory(
     createLinkProductSubcategoryRequest: CreateLinkProductSubcategoryRequest,
   ) {
-    const {
-      product_id,
-      categorySubCategory_id,
-      order_by,
-      is_active,
-    } = createLinkProductSubcategoryRequest;
+    const { product_id, categorySubCategory_id, order_by, is_active } =
+      createLinkProductSubcategoryRequest;
     //*--------------------------------- Make Check For User Data ---------------------------------*/
     //* Check if sub category exist
     const categorySubcategory = await this.categorySubcategory_repo.findOne({
@@ -56,7 +52,7 @@ export class ProductCategoryPriceService {
       where: { id: categorySubCategory_id },
     });
     if (!categorySubcategory) {
-      throw new NotFoundException(`Subcategory ID not found`);
+      throw new NotFoundException('message.sub_category_id_not_found');
     }
 
     //* Check if product exist
@@ -83,23 +79,22 @@ export class ProductCategoryPriceService {
 
     if (productSection) {
       throw new BadRequestException(
-        `This product cannot be added in the same section`,
+        'message.this_product_cannot_be_added_in_the_same_section',
       );
     }
-
 
     //* -------------------------- Create product sub category if Not Exist --------------------------*/
     const productSubCategoryCreate = this.productSubCategory_repo.create({
       product_id,
       category_sub_category_id: categorySubCategory_id,
       is_active,
-      order_by
+      order_by,
     });
     return await this.productSubCategory_repo.save(productSubCategoryCreate);
   }
 
   async updateLinkProductSubcategory(
-    product_sub_category_id : string,
+    product_sub_category_id: string,
     updateLinkProductSubcategoryRequest: UpdateLinkProductSubcategoryRequest,
   ) {
     const { order_by, is_active } = updateLinkProductSubcategoryRequest;
@@ -128,7 +123,7 @@ export class ProductCategoryPriceService {
       where: { id: product_id },
     });
     if (!product) {
-      throw new NotFoundException(`Product ID not found`);
+      throw new NotFoundException('message.product_id_not_found');
     }
     //* -------------------------- Return This Relation  if Exist --------------------------*/
     const productSubCategory = await this.productSubCategory_repo.findOne({
@@ -139,7 +134,7 @@ export class ProductCategoryPriceService {
     });
     if (!productSubCategory) {
       throw new NotFoundException(
-        `No Relation Between Product And Sub Category`,
+        'message.no_relation_between_product_and_sub_category',
       );
     }
     return productSubCategory;
@@ -153,7 +148,7 @@ export class ProductCategoryPriceService {
     });
     if (!productSubCategory) {
       throw new NotFoundException(
-        `No Relation Between Product And Sub Category`,
+        'message.no_relation_between_product_and_sub_category',
       );
     }
     return await this.productSubCategory_repo.remove(productSubCategory);
@@ -166,7 +161,7 @@ export class ProductCategoryPriceService {
       },
     });
     if (!productSubCategory) {
-      throw new NotFoundException(`Product sub category ID not found`);
+      throw new NotFoundException('message.product_sub_category_id_not_found');
     }
     return await this.productCategoryPrice_repo.find({
       where: {
@@ -198,14 +193,14 @@ export class ProductCategoryPriceService {
       },
     });
     if (!productSubCategory) {
-      throw new NotFoundException(`Product sub category ID not found`);
+      throw new NotFoundException('message.product_sub_category_id_not_found');
     }
     //* Check  product measurement id
     const productMeasurement = await this.productMeasurement_repo.findOne({
       where: { id: product_measurement_id },
     });
     if (!productMeasurement) {
-      throw new NotFoundException('Product Measurement not found');
+      throw new NotFoundException('message.product_measurement_not_found');
     }
 
     //*-------------------------- Check if product category price exist , will update it -------------------*/
@@ -248,7 +243,7 @@ export class ProductCategoryPriceService {
       where: { id: product_sub_category_id },
     });
     if (!productSubCategory) {
-      throw new NotFoundException(`Product sub category ID not found`);
+      throw new NotFoundException('message.product_sub_category_id_not_found');
     }
 
     //* Check  product measurement id
@@ -256,14 +251,14 @@ export class ProductCategoryPriceService {
       where: { id: product_measurement_id },
     });
     if (!productMeasurement) {
-      throw new NotFoundException('Product Measurement not found');
+      throw new NotFoundException('message.product_measurement_not_found');
     }
     //* check if additional service id
     const additionalService = await this.additionalService_repo.findOne({
       where: { id: additional_service_id },
     });
     if (!additionalService) {
-      throw new NotFoundException('Additional Service not found');
+      throw new NotFoundException('message.additional_service_not_found');
     }
 
     //* check if product category price exist
@@ -274,7 +269,7 @@ export class ProductCategoryPriceService {
       },
     });
     if (!productCategoryPrice) {
-      throw new NotFoundException('Product Category Price not found');
+      throw new NotFoundException('message.product_category_price_not_found');
     }
     //* -------------------------- Check if product additional service exist , will update it -------------------*/
 
@@ -299,15 +294,15 @@ export class ProductCategoryPriceService {
     });
     return await this.productService_repo.save(createProductAdditionalService);
   }
-  async deleteProductAdditionalService(product_additional_service_id:string){
+  async deleteProductAdditionalService(product_additional_service_id: string) {
     const productAdditionalService = await this.productService_repo.findOne({
       where: {
-        id: product_additional_service_id
-      }
-    })
-    if(!productAdditionalService){
-      throw new NotFoundException('Product Additional Service not found')
+        id: product_additional_service_id,
+      },
+    });
+    if (!productAdditionalService) {
+      throw new NotFoundException("message.product_additional_service_not_found");
     }
-    return await this.productService_repo.remove(productAdditionalService)
+    return await this.productService_repo.remove(productAdditionalService);
   }
 }
