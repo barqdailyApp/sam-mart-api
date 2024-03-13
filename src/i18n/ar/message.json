@@ -17,5 +17,6 @@
     "measurement_Unit_not_found": "وحدة القياس غير موجودة",
     "product_measurement_not_found": "وحدة القياس للمنتج غير موجودة",
     "region_not_found": "المنطقة غير موجودة",
-    "warehouse_product_not_enough": "الكمية غير متوفرة"
+    "warehouse_product_not_enough": "الكمية غير متوفرة",
+    "employee_not_found": "الموظف غير موجود"
 }
