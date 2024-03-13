@@ -22,6 +22,7 @@ import { ShipmentController } from 'src/modules/order/shipment.controller';
 import { PaymentMethodModule } from 'src/modules/payment_method/payment_method.module';
 import { ProductCategoryPriceModule } from 'src/modules/product-category-price/product-category-price.module';
 import { ProductModule } from 'src/modules/product/product.module';
+import { ReasonModule } from 'src/modules/reason/reason.module';
 import { RegionModule } from 'src/modules/region/region.module';
 import { SectionModule } from 'src/modules/section/section.module';
 import { SlotModule } from 'src/modules/slot/slot.module';
@@ -73,7 +74,8 @@ export default (app: INestApplication, config: ConfigService) => {
       ShipmentController,
       WorkingAreaModule,
       NotificationModule,
-      PaymentMethodModule
+      PaymentMethodModule,
+      ReasonModule
     ],
     operationIdFactory,
   });

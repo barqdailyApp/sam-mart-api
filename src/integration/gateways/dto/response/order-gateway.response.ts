@@ -18,9 +18,10 @@ export class OrderGatewayResponse {
     @Expose() number: string;
     @Expose() delivery_fee: number;
     @Expose() status: ShipmentStatusEnum;
-    @Expose() status_reason: string;
     @Expose() order_confirmed_at: Date;
     @Expose() order_on_processed_at: Date;
     @Expose() order_shipped_at: Date;
     @Expose() order_delivered_at: Date;
+    @Expose() order_canceled_at: Date;
+    @Expose() cancel_reason_id: Date;
 }

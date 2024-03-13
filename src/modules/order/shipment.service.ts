@@ -34,9 +34,11 @@ import { CancelShipmentRequest } from './dto/request/cancel-shipment.request';
 import { OrderGateway } from 'src/integration/gateways/order.gateway';
 import { Constant } from 'src/infrastructure/entities/constant/constant.entity';
 import { ConstantType } from 'src/infrastructure/data/enums/constant-type.enum';
-import { NotificationService } from '../notification/services/notification.service';
+import { NotificationService } from '../notification/notification.service';
 import { NotificationEntity } from 'src/infrastructure/entities/notification/notification.entity';
 import { NotificationTypes } from 'src/infrastructure/data/enums/notification-types.enum';
+import { ReasonService } from '../reason/reason.service';
+import { ReasonType } from 'src/infrastructure/data/enums/reason-type.enum';
 @Injectable()
 export class ShipmentService extends BaseService<Shipment> {
   constructor(
@@ -60,6 +62,9 @@ export class ShipmentService extends BaseService<Shipment> {
     private orderFeedBackRepository: Repository<ShipmentFeedback>,
     @Inject(REQUEST) private readonly request: Request,
     @Inject(FileService) private _fileService: FileService,
+    @Inject(ReasonService)
+    private readonly reasonService: ReasonService,
+
     private readonly notificationService: NotificationService,
   ) {
     super(shipmentRepository);
@@ -446,7 +451,7 @@ export class ShipmentService extends BaseService<Shipment> {
   }
 
   async cancelShipment(shipment_id: string, req: CancelShipmentRequest) {
-    const { reason } = req;
+    const { reason_id } = req;
 
     const shipment = await this.shipmentRepository.findOne({
       where: { id: shipment_id },
@@ -494,6 +499,22 @@ export class ShipmentService extends BaseService<Shipment> {
       throw new BadRequestException('Shipment cannot be canceled');
     }
 
+    const reason = await this.reasonService.findOne({
+      id: reason_id,
+      type: ReasonType.CANCEL_ORDER
+    });
+
+    if (
+      !reason ||
+      !reason.roles.some(role => currentUserRole.includes(role))
+    ) {
+      throw new BadRequestException('Reason not found');
+    }
+
+    if (!reason) {
+      throw new BadRequestException('Reason not found');
+    }
+
     let to_rooms = ['admin', shipment.order.user_id];
     if (shipment.status === ShipmentStatusEnum.PENDING) {
       to_rooms.push(shipment.warehouse_id);
@@ -503,7 +524,7 @@ export class ShipmentService extends BaseService<Shipment> {
 
     shipment.status = ShipmentStatusEnum.CANCELED;
     shipment.order_canceled_at = new Date();
-    shipment.status_reason = reason;
+    shipment.cancelShipmentReason = reason;
 
     await this.shipmentRepository.save(shipment);
 
@@ -519,6 +540,28 @@ export class ShipmentService extends BaseService<Shipment> {
       },
     });
 
+    await this.notificationService.create(
+      new NotificationEntity({
+        user_id: shipment.order.user_id,
+        url: shipment.order.id,
+        type: NotificationTypes.ORDERS,
+        title_ar: 'الغاء الطلب',
+        title_en: 'order cancel',
+        text_ar: 'تم الغاء الطلب',
+        text_en: 'the request has been canceled',
+      }),
+    );
+    await this.notificationService.create(
+      new NotificationEntity({
+        user_id: shipment.driver.user_id,
+        url: shipment.order.id,
+        type: NotificationTypes.ORDERS,
+        title_ar: 'تحديث الطلب',
+        title_en: 'order updated',
+        text_ar: 'تم الغاء الطلب',
+        text_en: 'the request has been canceled',
+      }),
+    );
     return shipment;
   }
 
@@ -615,6 +658,18 @@ export class ShipmentService extends BaseService<Shipment> {
     await this.notificationService.create(
       new NotificationEntity({
         user_id: shipment.order.user_id,
+        url: shipment.order.id,
+        type: NotificationTypes.ORDERS,
+        title_ar: 'تحديث الطلب',
+        title_en: 'order updated',
+        text_ar: 'تم تعيين سائق للطلب',
+        text_en: 'A driver has been assigned to the request',
+      }),
+    );
+    
+    await this.notificationService.create(
+      new NotificationEntity({
+        user_id: driver.user_id,
         url: shipment.order.id,
         type: NotificationTypes.ORDERS,
         title_ar: 'تحديث الطلب',

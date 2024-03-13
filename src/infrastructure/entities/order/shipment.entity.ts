@@ -1,5 +1,5 @@
 import { AuditableEntity } from 'src/infrastructure/base/auditable.entity';
-import { Column, Entity, ManyToOne, OneToMany, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from 'typeorm';
 import { Driver } from '../driver/driver.entity';
 import { Order } from './order.entity';
 import { Warehouse } from '../warehouse/warehouse.entity';
@@ -7,6 +7,7 @@ import { ShipmentProduct } from './shipment-product.entity';
 import { ShipmentStatusEnum } from 'src/infrastructure/data/enums/shipment_status.enum';
 import { ShipmentChat } from './shipment-chat.entity';
 import { ShipmentFeedback } from './shipment-feedback.entity';
+import { Reason } from '../reason/reason.entity';
 
 @Entity()
 export class Shipment extends AuditableEntity {
@@ -31,9 +32,13 @@ export class Shipment extends AuditableEntity {
   
   @Column({ default: ShipmentStatusEnum.PENDING })
   status: ShipmentStatusEnum;
+  
+  @ManyToOne(()=> Reason, reason => reason.cancelShipment, {onDelete: 'SET NULL'})
+  @JoinColumn({name: 'cancel_reason_id'})
+  cancelShipmentReason: Reason;
 
-  @Column({ nullable: true })
-  status_reason: string;
+  @Column({nullable: true})
+  cancel_reason_id: string;
 
   @Column({ nullable: true })
   order_confirmed_at: Date;

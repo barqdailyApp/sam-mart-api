@@ -4,6 +4,7 @@ import { ShipmentProduct } from "../shipment-product.entity";
 import { ReturnProductReason } from "./return-product-reason.entity";
 import { ReturnOrderStatus } from "src/infrastructure/data/enums/return-order-status.enum";
 import { ReturnOrder } from "./return-order.entity";
+import { Reason } from "../../reason/reason.entity";
 
 @Entity()
 export class ReturnOrderProduct extends AuditableEntity {
@@ -29,12 +30,12 @@ export class ReturnOrderProduct extends AuditableEntity {
     shipment_product_id: string;
 
     @ManyToOne(
-        () => ReturnProductReason,
+        () => Reason,
         returnProductReason => returnProductReason.returnOrderProducts,
         { onDelete: 'SET NULL' }
     )
     @JoinColumn({ name: 'return_product_reason_id' })
-    returnProductReason: ReturnProductReason;
+    returnProductReason: Reason;
 
     @Column({ nullable: true })
     return_product_reason_id: string;

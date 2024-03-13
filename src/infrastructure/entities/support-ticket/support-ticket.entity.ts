@@ -6,6 +6,7 @@ import { SupportTicketStatus } from 'src/infrastructure/data/enums/support-ticke
 import { TicketComment } from './ticket-comment.entity';
 import { TicketAttachment } from './ticket-attachement.entity';
 import { SupportTicketSubject } from './suppot-ticket-subject.entity';
+import { Reason } from '../reason/reason.entity';
 
 @Entity()
 export class SupportTicket extends AuditableEntity {
@@ -40,9 +41,9 @@ export class SupportTicket extends AuditableEntity {
     @Column({ nullable: false, unique: true })
     ticket_num: string;
 
-    @ManyToOne(() => SupportTicketSubject, (subject) => subject.support_tickets, { onDelete: 'SET NULL' })
+    @ManyToOne(() => Reason, reason => reason.support_tickets, { onDelete: 'SET NULL' })
     @JoinColumn({ name: 'subject_id' })
-    subject: SupportTicketSubject;
+    subject: Reason;
 
     @Column({ nullable: true })
     subject_id: string;

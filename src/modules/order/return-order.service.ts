@@ -1,25 +1,35 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import {
+    BadRequestException,
+    Inject,
+    Injectable,
+    NotFoundException,
+} from '@nestjs/common';
 import { Request } from 'express';
-import { REQUEST } from "@nestjs/core";
-import { InjectRepository } from "@nestjs/typeorm";
-import { BaseUserService } from "src/core/base/service/user-service.base";
-import { ReturnOrderProduct } from "src/infrastructure/entities/order/return-order/return-order-product.entity";
-import { ReturnOrder } from "src/infrastructure/entities/order/return-order/return-order.entity";
-import { ReturnProductReason } from "src/infrastructure/entities/order/return-order/return-product-reason.entity";
-import { In, Repository } from "typeorm";
-import { BaseService } from "src/core/base/service/service.base";
-import { User } from "src/infrastructure/entities/user/user.entity";
-import { ReturnOrderRequest } from "./dto/request/return-order.request";
-import { OrderGateway } from "src/integration/gateways/order.gateway";
-import { Order } from "src/infrastructure/entities/order/order.entity";
-import { Shipment } from "src/infrastructure/entities/order/shipment.entity";
-import { ShipmentStatusEnum } from "src/infrastructure/data/enums/shipment_status.enum";
-import { ShipmentProduct } from "src/infrastructure/entities/order/shipment-product.entity";
-import { ReturnOrderStatus } from "src/infrastructure/data/enums/return-order-status.enum";
-import { Driver } from "src/infrastructure/entities/driver/driver.entity";
-import { UpdateReturnOrderStatusRequest } from "./dto/request/update-return-order-statu.request";
-import { PaginatedRequest } from "src/core/base/requests/paginated.request";
-import { Role } from "src/infrastructure/data/enums/role.enum";
+import { REQUEST } from '@nestjs/core';
+import { InjectRepository } from '@nestjs/typeorm';
+import { BaseUserService } from 'src/core/base/service/user-service.base';
+import { ReturnOrderProduct } from 'src/infrastructure/entities/order/return-order/return-order-product.entity';
+import { ReturnOrder } from 'src/infrastructure/entities/order/return-order/return-order.entity';
+import { ReturnProductReason } from 'src/infrastructure/entities/order/return-order/return-product-reason.entity';
+import { In, Repository } from 'typeorm';
+import { BaseService } from 'src/core/base/service/service.base';
+import { User } from 'src/infrastructure/entities/user/user.entity';
+import { ReturnOrderRequest } from './dto/request/return-order.request';
+import { OrderGateway } from 'src/integration/gateways/order.gateway';
+import { Order } from 'src/infrastructure/entities/order/order.entity';
+import { Shipment } from 'src/infrastructure/entities/order/shipment.entity';
+import { ShipmentStatusEnum } from 'src/infrastructure/data/enums/shipment_status.enum';
+import { ShipmentProduct } from 'src/infrastructure/entities/order/shipment-product.entity';
+import { ReturnOrderStatus } from 'src/infrastructure/data/enums/return-order-status.enum';
+import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
+import { UpdateReturnOrderStatusRequest } from './dto/request/update-return-order-statu.request';
+import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
+import { Role } from 'src/infrastructure/data/enums/role.enum';
+import { NotificationService } from '../notification/notification.service';
+import { NotificationTypes } from 'src/infrastructure/data/enums/notification-types.enum';
+import { NotificationEntity } from 'src/infrastructure/entities/notification/notification.entity';
+import { Reason } from 'src/infrastructure/entities/reason/reason.entity';
+import { ReasonType } from 'src/infrastructure/data/enums/reason-type.enum';
 
 @Injectable()
 export class ReturnOrderService extends BaseService<ReturnOrder> {
@@ -39,9 +49,12 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
         private returnOrderProductRepository: Repository<ReturnOrderProduct>,
         @InjectRepository(ReturnProductReason)
         private returnProductReasonRepository: Repository<ReturnProductReason>,
+        @InjectRepository(Reason)
+        private reasonRepository: Repository<Reason>,
 
         @Inject(REQUEST) readonly request: Request,
         private readonly orderGateway: OrderGateway,
+        private readonly notificationService: NotificationService,
     ) {
         super(returnOrderRepository);
     }
@@ -122,12 +135,12 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
         }
 
         // check if the return products reasons IDs are valid
-        const returnedProductsReasons =
-            await this.returnProductReasonRepository.find({
-                where: {
-                    id: In(returned_shipment_products.map((p) => p.reason_id)),
-                },
-            });
+        const returnedProductsReasons = await this.reasonRepository.find({
+            where: {
+                id: In(returned_shipment_products.map((p) => p.reason_id)),
+                type: ReasonType.RETURN_ORDER
+            }
+        })
 
         if (
             returnedProductsReasons.length !==
@@ -163,10 +176,21 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
                 warehouse: shipment.warehouse,
             },
         });
+        await this.notificationService.create(
+            new NotificationEntity({
+                user_id: this.currentUser.id,
+                url: savedReturnOrder.id,
+                type: NotificationTypes.ORDERS,
+                title_ar: 'منتجع',
+                title_en: 'return order',
+                text_ar: 'هل تريد ارجاع هذا الطلب ؟',
+                text_en: 'Do you want to return this order?',
+            }),
+        );
 
         return savedReturnOrder;
     }
-    
+
     // this method is used by the admin to update the return order status
     async updateReturnOrderStatus(
         return_order_id: string,
@@ -235,7 +259,17 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
                 warehouse: shipment.warehouse,
             },
         });
-
+        await this.notificationService.create(
+            new NotificationEntity({
+                user_id: returnOrder.order.user_id,
+                url: returnOrder.id,
+                type: NotificationTypes.ORDERS,
+                title_ar: 'منتجع',
+                title_en: 'return order',
+                text_ar: 'تم تحديث طلب المرتجع',
+                text_en: 'Return request has been updated',
+            }),
+        );
         return savedReturnOrder;
     }
 
@@ -250,36 +284,7 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
         return await this.findAll(query);
     }
 
-    async addReturnProductReason(reason: string) {
-        return await this.returnProductReasonRepository.save({ reason });
-    }
-
-    async getReturnProductReasons() {
-        return await this.returnProductReasonRepository.find();
-    }
-
-    async updateReturnProductReason(reason_id: string, reason: string) {
-        const reasonExists = await this.returnProductReasonRepository.findOne({
-            where: { id: reason_id },
-        });
-        if (!reasonExists) throw new BadRequestException('reason not found');
-
-        return await this.returnProductReasonRepository.update(
-            { id: reason_id },
-            { reason },
-        );
-    }
-
-    async deleteReturnProductReason(reason_id: string) {
-        const reasonExists = await this.returnProductReasonRepository.findOne({
-            where: { id: reason_id },
-        });
-        if (!reasonExists) throw new BadRequestException('reason not found');
-
-        return await this.returnProductReasonRepository.delete({ id: reason_id });
-    }
-
     get currentUser(): User {
-        return this.request.user
+        return this.request.user;
     }
 }
