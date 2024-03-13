@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsEnum, IsNumber, IsString } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { operationType } from 'src/infrastructure/data/enums/operation-type.enum';
 
 
@@ -9,6 +9,11 @@ export class WarehouseOperationProductRequest{
     @ApiProperty()
     @IsString()
     product_id: string;
+
+    @ApiProperty({required:false})
+    @IsString()
+    @IsOptional()
+    barcode ?: string;
 
     @ApiProperty()
     @IsString()
