@@ -45,6 +45,7 @@ import { TransactionTypes } from 'src/infrastructure/data/enums/transaction-type
 import { WarehouseProducts } from 'src/infrastructure/entities/warehouse/warehouse-products.entity';
 import { WarehouseOperationTransaction } from '../warehouse/util/warehouse-opreation.transaction';
 import { operationType } from 'src/infrastructure/data/enums/operation-type.enum';
+import { ProductMeasurement } from 'src/infrastructure/entities/product/product-measurement.entity';
 @Injectable()
 export class ShipmentService extends BaseService<Shipment> {
   constructor(
@@ -62,6 +63,8 @@ export class ShipmentService extends BaseService<Shipment> {
     private shipmentChatAttachmentRepository: Repository<ShipmentChatAttachment>,
     @InjectRepository(WarehouseProducts)
     private warehouseProductsRepository: Repository<WarehouseProducts>,
+    @InjectRepository(ProductMeasurement)
+    private productMeasurementRepository: Repository<ProductMeasurement>,
 
     private readonly shipmentChatGateway: ShipmentChatGateway,
     private readonly orderGateway: OrderGateway,
@@ -544,14 +547,23 @@ export class ShipmentService extends BaseService<Shipment> {
 
     await this.shipmentRepository.save(shipment);
 
-    await this.warehouseOperationTransaction.run({
-      products: shipment.shipment_products.map((p) => {
-        return {
+    const mappedImportedProducts = [];
+    for (const p of shipment.shipment_products) {
+      const mainProductMeasurement = await this.productMeasurementRepository.findOne({
+        where: {
           product_id: p.product_id,
-          product_measurement_id: p.main_measurement_id,
-          quantity: p.quantity * p.conversion_factor,
-        };
-      }),
+          is_main_unit: true,
+        },
+      });
+      mappedImportedProducts.push({
+        product_id: p.product_id,
+        product_measurement_id: mainProductMeasurement.id,
+        quantity: p.quantity * p.conversion_factor,
+      });
+    }
+
+    await this.warehouseOperationTransaction.run({
+      products: mappedImportedProducts,
       warehouse_id: shipment.warehouse_id,
       type: operationType.IMPORT,
     });
