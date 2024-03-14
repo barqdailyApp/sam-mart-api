@@ -3,7 +3,14 @@ import { TransactionService } from './transaction.service';
 import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 import { ActionResponse } from 'src/core/base/responses/action.response';
-
+import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
+@ApiBearerAuth()
+@ApiHeader({
+  name: 'Accept-Language',
+  required: false,
+  description: 'Language header: en, ar',
+})
+@ApiTags('Transaction')
 @Controller('transaction')
 export class TransactionController {
   constructor(private readonly transactionService: TransactionService) {}

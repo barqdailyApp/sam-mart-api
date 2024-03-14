@@ -29,6 +29,7 @@ import { SlotModule } from 'src/modules/slot/slot.module';
 import { StaticPageModule } from 'src/modules/static-page/static-page.module';
 import { SubcategoryModule } from 'src/modules/subcategory/subcategory.module';
 import { SupportTicketModule } from 'src/modules/support-ticket/suuport-ticket.module';
+import { TransactionModule } from 'src/modules/transaction/transaction.module';
 import { UserModule } from 'src/modules/user/user.module';
 import { WarehouseModule } from 'src/modules/warehouse/warehouse.module';
 import { WorkingAreaModule } from 'src/modules/working-area/working-area.module';
@@ -75,7 +76,8 @@ export default (app: INestApplication, config: ConfigService) => {
       WorkingAreaModule,
       NotificationModule,
       PaymentMethodModule,
-      ReasonModule
+      ReasonModule,
+      TransactionModule
     ],
     operationIdFactory,
   });
