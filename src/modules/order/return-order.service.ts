@@ -241,6 +241,10 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
     await this.returnOrderProductRepository.save(
       mappedUpdatedReturnOrderProducts,
     );
+
+    returnOrder.status = status;
+    returnOrder.admin_note = admin_note;
+    
     const savedReturnOrder = await this.returnOrderRepository.save(returnOrder);
 
     const shipment = await this.shipmentRepository.findOne({

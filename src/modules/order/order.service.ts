@@ -687,6 +687,10 @@ export class OrderService extends BaseUserService<Order> {
       );
     }
 
+    // if broadcast order to drivers, so it'll become fast delivery 
+    order.delivery_type = DeliveryType.FAST;
+    await this.orderRepository.save(order);
+
     await this.orderGateway.notifyOrderStatusChange({
       action: shipment.status,
       to_rooms: [shipment.warehouse_id],
