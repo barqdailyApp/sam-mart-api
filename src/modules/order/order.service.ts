@@ -527,6 +527,7 @@ export class OrderService extends BaseUserService<Order> {
           ShipmentStatusEnum.CONFIRMED,
           ShipmentStatusEnum.PROCESSING,
           ShipmentStatusEnum.PICKED_UP,
+          ShipmentStatusEnum.READY_FOR_PICKUP
         ]),
         driver_id: driver.id,
         warehouse_id: driver.warehouse_id,
