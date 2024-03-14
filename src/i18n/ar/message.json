@@ -57,5 +57,7 @@
     "no_relation_between_product_and_sub_category": "لا يوجد علاقة بين المنتج والفئة الفرعية",
     "product_sub_category_id_not_found": "رقم الفئة الفرعية للمنتج غير موجودة",
     "additional_service_not_found": "خدمة اضافية غير موجودة",
-    "product_additional_service_not_found" :"خدمة اضافية للمنتج غير موجودة"
+    "product_additional_service_not_found" :"خدمة اضافية للمنتج غير موجودة",
+    "email_exists" :"البريد الالكتروني موجود بالفعل",
+    "phone_exists":"رقم الهاتف موجود بالفعل"
 }
