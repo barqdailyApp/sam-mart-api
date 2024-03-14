@@ -57,5 +57,7 @@
     "no_relation_between_product_and_sub_category": "No Relation Between Product And Sub Category",
     "product_sub_category_id_not_found": "Product sub category ID not found",
     "additional_service_not_found": "Additional Service not found",
-    "product_additional_service_not_found" :"Product Additional Service not found"
+    "product_additional_service_not_found" :"Product Additional Service not found",
+    "email_exists" :"Email already exists",
+    "phone_exists":"Phone already exists"
 }
