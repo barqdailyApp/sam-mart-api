@@ -452,7 +452,8 @@ export class OrderService extends BaseUserService<Order> {
           ShipmentStatusEnum.CONFIRMED,
           ShipmentStatusEnum.PROCESSING,
           ShipmentStatusEnum.DELIVERED,
-          ShipmentStatusEnum.CANCELED
+          ShipmentStatusEnum.CANCELED,
+          ShipmentStatusEnum.READY_FOR_PICKUP
         
         ],
       });
@@ -468,6 +469,7 @@ export class OrderService extends BaseUserService<Order> {
             ShipmentStatusEnum.PICKED_UP,
             ShipmentStatusEnum.CONFIRMED,
             ShipmentStatusEnum.PROCESSING,
+            ShipmentStatusEnum.READY_FOR_PICKUP
           ],
         });
         query = query.andWhere('driver.user_id = :user_id', {
@@ -604,6 +606,7 @@ export class OrderService extends BaseUserService<Order> {
             ShipmentStatusEnum.DELIVERED,
             ShipmentStatusEnum.CONFIRMED,
             ShipmentStatusEnum.PROCESSING,
+            ShipmentStatusEnum.READY_FOR_PICKUP
           ],
         });
       } else {
