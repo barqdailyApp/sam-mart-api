@@ -59,5 +59,6 @@
     "additional_service_not_found": "Additional Service not found",
     "product_additional_service_not_found" :"Product Additional Service not found",
     "email_exists" :"Email already exists",
-    "phone_exists":"Phone already exists"
+    "phone_exists":"Phone already exists",
+    "product_barcode_exist":"Product barcode already exists"
 }

@@ -56,7 +56,7 @@ export class CreateProductTransaction extends BaseTransaction<
         measurements,
         name_ar,
         name_en,
-        product_images,
+        product_images,barcode
       } = query;
       //* -------------------- Create Product ----------------------------
 
@@ -67,6 +67,7 @@ export class CreateProductTransaction extends BaseTransaction<
         is_recovered,
         name_ar,
         name_en,
+        barcode
       });
 
       // const moveLogoImage = moveTmpFile(logo, '/product-images/');

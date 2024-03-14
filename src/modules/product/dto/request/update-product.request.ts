@@ -17,6 +17,11 @@ export class UpdateProductRequest {
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()
   @IsString()
+  barcode: string;
+  
+  @ApiProperty({ nullable: true, required: false })
+  @IsOptional()
+  @IsString()
   description_ar: string;
 
   @ApiProperty({ nullable: true, required: false })
