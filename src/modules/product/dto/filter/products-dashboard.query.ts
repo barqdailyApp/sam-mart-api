@@ -36,6 +36,11 @@ export class ProductsDashboardQuery {
   @IsOptional()
   @IsString()
   product_name: string;
+  
+  @ApiProperty({ nullable: true, required: false })
+  @IsOptional()
+  @IsString()
+  product_barcode: string;
 
   @ApiProperty({ required: false, enum: ['new'], default: 'new' })
   @IsOptional()

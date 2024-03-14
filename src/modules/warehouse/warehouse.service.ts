@@ -13,7 +13,10 @@ import { WarehouseOperationTransaction } from './util/warehouse-opreation.transa
 import { WarehouseOperationRequest } from './dto/requests/warehouse-operation.request';
 import { UpdateWarehouseRequest } from './dto/requests/update-warehouse.request';
 import { RegionService } from '../region/region.service';
-import { WarehouseTransferProductRequest, WarehouseTransferProductsRequest } from './dto/requests/warehouse-transfer-product.request';
+import {
+  WarehouseTransferProductRequest,
+  WarehouseTransferProductsRequest,
+} from './dto/requests/warehouse-transfer-product.request';
 import { WarehouseProducts } from 'src/infrastructure/entities/warehouse/warehouse-products.entity';
 import { operationType } from 'src/infrastructure/data/enums/operation-type.enum';
 import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
@@ -53,8 +56,20 @@ export class WarehouseService extends BaseService<Warehouse> {
   async getWarehouseProduct(query: WarehouseProductsQuery) {
     const products = await this.warehouseProducts_repo.findAndCount({
       where: [
-        { warehouse_id: query.warehouse_id, product: { name_ar:Like(`%${query.name}%`) } },
-        { warehouse_id: query.warehouse_id, product: { name_en:Like(`%${query.name}%`) } },
+        {
+          warehouse_id: query.warehouse_id,
+          product: { name_ar: Like(`%${query.name}%`) },
+        },
+        {
+          warehouse_id: query.warehouse_id,
+          product: { name_en: Like(`%${query.name}%`) },
+        },
+        {
+          warehouse_id: query.warehouse_id,
+          product: {
+            barcode: query.product_barcode,
+          },
+        },
       ],
       relations: {
         product: { product_images: true },
@@ -69,7 +84,7 @@ export class WarehouseService extends BaseService<Warehouse> {
   async transferWarehouseProducts(
     from_warehouse_id: string,
     to_warehouse_id: string,
-    transfered_products: WarehouseTransferProductsRequest
+    transfered_products: WarehouseTransferProductsRequest,
   ) {
     const { warehouse_products } = transfered_products;
 
@@ -77,28 +92,34 @@ export class WarehouseService extends BaseService<Warehouse> {
       where: {
         id: In(warehouse_products.map((p) => p.warehouse_product_id)),
         warehouse_id: from_warehouse_id,
-      }
+      },
     });
 
-
     if (from_warehouse_product.length !== warehouse_products.length) {
-
       const noFoundWarehouseProduct = warehouse_products.filter(
-        (p) => !from_warehouse_product.some((wp) => wp.id === p.warehouse_product_id)
+        (p) =>
+          !from_warehouse_product.some(
+            (wp) => wp.id === p.warehouse_product_id,
+          ),
       );
 
-      throw new NotFoundException(`Warehouse product not found ${JSON.stringify(noFoundWarehouseProduct)}`);
+      throw new NotFoundException(
+        `Warehouse product not found ${JSON.stringify(
+          noFoundWarehouseProduct,
+        )}`,
+      );
     }
 
     const formatted_warehouse_products = warehouse_products.map((p) => {
-      const product = from_warehouse_product.find((wp) => wp.id === p.warehouse_product_id);
+      const product = from_warehouse_product.find(
+        (wp) => wp.id === p.warehouse_product_id,
+      );
       return {
         ...p,
         product_id: product.product_id,
         product_measurement_id: product.product_measurement_id,
       };
     });
-
 
     const exported_warehouse = await this.warehouseOperationTransaction.run({
       warehouse_id: from_warehouse_id,

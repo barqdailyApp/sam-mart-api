@@ -24,4 +24,9 @@ export class WarehouseProductsQuery {
   @IsOptional()
   @IsString()
   name: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  product_barcode: string;
 }

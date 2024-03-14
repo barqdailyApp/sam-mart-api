@@ -463,7 +463,7 @@ export class ProductDashboardService {
       product_name,
       section_id,
       section_category_id,
-      sort,
+      sort,product_barcode
     } = productsDashboardQuery;
     const skip = (page - 1) * limit;
     let productsSort = {};
@@ -542,6 +542,12 @@ export class ProductDashboardService {
     if (section_id) {
       query = query.andWhere('section_category.section_id = :section_id', {
         section_id,
+      });
+    }
+
+    if (product_barcode) {
+      query = query.andWhere('product.barcode = :product_barcode', {
+        product_barcode,
       });
     }
     const [products, total] = await query.getManyAndCount();
