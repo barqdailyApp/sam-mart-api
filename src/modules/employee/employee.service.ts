@@ -47,8 +47,16 @@ export class EmployeeService extends BaseService<Employee> {
             gender,
             phone,
         } = req;
-
-
+        // should email be Unique
+        const userEmail = await this.userRepository.findOne({ where: { email } });
+        if (userEmail) {
+            throw new BadRequestException("message.email_exists");
+        }
+        // should phone be Unique
+        const userPhone = await this.userRepository.findOne({ where: { phone } });
+        if (userPhone) {
+            throw new BadRequestException("message.phone_exists");
+        }
         // generate rendom username
         let username = (name_en.replace(/\s/g, '_') + '_' + randNum(5)).toLowerCase();
 
