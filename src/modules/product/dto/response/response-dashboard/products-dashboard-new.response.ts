@@ -17,6 +17,8 @@ export class ProductsDashboardNewResponse {
 
   @Expose() readonly name_en: string;
 
+  @Expose() readonly barcode: string;
+
   @Expose() readonly product_logo: string;
 
   @Expose() readonly product_is_active: boolean;
@@ -48,6 +50,7 @@ export class ProductsDashboardNewResponse {
     this.product_id = product.id;
     this.name_ar = product.name_ar;
     this.name_en = product.name_en;
+    this.barcode = product.barcode;
     this.product_logo = toUrl(
       product.product_images.find((x) => x.is_logo === true).url,
     );
