@@ -160,7 +160,7 @@ export class ShipmentService extends BaseService<Shipment> {
       },
       relations: ['order', 'warehouse', 'order.user', 'order.address'],
     });
-    if (!shipment || shipment.status !== ShipmentStatusEnum.PROCESSING) {
+    if (!shipment || shipment.status !== ShipmentStatusEnum.READY_FOR_PICKUP) {
       throw new NotFoundException('message.shipment_not_found');
     }
 
