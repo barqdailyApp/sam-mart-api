@@ -32,6 +32,7 @@ import { Reason } from 'src/infrastructure/entities/reason/reason.entity';
 import { ReasonType } from 'src/infrastructure/data/enums/reason-type.enum';
 import { WarehouseOperationTransaction } from '../warehouse/util/warehouse-opreation.transaction';
 import { operationType } from 'src/infrastructure/data/enums/operation-type.enum';
+import { ProductMeasurement } from 'src/infrastructure/entities/product/product-measurement.entity';
 
 @Injectable()
 export class ReturnOrderService extends BaseService<ReturnOrder> {
@@ -53,6 +54,9 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
     private returnProductReasonRepository: Repository<ReturnProductReason>,
     @InjectRepository(Reason)
     private reasonRepository: Repository<Reason>,
+    @InjectRepository(ProductMeasurement)
+    private productMeasurementRepository: Repository<ProductMeasurement>,
+
 
     @Inject(REQUEST) readonly request: Request,
     private readonly orderGateway: OrderGateway,
@@ -251,17 +255,29 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
     returnOrder.admin_note = admin_note;
 
     const savedReturnOrder = await this.returnOrderRepository.save(returnOrder);
+
+    const mappedImportedProducts = [];
+    for (const return_product of mappedReturnProductsNewStatus) {
+      // because shipmentProduct.product_measurement_id is the unit name not the main unit id
+      const product_measurement = await this.productMeasurementRepository.findOne({
+        where: {
+          product_id: return_product.shipmentProduct.product_id,
+          is_main_unit: true,
+        },
+      });
+
+      if (return_product.status === ReturnOrderStatus.ACCEPTED) {
+        mappedImportedProducts.push({
+          product_id: return_product.shipmentProduct.product_id,
+          product_measurement_id: product_measurement.id,
+          quantity: return_product.quantity * return_product.shipmentProduct.conversion_factor,
+        });
+      }
+    }
     
     // if the return order is accepted, we need to update the warehouse products
     await this.warehouseOperationTransaction.run({
-      products: mappedReturnProductsNewStatus.map((return_product) => {
-        if (return_product.status !== ReturnOrderStatus.ACCEPTED) return null;
-        return {
-          product_id: return_product.shipmentProduct.product_id,
-          product_measurement_id: return_product.shipmentProduct.main_measurement_id,
-          quantity: return_product.quantity * return_product.shipmentProduct.conversion_factor,
-        };
-      }),
+      products: mappedImportedProducts,
       warehouse_id: returnOrder.order.shipments[0].warehouse_id,
       type: operationType.IMPORT,
     });
