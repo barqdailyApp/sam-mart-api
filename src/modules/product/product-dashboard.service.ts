@@ -313,7 +313,7 @@ export class ProductDashboardService {
       is_active,
       is_recovered,
       name_ar,
-      name_en,
+      name_en,barcode
     } = updateProductRequest;
 
     //* Check if product exist
@@ -323,6 +323,15 @@ export class ProductDashboardService {
     if (!product) {
       throw new NotFoundException('message.product_not_found');
     }
+    //* Check if product barcode exist
+    const productBarcode = await this.productRepository.findOne({
+      where: { barcode },
+    });
+    if (productBarcode && (product.barcode != barcode)) {
+      throw new BadRequestException('message.product_barcode_exist');
+    }
+
+
     await this.productRepository.update(
       { id: product_id },
       {
@@ -332,6 +341,7 @@ export class ProductDashboardService {
         name_ar,
         description_ar,
         description_en,
+        barcode
       },
     );
     return await this.productRepository.findOne({

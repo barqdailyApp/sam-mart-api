@@ -59,5 +59,6 @@
     "additional_service_not_found": "خدمة اضافية غير موجودة",
     "product_additional_service_not_found" :"خدمة اضافية للمنتج غير موجودة",
     "email_exists" :"البريد الالكتروني موجود بالفعل",
-    "phone_exists":"رقم الهاتف موجود بالفعل"
+    "phone_exists":"رقم الهاتف موجود بالفعل",
+    "product_barcode_exist":"الباركود موجود بالفعل"
 }
