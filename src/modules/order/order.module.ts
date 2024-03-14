@@ -8,6 +8,7 @@ import { GatewaysModule } from 'src/integration/gateways/gateways.module';
 import { ReturnOrderService } from './return-order.service';
 import { NotificationModule } from '../notification/notification.module';
 import { ReasonService } from '../reason/reason.service';
+import { TransactionService } from '../transaction/transaction.service';
 
 @Module({
   controllers: [OrderController, ShipmentController],
@@ -16,8 +17,9 @@ import { ReasonService } from '../reason/reason.service';
     MakeOrderTransaction,
     ShipmentService,
     ReturnOrderService,
-    ReasonService
+    ReasonService,
+    TransactionService
   ],
-  imports: [GatewaysModule, NotificationModule]
+  imports: [GatewaysModule, NotificationModule,],
 })
-export class OrderModule { }
+export class OrderModule {}

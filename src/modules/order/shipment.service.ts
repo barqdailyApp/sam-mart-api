@@ -39,6 +39,9 @@ import { NotificationEntity } from 'src/infrastructure/entities/notification/not
 import { NotificationTypes } from 'src/infrastructure/data/enums/notification-types.enum';
 import { ReasonService } from '../reason/reason.service';
 import { ReasonType } from 'src/infrastructure/data/enums/reason-type.enum';
+import { TransactionService } from '../transaction/transaction.service';
+import { MakeTransactionRequest } from '../transaction/dto/requests/make-transaction-request';
+import { TransactionTypes } from 'src/infrastructure/data/enums/transaction-types';
 @Injectable()
 export class ShipmentService extends BaseService<Shipment> {
   constructor(
@@ -64,6 +67,8 @@ export class ShipmentService extends BaseService<Shipment> {
     @Inject(FileService) private _fileService: FileService,
     @Inject(ReasonService)
     private readonly reasonService: ReasonService,
+    @Inject(TransactionService)
+    private readonly transactionService: TransactionService,
 
     private readonly notificationService: NotificationService,
   ) {
@@ -71,7 +76,6 @@ export class ShipmentService extends BaseService<Shipment> {
   }
 
   async getDriver(driver_id?: string) {
-
     return await this.driverRepository.findOne({
       where: {
         user_id: driver_id ?? this.request.user.id,
@@ -83,7 +87,7 @@ export class ShipmentService extends BaseService<Shipment> {
   async deliverShipment(id: string) {
     const driver = await this.getDriver();
     if (!driver) {
-      throw new NotFoundException("message.driver_not_found");
+      throw new NotFoundException('message.driver_not_found');
     }
     driver.current_orders = driver.current_orders - 1;
     const shipment = await this.shipmentRepository.findOne({
@@ -95,7 +99,7 @@ export class ShipmentService extends BaseService<Shipment> {
     });
 
     if (!shipment || shipment.status !== ShipmentStatusEnum.PICKED_UP) {
-      throw new NotFoundException("message.shipment_not_found");
+      throw new NotFoundException('message.shipment_not_found');
     }
 
     shipment.order_delivered_at = new Date();
@@ -109,6 +113,14 @@ export class ShipmentService extends BaseService<Shipment> {
       relations: ['address'],
     });
     order.is_paid = true;
+    this.transactionService.makeTransaction(
+      new MakeTransactionRequest({
+        amount: -order.total_price,
+        type: TransactionTypes.ORDER_DELIVERD,
+        order_id: order.id,
+        user_id: order.user_id,
+      }),
+    );
     await this.driverRepository.save(driver);
     await this.orderRepository.save(order);
 
@@ -149,7 +161,7 @@ export class ShipmentService extends BaseService<Shipment> {
       relations: ['order', 'warehouse', 'order.user', 'order.address'],
     });
     if (!shipment || shipment.status !== ShipmentStatusEnum.PROCESSING) {
-      throw new NotFoundException("message.shipment_not_found");
+      throw new NotFoundException('message.shipment_not_found');
     }
 
     shipment.order_shipped_at = new Date();
@@ -189,13 +201,13 @@ export class ShipmentService extends BaseService<Shipment> {
       },
       relations: ['order', 'warehouse', 'order.user', 'driver', 'driver.user'],
     });
-  
+
     const driver = await this.getDriver(shipment.driver.user_id);
     if (!driver) {
-      throw new NotFoundException("message.driver_not_found");
+      throw new NotFoundException('message.driver_not_found');
     }
     if (!shipment || shipment.status !== ShipmentStatusEnum.CONFIRMED) {
-      throw new NotFoundException("message.shipment_not_found");
+      throw new NotFoundException('message.shipment_not_found');
     }
 
     shipment.order_on_processed_at = new Date();
@@ -253,10 +265,10 @@ export class ShipmentService extends BaseService<Shipment> {
     });
     const driver = await this.getDriver(shipment.driver.user_id);
     if (!driver) {
-      throw new NotFoundException("message.driver_not_found");
+      throw new NotFoundException('message.driver_not_found');
     }
     if (!shipment || shipment.status !== ShipmentStatusEnum.PROCESSING) {
-      throw new NotFoundException("message.shipment_not_found");
+      throw new NotFoundException('message.shipment_not_found');
     }
 
     shipment.order_ready_for_pickup_at = new Date();
@@ -317,16 +329,14 @@ export class ShipmentService extends BaseService<Shipment> {
       relations: ['order', 'driver'],
     });
 
-    if (!shipment) throw new NotFoundException("message.shipment_not_found");
+    if (!shipment) throw new NotFoundException('message.shipment_not_found');
 
     if (
       shipment.driver.user_id !== this.currentUser.id &&
       shipment.order.user_id !== this.currentUser.id &&
       !this.currentUser.roles.includes(Role.ADMIN)
     ) {
-      throw new UnauthorizedException(
-        "message.not_allowed_to_add_chat",
-      );
+      throw new UnauthorizedException('message.not_allowed_to_add_chat');
     }
 
     let attachedFile = null;
@@ -378,16 +388,14 @@ export class ShipmentService extends BaseService<Shipment> {
       where: { id: shipment_id },
       relations: ['order', 'driver'],
     });
-    if (!shipment) throw new NotFoundException("message.shipment_not_found");
+    if (!shipment) throw new NotFoundException('message.shipment_not_found');
 
     if (
       shipment.driver.user_id !== this.currentUser.id &&
       shipment.order.user_id !== this.currentUser.id &&
       !this.currentUser.roles.includes(Role.ADMIN)
     ) {
-      throw new UnauthorizedException(
-        "message_not_allowed_to_view_chat",
-      );
+      throw new UnauthorizedException('message_not_allowed_to_view_chat');
     }
 
     return await this.shipmentChatRepository.find({
@@ -410,25 +418,25 @@ export class ShipmentService extends BaseService<Shipment> {
       where: { id: driver_id },
     });
     if (!driver) {
-      throw new BadRequestException("message.driver_not_found");
+      throw new BadRequestException('message.driver_not_found');
     }
 
     const shipment = await this.shipmentRepository.findOne({
       where: { id: shipment_id },
     });
     if (!shipment) {
-      throw new BadRequestException("message.shipment_not_found");
+      throw new BadRequestException('message.shipment_not_found');
     }
 
     if (shipment.status !== ShipmentStatusEnum.DELIVERED) {
-      throw new BadRequestException( "message.shipment_not_delivered");
+      throw new BadRequestException('message.shipment_not_delivered');
     }
 
     const shipmentFeedBack = await this.orderFeedBackRepository.findOne({
       where: { driver_id, user_id: user.id, shipment_id },
     });
     if (shipmentFeedBack) {
-      throw new BadRequestException("message.feedback_already_added");
+      throw new BadRequestException('message.feedback_already_added');
     }
 
     const shipmentFeedBackCreated = this.orderFeedBackRepository.create({
@@ -466,7 +474,7 @@ export class ShipmentService extends BaseService<Shipment> {
     });
 
     if (!shipment) {
-      throw new NotFoundException("message.shipment_not_found");
+      throw new NotFoundException('message.shipment_not_found');
     }
 
     const currentUserRole = this.currentUser.roles;
@@ -480,9 +488,7 @@ export class ShipmentService extends BaseService<Shipment> {
         shipment.driver_id !== driver.id &&
         !currentUserRole.includes(Role.ADMIN))
     ) {
-      throw new UnauthorizedException(
-        "message.not_allowed_to_cancel",
-      );
+      throw new UnauthorizedException('message.not_allowed_to_cancel');
     }
 
     if (
@@ -496,23 +502,23 @@ export class ShipmentService extends BaseService<Shipment> {
           ShipmentStatusEnum.RETRUNED ||
           ShipmentStatusEnum.COMPLETED)
     ) {
-      throw new BadRequestException( "message.not_allowed_to_cancel_shipment");
+      throw new BadRequestException('message.not_allowed_to_cancel_shipment');
     }
 
     const reason = await this.reasonService.findOne({
       id: reason_id,
-      type: ReasonType.CANCEL_ORDER
+      type: ReasonType.CANCEL_ORDER,
     });
 
     if (
       !reason ||
-      !reason.roles.some(role => currentUserRole.includes(role))
+      !reason.roles.some((role) => currentUserRole.includes(role))
     ) {
-      throw new BadRequestException("message.reason_not_found");
+      throw new BadRequestException('message.reason_not_found');
     }
 
     if (!reason) {
-      throw new BadRequestException("message.reason_not_found");
+      throw new BadRequestException('message.reason_not_found');
     }
 
     let to_rooms = ['admin', shipment.order.user_id];
@@ -526,8 +532,7 @@ export class ShipmentService extends BaseService<Shipment> {
     shipment.order_canceled_at = new Date();
     shipment.cancelShipmentReason = reason;
 
-
-    driver.current_orders=driver.current_orders-1;
+    driver.current_orders = driver.current_orders - 1;
     await this.driverRepository.save(driver);
 
     await this.shipmentRepository.save(shipment);
@@ -581,14 +586,14 @@ export class ShipmentService extends BaseService<Shipment> {
     const driver = await this.getDriver(driver_id);
 
     if (!driver) {
-      throw new NotFoundException("message.driver_not_found");
+      throw new NotFoundException('message.driver_not_found');
     }
     const max_orders = await this.constantRepository.findOne({
       where: { type: ConstantType.ORDER_LIMIT },
     });
     if (driver.current_orders >= Number(max_orders.variable)) {
       throw new BadRequestException(
-        "message.driver_has_reached_maximum_number_of_orders",
+        'message.driver_has_reached_maximum_number_of_orders',
       );
     }
     driver.current_orders = driver.current_orders + 1;
@@ -599,15 +604,15 @@ export class ShipmentService extends BaseService<Shipment> {
     });
 
     if (!shipment) {
-      throw new NotFoundException("message.shipment_not_found");
+      throw new NotFoundException('message.shipment_not_found');
     }
 
     if (driver.warehouse_id !== shipment.warehouse_id) {
-      throw new BadRequestException("message.driver_not_in_the_same_warehouse");
+      throw new BadRequestException('message.driver_not_in_the_same_warehouse');
     }
 
     if (shipment.status !== ShipmentStatusEnum.PENDING) {
-      throw new BadRequestException("message.shipment_already_confirmed");
+      throw new BadRequestException('message.shipment_already_confirmed');
     }
 
     shipment.order_confirmed_at = new Date();
@@ -670,7 +675,7 @@ export class ShipmentService extends BaseService<Shipment> {
         text_en: 'A driver has been assigned to the request',
       }),
     );
-    
+
     await this.notificationService.create(
       new NotificationEntity({
         user_id: driver.user_id,
