@@ -42,6 +42,9 @@ import { ReasonType } from 'src/infrastructure/data/enums/reason-type.enum';
 import { TransactionService } from '../transaction/transaction.service';
 import { MakeTransactionRequest } from '../transaction/dto/requests/make-transaction-request';
 import { TransactionTypes } from 'src/infrastructure/data/enums/transaction-types';
+import { WarehouseProducts } from 'src/infrastructure/entities/warehouse/warehouse-products.entity';
+import { WarehouseOperationTransaction } from '../warehouse/util/warehouse-opreation.transaction';
+import { operationType } from 'src/infrastructure/data/enums/operation-type.enum';
 @Injectable()
 export class ShipmentService extends BaseService<Shipment> {
   constructor(
@@ -57,6 +60,8 @@ export class ShipmentService extends BaseService<Shipment> {
     private constantRepository: Repository<Constant>,
     @InjectRepository(ShipmentChatAttachment)
     private shipmentChatAttachmentRepository: Repository<ShipmentChatAttachment>,
+    @InjectRepository(WarehouseProducts)
+    private warehouseProductsRepository: Repository<WarehouseProducts>,
 
     private readonly shipmentChatGateway: ShipmentChatGateway,
     private readonly orderGateway: OrderGateway,
@@ -71,6 +76,7 @@ export class ShipmentService extends BaseService<Shipment> {
     private readonly transactionService: TransactionService,
 
     private readonly notificationService: NotificationService,
+    private readonly warehouseOperationTransaction: WarehouseOperationTransaction,
   ) {
     super(shipmentRepository);
   }
@@ -470,6 +476,7 @@ export class ShipmentService extends BaseService<Shipment> {
         'driver',
         'driver.user',
         'order.address',
+        'shipment_products'
       ],
     });
 
@@ -497,10 +504,10 @@ export class ShipmentService extends BaseService<Shipment> {
       (currentUserRole.includes(Role.DRIVER) &&
         shipmentStatus === ShipmentStatusEnum.PENDING) ||
       shipmentStatus ===
-        (ShipmentStatusEnum.CANCELED ||
-          ShipmentStatusEnum.DELIVERED ||
-          ShipmentStatusEnum.RETRUNED ||
-          ShipmentStatusEnum.COMPLETED)
+      (ShipmentStatusEnum.CANCELED ||
+        ShipmentStatusEnum.DELIVERED ||
+        ShipmentStatusEnum.RETRUNED ||
+        ShipmentStatusEnum.COMPLETED)
     ) {
       throw new BadRequestException('message.not_allowed_to_cancel_shipment');
     }
@@ -536,6 +543,18 @@ export class ShipmentService extends BaseService<Shipment> {
     await this.driverRepository.save(driver);
 
     await this.shipmentRepository.save(shipment);
+
+    await this.warehouseOperationTransaction.run({
+      products: shipment.shipment_products.map((p) => {
+        return {
+          product_id: p.product_id,
+          product_measurement_id: p.main_measurement_id,
+          quantity: p.quantity * p.conversion_factor,
+        };
+      }),
+      warehouse_id: shipment.warehouse_id,
+      type: operationType.IMPORT,
+    });
 
     await this.orderGateway.notifyOrderStatusChange({
       action: ShipmentStatusEnum.CANCELED,
