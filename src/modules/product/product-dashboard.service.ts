@@ -754,11 +754,14 @@ export class ProductDashboardService {
         category_sub_category_id,
       },
     });
-    if (!productSubCategory) {
-      throw new NotFoundException(
-        'No Relation bettwen product and sub category',
-      );
+    if(category_sub_category_id){
+      if (!productSubCategory) {
+        throw new NotFoundException(
+          'No Relation bettwen product and sub category',
+        );
+      }
     }
+   
 
     // For guests and individuals, orders are taken from the nearest warehouse
     // Start building the query
