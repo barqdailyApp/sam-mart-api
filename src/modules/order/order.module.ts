@@ -9,6 +9,7 @@ import { ReturnOrderService } from './return-order.service';
 import { NotificationModule } from '../notification/notification.module';
 import { ReasonService } from '../reason/reason.service';
 import { TransactionService } from '../transaction/transaction.service';
+import { WarehouseOperationTransaction } from '../warehouse/util/warehouse-opreation.transaction';
 
 @Module({
   controllers: [OrderController, ShipmentController],
@@ -18,7 +19,8 @@ import { TransactionService } from '../transaction/transaction.service';
     ShipmentService,
     ReturnOrderService,
     ReasonService,
-    TransactionService
+    TransactionService,
+    WarehouseOperationTransaction,
   ],
   imports: [GatewaysModule, NotificationModule,],
 })
