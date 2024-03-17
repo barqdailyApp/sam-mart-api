@@ -479,7 +479,7 @@ export class ShipmentService extends BaseService<Shipment> {
         'driver',
         'driver.user',
         'order.address',
-        'shipment_products'
+        'shipment_products',
       ],
     });
 
@@ -489,11 +489,13 @@ export class ShipmentService extends BaseService<Shipment> {
 
     const currentUserRole = this.currentUser.roles;
     const shipmentStatus = shipment.status;
-    const driver = await this.getDriver(
-      currentUserRole.includes(Role.DRIVER)
-        ? this.currentUser.id
-        : shipment.driver.user_id,
-    );
+    const driver = shipment.driver
+      ? await this.getDriver(
+          currentUserRole.includes(Role.DRIVER)
+            ? this.currentUser.id
+            : shipment.driver.user_id,
+        )
+      : null;
 
     if (
       (currentUserRole.includes(Role.CLIENT) &&
@@ -511,10 +513,10 @@ export class ShipmentService extends BaseService<Shipment> {
       (currentUserRole.includes(Role.DRIVER) &&
         shipmentStatus === ShipmentStatusEnum.PENDING) ||
       shipmentStatus ===
-      (ShipmentStatusEnum.CANCELED ||
-        ShipmentStatusEnum.DELIVERED ||
-        ShipmentStatusEnum.RETRUNED ||
-        ShipmentStatusEnum.COMPLETED)
+        (ShipmentStatusEnum.CANCELED ||
+          ShipmentStatusEnum.DELIVERED ||
+          ShipmentStatusEnum.RETRUNED ||
+          ShipmentStatusEnum.COMPLETED)
     ) {
       throw new BadRequestException('message.not_allowed_to_cancel_shipment');
     }
@@ -545,20 +547,22 @@ export class ShipmentService extends BaseService<Shipment> {
     shipment.status = ShipmentStatusEnum.CANCELED;
     shipment.order_canceled_at = new Date();
     shipment.cancelShipmentReason = reason;
-if(shipment.driver){
-    driver.current_orders = driver.current_orders - 1;
-    await this.driverRepository.save(driver);}
+    if (shipment.driver) {
+      driver.current_orders = driver.current_orders - 1;
+      await this.driverRepository.save(driver);
+    }
 
     await this.shipmentRepository.save(shipment);
 
     const mappedImportedProducts = [];
     for (const p of shipment.shipment_products) {
-      const mainProductMeasurement = await this.productMeasurementRepository.findOne({
-        where: {
-          product_id: p.product_id,
-          is_main_unit: true,
-        },
-      });
+      const mainProductMeasurement =
+        await this.productMeasurementRepository.findOne({
+          where: {
+            product_id: p.product_id,
+            is_main_unit: true,
+          },
+        });
       mappedImportedProducts.push({
         product_id: p.product_id,
         product_measurement_id: mainProductMeasurement.id,
