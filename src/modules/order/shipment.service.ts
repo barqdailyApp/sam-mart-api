@@ -611,6 +611,7 @@ export class ShipmentService extends BaseService<Shipment> {
         text_en: 'the request has been canceled',
       }),
     );}
+    delete shipment.shipment_products;
     return shipment;
   }
 
