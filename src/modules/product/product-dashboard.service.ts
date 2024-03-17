@@ -780,6 +780,7 @@ export class ProductDashboardService {
         'product_category_subCategory.section_category',
         'product_section_category',
       )
+    
       .leftJoinAndSelect('product_section_category.section', 'product_section')
       .leftJoinAndSelect('product.warehouses_products', 'warehousesProduct')
 
