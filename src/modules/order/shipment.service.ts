@@ -492,7 +492,7 @@ export class ShipmentService extends BaseService<Shipment> {
     const driver = await this.getDriver(
       currentUserRole.includes(Role.DRIVER)
         ? this.currentUser.id
-        : shipment.driver_id,
+        : shipment.driver.user_id,
     );
 
     if (
