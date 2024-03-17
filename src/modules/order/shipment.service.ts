@@ -599,6 +599,7 @@ export class ShipmentService extends BaseService<Shipment> {
         text_en: 'the request has been canceled',
       }),
     );
+    if(shipment.driver){
     await this.notificationService.create(
       new NotificationEntity({
         user_id: shipment.driver.user_id,
@@ -609,7 +610,7 @@ export class ShipmentService extends BaseService<Shipment> {
         text_ar: 'تم الغاء الطلب',
         text_en: 'the request has been canceled',
       }),
-    );
+    );}
     return shipment;
   }
 
