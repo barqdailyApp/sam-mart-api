@@ -8,6 +8,7 @@ import { CartProduct } from 'src/infrastructure/entities/cart/cart-products';
 import { ProductMeasurementResponse } from '../product-measurement.response';
 import { ProductImagesResponse } from '../product-images.response';
 import { Product } from 'src/infrastructure/entities/product/product.entity';
+import { Console } from 'console';
 
 @Exclude()
 export class SingleProductDashboardNewResponse {
@@ -17,6 +18,7 @@ export class SingleProductDashboardNewResponse {
   @Expose() product_measurements: any[];
 
   constructor(product: Product) {
+    console.log(product);
     const product_sub_categories = product.product_sub_categories;
     const product_measurements = product.product_measurements;
     const product_images = product.product_images;
@@ -61,6 +63,9 @@ export class SingleProductDashboardNewResponse {
         product.product_sub_categories.length > 0
           ? product.product_sub_categories[0].is_active
           : false,
+          delivery_price: product.product_sub_categories.length > 0
+          ? product.product_sub_categories[0].category_subCategory.section_category.section.delivery_price
+          : 0
     }),
       (this.product_measurements = product_measurements.map((item) => {
         return {

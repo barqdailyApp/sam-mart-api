@@ -30,6 +30,9 @@ import { NotificationTypes } from 'src/infrastructure/data/enums/notification-ty
 import { NotificationEntity } from 'src/infrastructure/entities/notification/notification.entity';
 import { Reason } from 'src/infrastructure/entities/reason/reason.entity';
 import { ReasonType } from 'src/infrastructure/data/enums/reason-type.enum';
+import { WarehouseOperationTransaction } from '../warehouse/util/warehouse-opreation.transaction';
+import { operationType } from 'src/infrastructure/data/enums/operation-type.enum';
+import { ProductMeasurement } from 'src/infrastructure/entities/product/product-measurement.entity';
 
 @Injectable()
 export class ReturnOrderService extends BaseService<ReturnOrder> {
@@ -51,10 +54,15 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
     private returnProductReasonRepository: Repository<ReturnProductReason>,
     @InjectRepository(Reason)
     private reasonRepository: Repository<Reason>,
+    @InjectRepository(ProductMeasurement)
+    private productMeasurementRepository: Repository<ProductMeasurement>,
+
 
     @Inject(REQUEST) readonly request: Request,
     private readonly orderGateway: OrderGateway,
     private readonly notificationService: NotificationService,
+    private readonly warehouseOperationTransaction: WarehouseOperationTransaction,
+
   ) {
     super(returnOrderRepository);
   }
@@ -111,7 +119,7 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
     if (canNotReturnProducts) {
       throw new BadRequestException(
         "message.not_allowed_to_return_already_returned" +
-          JSON.stringify(canNotReturnProducts),
+        JSON.stringify(canNotReturnProducts),
       );
     }
 
@@ -197,7 +205,7 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
   ) {
     const returnOrder = await this.returnOrderRepository.findOne({
       where: { id: return_order_id },
-      relations: ['order', 'order.user'],
+      relations: ['order', 'order.user', 'order.shipments'],
     });
 
     if (!returnOrder) throw new NotFoundException('return order not found');
@@ -213,6 +221,7 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
         id: In(returned_products_id),
         return_order_id,
       },
+      relations: { shipmentProduct: true },
     });
 
     if (returnOrderProducts.length !== return_order_products.length) {
@@ -228,7 +237,7 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
     }
 
     // mapped the return order products with the updated status
-    const mappedUpdatedReturnOrderProducts = returnOrderProducts.map((p) => {
+    const mappedReturnProductsNewStatus = returnOrderProducts.map((p) => {
       const product = return_order_products.find(
         (rp) => rp.return_order_product_id === p.id,
       );
@@ -239,13 +248,39 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
     });
 
     await this.returnOrderProductRepository.save(
-      mappedUpdatedReturnOrderProducts,
+      mappedReturnProductsNewStatus,
     );
 
     returnOrder.status = status;
     returnOrder.admin_note = admin_note;
-    
+
     const savedReturnOrder = await this.returnOrderRepository.save(returnOrder);
+
+    const mappedImportedProducts = [];
+    for (const return_product of mappedReturnProductsNewStatus) {
+      // because shipmentProduct.product_measurement_id is the unit name not the main unit id
+      const product_measurement = await this.productMeasurementRepository.findOne({
+        where: {
+          product_id: return_product.shipmentProduct.product_id,
+          is_main_unit: true,
+        },
+      });
+
+      if (return_product.status === ReturnOrderStatus.ACCEPTED) {
+        mappedImportedProducts.push({
+          product_id: return_product.shipmentProduct.product_id,
+          product_measurement_id: product_measurement.id,
+          quantity: return_product.quantity * return_product.shipmentProduct.conversion_factor,
+        });
+      }
+    }
+    
+    // if the return order is accepted, we need to update the warehouse products
+    await this.warehouseOperationTransaction.run({
+      products: mappedImportedProducts,
+      warehouse_id: returnOrder.order.shipments[0].warehouse_id,
+      type: operationType.IMPORT,
+    });
 
     const shipment = await this.shipmentRepository.findOne({
       where: { order_id: returnOrder.order_id },

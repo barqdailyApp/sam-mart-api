@@ -42,6 +42,10 @@ import { ReasonType } from 'src/infrastructure/data/enums/reason-type.enum';
 import { TransactionService } from '../transaction/transaction.service';
 import { MakeTransactionRequest } from '../transaction/dto/requests/make-transaction-request';
 import { TransactionTypes } from 'src/infrastructure/data/enums/transaction-types';
+import { WarehouseProducts } from 'src/infrastructure/entities/warehouse/warehouse-products.entity';
+import { WarehouseOperationTransaction } from '../warehouse/util/warehouse-opreation.transaction';
+import { operationType } from 'src/infrastructure/data/enums/operation-type.enum';
+import { ProductMeasurement } from 'src/infrastructure/entities/product/product-measurement.entity';
 @Injectable()
 export class ShipmentService extends BaseService<Shipment> {
   constructor(
@@ -57,6 +61,10 @@ export class ShipmentService extends BaseService<Shipment> {
     private constantRepository: Repository<Constant>,
     @InjectRepository(ShipmentChatAttachment)
     private shipmentChatAttachmentRepository: Repository<ShipmentChatAttachment>,
+    @InjectRepository(WarehouseProducts)
+    private warehouseProductsRepository: Repository<WarehouseProducts>,
+    @InjectRepository(ProductMeasurement)
+    private productMeasurementRepository: Repository<ProductMeasurement>,
 
     private readonly shipmentChatGateway: ShipmentChatGateway,
     private readonly orderGateway: OrderGateway,
@@ -71,6 +79,7 @@ export class ShipmentService extends BaseService<Shipment> {
     private readonly transactionService: TransactionService,
 
     private readonly notificationService: NotificationService,
+    private readonly warehouseOperationTransaction: WarehouseOperationTransaction,
   ) {
     super(shipmentRepository);
   }
@@ -470,6 +479,7 @@ export class ShipmentService extends BaseService<Shipment> {
         'driver',
         'driver.user',
         'order.address',
+        'shipment_products'
       ],
     });
 
@@ -501,10 +511,10 @@ export class ShipmentService extends BaseService<Shipment> {
       (currentUserRole.includes(Role.DRIVER) &&
         shipmentStatus === ShipmentStatusEnum.PENDING) ||
       shipmentStatus ===
-        (ShipmentStatusEnum.CANCELED ||
-          ShipmentStatusEnum.DELIVERED ||
-          ShipmentStatusEnum.RETRUNED ||
-          ShipmentStatusEnum.COMPLETED)
+      (ShipmentStatusEnum.CANCELED ||
+        ShipmentStatusEnum.DELIVERED ||
+        ShipmentStatusEnum.RETRUNED ||
+        ShipmentStatusEnum.COMPLETED)
     ) {
       throw new BadRequestException('message.not_allowed_to_cancel_shipment');
     }
@@ -540,6 +550,27 @@ export class ShipmentService extends BaseService<Shipment> {
     await this.driverRepository.save(driver);
 
     await this.shipmentRepository.save(shipment);
+
+    const mappedImportedProducts = [];
+    for (const p of shipment.shipment_products) {
+      const mainProductMeasurement = await this.productMeasurementRepository.findOne({
+        where: {
+          product_id: p.product_id,
+          is_main_unit: true,
+        },
+      });
+      mappedImportedProducts.push({
+        product_id: p.product_id,
+        product_measurement_id: mainProductMeasurement.id,
+        quantity: p.quantity * p.conversion_factor,
+      });
+    }
+
+    await this.warehouseOperationTransaction.run({
+      products: mappedImportedProducts,
+      warehouse_id: shipment.warehouse_id,
+      type: operationType.IMPORT,
+    });
 
     await this.orderGateway.notifyOrderStatusChange({
       action: ShipmentStatusEnum.CANCELED,

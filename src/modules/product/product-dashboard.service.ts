@@ -754,11 +754,14 @@ export class ProductDashboardService {
         category_sub_category_id,
       },
     });
-    if (!productSubCategory) {
-      throw new NotFoundException(
-        'No Relation bettwen product and sub category',
-      );
+    if(category_sub_category_id){
+      if (!productSubCategory) {
+        throw new NotFoundException(
+          'No Relation bettwen product and sub category',
+        );
+      }
     }
+   
 
     // For guests and individuals, orders are taken from the nearest warehouse
     // Start building the query
@@ -777,6 +780,7 @@ export class ProductDashboardService {
         'product_category_subCategory.section_category',
         'product_section_category',
       )
+    
       .leftJoinAndSelect('product_section_category.section', 'product_section')
       .leftJoinAndSelect('product.warehouses_products', 'warehousesProduct')
 
