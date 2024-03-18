@@ -42,6 +42,10 @@ import { ReasonType } from 'src/infrastructure/data/enums/reason-type.enum';
 import { TransactionService } from '../transaction/transaction.service';
 import { MakeTransactionRequest } from '../transaction/dto/requests/make-transaction-request';
 import { TransactionTypes } from 'src/infrastructure/data/enums/transaction-types';
+import { WarehouseProducts } from 'src/infrastructure/entities/warehouse/warehouse-products.entity';
+import { WarehouseOperationTransaction } from '../warehouse/util/warehouse-opreation.transaction';
+import { operationType } from 'src/infrastructure/data/enums/operation-type.enum';
+import { ProductMeasurement } from 'src/infrastructure/entities/product/product-measurement.entity';
 @Injectable()
 export class ShipmentService extends BaseService<Shipment> {
   constructor(
@@ -57,6 +61,10 @@ export class ShipmentService extends BaseService<Shipment> {
     private constantRepository: Repository<Constant>,
     @InjectRepository(ShipmentChatAttachment)
     private shipmentChatAttachmentRepository: Repository<ShipmentChatAttachment>,
+    @InjectRepository(WarehouseProducts)
+    private warehouseProductsRepository: Repository<WarehouseProducts>,
+    @InjectRepository(ProductMeasurement)
+    private productMeasurementRepository: Repository<ProductMeasurement>,
 
     private readonly shipmentChatGateway: ShipmentChatGateway,
     private readonly orderGateway: OrderGateway,
@@ -71,6 +79,7 @@ export class ShipmentService extends BaseService<Shipment> {
     private readonly transactionService: TransactionService,
 
     private readonly notificationService: NotificationService,
+    private readonly warehouseOperationTransaction: WarehouseOperationTransaction,
   ) {
     super(shipmentRepository);
   }
@@ -95,7 +104,7 @@ export class ShipmentService extends BaseService<Shipment> {
         id: id,
         warehouse_id: driver.warehouse_id,
       },
-      relations: ['order', 'warehouse', 'order.user'],
+      relations: ['order', 'warehouse', 'order.user', 'driver', 'driver.user'],
     });
 
     if (!shipment || shipment.status !== ShipmentStatusEnum.PICKED_UP) {
@@ -105,7 +114,7 @@ export class ShipmentService extends BaseService<Shipment> {
     shipment.order_delivered_at = new Date();
     shipment.status = ShipmentStatusEnum.DELIVERED;
 
-    await this.shipmentRepository.save(shipment);
+
     const order = await this.orderRepository.findOne({
       where: {
         id: shipment.order_id,
@@ -113,14 +122,15 @@ export class ShipmentService extends BaseService<Shipment> {
       relations: ['address'],
     });
     order.is_paid = true;
-    this.transactionService.makeTransaction(
+  await  this.transactionService.makeTransaction(
       new MakeTransactionRequest({
         amount: -order.total_price,
         type: TransactionTypes.ORDER_DELIVERD,
         order_id: order.id,
-        user_id: order.user_id,
+        user_id: shipment.driver.user_id,
       }),
     );
+    await this.shipmentRepository.save(shipment);
     await this.driverRepository.save(driver);
     await this.orderRepository.save(order);
 
@@ -470,6 +480,7 @@ export class ShipmentService extends BaseService<Shipment> {
         'driver',
         'driver.user',
         'order.address',
+        'shipment_products',
       ],
     });
 
@@ -479,7 +490,13 @@ export class ShipmentService extends BaseService<Shipment> {
 
     const currentUserRole = this.currentUser.roles;
     const shipmentStatus = shipment.status;
-    const driver = await this.getDriver(this.currentUser.id);
+    const driver = shipment.driver
+      ? await this.getDriver(
+          currentUserRole.includes(Role.DRIVER)
+            ? this.currentUser.id
+            : shipment.driver.user_id,
+        )
+      : null;
 
     if (
       (currentUserRole.includes(Role.CLIENT) &&
@@ -531,11 +548,34 @@ export class ShipmentService extends BaseService<Shipment> {
     shipment.status = ShipmentStatusEnum.CANCELED;
     shipment.order_canceled_at = new Date();
     shipment.cancelShipmentReason = reason;
-
-    driver.current_orders = driver.current_orders - 1;
-    await this.driverRepository.save(driver);
+    if (shipment.driver) {
+      driver.current_orders = driver.current_orders - 1;
+      await this.driverRepository.save(driver);
+    }
 
     await this.shipmentRepository.save(shipment);
+
+    const mappedImportedProducts = [];
+    for (const p of shipment.shipment_products) {
+      const mainProductMeasurement =
+        await this.productMeasurementRepository.findOne({
+          where: {
+            product_id: p.product_id,
+            is_main_unit: true,
+          },
+        });
+      mappedImportedProducts.push({
+        product_id: p.product_id,
+        product_measurement_id: mainProductMeasurement.id,
+        quantity: p.quantity * p.conversion_factor,
+      });
+    }
+
+    await this.warehouseOperationTransaction.run({
+      products: mappedImportedProducts,
+      warehouse_id: shipment.warehouse_id,
+      type: operationType.IMPORT,
+    });
 
     await this.orderGateway.notifyOrderStatusChange({
       action: ShipmentStatusEnum.CANCELED,
@@ -560,6 +600,7 @@ export class ShipmentService extends BaseService<Shipment> {
         text_en: 'the request has been canceled',
       }),
     );
+    if(shipment.driver){
     await this.notificationService.create(
       new NotificationEntity({
         user_id: shipment.driver.user_id,
@@ -570,7 +611,8 @@ export class ShipmentService extends BaseService<Shipment> {
         text_ar: 'تم الغاء الطلب',
         text_en: 'the request has been canceled',
       }),
-    );
+    );}
+    delete shipment.shipment_products;
     return shipment;
   }
 

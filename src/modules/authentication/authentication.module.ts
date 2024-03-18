@@ -13,6 +13,7 @@ import { RegisterDriverTransaction } from './transactions/register-driver.transa
 import { CountryModule } from '../country/country.module';
 import { RegionModule } from '../region/region.module';
 import { CityModule } from '../city/city.module';
+import { SmsProviderService } from './sms-provider.service';
 
 @Global()
 @Module({
@@ -35,10 +36,12 @@ import { CityModule } from '../city/city.module';
         JwtStrategy,
         VerifyPhoneTransaction,
         DeleteAccountTransaction,
+        SmsProviderService
 
     ],
     exports: [
         AuthenticationService,
+        SmsProviderService
     ],
 })
 export class AuthenticationModule { }

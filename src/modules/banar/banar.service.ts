@@ -7,12 +7,18 @@ import { CreateBanarRequest } from './dto/request/create-banar.request';
 import { FileService } from '../file/file.service';
 import { UploadFileRequest } from '../file/dto/requests/upload-file.request';
 import { UpdateBannerRequest } from './dto/request/update-banner.request';
+import { REQUEST } from '@nestjs/core';
+import { Request } from 'express';
+import { User } from 'src/infrastructure/entities/user/user.entity';
+import { Role } from 'src/infrastructure/data/enums/role.enum';
 
 @Injectable()
 export class BanarService extends BaseService<Banar> {
     constructor(
         @InjectRepository(Banar) private readonly banarRepository: Repository<Banar>,
         @Inject(FileService) private _fileService: FileService,
+        @Inject(REQUEST) private readonly request: Request
+
     ) {
         super(banarRepository);
     }
@@ -34,14 +40,18 @@ export class BanarService extends BaseService<Banar> {
     }
 
     async getBanars() {
-        return await this.banarRepository.find({
-            where: {
-                is_active: true,
-                started_at: LessThanOrEqual(new Date()),
-                ended_at: MoreThanOrEqual(new Date())
-
-            }
-        });
+        console.log(this.currentUser)
+        if (this.currentUser?.roles.includes(Role.ADMIN)) {
+            return await this.banarRepository.find();
+        } else {
+            return await this.banarRepository.find({
+                where: {
+                    is_active: true,
+                    started_at: LessThanOrEqual(new Date()),
+                    ended_at: MoreThanOrEqual(new Date())
+                }
+            });
+        }
     }
 
     async updateBanar(id: string, banar: UpdateBannerRequest) {
@@ -58,7 +68,7 @@ export class BanarService extends BaseService<Banar> {
             );
         }
 
-        Object.assign(banarEntity, { 
+        Object.assign(banarEntity, {
             banar: banar.banar ? tempImage : banarEntity.banar,
             started_at: banar.started_at ? banar.started_at : banarEntity.started_at,
             ended_at: banar.ended_at ? banar.ended_at : banarEntity.ended_at,
@@ -74,5 +84,9 @@ export class BanarService extends BaseService<Banar> {
             throw new NotFoundException("Banar not found");
         }
         return await this.banarRepository.remove(banar);
+    }
+
+    get currentUser(): User {
+        return this.request.user;
     }
 }
