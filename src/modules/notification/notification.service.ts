@@ -70,6 +70,7 @@ export class NotificationService extends BaseUserService<NotificationEntity> {
       })
       .skip(skip)
       .take(limit)
+      .orderBy('notification.created_at', 'DESC')
       .getManyAndCount();
 
     // notifications Be seen by user
@@ -94,7 +95,8 @@ export class NotificationService extends BaseUserService<NotificationEntity> {
         where: { id: users_id[index] },
       });
       if (user) {
-        this._repo.create(
+
+        await this.create(
           new NotificationEntity({
             user_id: users_id[index],
             url: users_id[index],
@@ -108,5 +110,4 @@ export class NotificationService extends BaseUserService<NotificationEntity> {
       }
     }
   }
-  
 }
