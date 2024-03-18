@@ -15,6 +15,7 @@ export class OrdersDashboardResponse {
 
    
   @Expose() delivery_type: DeliveryType;
+  @Expose() delivery_fee: number;
 
   
   @Expose() total_price: number;
@@ -42,6 +43,8 @@ export class OrdersDashboardResponse {
     this.is_paid = order.is_paid;
     this.delivery_day = order.delivery_day;
     this.delivery_type = order.delivery_type;
+    this.delivery_fee = order.delivery_fee;
+
     this.warehouse = {
       id: order.warehouse.id,
       name_ar: order.warehouse.name_ar,
