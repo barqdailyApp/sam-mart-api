@@ -1,10 +1,11 @@
 
 import { AuditableEntity } from "src/infrastructure/base/auditable.entity";
 import { TransactionTypes } from "src/infrastructure/data/enums/transaction-types";
-import { Entity, Column, ManyToOne, JoinColumn } from "typeorm";
+import { Entity, Column, ManyToOne, JoinColumn, BeforeInsert } from "typeorm";
 import { User } from "../user/user.entity";
 import { Wallet } from "./wallet.entity";
 import { Order, } from "../order/order.entity";
+import { randNum } from "src/core/helpers/cast.helper";
 
 
 @Entity()
@@ -34,10 +35,21 @@ export class Transaction extends AuditableEntity {
 
   @Column()
   user_id: string;
+  
+  @Column({ length: 8, unique: true })
+  number: string;
 
 
   constructor(partial?: Partial<Transaction>) {
     super();
     Object.assign(this, partial);
+  }
+  public uniqueIdGenerator(): string {
+    return randNum(8);  
+  }
+  @BeforeInsert()
+  generateAccount() {
+    // ensure the account is unique
+    if (!this.number) this.number = this.uniqueIdGenerator();
   }
 }
