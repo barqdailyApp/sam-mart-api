@@ -104,7 +104,7 @@ export class ShipmentService extends BaseService<Shipment> {
         id: id,
         warehouse_id: driver.warehouse_id,
       },
-      relations: ['order', 'warehouse', 'order.user'],
+      relations: ['order', 'warehouse', 'order.user', 'driver', 'driver.user'],
     });
 
     if (!shipment || shipment.status !== ShipmentStatusEnum.PICKED_UP) {
@@ -114,7 +114,7 @@ export class ShipmentService extends BaseService<Shipment> {
     shipment.order_delivered_at = new Date();
     shipment.status = ShipmentStatusEnum.DELIVERED;
 
-    await this.shipmentRepository.save(shipment);
+
     const order = await this.orderRepository.findOne({
       where: {
         id: shipment.order_id,
@@ -127,9 +127,10 @@ export class ShipmentService extends BaseService<Shipment> {
         amount: -order.total_price,
         type: TransactionTypes.ORDER_DELIVERD,
         order_id: order.id,
-        user_id: order.user_id,
+        user_id: shipment.driver.user_id,
       }),
     );
+    await this.shipmentRepository.save(shipment);
     await this.driverRepository.save(driver);
     await this.orderRepository.save(order);
 
