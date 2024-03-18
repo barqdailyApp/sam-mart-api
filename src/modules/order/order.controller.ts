@@ -34,7 +34,6 @@ import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { UpdateReturnOrderStatusRequest } from './dto/request/update-return-order-statu.request';
 import { OrderSingleDashboardResponse } from './dto/response/dashboard-response/order-single-dashboard.response';
 import { OrdersDashboardResponse } from './dto/response/dashboard-response/orders-dashboard.response';
-import { OrdersTotalDashboardResponse } from './dto/response/dashboard-response/orders-total-dashboard.response';
 import { ShipmentsResponse } from './dto/response/client-response/shipments.response';
 import { ShipmentSingleResponse } from './dto/response/client-response/shipment-single.response';
 import { OrdersResponse } from './dto/response/client-response/orders.response';
@@ -135,15 +134,7 @@ export class OrderController {
   async getDashboardOrdersTotal() {
     const ordersTotal = await this.orderService.getTotalDashboardOrders();
 
-    const ordersTotalResponse = new OrdersTotalDashboardResponse(
-      ordersTotal.ordersTotal,
-      ordersTotal.ordersNew,
-      ordersTotal.ordersDriversAccepted,
-      ordersTotal.ordersProcessing,
-      ordersTotal.ordersPicked,
-      ordersTotal.ordersDelivered,
-      ordersTotal.ordersCanceled,
-    );
+    
 
     return new ActionResponse(ordersTotal);
   }
