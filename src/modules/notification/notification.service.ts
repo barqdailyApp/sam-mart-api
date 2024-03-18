@@ -70,6 +70,7 @@ export class NotificationService extends BaseUserService<NotificationEntity> {
       })
       .skip(skip)
       .take(limit)
+      .orderBy('notification.created_at', 'DESC')
       .getManyAndCount();
 
     // notifications Be seen by user
