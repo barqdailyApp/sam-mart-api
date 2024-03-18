@@ -132,8 +132,11 @@ export class OrderService extends BaseUserService<Order> {
 
     let query = this.orderRepository
       .createQueryBuilder('order')
-
-      .leftJoinAndSelect('order.user', 'user')
+      .leftJoinAndSelect(
+        'order.user',
+        'user',
+        'user.deleted_at IS NOT NULL OR user.deleted_at IS NULL',
+      )
       .leftJoinAndSelect('order.section', 'section_order')
       .leftJoinAndSelect('order.warehouse', 'warehouse_order')
       .leftJoinAndSelect('order.address', 'address')
@@ -235,7 +238,7 @@ export class OrderService extends BaseUserService<Order> {
         status: ShipmentStatusEnum.CONFIRMED,
       },
     });
-    const  ordersReadyForPickup = await this.shipmentRepository.count({
+    const ordersReadyForPickup = await this.shipmentRepository.count({
       where: {
         status: ShipmentStatusEnum.READY_FOR_PICKUP,
       },
@@ -281,7 +284,7 @@ export class OrderService extends BaseUserService<Order> {
     });
 
     if (!order) {
-      throw new BadRequestException("message.order_not_found");
+      throw new BadRequestException('message.order_not_found');
     }
     let query = this.orderRepository
       .createQueryBuilder('order')
@@ -435,46 +438,43 @@ export class OrderService extends BaseUserService<Order> {
       )
       .leftJoinAndSelect('product_sub_category.product', 'product')
       .leftJoinAndSelect('product.product_images', 'product_images')
-      .where('shipments.warehouse_id = :warehouse_id', { warehouse_id: driver.warehouse_id })
+      .where('shipments.warehouse_id = :warehouse_id', {
+        warehouse_id: driver.warehouse_id,
+      })
       .orderBy('shipments.updated_at', 'DESC')
       .skip(skip) // Apply pagination offset.
       .take(limit); // Limit the number of results returned.
 
-
-    
     if (order_date) {
       //*using database functions to truncate the time part of the order.created_at timestamp to compare only the date components
       query = query.andWhere('order.delivery_day = :delivery_day', {
-        delivery_day:order_date,
+        delivery_day: order_date,
       });
     }
     // Apply filters based on the shipment status.
     if (status) {
-     if(status === ShipmentStatusEnum.WITHOUT_NEW){
-      query = query.andWhere('shipments.status IN (:...statuses)', {
-        statuses: [
-          ShipmentStatusEnum.PICKED_UP,
-          ShipmentStatusEnum.CONFIRMED,
-          ShipmentStatusEnum.PROCESSING,
-          ShipmentStatusEnum.DELIVERED,
-          ShipmentStatusEnum.CANCELED,
-          ShipmentStatusEnum.READY_FOR_PICKUP
-        
-        ],
-      });
-      query = query.andWhere('driver.user_id = :user_id', {
-        user_id: user.id,
-      });
-
-     }
-     else if (status === ShipmentStatusEnum.ACTIVE) {
+      if (status === ShipmentStatusEnum.WITHOUT_NEW) {
+        query = query.andWhere('shipments.status IN (:...statuses)', {
+          statuses: [
+            ShipmentStatusEnum.PICKED_UP,
+            ShipmentStatusEnum.CONFIRMED,
+            ShipmentStatusEnum.PROCESSING,
+            ShipmentStatusEnum.DELIVERED,
+            ShipmentStatusEnum.CANCELED,
+            ShipmentStatusEnum.READY_FOR_PICKUP,
+          ],
+        });
+        query = query.andWhere('driver.user_id = :user_id', {
+          user_id: user.id,
+        });
+      } else if (status === ShipmentStatusEnum.ACTIVE) {
         // For ACTIVE status, filter shipments that are either picked up, CONFIRMED, or PROCESSING.
         query = query.andWhere('shipments.status IN (:...statuses)', {
           statuses: [
             ShipmentStatusEnum.PICKED_UP,
             ShipmentStatusEnum.CONFIRMED,
             ShipmentStatusEnum.PROCESSING,
-            ShipmentStatusEnum.READY_FOR_PICKUP
+            ShipmentStatusEnum.READY_FOR_PICKUP,
           ],
         });
         query = query.andWhere('driver.user_id = :user_id', {
@@ -532,7 +532,7 @@ export class OrderService extends BaseUserService<Order> {
           ShipmentStatusEnum.CONFIRMED,
           ShipmentStatusEnum.PROCESSING,
           ShipmentStatusEnum.PICKED_UP,
-          ShipmentStatusEnum.READY_FOR_PICKUP
+          ShipmentStatusEnum.READY_FOR_PICKUP,
         ]),
         driver_id: driver.id,
         warehouse_id: driver.warehouse_id,
@@ -554,7 +554,8 @@ export class OrderService extends BaseUserService<Order> {
     };
   }
   async getDashboardShipments(driverShipmentsQuery: DriverShipmentsQuery) {
-    const { limit, page, status, driver_id, order_date,order_search } = driverShipmentsQuery;
+    const { limit, page, status, driver_id, order_date, order_search } =
+      driverShipmentsQuery;
     const skip = (page - 1) * limit;
     let query = this.shipmentRepository
       .createQueryBuilder('shipments')
@@ -591,11 +592,11 @@ export class OrderService extends BaseUserService<Order> {
       .skip(skip)
       .take(limit);
     // Filter orders that are being delivered today.
- 
+
     if (order_date) {
       //*using database functions to truncate the time part of the order.created_at timestamp to compare only the date components
       query = query.andWhere('order.delivery_day = :delivery_day', {
-        delivery_day:order_date,
+        delivery_day: order_date,
       });
     }
     if (order_search) {
@@ -612,7 +613,7 @@ export class OrderService extends BaseUserService<Order> {
             ShipmentStatusEnum.DELIVERED,
             ShipmentStatusEnum.CONFIRMED,
             ShipmentStatusEnum.PROCESSING,
-            ShipmentStatusEnum.READY_FOR_PICKUP
+            ShipmentStatusEnum.READY_FOR_PICKUP,
           ],
         });
       } else {
@@ -669,7 +670,7 @@ export class OrderService extends BaseUserService<Order> {
 
   async sendOrderToDrivers(id: string) {
     const order = await this.orderRepository.findOne({ where: { id } });
-    if (!order) throw new NotFoundException("message.order_not_found");
+    if (!order) throw new NotFoundException('message.order_not_found');
     order.delivery_type = DeliveryType.FAST;
     return await this.orderRepository.save(order);
   }
@@ -680,23 +681,21 @@ export class OrderService extends BaseUserService<Order> {
   async broadcastOrderDrivers(order_id: string) {
     const order = await this.orderRepository.findOne({
       where: { id: order_id },
-      relations: ['user', 'address']
+      relations: ['user', 'address'],
     });
-    if (!order) throw new NotFoundException("message.order_not_found");
+    if (!order) throw new NotFoundException('message.order_not_found');
 
     const shipment = await this.shipmentRepository.findOne({
       where: { order_id },
       relations: ['warehouse'],
     });
-    if (!shipment) throw new NotFoundException("message.shipment_not_found");
+    if (!shipment) throw new NotFoundException('message.shipment_not_found');
 
     if (shipment.status !== ShipmentStatusEnum.PENDING) {
-      throw new BadRequestException(
-        "message.order_already_broadcasted",
-      );
+      throw new BadRequestException('message.order_already_broadcasted');
     }
 
-    // if broadcast order to drivers, so it'll become fast delivery 
+    // if broadcast order to drivers, so it'll become fast delivery
     order.delivery_type = DeliveryType.FAST;
     await this.orderRepository.save(order);
 
