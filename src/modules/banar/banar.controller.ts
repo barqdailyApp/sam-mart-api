@@ -26,13 +26,13 @@ import { UpdateBannerRequest } from './dto/request/update-banner.request';
 })
 @ApiTags('Banar')
 @Controller('banar')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class BanarController {
     constructor(
         private readonly banarService: BanarService,
     ) { }
 
     @Post()
-    @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN)
     @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('banar'))
     @ApiConsumes('multipart/form-data')
@@ -48,7 +48,6 @@ export class BanarController {
     }
 
     @Get()
-    // @Roles(Role.CLIENT)
     async getBanars(): Promise<ActionResponse<BannerResponse[]>> {
         const banners = await this.banarService.getBanars();
         const result = plainToInstance(BannerResponse, banners, { excludeExtraneousValues: true })
@@ -56,7 +55,6 @@ export class BanarController {
     }
 
     @Patch(":id")
-    @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN)
     @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('banar'))
     @ApiConsumes('multipart/form-data')
@@ -73,7 +71,6 @@ export class BanarController {
     }
 
     @Delete(":id")
-    @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN)
     async deleteBanar(
         @Param('id') id: string,
