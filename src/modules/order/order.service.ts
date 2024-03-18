@@ -235,7 +235,11 @@ export class OrderService extends BaseUserService<Order> {
         status: ShipmentStatusEnum.CONFIRMED,
       },
     });
-
+    const  ordersReadyForPickup = await this.shipmentRepository.count({
+      where: {
+        status: ShipmentStatusEnum.READY_FOR_PICKUP,
+      },
+    });
     const ordersProcessing = await this.shipmentRepository.count({
       where: {
         status: ShipmentStatusEnum.PROCESSING,
@@ -263,6 +267,7 @@ export class OrderService extends BaseUserService<Order> {
       ordersTotal,
       ordersNew,
       ordersDriversAccepted,
+      ordersReadyForPickup,
       ordersProcessing,
       ordersPicked,
       ordersDelivered,

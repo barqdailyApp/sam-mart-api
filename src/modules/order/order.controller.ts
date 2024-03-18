@@ -145,7 +145,7 @@ export class OrderController {
       ordersTotal.ordersCanceled,
     );
 
-    return new ActionResponse(ordersTotalResponse);
+    return new ActionResponse(ordersTotal);
   }
 
 
