@@ -7,6 +7,7 @@ import { Otp } from 'src/infrastructure/entities/auth/otp.entity';
 import { User } from 'src/infrastructure/entities/user/user.entity';
 import { DataSource, EntityManager } from 'typeorm';
 import { SendOtpRequest } from '../dto/requests/send-otp.dto';
+import { SmsProviderService } from '../sms-provider.service';
 
 @Injectable()
 export class SendOtpTransaction extends BaseTransaction<
@@ -16,6 +17,7 @@ export class SendOtpTransaction extends BaseTransaction<
   constructor(
     dataSource: DataSource,
     @Inject(ConfigService) private readonly _config: ConfigService,
+    @Inject(SmsProviderService) private readonly smsProviderService: SmsProviderService
   ) {
     super(dataSource);
   }
@@ -39,6 +41,7 @@ export class SendOtpTransaction extends BaseTransaction<
       const code = '1234' 
       // map to otp entity
       const otp = plainToInstance(Otp, { ...req, code });
+      await this.smsProviderService.sendSms(req.username, code);
       // delete old otp
       await context.delete(Otp, {
         type: req.type,
