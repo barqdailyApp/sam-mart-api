@@ -104,7 +104,13 @@ export class ShipmentService extends BaseService<Shipment> {
         id: id,
         warehouse_id: driver.warehouse_id,
       },
-      relations: ['order', 'warehouse', 'order.user', 'driver', 'driver.user'],
+      relations: [
+        'order',
+        'warehouse',
+        'order.user',
+        'driver',
+        'driver.user'
+      ],
     });
 
     if (!shipment || shipment.status !== ShipmentStatusEnum.PICKED_UP) {
@@ -122,7 +128,7 @@ export class ShipmentService extends BaseService<Shipment> {
       relations: ['address'],
     });
     order.is_paid = true;
-  await  this.transactionService.makeTransaction(
+    await this.transactionService.makeTransaction(
       new MakeTransactionRequest({
         amount: -order.total_price,
         type: TransactionTypes.ORDER_DELIVERD,
@@ -168,7 +174,12 @@ export class ShipmentService extends BaseService<Shipment> {
         id: id,
         warehouse_id: driver.warehouse_id,
       },
-      relations: ['order', 'warehouse', 'order.user', 'order.address'],
+      relations: [
+        'order',
+        'warehouse',
+        'order.user',
+        'order.address'
+      ],
     });
     if (!shipment || shipment.status !== ShipmentStatusEnum.READY_FOR_PICKUP) {
       throw new NotFoundException('message.shipment_not_found');
@@ -209,7 +220,14 @@ export class ShipmentService extends BaseService<Shipment> {
       where: {
         id: id,
       },
-      relations: ['order', 'warehouse', 'order.user', 'driver', 'driver.user'],
+      relations: [
+        'order',
+        'warehouse',
+        'order.user',
+        'driver',
+        'driver.user',
+        'order.address'
+      ],
     });
 
     const driver = await this.getDriver(shipment.driver.user_id);
@@ -271,7 +289,14 @@ export class ShipmentService extends BaseService<Shipment> {
       where: {
         id: id,
       },
-      relations: ['order', 'warehouse', 'order.user', 'driver', 'driver.user'],
+      relations: [
+        'order',
+        'warehouse',
+        'order.user',
+        'driver',
+        'driver.user',
+        'order.address'
+      ],
     });
     const driver = await this.getDriver(shipment.driver.user_id);
     if (!driver) {
@@ -492,10 +517,10 @@ export class ShipmentService extends BaseService<Shipment> {
     const shipmentStatus = shipment.status;
     const driver = shipment.driver
       ? await this.getDriver(
-          currentUserRole.includes(Role.DRIVER)
-            ? this.currentUser.id
-            : shipment.driver.user_id,
-        )
+        currentUserRole.includes(Role.DRIVER)
+          ? this.currentUser.id
+          : shipment.driver.user_id,
+      )
       : null;
 
     if (
@@ -514,10 +539,10 @@ export class ShipmentService extends BaseService<Shipment> {
       (currentUserRole.includes(Role.DRIVER) &&
         shipmentStatus === ShipmentStatusEnum.PENDING) ||
       shipmentStatus ===
-        (ShipmentStatusEnum.CANCELED ||
-          ShipmentStatusEnum.DELIVERED ||
-          ShipmentStatusEnum.RETRUNED ||
-          ShipmentStatusEnum.COMPLETED)
+      (ShipmentStatusEnum.CANCELED ||
+        ShipmentStatusEnum.DELIVERED ||
+        ShipmentStatusEnum.RETRUNED ||
+        ShipmentStatusEnum.COMPLETED)
     ) {
       throw new BadRequestException('message.not_allowed_to_cancel_shipment');
     }
@@ -600,18 +625,19 @@ export class ShipmentService extends BaseService<Shipment> {
         text_en: 'the request has been canceled',
       }),
     );
-    if(shipment.driver){
-    await this.notificationService.create(
-      new NotificationEntity({
-        user_id: shipment.driver.user_id,
-        url: shipment.order.id,
-        type: NotificationTypes.ORDERS,
-        title_ar: 'تحديث الطلب',
-        title_en: 'order updated',
-        text_ar: 'تم الغاء الطلب',
-        text_en: 'the request has been canceled',
-      }),
-    );}
+    if (shipment.driver) {
+      await this.notificationService.create(
+        new NotificationEntity({
+          user_id: shipment.driver.user_id,
+          url: shipment.order.id,
+          type: NotificationTypes.ORDERS,
+          title_ar: 'تحديث الطلب',
+          title_en: 'order updated',
+          text_ar: 'تم الغاء الطلب',
+          text_en: 'the request has been canceled',
+        }),
+      );
+    }
     delete shipment.shipment_products;
     return shipment;
   }
@@ -642,7 +668,12 @@ export class ShipmentService extends BaseService<Shipment> {
 
     const shipment = await this.shipmentRepository.findOne({
       where: { id: shipment_id },
-      relations: ['order', 'warehouse', 'order.user', 'order.address'],
+      relations: [
+        'order',
+        'warehouse',
+        'order.user',
+        'order.address'
+      ],
     });
 
     if (!shipment) {
