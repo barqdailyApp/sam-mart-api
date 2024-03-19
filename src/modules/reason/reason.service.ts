@@ -24,19 +24,33 @@ export class ReasonService extends BaseService<Reason>{
         return await this.reasonRepository.save(createdReason);
     }
 
-    async getAll(query: GetReasonQueryRequest): Promise<Reason[]> {
+    async getAll(query: GetReasonQueryRequest)
+        : Promise<
+            {
+                total: number,
+                reasons: Reason[]
+            }
+        > {
+        const { type, page, limit } = query;
+        let total = 0;
         const currentUserRole = this.currentUser.roles;
         let reasons = await this.reasonRepository.find({
             where: {
-                type: query.type,
-            }
+                type,
+            },
         });
 
         if (!currentUserRole.includes(Role.ADMIN)) {
             reasons = reasons.filter(reason => reason.roles.some(role => currentUserRole.includes(role)));
         }
+        total = reasons.length;
 
-        return reasons;
+        if (page && limit) {
+            const offset = (page - 1) * limit;
+            reasons = reasons.slice(offset, offset + limit);
+        }
+
+        return { total, reasons };
     }
 
     async updateReason(id: string, req: UpdateReasonRequest): Promise<Reason> {

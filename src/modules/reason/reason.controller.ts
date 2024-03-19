@@ -24,6 +24,7 @@ import { ReasonService } from './reason.service';
 import { Reason } from 'src/infrastructure/entities/reason/reason.entity';
 import { GetReasonQueryRequest } from './dto/request/get-reason-query.requst';
 import { UpdateReasonRequest } from './dto/request/update-reason.request';
+import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 @ApiBearerAuth()
 @ApiHeader({
     name: 'Accept-Language',
@@ -53,10 +54,10 @@ export class ReasonController {
     async getAllReasons(
         @Query() query: GetReasonQueryRequest
     ): Promise<ActionResponse<Reason[]>> {
-        const reasons = await this.reasonService.getAll(query);
-        return new ActionResponse<Reason[]>(
-            this._i18nResponse.entity(reasons)
-        );
+        const { reasons, total } = await this.reasonService.getAll(query);
+        return new PaginatedResponse<Reason[]>(reasons, {
+            meta: { total, page: query.page, limit: query.limit },
+        });
     }
 
     @Patch("update/:id")
