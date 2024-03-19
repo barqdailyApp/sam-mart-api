@@ -72,7 +72,7 @@ export class BanarService extends BaseService<Banar> {
             banar: banar.banar ? tempImage : banarEntity.banar,
             started_at: banar.started_at ? banar.started_at : banarEntity.started_at,
             ended_at: banar.ended_at ? banar.ended_at : banarEntity.ended_at,
-            is_active: banar.is_active ? banar.is_active : banarEntity.is_active,
+            is_active: banar.is_active != null ? banar.is_active : banarEntity.is_active,
         });
 
         return await this.banarRepository.save(banarEntity);
