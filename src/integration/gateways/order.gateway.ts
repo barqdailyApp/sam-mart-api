@@ -69,13 +69,21 @@ export class OrderGateway
 
   async notifyOrderStatusChange(payload: OrderStatusChangePayload) {
     const { action, body } = payload;
+    console.log('payload', payload);
     const message = plainToInstance(OrderStatusChangeResponse,
       {
         action: action,
         client: body.client,
         driver: body.driver ? {
-          ...body.driver,
-          user: body.driver.user,
+         ... body.driver,
+         
+         user:{
+          username: body.driver.user.username,
+          name:body.driver.user.name,
+          avatar: body.driver.user.avatar,
+          phone: body.driver.user.phone
+         }
+      
         } : null,
         warehouse: { ...i18nEntity(body.warehouse, 'en') },
         order: {

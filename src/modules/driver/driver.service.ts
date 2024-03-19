@@ -26,6 +26,7 @@ export class DriverService {
     @InjectRepository(Shipment)
     private shipmentRepository: Repository<Shipment>,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
+
   ) {}
 
   async single(): Promise<Driver> {
@@ -236,6 +237,22 @@ export class DriverService {
   async deleteDriverDashboard(driver_id: string) {
     const driver = await this.driverRepository.findOne({ where: { id: driver_id } });
     if (!driver) throw new NotFoundException('driver not found');
+    const ordersActive = await this.shipmentRepository.count({
+      where: {
+        status: In([
+          ShipmentStatusEnum.CONFIRMED,
+          ShipmentStatusEnum.PROCESSING,
+          ShipmentStatusEnum.PICKED_UP,
+          ShipmentStatusEnum.READY_FOR_PICKUP,
+        ]),
+        driver_id: driver.id,
+        warehouse_id: driver.warehouse_id,
+      },
+    });
+    if(ordersActive > 0) {
+      throw new Error('message.driver_has_active_orders');
+
+    }
     return await this.driverRepository.softDelete({ id: driver_id });
   }
 }

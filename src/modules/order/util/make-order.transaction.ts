@@ -239,7 +239,7 @@ export class MakeOrderTransaction extends BaseTransaction<
       for (let index = 0; index < driversWarehouse.length; index++) {
         await this.notificationService.create(
           new NotificationEntity({
-            user_id: user.id,
+            user_id: driversWarehouse[index].user_id,
             url: shipment.id,
             type: NotificationTypes.ORDERS,
             title_ar: 'طلب جديد',
