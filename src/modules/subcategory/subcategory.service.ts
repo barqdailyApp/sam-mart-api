@@ -169,10 +169,26 @@ export class SubcategoryService extends BaseService<Subcategory> {
       );
 
       subcategory.logo = path;
+      await this.subcategory_repo.update(
+        { id: req.id },
+        {
+          logo: path,
+          name_ar: req.name_ar,
+          name_en: req.name_en,
+        },
+      );
+    } else {
+      await this.subcategory_repo.update(
+        { id: req.id },
+        {
+          name_ar: req.name_ar,
+          name_en: req.name_en,
+        },
+      );
     }
 
     // Object.assign(subcategory, req);
-    return await this.subcategory_repo.save(subcategory);
+    return await this.subcategory_repo.findBy({ id: req.id });
   }
 
   async deleteSubCategory(id: string) {
