@@ -682,7 +682,7 @@ export class ShipmentService extends BaseService<Shipment> {
         ? 'ASSIGNED'
         : ShipmentStatusEnum.CONFIRMED;
 
-    const to_rooms = ['admin'];
+    const to_rooms = ['admin',shipment.order.user_id];
     if (action === AddDriverShipmentOption.DRIVER_ASSIGN_SHIPMENT) {
       if (shipment.order.delivery_type === DeliveryType.FAST) {
         // if he assigned to fast delivery, notify the drivers in the warehouse. to avoid double accept
