@@ -54,6 +54,15 @@ export class BanarController {
         return new ActionResponse<BannerResponse[]>(result);
     }
 
+    @Get(":banar_id")
+    async getBanar(
+        @Param('banar_id') id: string,
+    ): Promise<ActionResponse<BannerResponse>> {
+        const banner = await this.banarService.findOne(id);
+        const result = plainToInstance(BannerResponse, banner, { excludeExtraneousValues: true })
+        return new ActionResponse<BannerResponse>(result);
+    }
+
     @Patch(":id")
     @Roles(Role.ADMIN)
     @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('banar'))
@@ -64,7 +73,7 @@ export class BanarController {
         @UploadedFile(new UploadValidator().build())
         banar: Express.Multer.File,
     ): Promise<ActionResponse<BannerResponse>> {
-        if(banar) req.banar = banar;
+        if (banar) req.banar = banar;
         const banner = await this.banarService.updateBanar(id, req);
         const result = plainToInstance(BannerResponse, banner, { excludeExtraneousValues: true })
         return new ActionResponse<BannerResponse>(result);
@@ -79,4 +88,5 @@ export class BanarController {
         const result = plainToInstance(BannerResponse, banner, { excludeExtraneousValues: true })
         return new ActionResponse<BannerResponse>(result);
     }
+
 }
