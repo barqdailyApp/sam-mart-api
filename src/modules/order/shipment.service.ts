@@ -589,17 +589,17 @@ export class ShipmentService extends BaseService<Shipment> {
       },
     });
 
-    await this.notificationService.create(
-      new NotificationEntity({
-        user_id: shipment.order.user_id,
-        url: shipment.order.id,
-        type: NotificationTypes.ORDERS,
-        title_ar: 'الغاء الطلب',
-        title_en: 'order cancel',
-        text_ar: 'تم الغاء الطلب',
-        text_en: 'the request has been canceled',
-      }),
-    );
+    // await this.notificationService.create(
+    //   new NotificationEntity({
+    //     user_id: shipment.order.user_id,
+    //     url: shipment.order.id,
+    //     type: NotificationTypes.ORDERS,
+    //     title_ar: 'الغاء الطلب',
+    //     title_en: 'order cancel',
+    //     text_ar: 'تم الغاء الطلب',
+    //     text_en: 'the request has been canceled',
+    //   }),
+    // );
     if(shipment.driver){
     await this.notificationService.create(
       new NotificationEntity({
