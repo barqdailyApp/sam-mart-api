@@ -1,5 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsEnum } from "class-validator";
+import { Transform } from "class-transformer";
+import { IsEnum, IsNumber, IsOptional } from "class-validator";
+import { toRightNumber } from "src/core/helpers/cast.helper";
 import { ReasonType } from "src/infrastructure/data/enums/reason-type.enum";
 
 export class GetReasonQueryRequest {
@@ -12,4 +14,18 @@ export class GetReasonQueryRequest {
     })
     @IsEnum(ReasonType)
     type: ReasonType;
+
+    @Transform(({ value }) => toRightNumber(value, { min: 1 }))
+    @ApiProperty({ required: false, minimum: 1 })
+    @IsOptional()
+    @IsNumber()
+    page: number;
+  
+    @Transform(({ value }) => toRightNumber(value, { min: 1 }))
+    @ApiProperty({ required: false })
+    @IsOptional()
+    @IsNumber()
+    limit: number;
+
+    
 }
