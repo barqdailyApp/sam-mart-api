@@ -119,8 +119,6 @@ export class CartService extends BaseService<CartProduct> {
       )
       .getOne();
 
-
-
     const warehouse_product = await this.WarehouseProductsRepository.findOne({
       where: {
         warehouse_id: nearst_warehouse.id,
@@ -162,13 +160,13 @@ export class CartService extends BaseService<CartProduct> {
       product_price.product_offer.start_date < new Date() &&
       new Date() < product_price.product_offer.end_date;
 
-      if (is_offer) {
-        product_price.min_order_quantity =
-          product_price.product_offer.min_offer_quantity;
-        product_price.max_order_quantity =
-          product_price.product_offer.max_offer_quantity;
-        product_price.price = product_price.product_offer.price;
-      }
+    if (is_offer) {
+      product_price.min_order_quantity =
+        product_price.product_offer.min_offer_quantity;
+      product_price.max_order_quantity =
+        product_price.product_offer.max_offer_quantity;
+      product_price.price = product_price.product_offer.price;
+    }
 
     return this.cartProductRepository.save(
       new CartProduct({
@@ -230,7 +228,12 @@ export class CartService extends BaseService<CartProduct> {
         },
       },
     });
-    if (product_category_price.product_offer != null) {
+    if (
+      product_category_price.product_offer &&
+      product_category_price.product_offer.offer_quantity > 0 &&
+      product_category_price.product_offer.start_date < new Date() &&
+      new Date() < product_category_price.product_offer.end_date
+    ) {
       product_category_price.min_order_quantity =
         product_category_price.product_offer.min_offer_quantity;
       product_category_price.max_order_quantity =
