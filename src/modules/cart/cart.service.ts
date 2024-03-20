@@ -78,7 +78,9 @@ export class CartService extends BaseService<CartProduct> {
         },
       },
     });
-    if(!cart_product.is_offer){delete cart_product.product_category_price.product_offer}
+    if (!cart_product.is_offer) {
+      delete cart_product.product_category_price.product_offer;
+    }
     return cart_product;
   }
 
@@ -231,13 +233,7 @@ export class CartService extends BaseService<CartProduct> {
         },
       },
     });
-    if (
-      product_category_price.product_offer &&
-      product_category_price.product_offer.offer_quantity > 0 &&
-      product_category_price.product_offer.start_date < new Date() &&
-      new Date() < product_category_price.product_offer.end_date &&
-      product_category_price.product_offer.is_active
-    ) {
+    if (cart_product.is_offer) {
       product_category_price.min_order_quantity =
         product_category_price.product_offer.min_offer_quantity;
       product_category_price.max_order_quantity =
