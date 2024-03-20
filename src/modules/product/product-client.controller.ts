@@ -92,8 +92,8 @@ export class ProductClientController {
       id,
       singleProductClientQuery,
     );
-   // const productResponse =new SingleProductsNewResponse(product);
-    const productResponse = plainToClass(ProductResponse, product);
+    const productResponse =new SingleProductsNewResponse(product);
+   // const productResponse = plainToClass(ProductResponse, product);
 
  
 
