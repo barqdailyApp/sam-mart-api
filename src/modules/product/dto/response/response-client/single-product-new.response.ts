@@ -68,6 +68,8 @@ export class SingleProductsNewResponse {
         warehouse_quantity :
         product.warehouses_products.reduce((acc, cur) => acc + cur.quantity, 0) /
         item.conversion_factor,
+        min_order_quantity: product_category_price.min_order_quantity,
+        max_order_quantity: product_category_price.max_order_quantity,
         offer: product_offer
           ? {
               product_category_price_id:
