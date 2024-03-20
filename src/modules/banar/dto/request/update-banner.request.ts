@@ -17,7 +17,9 @@ export class UpdateBannerRequest {
 
     @ApiProperty({ nullable: true, required: false, default: true })
     @IsOptional()
-    @Transform((value) => Boolean(value))
+    @Transform(({ value }) => {
+        return value === true || value === 'true';
+    })
     @IsBoolean()
     is_active: boolean;
 
