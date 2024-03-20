@@ -135,9 +135,10 @@ export class ProductClientService {
       .leftJoinAndSelect(
         'product_category_prices.product_offer',
         'product_offer',
-        'product_offer.offer_quantity > 0 AND product_offer.start_date <= :current_date AND product_offer.end_date >= :current_date',
+        'product_offer.offer_quantity > 0 AND product_offer.start_date <= :current_date AND product_offer.end_date >= :current_date AND product_offer.is_active = :isActive',
         {
           current_date: new Date(),
+          isActive: true,
         },
       )
       .innerJoin(
@@ -375,9 +376,10 @@ export class ProductClientService {
     
 
       .where(
-        'product_offer.offer_quantity > 0 AND product_offer.start_date <= :current_date AND product_offer.end_date >= :current_date AND product_offer.is_active = true',
+        'product_offer.offer_quantity > 0 AND product_offer.start_date <= :current_date AND product_offer.end_date >= :current_date AND product_offer.is_active = :isActive',
         {
           current_date: new Date(),
+          isActive: true,
         },
       )
       .orderBy(productsSort)
@@ -535,9 +537,10 @@ export class ProductClientService {
       .leftJoinAndSelect(
         'product_category_prices.product_offer',
         'product_offer',
-        'product_offer.offer_quantity > 0 AND product_offer.start_date <= :current_date AND product_offer.end_date >= :current_date',
+        'product_offer.offer_quantity > 0 AND product_offer.start_date <= :current_date AND product_offer.end_date >= :current_date AND product_offer.is_active = :isActive',
         {
           current_date: new Date(),
+          isActive: true,
         },
       )
       .leftJoinAndSelect(
@@ -740,9 +743,10 @@ export class ProductClientService {
       .leftJoinAndSelect(
         'product_category_prices.product_offer',
         'product_offer',
-        'product_offer.offer_quantity > 0 AND product_offer.start_date <= :current_date AND product_offer.end_date >= :current_date',
+        'product_offer.offer_quantity > 0 AND product_offer.start_date <= :current_date AND product_offer.end_date >= :current_date AND product_offer.is_active = :isActive',
         {
           current_date: new Date(),
+          isActive: true,
         },
       )
       .innerJoin(
