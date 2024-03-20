@@ -375,7 +375,7 @@ export class ProductClientService {
     
 
       .where(
-        'product_offer.offer_quantity > 0 AND product_offer.start_date <= :current_date AND product_offer.end_date >= :current_date',
+        'product_offer.offer_quantity > 0 AND product_offer.start_date <= :current_date AND product_offer.end_date >= :current_date AND product_offer.is_active = true',
         {
           current_date: new Date(),
         },
