@@ -76,6 +76,15 @@ export class ReasonService extends BaseService<Reason>{
         return deletedReason.affected > 0;
     }
 
+    async getSingleReason(id: string): Promise<Reason> {
+        const reason = await this.findOne(id);
+        if (!reason) {
+            throw new NotFoundException(`Reason with id ${id} not found`);
+        }
+
+        return reason;
+    }
+
     get currentUser() {
         return this.request.user;
     }
