@@ -60,7 +60,7 @@ export class ProductCategoryPriceService {
       where: { id: product_id },
     });
     if (!product) {
-      throw new NotFoundException(`Product ID not found`);
+      throw new NotFoundException('message.product_not_found');
     }
     //* Check if product  there is a section
     const sectionSubcategory = categorySubcategory.section_category.section_id;
@@ -116,7 +116,7 @@ export class ProductCategoryPriceService {
       where: { id: categorySubCategory_id },
     });
     if (!categorySubcategory) {
-      throw new NotFoundException(`Subcategory ID not found`);
+      throw new NotFoundException("message.sub_category_id_not_found");
     }
     //* Check if product exist
     const product = await this.product_repo.findOne({

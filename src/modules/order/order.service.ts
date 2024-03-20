@@ -105,6 +105,7 @@ export class OrderService extends BaseUserService<Order> {
 
       .leftJoinAndSelect('product_sub_category.product', 'product')
       .leftJoinAndSelect('product.product_images', 'product_images')
+      .orderBy('order.created_at', 'DESC')
       .skip(skip)
       .take(limit);
 
@@ -168,6 +169,7 @@ export class OrderService extends BaseUserService<Order> {
 
       .leftJoinAndSelect('product_sub_category.product', 'product')
       .leftJoinAndSelect('product.product_images', 'product_images')
+      .orderBy('order.created_at', 'DESC')
       .skip(skip)
       .take(limit);
 
