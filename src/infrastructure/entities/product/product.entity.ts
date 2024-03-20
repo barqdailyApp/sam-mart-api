@@ -27,7 +27,7 @@ export class Product extends AuditableEntity {
   @Column({ default: false })
   is_recovered: boolean;
 
-  @Column({nullable:true,unique:true})
+  @Column({nullable:true})
   barcode:string
 
   @OneToMany(() => ProductImage, (productImage) => productImage.product)
