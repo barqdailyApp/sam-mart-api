@@ -53,11 +53,7 @@ export class SingleProductsNewResponse {
       product_logo: toUrl(
         product.product_images.find((x) => x.is_logo === true).url,
       ),
-      product_images: product_images.map((item) => {
-        return {
-          url: toUrl(item.url),
-        };
-      }),
+      product_images: product_images.map((item) => toUrl(item.url)),
     };
     this.product_measurements = product_measurements.map((item) => {
       const product_category_price = item.product_category_prices[0];
