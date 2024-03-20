@@ -757,7 +757,7 @@ export class ProductDashboardService {
     if(category_sub_category_id){
       if (!productSubCategory) {
         throw new NotFoundException(
-          'No Relation bettwen product and sub category',
+          "message.no_relation_between_product_and_sub_category",
         );
       }
     }
@@ -866,7 +866,7 @@ export class ProductDashboardService {
       throw new NotFoundException('message.product_not_found');
     }
     if (product.product_images.length == 1) {
-      throw new NotFoundException('There must be at least one photo');
+      throw new NotFoundException("message.there_must_be_at_least_one_photo");
     }
     await this.singleProductImage(product_id, image_id);
     return await this.productImageRepository.delete({ id: image_id });
@@ -1021,7 +1021,7 @@ export class ProductDashboardService {
       where: { id: product_id },
     });
     if (!product) {
-      throw new NotFoundException('message_product_not_found');
+      throw new NotFoundException('message.product_not_found');
     }
 
     const productImage = await this.productImageRepository.findOne({

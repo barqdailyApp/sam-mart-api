@@ -58,7 +58,7 @@ export class BanarService extends BaseService<Banar> {
         let tempImage = null;
         const banarEntity = await this.banarRepository.findOne({ where: { id } });
         if (!banarEntity) {
-            throw new NotFoundException("Banar not found");
+            throw new NotFoundException("message.banner_not_found");
         }
 
         if (banar.banar) {
@@ -81,7 +81,7 @@ export class BanarService extends BaseService<Banar> {
     async deleteBanar(id: string) {
         const banar = await this.banarRepository.findOne({ where: { id } });
         if (!banar) {
-            throw new NotFoundException("Banar not found");
+            throw new NotFoundException("message.banner_not_found");
         }
         return await this.banarRepository.remove(banar);
     }
