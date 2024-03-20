@@ -79,6 +79,7 @@ export class CartService extends BaseService<CartProduct> {
       },
     });
     if(!cart_product.is_offer){delete cart_product.product_category_price.product_offer}
+    return cart_product;
   }
 
   async addToCart(req: AddToCartRequest) {
