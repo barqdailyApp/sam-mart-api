@@ -23,6 +23,7 @@ export class WarehouseProductsQuery {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
+  
   name: string;
 
   @ApiPropertyOptional()

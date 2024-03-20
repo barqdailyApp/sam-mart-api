@@ -21,6 +21,8 @@ export class WarehouseResponse {
 
   @Expose() readonly is_active: boolean;
 
+
+
   @Transform(({ value }) => plainToClass(RegionResponse, value))
   @Expose() readonly region: RegionResponse;
 
