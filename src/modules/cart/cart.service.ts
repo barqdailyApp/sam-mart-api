@@ -62,7 +62,7 @@ export class CartService extends BaseService<CartProduct> {
     });
   }
   async getSingleCartProduct(id: string) {
-    return await this.cartProductRepository.findOne({
+    const cart_product = await this.cartProductRepository.findOne({
       where: { id },
       relations: {
         product_category_price: {
@@ -78,6 +78,7 @@ export class CartService extends BaseService<CartProduct> {
         },
       },
     });
+    if(!cart_product.is_offer){delete cart_product.product_category_price.product_offer}
   }
 
   async addToCart(req: AddToCartRequest) {
