@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException, Scope, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException, Scope, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/infrastructure/entities/user/user.entity';
 import { DataSource, Repository } from 'typeorm';
@@ -82,16 +82,28 @@ export class UserService extends BaseService<User> {
     }
 
     Object.assign(user, updatdReq);
-    const savedUser = await this.userRepo.save(user);
 
     if (updatdReq.phone) {
-      await this.sendOtpTransaction.run({
-        type: 'phone',
-        username: updatdReq.phone,
+      const userExists = await this.userRepo.findOne({
+        where: { phone: updatdReq.phone },
       });
+
+      if (userExists && userExists.id !== user.id) {
+        throw new BadRequestException('Phone number already exists');
+      }
+
+      if (!this.currentUser.roles.includes(Role.ADMIN)) {
+        await this.sendOtpTransaction.run({
+          type: 'phone',
+          username: updatdReq.phone,
+        });
+      } else {
+        user.phone = updatdReq.phone;
+        user.username = updatdReq.phone;
+      }
     }
 
-    return savedUser;
+    return await this.userRepo.save(user);
   }
 
   async updateFcmToken(updateFcmTokenRequest: UpdateFcmTokenRequest) {
