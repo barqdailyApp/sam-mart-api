@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException, Scope } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, Scope, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/infrastructure/entities/user/user.entity';
 import { DataSource, Repository } from 'typeorm';
@@ -40,8 +40,15 @@ export class UserService extends BaseService<User> {
   }
 
   async updateProfile(updatdReq: UpdateProfileRequest) {
+    if (
+      updatdReq.user_id &&
+      !this.currentUser.roles.includes(Role.ADMIN)
+    ) {
+      throw new UnauthorizedException('You are not allowed to update other users');
+    }
+
     const user = await this.userRepo.findOne({
-      where: { id: this.currentUser.id },
+      where: { id: updatdReq.user_id ?? this.currentUser.id },
     });
 
     if (updatdReq.delete_avatar) {
