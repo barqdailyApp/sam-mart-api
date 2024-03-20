@@ -158,7 +158,7 @@ export class ProductClientService {
     if (user_id) {
       const cartUser = await this.cart_repo.findOne({ where: { user_id } });
       if (!cartUser) {
-        throw new NotFoundException('user not found');
+        throw new NotFoundException("message.user_not_found");
       }
 
       query = query.leftJoinAndSelect(
@@ -390,7 +390,7 @@ export class ProductClientService {
     if (user_id) {
       const cartUser = await this.cart_repo.findOne({ where: { user_id } });
       if (!cartUser) {
-        throw new NotFoundException('user not found');
+        throw new NotFoundException("message.user_not_found");
       }
 
       query = query.leftJoinAndSelect(
@@ -774,7 +774,7 @@ export class ProductClientService {
     if (user_id) {
       const cartUser = await this.cart_repo.findOne({ where: { user_id } });
       if (!cartUser) {
-        throw new NotFoundException('user not found');
+        throw new NotFoundException("message.user_not_found");
       }
 
       query = query.leftJoinAndSelect(

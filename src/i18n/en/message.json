@@ -61,5 +61,7 @@
     "email_exists" :"Email already exists",
     "phone_exists":"Phone already exists",
     "product_barcode_exist":"Product barcode already exists",
-    "driver_has_active_orders":"Driver has active orders"
+    "driver_has_active_orders":"Driver has active orders",
+    "banner_not_found":"Banner not found",
+    "there_must_be_at_least_one_photo":"There must be at least one photo"
 }
