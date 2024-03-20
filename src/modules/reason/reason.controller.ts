@@ -60,6 +60,15 @@ export class ReasonController {
         });
     }
 
+    @Get("signle-reason/:id")
+    async getSingleReason(
+        @Param('id') id: string
+    ): Promise<ActionResponse<Reason>> {
+        return new ActionResponse<Reason>(
+            await this.reasonService.getSingleReason(id)
+        );
+    }
+
     @Patch("update/:id")
     @Roles(Role.ADMIN)
     async updateReason(
