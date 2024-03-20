@@ -62,7 +62,7 @@ export class CartService extends BaseService<CartProduct> {
     });
   }
   async getSingleCartProduct(id: string) {
-    return await this.cartProductRepository.findOne({
+    const cart_product = await this.cartProductRepository.findOne({
       where: { id },
       relations: {
         product_category_price: {
@@ -78,6 +78,8 @@ export class CartService extends BaseService<CartProduct> {
         },
       },
     });
+    if(!cart_product.is_offer){delete cart_product.product_category_price.product_offer}
+    return cart_product;
   }
 
   async addToCart(req: AddToCartRequest) {
@@ -157,6 +159,7 @@ export class CartService extends BaseService<CartProduct> {
     const is_offer =
       product_price.product_offer &&
       product_price.product_offer.offer_quantity > 0 &&
+      product_price.product_offer.is_active &&
       product_price.product_offer.start_date < new Date() &&
       new Date() < product_price.product_offer.end_date;
 
@@ -232,7 +235,8 @@ export class CartService extends BaseService<CartProduct> {
       product_category_price.product_offer &&
       product_category_price.product_offer.offer_quantity > 0 &&
       product_category_price.product_offer.start_date < new Date() &&
-      new Date() < product_category_price.product_offer.end_date
+      new Date() < product_category_price.product_offer.end_date &&
+      product_category_price.product_offer.is_active
     ) {
       product_category_price.min_order_quantity =
         product_category_price.product_offer.min_offer_quantity;

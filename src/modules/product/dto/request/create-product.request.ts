@@ -13,6 +13,8 @@ import {
 } from 'class-validator';
 import { CreateProductMeasurementRequest } from './create-product-measurement.request';
 import { CreateProductImageRequest } from './product-images/create-product-image.request';
+import { Unique } from 'src/core/validators/unique-constraints.validator';
+
 
 export class CreateProductRequest {
   @ApiProperty()
@@ -38,6 +40,7 @@ export class CreateProductRequest {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
+  @Unique('product')
   barcode: string;
 
 
