@@ -16,6 +16,7 @@ import { I18nResponse } from 'src/core/helpers/i18n.helper';
 import { DriversDashboardQuery } from './filters/driver-dashboard.query';
 import { DriverStatus } from 'src/infrastructure/data/enums/driver-status.enum';
 import { DriverStatusRequest } from './requests/update-driver-status.request';
+import { DeleteDriverAccountTransaction } from './transactions/delete-driver-account.transaction';
 @Injectable()
 export class DriverService {
   constructor(
@@ -26,6 +27,7 @@ export class DriverService {
     @InjectRepository(Shipment)
     private shipmentRepository: Repository<Shipment>,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
+    private readonly deleteAccountTransaction: DeleteDriverAccountTransaction,
 
   ) {}
 
@@ -235,24 +237,8 @@ export class DriverService {
   //changeDriverStatusDashboard
 
   async deleteDriverDashboard(driver_id: string) {
-    const driver = await this.driverRepository.findOne({ where: { id: driver_id } });
-    if (!driver) throw new NotFoundException('driver not found');
-    const ordersActive = await this.shipmentRepository.count({
-      where: {
-        status: In([
-          ShipmentStatusEnum.CONFIRMED,
-          ShipmentStatusEnum.PROCESSING,
-          ShipmentStatusEnum.PICKED_UP,
-          ShipmentStatusEnum.READY_FOR_PICKUP,
-        ]),
-        driver_id: driver.id,
-        warehouse_id: driver.warehouse_id,
-      },
-    });
-    if(ordersActive > 0) {
-      throw new Error('message.driver_has_active_orders');
+  
+    return await this.deleteAccountTransaction.run({ driver_id });
 
-    }
-    return await this.driverRepository.softDelete({ id: driver_id });
   }
 }
