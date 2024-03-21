@@ -7,6 +7,7 @@ import { Shipment } from 'src/infrastructure/entities/order/shipment.entity';
 export class ShipmentsResponse {
   @Expose() shipment_id: string;
   @Expose() status: ShipmentStatusEnum;
+  @Expose() shipment_feedback: any;
 
   @Expose() order: any;
 
@@ -15,7 +16,15 @@ export class ShipmentsResponse {
   constructor(shipments: Shipment) {
     this.shipment_id = shipments.id;
     this.status = shipments.status;
-
+    this.shipment_feedback = shipments.order_feedback?{
+      id: shipments.order_feedback.id,
+      communication: shipments.order_feedback.communication,
+      packaging: shipments.order_feedback.packaging,
+      delivery_time: shipments.order_feedback.delivery_time,
+      client_id: shipments.order_feedback.user_id,
+      driver_id: shipments.order_feedback.driver_id,
+      shipment_id: shipments.order_feedback.shipment_id
+    }:null;
     this.order = {
       id: shipments.order.id,
       number: shipments.order.number,

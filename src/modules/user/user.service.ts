@@ -1,4 +1,11 @@
-import { BadRequestException, Inject, Injectable, NotFoundException, Scope, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+  Scope,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/infrastructure/entities/user/user.entity';
 import { DataSource, Repository } from 'typeorm';
@@ -16,6 +23,7 @@ import { UsersDashboardQuery } from './dto/filters/user-dashboard.query';
 import { UserStatus } from 'src/infrastructure/data/enums/user-status.enum';
 import { UserStatusRequest } from './dto/requests/update-user-status.request';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
+import { DeleteClientAccountTransaction } from './transactions/delete-client-account.transaction';
 
 @Injectable({ scope: Scope.REQUEST })
 export class UserService extends BaseService<User> {
@@ -28,6 +36,8 @@ export class UserService extends BaseService<User> {
     @Inject(ImageManager) private readonly imageManager: ImageManager,
     @Inject(SendOtpTransaction)
     private readonly sendOtpTransaction: SendOtpTransaction,
+    @Inject(DeleteClientAccountTransaction)
+    private readonly deleteAccountTransaction: DeleteClientAccountTransaction,
   ) {
     super(userRepo);
   }
@@ -40,11 +50,10 @@ export class UserService extends BaseService<User> {
   }
 
   async updateProfile(updatdReq: UpdateProfileRequest) {
-    if (
-      updatdReq.user_id &&
-      !this.currentUser.roles.includes(Role.ADMIN)
-    ) {
-      throw new UnauthorizedException('You are not allowed to update other users');
+    if (updatdReq.user_id && !this.currentUser.roles.includes(Role.ADMIN)) {
+      throw new UnauthorizedException(
+        'You are not allowed to update other users',
+      );
     }
 
     const user = await this.userRepo.findOne({
@@ -203,8 +212,7 @@ export class UserService extends BaseService<User> {
     return await this.userRepo.update({ id: user_id }, { user_status: status });
   }
   async deleteClientDashboard(user_id: string) {
-    const user = await this.userRepo.findOne({ where: { id: user_id } });
-    if (!user) throw new NotFoundException('user not found');
-    return await this.userRepo.softDelete({ id: user_id });
+    return await this.deleteAccountTransaction.run({ user_id });
+   
   }
 }

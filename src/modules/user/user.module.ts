@@ -5,12 +5,19 @@ import { UserController } from './user.controller';
 import { ImageManager } from 'src/integration/sharp/image.manager';
 import { StorageManager } from 'src/integration/storage/storage.manager';
 import { SendOtpTransaction } from '../authentication/transactions/send-otp.transaction';
+import { DeleteClientAccountTransaction } from './transactions/delete-client-account.transaction';
 
 @Global()
 @Module({
-    imports: [],
-    controllers: [UserController],
-    providers: [UserService, ImageManager, StorageManager, SendOtpTransaction],
-    exports: [UserService, SendOtpTransaction]
+  imports: [],
+  controllers: [UserController],
+  providers: [
+    UserService,
+    ImageManager,
+    StorageManager,
+    SendOtpTransaction,
+    DeleteClientAccountTransaction,
+  ],
+  exports: [UserService, SendOtpTransaction, DeleteClientAccountTransaction],
 })
-export class UserModule { }
+export class UserModule {}

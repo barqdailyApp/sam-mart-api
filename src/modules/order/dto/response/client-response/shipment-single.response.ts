@@ -12,7 +12,9 @@ export class ShipmentSingleResponse {
   @Expose() shipment_products: any;
 
   @Expose() order: any;
+  @Expose() shipment_feedback: any;
 
+  
   @Expose() warehouse: any;
 
 
@@ -54,6 +56,15 @@ export class ShipmentSingleResponse {
       },
       
     };
+    this.shipment_feedback = shipments.order_feedback?{
+      id: shipments.order_feedback.id,
+      communication: shipments.order_feedback.communication,
+      packaging: shipments.order_feedback.packaging,
+      delivery_time: shipments.order_feedback.delivery_time,
+      client_id: shipments.order_feedback.user_id,
+      driver_id: shipments.order_feedback.driver_id,
+      shipment_id: shipments.order_feedback.shipment_id
+    }:null;
     (this.shipment_products = shipments.shipment_products.map(
       (shipment_product) => {
         return {

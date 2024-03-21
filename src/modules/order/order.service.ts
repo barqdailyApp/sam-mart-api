@@ -421,6 +421,8 @@ export class OrderService extends BaseUserService<Order> {
       .leftJoinAndSelect('shipments.driver', 'driver')
       .leftJoinAndSelect('driver.user', 'shipment_user_driver')
       .leftJoinAndSelect('shipments.warehouse', 'warehouse_shipment')
+      .leftJoinAndSelect('shipments.order_feedback', 'order_feedback')
+
       .leftJoinAndSelect('shipments.shipment_products', 'shipment_products')
       .leftJoinAndSelect(
         'shipment_products.product_category_price',
