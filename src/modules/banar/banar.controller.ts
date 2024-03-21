@@ -1,7 +1,7 @@
 import {
     Body,
     ClassSerializerInterceptor,
-    Controller, Delete, Get, Param, Patch, Post, UploadedFile, UseGuards, UseInterceptors,
+    Controller, Delete, Get, Param, Patch, Post, Query, UploadedFile, UseGuards, UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { BanarService } from './banar.service';
@@ -17,6 +17,8 @@ import { Banar } from 'src/infrastructure/entities/banar/banar.entity';
 import { plainToInstance } from 'class-transformer';
 import { BannerResponse } from './dto/response/banner.response';
 import { UpdateBannerRequest } from './dto/request/update-banner.request';
+import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
+import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -48,9 +50,20 @@ export class BanarController {
     }
 
     @Get()
-    async getBanars(): Promise<ActionResponse<BannerResponse[]>> {
-        const banners = await this.banarService.getBanars();
+    async getBanars(
+        @Query() query: PaginatedRequest
+    ): Promise<ActionResponse<BannerResponse[]>> {
+        const banners = await this.banarService.getBanars(query);
+        const count = await this.banarService.count(query);
         const result = plainToInstance(BannerResponse, banners, { excludeExtraneousValues: true })
+        if (Object.keys(query).length) {
+            return new PaginatedResponse<BannerResponse[]>(result, {
+                meta: {
+                    total: count,
+                    ...query
+                }
+            });
+        }
         return new ActionResponse<BannerResponse[]>(result);
     }
 

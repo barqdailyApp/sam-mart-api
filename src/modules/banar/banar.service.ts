@@ -11,6 +11,7 @@ import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { User } from 'src/infrastructure/entities/user/user.entity';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
+import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 
 @Injectable()
 export class BanarService extends BaseService<Banar> {
@@ -39,10 +40,9 @@ export class BanarService extends BaseService<Banar> {
         return await this.banarRepository.save(createdBanar);
     }
 
-    async getBanars() {
-        console.log(this.currentUser)
+    async getBanars(query: PaginatedRequest) {
         if (this.currentUser?.roles.includes(Role.ADMIN)) {
-            return await this.banarRepository.find();
+            return await this.findAll(query);
         } else {
             return await this.banarRepository.find({
                 where: {
