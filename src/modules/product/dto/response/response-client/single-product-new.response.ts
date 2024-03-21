@@ -18,7 +18,8 @@ export class SingleProductsNewResponse {
     const product_sub_category = product.product_sub_categories[0];
     const product_measurements = product.product_measurements;
     const product_images = product.product_images;
-    const product_is_fav = function (): boolean {
+    let product_is_fav = false;
+    if(product.products_favorite != undefined){
       for (let i = 0; i < product.products_favorite.length; i++) {
         for (let j = 0; j < product.product_sub_categories.length; j++) {
           if (
@@ -26,13 +27,11 @@ export class SingleProductsNewResponse {
             product.product_sub_categories[j].category_subCategory
               .section_category.section_id
           ) {
-            return true;
+            product_is_fav = true;
           }
         }
       }
-      return false;
-    };
-
+    }
     // Manually setting the values based on the transformation logic
     this.product = {
       section_id:
@@ -42,7 +41,7 @@ export class SingleProductsNewResponse {
       product_name_en: product.name_en,
       product_description_ar: product.description_ar,
       product_description_en: product.description_en,
-      product_is_fav: product_is_fav(),
+      product_is_fav: product_is_fav,
       is_quantity_available:
         product.warehouses_products.reduce(
           (acc, cur) => acc + cur.quantity,
@@ -65,9 +64,13 @@ export class SingleProductsNewResponse {
         product_measurement_id: item.id,
         measurement_unit_ar: item.measurement_unit.name_ar,
         measurement_unit_en: item.measurement_unit.name_en,
-        warehouse_quantity :
-        product.warehouses_products.reduce((acc, cur) => acc + cur.quantity, 0) /
-        item.conversion_factor,
+        warehouse_quantity:
+          product.warehouses_products.reduce(
+            (acc, cur) => acc + cur.quantity,
+            0,
+          ) / item.conversion_factor,
+        min_order_quantity: product_category_price.min_order_quantity,
+        max_order_quantity: product_category_price.max_order_quantity,
         offer: product_offer
           ? {
               product_category_price_id:
