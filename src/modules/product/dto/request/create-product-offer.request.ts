@@ -61,4 +61,15 @@ export class CreateProductOfferRequest {
   })
   @IsBoolean()
   is_active: boolean;
+
+  @ApiProperty({ nullable: true, required: false })
+  @IsOptional()
+  @IsString()
+  description_ar: string;
+
+  @ApiProperty({ nullable: true, required: false })
+  @IsOptional()
+  @IsString()
+  description_en: string;
+  
 }
