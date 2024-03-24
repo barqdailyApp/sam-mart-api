@@ -48,6 +48,7 @@ import { UpdateProductOfferRequest } from './dto/request/update-product-offer.re
 import { NotificationService } from '../notification/notification.service';
 import { SendToUsersNotificationRequest } from '../notification/dto/requests/send-to-users-notification.request';
 import { User } from 'src/infrastructure/entities/user/user.entity';
+import { WarehouseProducts } from 'src/infrastructure/entities/warehouse/warehouse-products.entity';
 
 @Injectable()
 export class ProductDashboardService {
@@ -80,6 +81,9 @@ export class ProductDashboardService {
 
     @InjectRepository(Warehouse)
     private readonly warehouse_repo: Repository<Warehouse>,
+
+    @InjectRepository(WarehouseProducts)
+    private readonly warehouse_products_repo: Repository<WarehouseProducts>,
 
     @Inject(CreateProductTransaction)
     private readonly addProductTransaction: CreateProductTransaction,
@@ -115,7 +119,9 @@ export class ProductDashboardService {
       );
     }
     if (end_date < start_date) {
-      throw new BadRequestException('message.end_date_must_be_greater_than_start_date');
+      throw new BadRequestException(
+        'message.end_date_must_be_greater_than_start_date',
+      );
     }
     const productCategoryPrice = await this.productCategoryPrice_repo.findOne({
       where: { id: product_category_price_id },
@@ -173,7 +179,7 @@ export class ProductDashboardService {
       start_date,
       offer_quantity,
       description_ar,
-      description_en
+      description_en,
     } = updateProductOfferRequest;
     const productOffer = await this.productOffer_repo.findOne({
       where: { id: offer_id },
@@ -209,7 +215,7 @@ export class ProductDashboardService {
         price: productOfferPrice,
         offer_quantity,
         description_ar,
-        description_en
+        description_en,
       },
     );
     return await this.productOffer_repo.findOne({
@@ -317,7 +323,8 @@ export class ProductDashboardService {
       is_active,
       is_recovered,
       name_ar,
-      name_en,barcode
+      name_en,
+      barcode,
     } = updateProductRequest;
 
     //* Check if product exist
@@ -331,10 +338,9 @@ export class ProductDashboardService {
     const productBarcode = await this.productRepository.findOne({
       where: { barcode },
     });
-    if (productBarcode && (product.barcode != barcode)) {
+    if (productBarcode && product.barcode != barcode) {
       throw new BadRequestException('message.product_barcode_exist');
     }
-
 
     await this.productRepository.update(
       { id: product_id },
@@ -345,7 +351,7 @@ export class ProductDashboardService {
         name_ar,
         description_ar,
         description_en,
-        barcode
+        barcode,
       },
     );
     return await this.productRepository.findOne({
@@ -365,7 +371,7 @@ export class ProductDashboardService {
       where: { id: product_id },
     });
     if (!product) {
-      throw new NotFoundException("message.product_not_found");
+      throw new NotFoundException('message.product_not_found');
     }
 
     // Check if the product measurement exists
@@ -388,7 +394,7 @@ export class ProductDashboardService {
       is_main_unit == true
     ) {
       throw new BadRequestException(
-        "message.conversion_factor_must_be_1_for_main_unit",
+        'message.conversion_factor_must_be_1_for_main_unit',
       );
     }
 
@@ -408,7 +414,9 @@ export class ProductDashboardService {
 
         // If a main unit doesn't exist, throw an error
         if (!mainProductMeasurement) {
-          throw new NotFoundException('message.main_product_measurement_not_found');
+          throw new NotFoundException(
+            'message.main_product_measurement_not_found',
+          );
         }
 
         // Link this unit to the found main unit by setting `base_unit_id` to the main unit's ID
@@ -477,7 +485,8 @@ export class ProductDashboardService {
       product_name,
       section_id,
       section_category_id,
-      sort,product_barcode
+      sort,
+      product_barcode,
     } = productsDashboardQuery;
     const skip = (page - 1) * limit;
     let productsSort = {};
@@ -758,14 +767,13 @@ export class ProductDashboardService {
         category_sub_category_id,
       },
     });
-    if(category_sub_category_id){
+    if (category_sub_category_id) {
       if (!productSubCategory) {
         throw new NotFoundException(
-          "message.no_relation_between_product_and_sub_category",
+          'message.no_relation_between_product_and_sub_category',
         );
       }
     }
-   
 
     // For guests and individuals, orders are taken from the nearest warehouse
     // Start building the query
@@ -784,7 +792,7 @@ export class ProductDashboardService {
         'product_category_subCategory.section_category',
         'product_section_category',
       )
-    
+
       .leftJoinAndSelect('product_section_category.section', 'product_section')
       .leftJoinAndSelect('product.warehouses_products', 'warehousesProduct')
 
@@ -855,7 +863,24 @@ export class ProductDashboardService {
     if (!product) {
       throw new NotFoundException('message.product_not_found');
     }
-    return await this.productRepository.delete({ id: product_id });
+    // check if product in warehouse have quantity
+    const product_main_measurement =
+      await this.productMeasurementRepository.findOne({
+        where: {
+          product_id,
+          is_main_unit: true,
+        },
+      });
+    const product_warehouse = await this.warehouse_products_repo.find({
+      where: { product_id },
+    });
+    const product_quantities =
+      product_warehouse.reduce((acc, cur) => acc + cur.quantity, 0) /
+      product_main_measurement.conversion_factor;
+    if (product_quantities > 0) {
+      throw new BadRequestException('message.product_has_quantity_in_warehouse');
+    }
+    return await this.productRepository.softDelete({ id: product_id });
   }
 
   async deleteProductImage(
@@ -870,7 +895,7 @@ export class ProductDashboardService {
       throw new NotFoundException('message.product_not_found');
     }
     if (product.product_images.length == 1) {
-      throw new NotFoundException("message.there_must_be_at_least_one_photo");
+      throw new NotFoundException('message.there_must_be_at_least_one_photo');
     }
     await this.singleProductImage(product_id, image_id);
     return await this.productImageRepository.delete({ id: image_id });
