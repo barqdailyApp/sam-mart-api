@@ -46,10 +46,10 @@ export class ProductOffer extends AuditableEntity {
   @Column()
   is_active: boolean;
 
-  @Column({nullable: true})
+  @Column({nullable: true,type: 'longtext' })
   description_ar: string;
 
   
-  @Column({nullable: true})
+  @Column({nullable: true,type: 'longtext' })
   description_en: string;
 }

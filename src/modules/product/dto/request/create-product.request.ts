@@ -27,13 +27,13 @@ export class CreateProductRequest {
   @IsString()
   name_en: string;
 
-  @ApiProperty()
-  @IsNotEmpty()
+  @ApiProperty({ nullable: true, required: false })
+  @IsOptional()
   @IsString()
   description_ar: string;
 
-  @ApiProperty()
-  @IsNotEmpty()
+  @ApiProperty({ nullable: true, required: false })
+  @IsOptional()
   @IsString()
   description_en: string;
 
