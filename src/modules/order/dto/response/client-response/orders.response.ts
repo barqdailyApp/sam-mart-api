@@ -37,6 +37,31 @@ export class OrdersResponse {
             longitude: order.shipments[0].driver.longitude,
           }
         : null,
+      products: order.shipments[0].shipment_products.map((shipment_product) => {
+        return {
+          product_id: shipment_product.product_id,
+          product_name_ar:
+            shipment_product.product_category_price.product_sub_category.product
+              .name_ar,
+          product_name_en:
+            shipment_product.product_category_price.product_sub_category.product
+              .name_en,
+
+          product_logo: toUrl(
+            shipment_product.product_category_price.product_sub_category.product.product_images.find(
+              (x) => x.is_logo === true,
+            ).url,
+          ),
+          quantity: shipment_product.quantity,
+
+          measurement_unit_name_ar:
+            shipment_product.product_category_price.product_measurement
+              .measurement_unit.name_ar,
+          measurement_unit_name_en:
+            shipment_product.product_category_price.product_measurement
+              .measurement_unit.name_en,
+        };
+      }),
       status: order.shipments[0].status,
     };
   }

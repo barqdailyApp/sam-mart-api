@@ -67,7 +67,7 @@ export class OrderService extends BaseUserService<Order> {
   async getAllClientOrders(orderClientQuery: OrderClientQuery) {
     const user = this.currentUser;
 
-    const { limit, page } = orderClientQuery;
+    const { limit, page,status } = orderClientQuery;
     const skip = (page - 1) * limit;
 
     let query = this.orderRepository
@@ -110,7 +110,9 @@ export class OrderService extends BaseUserService<Order> {
       .take(limit);
 
     query = query.where('order.user_id = :user_id', { user_id: user.id });
-
+    if (status) {
+      query = query.andWhere('shipments.status = :status', { status });
+    }
     const [orders, total] = await query.getManyAndCount();
     return { orders, total };
   }
