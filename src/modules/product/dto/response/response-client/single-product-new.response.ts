@@ -62,8 +62,11 @@ export class SingleProductsNewResponse {
         product_category_price.product_additional_services;
       return {
         product_measurement_id: item.id,
+        conversion_factor:item.conversion_factor,
+        is_main_unit: item.is_main_unit,
         measurement_unit_ar: item.measurement_unit.name_ar,
         measurement_unit_en: item.measurement_unit.name_en,
+        
         warehouse_quantity:
           product.warehouses_products.reduce(
             (acc, cur) => acc + cur.quantity,

@@ -63,5 +63,6 @@
     "product_barcode_exist":"الباركود موجود بالفعل",
     "driver_has_active_orders": "السائق لديه طلبات نشطة",
     "banner_not_found":"لا يوجد بانر",
-    "there_must_be_at_least_one_photo":"يجب أن تكون على الاقل صورة"
+    "there_must_be_at_least_one_photo":"يجب أن تكون على الاقل صورة",
+    "product_has_quantity_in_warehouse":"المنتج لديه كمية في المستودع"
 }
