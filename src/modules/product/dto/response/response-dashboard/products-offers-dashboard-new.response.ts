@@ -36,6 +36,9 @@ export class ProductsOffersDashboardNewResponse {
   @Expose() name_en: string;
   @Expose() product_logo: string;
 
+  @Expose() product_offer_description_ar: string;
+  @Expose() product_offer_description_en: string;
+
   @Expose() product_measurement_id: string;
   @Expose() measurement_unit_id: string;
   @Expose() measurement_unit_ar: string;
@@ -68,6 +71,9 @@ export class ProductsOffersDashboardNewResponse {
     this.product_logo = toUrl(
       product.product_images.find((x) => x.is_logo === true).url,
     );
+
+    this.product_offer_description_ar = product_offer.description_ar;
+    this.product_offer_description_en = product_offer.description_en;
 
     this.product_measurement_id = product_measurement.id;
     this.measurement_unit_id = measurement_unit.id;
