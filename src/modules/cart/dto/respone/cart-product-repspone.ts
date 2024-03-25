@@ -12,7 +12,6 @@ export class CartProductRespone {
 
   additional_services: any;
   constructor(data: any) {
-   
     return {
       id: data.id,
       product_id: data.product.product_sub_category.product.id,
@@ -24,7 +23,7 @@ export class CartProductRespone {
       price: data.price,
       quantity: data.quantity,
       unit: data.product.product_measurement.measurement_unit.name,
-      unit_id:data.product.product_measurement.id,
+      unit_id: data.product.product_measurement.id,
       is_recovered: data.product.is_recovered,
       min_order_quantity: data.product.product_offer
         ? data.product.product_offer.min_offer_quantity
@@ -32,7 +31,8 @@ export class CartProductRespone {
       max_order_quantity: data.product.product_offer
         ? data.product.product_offer.max_offer_quantity
         : data.product.max_order_quantity,
-
+      warhouse_quantity:
+        data.product.product_sub_category.product.warehouses_products[0].quantity,
       additional_services: data.product.product_additional_services.filter(
         (e) => {
           if (data.additional_services.includes(e.id)) {

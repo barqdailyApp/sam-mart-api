@@ -44,7 +44,7 @@ export class CartService extends BaseService<CartProduct> {
   }
 
   async getCartProducts(cart_id: string) {
-    return await this.cartProductRepository.find({
+    const cart_products = await this.cartProductRepository.find({
       where: { cart_id: cart_id },
       relations: {
         product_category_price: {
@@ -54,12 +54,26 @@ export class CartService extends BaseService<CartProduct> {
 
           product_offer: true,
           product_sub_category: {
-            product: { product_images: true },
+            product: { product_images: true, warehouses_products: true },
             category_subCategory: { section_category: true },
           },
         },
       },
     });
+    cart_products.forEach((e) => {
+      if (!e.is_offer) {
+        delete e.product_category_price.product_offer;
+      }
+      e.product_category_price.product_sub_category.product.warehouses_products.filter(
+        (w) => w.warehouse_id == e.warehouse_id,
+      );
+    });
+    cart_products.map((e) => {
+      e.product_category_price.product_sub_category.product.warehouses_products.map(
+        (w) => (w.quantity = w.quantity / e.conversion_factor),
+      );
+    });
+    return cart_products;
   }
   async getSingleCartProduct(id: string) {
     const cart_product = await this.cartProductRepository.findOne({
@@ -72,12 +86,17 @@ export class CartService extends BaseService<CartProduct> {
 
           product_offer: true,
           product_sub_category: {
-            product: { product_images: true },
+            product: { product_images: true, warehouses_products: true },
             category_subCategory: { section_category: true },
           },
         },
       },
     });
+    cart_product.product_category_price.product_sub_category.product.warehouses_products.filter(
+      (w) => w.warehouse_id == cart_product.warehouse_id,
+    );
+    cart_product.product_category_price.product_sub_category.product.warehouses_products[0].quantity =
+    cart_product.product_category_price.product_sub_category.product.warehouses_products[0].quantity  / cart_product.conversion_factor;
     if (!cart_product.is_offer) {
       delete cart_product.product_category_price.product_offer;
     }
@@ -103,7 +122,7 @@ export class CartService extends BaseService<CartProduct> {
         },
       },
       relations: {
-        product_measurement: true,
+        product_measurement: { measurement_unit: true },
         product_offer: true,
         product_additional_services: true,
         product_sub_category: {
