@@ -3,7 +3,7 @@ import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class SingleProductDashboardQuery {
-  @ApiProperty()
+  @ApiProperty({description : "Enter barcode or product_id"})
   @IsNotEmpty()
   @IsString()
   product_id: string;
