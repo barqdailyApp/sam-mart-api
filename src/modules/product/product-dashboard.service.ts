@@ -825,7 +825,12 @@ export class ProductDashboardService {
       .leftJoin('category_subCategory.section_category', 'section_category');
 
     // Get single product
-    query = query.where('product.id = :product_id', { product_id });
+    query = query.where(
+      'product.id = :product_id OR product.barcode = :product_id',
+      {
+        product_id,
+      },
+    );
     if (category_sub_category_id) {
       query = query.andWhere(
         'product_sub_categories.category_sub_category_id = :category_sub_category_id',
@@ -878,7 +883,9 @@ export class ProductDashboardService {
       product_warehouse.reduce((acc, cur) => acc + cur.quantity, 0) /
       product_main_measurement.conversion_factor;
     if (product_quantities > 0) {
-      throw new BadRequestException('message.product_has_quantity_in_warehouse');
+      throw new BadRequestException(
+        'message.product_has_quantity_in_warehouse',
+      );
     }
     return await this.productRepository.softDelete({ id: product_id });
   }
