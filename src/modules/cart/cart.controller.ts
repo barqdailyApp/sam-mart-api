@@ -79,17 +79,20 @@ export class CartController {
 
   @Delete('/delete/:cart_product_id')
   async deleteCartProduct(@Param('cart_product_id') cart_product_id: string) {
-    const cart_product = await this.cartService.deleteCartProduct(
+     await this.cartService.deleteCartProduct(
       cart_product_id,
     );
+    const get_cart_product = await this.cartService.getSingleCartProduct(
+      cart_product_id,
+    )
     return new ActionResponse(
       this._i18nResponse.entity(
         new CartProductRespone({
-          id: cart_product.id,
-          additional_services: cart_product.additions,
-          price: cart_product.price,
-          quantity: cart_product.quantity,
-          product: cart_product.product_category_price,
+          id: get_cart_product.id,
+          additional_services: get_cart_product.additions,
+          price: get_cart_product.price,
+          quantity: get_cart_product.quantity,
+          product: get_cart_product.product_category_price,
         }),
       ),
     );
