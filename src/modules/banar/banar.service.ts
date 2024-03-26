@@ -11,6 +11,7 @@ import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { User } from 'src/infrastructure/entities/user/user.entity';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
+import { BannerQuery } from './dto/filters/banners.query';
 
 @Injectable()
 export class BanarService extends BaseService<Banar> {
@@ -39,18 +40,28 @@ export class BanarService extends BaseService<Banar> {
         return await this.banarRepository.save(createdBanar);
     }
 
-    async getBanars() {
+    async getBanars(bannerQuery:BannerQuery) {
+        const { page, limit } = bannerQuery;
+        const skip = (page - 1) * limit;
+
         console.log(this.currentUser)
         if (this.currentUser?.roles.includes(Role.ADMIN)) {
-            return await this.banarRepository.find();
+            // Admins get all banners without any conditions
+            return await this.banarRepository
+                .createQueryBuilder('banar')
+                .skip(skip)
+                .take(limit)
+                .getManyAndCount();
         } else {
-            return await this.banarRepository.find({
-                where: {
-                    is_active: true,
-                    started_at: LessThanOrEqual(new Date()),
-                    ended_at: MoreThanOrEqual(new Date())
-                }
-            });
+            // Non-admin users get only active banners within the valid date range
+            return await this.banarRepository
+                .createQueryBuilder('banar')
+                .where('banar.is_active = :isActive', { isActive: true })
+                .andWhere('banar.started_at <= :currentDate', { currentDate: new Date() })
+                .andWhere('banar.ended_at >= :currentDate', { currentDate: new Date() })
+                .skip(skip)
+                .take(limit)
+                .getManyAndCount();
         }
     }
 

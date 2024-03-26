@@ -1,7 +1,7 @@
 import {
     Body,
     ClassSerializerInterceptor,
-    Controller, Delete, Get, Param, Patch, Post, UploadedFile, UseGuards, UseInterceptors,
+    Controller, Delete, Get, Param, Patch, Post, Query, UploadedFile, UseGuards, UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { BanarService } from './banar.service';
@@ -17,6 +17,9 @@ import { Banar } from 'src/infrastructure/entities/banar/banar.entity';
 import { plainToInstance } from 'class-transformer';
 import { BannerResponse } from './dto/response/banner.response';
 import { UpdateBannerRequest } from './dto/request/update-banner.request';
+import { BannerQuery } from './dto/filters/banners.query';
+import { PageMetaDto } from 'src/core/helpers/pagination/page-meta.dto';
+import { PageDto } from 'src/core/helpers/pagination/page.dto';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -48,10 +51,17 @@ export class BanarController {
     }
 
     @Get()
-    async getBanars(): Promise<ActionResponse<BannerResponse[]>> {
-        const banners = await this.banarService.getBanars();
+    async getBanars(
+        @Query() bannerQuery:BannerQuery,
+    ) {
+        const { limit, page } = bannerQuery;
+
+        const [banners, total] = await this.banarService.getBanars(bannerQuery);
         const result = plainToInstance(BannerResponse, banners, { excludeExtraneousValues: true })
-        return new ActionResponse<BannerResponse[]>(result);
+        const pageMetaDto = new PageMetaDto(page, limit, total);
+        const pageDto = new PageDto(result, pageMetaDto);
+    
+        return new ActionResponse(pageDto);
     }
 
     @Get(":banar_id")
