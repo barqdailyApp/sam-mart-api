@@ -1,4 +1,9 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
 import { In, Not, Repository, UpdateResult } from 'typeorm';
@@ -17,6 +22,8 @@ import { DriversDashboardQuery } from './filters/driver-dashboard.query';
 import { DriverStatus } from 'src/infrastructure/data/enums/driver-status.enum';
 import { DriverStatusRequest } from './requests/update-driver-status.request';
 import { DeleteDriverAccountTransaction } from './transactions/delete-driver-account.transaction';
+import { UpdateProfileDriverRequest } from './requests/update-profile-driver.request';
+import { UpdateProfileDriverTransaction } from './transactions/update-profile-driver.transaction';
 @Injectable()
 export class DriverService {
   constructor(
@@ -28,6 +35,7 @@ export class DriverService {
     private shipmentRepository: Repository<Shipment>,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
     private readonly deleteAccountTransaction: DeleteDriverAccountTransaction,
+    @Inject(UpdateProfileDriverTransaction) private readonly updateProfileDriverTransaction: UpdateProfileDriverTransaction,
 
   ) {}
 
@@ -121,6 +129,13 @@ export class DriverService {
       relations: { user: true },
     });
   }
+  async updateProfileDriver(
+    updateProfileDriverRequest: UpdateProfileDriverRequest,
+  ) {
+   return await this.updateProfileDriverTransaction.run(updateProfileDriverRequest);
+
+  }
+
   async allDriversDashboard(driversDashboardQuery: DriversDashboardQuery) {
     const {
       created_at,
@@ -237,8 +252,6 @@ export class DriverService {
   //changeDriverStatusDashboard
 
   async deleteDriverDashboard(driver_id: string) {
-  
     return await this.deleteAccountTransaction.run({ driver_id });
-
   }
 }
