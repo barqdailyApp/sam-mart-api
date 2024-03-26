@@ -51,6 +51,7 @@ export class OrderSingleResponse {
             id: shipment_product.id,
             shipment_id: shipment_product.shipment_id,
             product_id: shipment_product.product_id,
+            product_category_price_id:shipment_product.product_category_price.id,
             quantity: shipment_product.quantity,
             price: shipment_product.price,
             product_name_ar:
