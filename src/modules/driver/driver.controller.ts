@@ -1,20 +1,26 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Delete,
   Get,
+  HttpStatus,
   Inject,
   Param,
+  Post,
   Put,
   Query,
+  UploadedFile,
+  UploadedFiles,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { DriverService } from './driver.service';
 import { I18nResponse } from 'src/core/helpers/i18n.helper';
 import { Driver } from 'typeorm';
 import { DriverResponse } from './response/driver.response';
-import { plainToClass } from 'class-transformer';
+import { plainToClass, plainToInstance } from 'class-transformer';
 import { UpdateDriverLocationRequest } from './requests/update-driver-location.request';
 import { ActionResponse } from 'src/core/base/responses/action.response';
 import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
@@ -29,6 +35,12 @@ import { PageMetaDto } from 'src/core/helpers/pagination/page-meta.dto';
 import { PageDto } from 'src/core/helpers/pagination/page.dto';
 import { DriverStatusRequest } from './requests/update-driver-status.request';
 import { DriverClientResponse } from './response/driver-client.response';
+import { FileInterceptor, FileFieldsInterceptor } from '@nestjs/platform-express';
+import { UploadValidator } from 'src/core/validators/upload.validator';
+import { DriverRegisterRequest } from '../authentication/dto/requests/driver-register.dto';
+import { RegisterRequest } from '../authentication/dto/requests/register.dto';
+import { RegisterResponse } from '../authentication/dto/responses/register.response';
+import { UpdateProfileDriverRequest } from './requests/update-profile-driver.request';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -124,4 +136,23 @@ export class DriverController {
     const result = await this.driverService.deleteDriverDashboard(driver_id);
     return new ActionResponse(result);
   }
+
+  
+  @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('avatarFile'))
+  @ApiConsumes('multipart/form-data')
+//  @Roles(Role.ADMIN)
+  @Put('update-profile-driver')
+  async updateProfileDriver(
+    @Body() req: UpdateProfileDriverRequest,
+    @UploadedFile(new UploadValidator().build())
+    avatarFile: Express.Multer.File,
+  ): Promise<ActionResponse<RegisterResponse>> {
+    req.avatarFile = avatarFile;
+    console.log('req.avatarFile', req.avatarFile);
+    const driver = await this.driverService.updateProfileDriver(req);
+    const driverResponse = new DriverDashboardResponse(driver);
+    return new ActionResponse(this._i18nResponse.entity(driverResponse));
+  }
+
+ 
 }

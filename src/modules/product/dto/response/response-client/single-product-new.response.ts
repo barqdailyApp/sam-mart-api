@@ -104,6 +104,11 @@ export class SingleProductsNewResponse {
             ? null
             : {
                 id: cart_products[0].id,
+                warehouse_quantity:
+                product.warehouses_products.reduce(
+                  (acc, cur) => acc + cur.quantity,
+                  0,
+                ) / cart_products[0].conversion_factor,
                 cart_id: cart_products[0].cart_id,
                 product_id: cart_products[0].product_id,
                 quantity: cart_products[0].quantity,
