@@ -5,8 +5,8 @@ import { toRightNumber } from "src/core/helpers/cast.helper";
 import { ReasonType } from "src/infrastructure/data/enums/reason-type.enum";
 
 export class GetReasonByNameQueryRequest {
-    @ApiProperty()
-    @IsString()
+    @ApiProperty({required: false})
+    @IsOptional()
     @IsNotEmpty()
     name: string;
 

@@ -56,8 +56,9 @@ export class ReasonService extends BaseService<Reason>{
 
     async getReasonByName(query: GetReasonByNameQueryRequest): Promise<[Reason[], number]> {
         const { name, page, limit, type } = query;
-        const [reasons, count] = await this.reasonRepository.findAndCount({
-            where: [
+        let whereConditions = [];
+        if (name) {
+            whereConditions = [
                 {
                     type,
                     name_en: Like(`%${name}%`),
@@ -66,7 +67,17 @@ export class ReasonService extends BaseService<Reason>{
                     type,
                     name_ar: Like(`%${name}%`),
                 }
-            ],
+            ]
+        } else {
+            whereConditions = [
+                {
+                    type,
+                }
+            ]
+        }
+
+        const [reasons, count] = await this.reasonRepository.findAndCount({
+            where: whereConditions,
             skip: (page - 1) * limit,
             take: limit,
         });
