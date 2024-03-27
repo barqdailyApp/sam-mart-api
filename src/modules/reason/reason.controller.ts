@@ -71,6 +71,7 @@ export class ReasonController {
     }
 
     @Get("get-reasons-by-name")
+    @Roles(Role.ADMIN)
     async getReasonByName(
         @Query() query: GetReasonByNameQueryRequest
     ): Promise<ActionResponse<Reason[]>> {
