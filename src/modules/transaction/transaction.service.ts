@@ -35,9 +35,9 @@ export class TransactionService extends BaseUserService<Transaction> {
     return transaction;
   }
 
-  async getWallet() {
+  async getWallet(user_id: string) {
     const wallet = await this.walletRepository.findOneBy({
-      user_id: this.currentUser.id,
+      user_id:user_id?user_id: this.currentUser.id,
     });
     return wallet;
   }

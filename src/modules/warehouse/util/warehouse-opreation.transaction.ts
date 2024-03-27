@@ -97,7 +97,7 @@ export class WarehouseOperationTransaction extends BaseTransaction<
         const warehouseProducts = await context.findOne(WarehouseProducts, {
           where: {
             warehouse_id: request.warehouse_id,
-            product_id: find_product.id,
+            product_id: product.product_id,
           },
         });
         if (

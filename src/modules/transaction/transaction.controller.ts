@@ -7,6 +7,7 @@ import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { applyQueryFilters } from 'src/core/helpers/service-related.helper';
 import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
 import { RolesGuard } from '../authentication/guards/roles.guard';
+import { Role } from 'src/infrastructure/data/enums/role.enum';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -21,6 +22,7 @@ export class TransactionController {
 
   @Get()
   async getTransactions(@Query() query: PaginatedRequest) {
+    if(!this.transactionService.currentUser.roles .includes(Role.ADMIN)) 
     applyQueryFilters(query,`user_id=${this.transactionService.currentUser.id}`);
     const transaction = await this.transactionService.findAll(query);
 
@@ -34,7 +36,7 @@ export class TransactionController {
   }
 
   @Get('wallet')
-  async getWallet() {
-    return new ActionResponse(await this.transactionService.getWallet());
+  async getWallet(@Query("user_id") user_id:string ) {
+    return new ActionResponse(await this.transactionService.getWallet(user_id));
   }
 }
