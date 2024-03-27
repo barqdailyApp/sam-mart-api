@@ -154,7 +154,6 @@ export class ProductDashboardService {
         throw new BadRequestException(
           'message.discount_value_must_be_less_than_100',
         );
-        
       }
       const discountedPercentage =
         (productCategoryPrice.price * createProductOffer.discount_value) / 100;
@@ -827,11 +826,11 @@ export class ProductDashboardService {
         'product_additional_services.additional_service',
         'additional_service',
       )
-      .leftJoin(
+      .leftJoinAndSelect(
         'product_category_prices.product_sub_category',
         'product_sub_category',
       )
-      .leftJoin(
+      .leftJoinAndSelect(
         'product_sub_category.category_subCategory',
         'category_subCategory',
       )
@@ -844,35 +843,29 @@ export class ProductDashboardService {
         product_id,
       },
     );
-    if (category_sub_category_id) {
-      query = query.andWhere(
-        'product_sub_categories.category_sub_category_id = :category_sub_category_id',
-        {
-          category_sub_category_id,
-        },
-      );
-      //  const productPrice = await this.productCategoryPrice_repo.findOne({
-      //    where: {
-      //     product_sub_category:{
-      //       category_sub_category_id,
-      //       product_id
-      //     },
-
-      //    },
-      //    relations: { product_sub_category: true }
-      //  });
-      //  console.log(productPrice);
-      //  if(productPrice){
-      //   query = query.andWhere(
-      //     'product_sub_category.category_sub_category_id = :category_sub_category_id',
-      //     {
-      //       category_sub_category_id,
-      //     },
-      //   );
-      //  }
+    let product = await query.getOne();
+    // Remove product from sub category
+    for (let index = 0; index < product.product_sub_categories.length; index++) {
+      if (
+        product.product_sub_categories[index].category_sub_category_id !=
+        category_sub_category_id
+      ) {
+        product.product_sub_categories.splice(index, 1);
+        index--;
+      }
     }
-    return await query.getOne();
-  }
+
+    // Remove product from category
+    for (let index = 0; index < product.product_measurements.length; index++) {
+      for (let index2 = 0; index2 < product.product_measurements[index].product_category_prices.length; index2++) {
+        if(product.product_measurements[index].product_category_prices[index2].product_sub_category.category_sub_category_id != category_sub_category_id){
+          product.product_measurements[index].product_category_prices.splice(index2, 1);
+          index2--;
+        }
+      }
+
+    return product;
+  }}
 
   async deleteProduct(product_id: string): Promise<DeleteResult> {
     const product = await this.productRepository.findOne({
