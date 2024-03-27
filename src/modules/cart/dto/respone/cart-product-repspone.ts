@@ -31,7 +31,7 @@ export class CartProductRespone {
       max_order_quantity: data.product.product_offer
         ? data.product.product_offer.max_offer_quantity
         : data.product.max_order_quantity,
-      warhouse_quantity:
+        warehouse_quantity:
         data.product.product_sub_category.product.warehouses_products[0].quantity,
       additional_services: data.product.product_additional_services.filter(
         (e) => {
