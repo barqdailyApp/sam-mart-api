@@ -2,7 +2,7 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/core/base/service/service.base';
 import { Reason } from 'src/infrastructure/entities/reason/reason.entity';
-import { Like, Repository } from 'typeorm';
+import { ILike, Like, Repository } from 'typeorm';
 import { CreateReasonRequest } from './dto/request/create-reason.request';
 import { GetReasonQueryRequest } from './dto/request/get-reason-query.requst';
 import { Request } from 'express';
@@ -55,11 +55,17 @@ export class ReasonService extends BaseService<Reason>{
     }
 
     async getReasonByName(query: GetReasonByNameQueryRequest): Promise<[Reason[], number]> {
-        const { name, page, limit } = query;
+        const { name, page, limit, type } = query;
         const [reasons, count] = await this.reasonRepository.findAndCount({
             where: [
-                { name_en: Like(`%${name}%`) },
-                { name_ar: Like(`%${name}%`) }
+                {
+                    type,
+                    name_en: Like(`%${name}%`),
+                },
+                {
+                    type,
+                    name_ar: Like(`%${name}%`),
+                }
             ],
             skip: (page - 1) * limit,
             take: limit,
