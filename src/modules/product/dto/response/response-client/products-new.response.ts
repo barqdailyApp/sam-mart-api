@@ -84,6 +84,11 @@ export class ProductsNewResponse {
         cart_id: cart_products[0].cart_id,
         product_id: cart_products[0].product_id,
         quantity: cart_products[0].quantity,
+        warehouse_quantity:
+                product.warehouses_products.reduce(
+                  (acc, cur) => acc + cur.quantity,
+                  0,
+                ) / cart_products[0].conversion_factor,
         min_order_quantity: product_offer
           ? product_offer.min_offer_quantity
           : product_category_price.min_order_quantity,
