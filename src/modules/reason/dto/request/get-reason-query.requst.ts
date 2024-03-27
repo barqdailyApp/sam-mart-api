@@ -19,13 +19,11 @@ export class GetReasonQueryRequest {
     @ApiProperty({ required: false, minimum: 1 })
     @IsOptional()
     @IsNumber()
-    page: number;
-  
+    page: number = 1;
+
     @Transform(({ value }) => toRightNumber(value, { min: 1 }))
     @ApiProperty({ required: false })
     @IsOptional()
     @IsNumber()
-    limit: number;
-
-    
+    limit: number = 5;
 }
