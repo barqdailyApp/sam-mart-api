@@ -2,13 +2,14 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/core/base/service/service.base';
 import { Reason } from 'src/infrastructure/entities/reason/reason.entity';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { CreateReasonRequest } from './dto/request/create-reason.request';
 import { GetReasonQueryRequest } from './dto/request/get-reason-query.requst';
 import { Request } from 'express';
 import { REQUEST } from '@nestjs/core';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { UpdateReasonRequest } from './dto/request/update-reason.request';
+import { GetReasonByNameQueryRequest } from './dto/request/get-reason-by-name-query.request';
 
 @Injectable()
 export class ReasonService extends BaseService<Reason>{
@@ -51,6 +52,24 @@ export class ReasonService extends BaseService<Reason>{
         }
 
         return { total, reasons };
+    }
+
+    async getReasonByName(query: GetReasonByNameQueryRequest): Promise<[Reason[], number]> {
+        const { name, page, limit } = query;
+        const [reasons, count] = await this.reasonRepository.findAndCount({
+            where: [
+                { name_en: Like(`%${name}%`) },
+                { name_ar: Like(`%${name}%`) }
+            ],
+            skip: (page - 1) * limit,
+            take: limit,
+        });
+
+        if (!reasons.length) {
+            throw new NotFoundException(`Reason with name ${name} not found`);
+        }
+
+        return [reasons, count];
     }
 
     async updateReason(id: string, req: UpdateReasonRequest): Promise<Reason> {
