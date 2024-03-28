@@ -142,7 +142,8 @@ export class ProductDashboardService {
 
     createProductOffer.product_category_price_id = product_category_price_id;
     if (createProductOffer.discount_type == DiscountType.VALUE) {
-      if (createProductOffer.discount_value >= createProductOffer.price) {
+   
+      if (createProductOffer.discount_value >= productCategoryPrice.price) {
         throw new BadRequestException(
           'message.discount_value_must_be_less_than_product_price',
         );
@@ -204,9 +205,19 @@ export class ProductDashboardService {
 
     if (discount_type != undefined && discount_value != undefined) {
       if (discount_type == DiscountType.VALUE) {
+        if (discount_value >= productOffer.product_category_price.price) {
+          throw new BadRequestException(
+            'message.discount_value_must_be_less_than_product_price',
+          );
+        }
         productOfferPrice =
           productOffer.product_category_price.price - discount_value;
       } else {
+        if (discount_value >= 1) {
+          throw new BadRequestException(
+            'message.discount_value_must_be_less_than_1',
+          );
+        }
         const discountedPercentage =
           (productOffer.product_category_price.price * discount_value) / 100;
         productOfferPrice =
