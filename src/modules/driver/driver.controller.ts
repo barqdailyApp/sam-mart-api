@@ -55,7 +55,7 @@ import { UpdateProfileDriverRequest } from './requests/update-profile-driver.req
   required: false,
   description: 'Language header: en, ar',
 })
-//@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @ApiTags('Driver')
 @Controller('driver')
 export class DriverController {
@@ -154,7 +154,7 @@ export class DriverController {
     ]),
   )
   @ApiConsumes('multipart/form-data')
-  //  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN)
   @Put('update-profile-driver')
   async updateProfileDriver(
     @Body() req: UpdateProfileDriverRequest,
