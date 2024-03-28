@@ -89,25 +89,35 @@ export class NotificationService extends BaseUserService<NotificationEntity> {
   ) {
     const { users_id, message_ar, message_en, title_ar, title_en } =
       sendToUsersNotificationRequest;
-    //* Check if user exists
-    for (let index = 0; index < users_id.length; index++) {
-      const user = await this.userRepository.findOne({
-        where: { id: users_id[index] },
-      });
-      if (user) {
+    const BATCH_SIZE = 10; // Adjust batch size based on your server's capacity
 
-        await this.create(
-          new NotificationEntity({
-            user_id: users_id[index],
-            url: users_id[index],
-            type: NotificationTypes.USERS,
-            title_ar: title_ar,
-            title_en: title_en,
-            text_ar: message_ar,
-            text_en: message_en,
-          }),
-        );
-      }
+    for (let i = 0; i < users_id.length; i += BATCH_SIZE) {
+      const userBatch = users_id.slice(i, i + BATCH_SIZE);
+
+      const notificationPromises = userBatch.map(async (userId) => {
+        const user = await this.userRepository.findOne({
+          where: { id: userId },
+        });
+        if (user) {
+          return this.create(
+            new NotificationEntity({
+              user_id: userId,
+              url: userId,
+              type: NotificationTypes.USERS,
+              title_ar: title_ar,
+              title_en: title_en,
+              text_ar: message_ar,
+              text_en: message_en,
+            }),
+          );
+        }
+      });
+
+      // Wait for all notifications in the batch to be processed
+      await Promise.all(notificationPromises).catch((error) => {
+        // Log the error or handle it as needed
+        console.error('Error sending notifications:', error);
+      });
     }
   }
 }
