@@ -64,9 +64,9 @@ export class ProductsOffersNewResponse {
       0
         ? false
         : true;
-        this.warehouse_quantity =
-        product.warehouses_products.reduce((acc, cur) => acc + cur.quantity, 0) /
-        product_measurement.conversion_factor; 
+    this.warehouse_quantity =
+      product.warehouses_products.reduce((acc, cur) => acc + cur.quantity, 0) /
+      product_measurement.conversion_factor;
     this.product_id = product.id;
     this.product_name_ar = product.name_ar;
     this.product_name_en = product.name_en;
@@ -90,6 +90,11 @@ export class ProductsOffersNewResponse {
         cart_id: cart_products[0].cart_id,
         product_id: cart_products[0].product_id,
         quantity: cart_products[0].quantity,
+        warehouse_quantity:
+          product.warehouses_products.reduce(
+            (acc, cur) => acc + cur.quantity,
+            0,
+          ) / cart_products[0].conversion_factor,
         min_order_quantity: product_offer.min_offer_quantity,
         max_order_quantity: product_offer.max_offer_quantity,
         price: cart_products[0].price,
