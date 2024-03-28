@@ -142,17 +142,17 @@ export class ProductDashboardService {
 
     createProductOffer.product_category_price_id = product_category_price_id;
     if (createProductOffer.discount_type == DiscountType.VALUE) {
-      if (createProductOffer.discount_value == createProductOffer.price) {
+      if (createProductOffer.discount_value >= createProductOffer.price) {
         throw new BadRequestException(
-          'message.discount_value_must_be_less_than_price',
+          'message.discount_value_must_be_less_than_product_price',
         );
       }
       createProductOffer.price =
         productCategoryPrice.price - createProductOffer.discount_value;
     } else {
-      if (createProductOffer.discount_value >= 100) {
+      if (createProductOffer.discount_value >= 1) {
         throw new BadRequestException(
-          'message.discount_value_must_be_less_than_100',
+          'message.discount_value_must_be_less_than_1',
         );
       }
       const discountedPercentage =
