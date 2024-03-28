@@ -142,7 +142,6 @@ export class ProductDashboardService {
 
     createProductOffer.product_category_price_id = product_category_price_id;
     if (createProductOffer.discount_type == DiscountType.VALUE) {
-   
       if (createProductOffer.discount_value >= productCategoryPrice.price) {
         throw new BadRequestException(
           'message.discount_value_must_be_less_than_product_price',
@@ -784,12 +783,32 @@ export class ProductDashboardService {
   ) {
     const { category_sub_category_id, product_id } =
       singleProductDashboardQuery;
-    const productSubCategory = await this.productSubCategory_repo.findOne({
-      where: {
+
+
+      const product_check = await this.productSubCategory_repo
+      .createQueryBuilder('productSubCategory')
+      .leftJoinAndSelect('productSubCategory.product', 'product')
+      .where('product.id = :product_id OR product.barcode = :product_id', {
         product_id,
-        category_sub_category_id,
-      },
-    });
+      })
+      .getOne();
+      if(!product_check){
+        throw new NotFoundException('message.product_not_found');
+
+      }
+      const productSubCategory = await this.productSubCategory_repo
+      .createQueryBuilder('productSubCategory')
+      .leftJoinAndSelect('productSubCategory.product', 'product')
+      .where('product.id = :product_id OR product.barcode = :product_id', {
+        product_id,
+      })
+      .andWhere(
+        'productSubCategory.category_sub_category_id = :category_sub_category_id',
+        { category_sub_category_id },
+      )
+      .getOne();
+
+   
     if (category_sub_category_id) {
       if (!productSubCategory) {
         throw new NotFoundException(
@@ -856,7 +875,11 @@ export class ProductDashboardService {
     );
     let product = await query.getOne();
     // Remove product from sub category
-    for (let index = 0; index < product.product_sub_categories.length; index++) {
+    for (
+      let index = 0;
+      index < product.product_sub_categories.length;
+      index++
+    ) {
       if (
         product.product_sub_categories[index].category_sub_category_id !=
         category_sub_category_id
@@ -868,15 +891,28 @@ export class ProductDashboardService {
 
     // Remove product from category
     for (let index = 0; index < product.product_measurements.length; index++) {
-      for (let index2 = 0; index2 < product.product_measurements[index].product_category_prices.length; index2++) {
-        if(product.product_measurements[index].product_category_prices[index2].product_sub_category.category_sub_category_id != category_sub_category_id){
-          product.product_measurements[index].product_category_prices.splice(index2, 1);
+      for (
+        let index2 = 0;
+        index2 <
+        product.product_measurements[index].product_category_prices.length;
+        index2++
+      ) {
+        if (
+          product.product_measurements[index].product_category_prices[index2]
+            .product_sub_category.category_sub_category_id !=
+          category_sub_category_id
+        ) {
+          product.product_measurements[index].product_category_prices.splice(
+            index2,
+            1,
+          );
           index2--;
         }
       }
 
-    return product;
-  }}
+      return product;
+    }
+  }
 
   async deleteProduct(product_id: string): Promise<DeleteResult> {
     const product = await this.productRepository.findOne({
