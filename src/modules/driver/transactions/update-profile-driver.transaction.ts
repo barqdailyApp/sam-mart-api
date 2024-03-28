@@ -80,7 +80,7 @@ export class UpdateProfileDriverTransaction extends BaseTransaction<
             },
           },
         });
-        if (userEmail) {
+        if (userEmail && driver.user.email != email) {
           throw new BadRequestException('message.email_exists');
         }
 
@@ -95,7 +95,7 @@ export class UpdateProfileDriverTransaction extends BaseTransaction<
             },
           },
         });
-        if (userPhone) {
+        if (userPhone && driver.user.phone != phone) {
           throw new BadRequestException('message.phone_exists');
         }
         driver.user.phone = phone;
@@ -131,15 +131,18 @@ export class UpdateProfileDriverTransaction extends BaseTransaction<
 
       //* check country
       if (country_id) {
+
+
         const country = await context.findOne(Country, {
           where: {
             id: country_id,
           },
         });
+
         if (!country) {
           throw new BadRequestException('message.country_not_found');
         }
-        driver.country = country;
+        driver.country_id = country_id;
       }
 
       //* check city
@@ -181,6 +184,8 @@ export class UpdateProfileDriverTransaction extends BaseTransaction<
           },
           { path: 'id_card_images' },
         );
+
+
         driver.id_card_image = pathIdCardImage;
       }
 
@@ -206,6 +211,12 @@ export class UpdateProfileDriverTransaction extends BaseTransaction<
       }
       if (vehicle_model) {
         driver.vehicle_model = vehicle_model;
+      }
+      if(license_number){
+        driver.license_number = license_number;
+      }
+      if(id_card_number){
+        driver.id_card_number = id_card_number;
       }
       await context.update(Driver, driver_id, {
         id_card_image: driver.id_card_image,
