@@ -151,14 +151,14 @@ export class WarehouseService extends BaseService<Warehouse> {
     const driver = await this.driver_repo.findOne({ where: { id: driver_id } });
     if (!driver) throw new NotFoundException('Driver not found');
 
-    const isDriverAttached = warehouse.drivers.some((d) => d.id === driver_id);
+    // const isDriverAttached = warehouse.drivers.some((d) => d.id === driver_id);
     // if (isDriverAttached) {
     //   throw new BadRequestException('Driver already attached to warehouse');
     // }
 
-    if (driver.warehouse_id !== null) {
-      throw new BadRequestException('Driver already attached to warehouse');
-    }
+    // if (driver.warehouse_id !== null) {
+    //   throw new BadRequestException('Driver already attached to warehouse');
+    // }
 
     warehouse.drivers.push(driver);
     return await this.warehouse_repo.save(warehouse);
