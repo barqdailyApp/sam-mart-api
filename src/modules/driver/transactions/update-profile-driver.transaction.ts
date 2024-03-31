@@ -88,7 +88,7 @@ export class UpdateProfileDriverTransaction extends BaseTransaction<
       }
       if (phone) {
         // should phone be Unique
-        const userPhone = context.findOne(Driver, {
+        const userPhone = await context.findOne(Driver, {
           where: {
             user: {
               phone,
