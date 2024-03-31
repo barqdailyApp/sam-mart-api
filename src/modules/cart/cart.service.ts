@@ -96,7 +96,8 @@ export class CartService extends BaseService<CartProduct> {
       (w) => w.warehouse_id == cart_product.warehouse_id,
     );
     cart_product.product_category_price.product_sub_category.product.warehouses_products[0].quantity =
-    cart_product.product_category_price.product_sub_category.product.warehouses_products[0].quantity  / cart_product.conversion_factor;
+      cart_product.product_category_price.product_sub_category.product
+        .warehouses_products[0].quantity / cart_product.conversion_factor;
     if (!cart_product.is_offer) {
       delete cart_product.product_category_price.product_offer;
     }
@@ -217,7 +218,6 @@ export class CartService extends BaseService<CartProduct> {
   async deleteCartProduct(cart_product_id: string) {
     const cart_product = await this.cartProductRepository.findOne({
       where: { id: cart_product_id },
-   
     });
     await this.cartProductRepository.delete({
       id: cart_product_id,
@@ -228,6 +228,12 @@ export class CartService extends BaseService<CartProduct> {
   async updatecartProduct(req: UpdateCartProductRequest) {
     const cart_product = await this.cartProductRepository.findOne({
       where: { id: req.cart_product_id },
+    });
+    const warehouse_product = await this.WarehouseProductsRepository.findOne({
+      where: {
+        warehouse_id: cart_product.warehouse_id,
+        product_id: cart_product.product_id,
+      },
     });
     const product_category_price = await this.productCategoryPrice.findOne({
       where: { id: cart_product.product_category_price_id },
@@ -260,14 +266,17 @@ export class CartService extends BaseService<CartProduct> {
         product_category_price.min_order_quantity
       )
         cart_product.quantity = product_category_price.min_order_quantity;
-      else cart_product.quantity -= product_category_price.min_order_quantity;
+      else if (
+        warehouse_product.quantity * cart_product.conversion_factor >=
+        cart_product.quantity - product_category_price.min_order_quantity
+      )
+        cart_product.quantity -= product_category_price.min_order_quantity;
+        else if(
+          warehouse_product.quantity * cart_product.conversion_factor >=
+          product_category_price.min_order_quantity)
+          cart_product.quantity = product_category_price.min_order_quantity
     }
-    const warehouse_product = await this.WarehouseProductsRepository.findOne({
-      where: {
-        warehouse_id: cart_product.warehouse_id,
-        product_id: cart_product.product_id,
-      },
-    });
+
     if (!warehouse_product) {
       throw new BadRequestException('message.warehouse_product_not_enough');
     }
