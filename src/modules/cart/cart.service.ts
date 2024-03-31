@@ -70,7 +70,14 @@ export class CartService extends BaseService<CartProduct> {
     });
     cart_products.map((e) => {
       e.product_category_price.product_sub_category.product.warehouses_products.map(
-        (w) => (w.quantity = w.quantity / e.conversion_factor),
+        (w) => {
+          w.quantity = w.quantity / e.conversion_factor;
+          const min_order_quantity = e.is_offer
+            ? e.product_category_price.product_offer.min_offer_quantity
+            : e.product_category_price.min_order_quantity;
+          if (w.quantity < e.quantity)
+            e.quantity = Math.floor(w.quantity / min_order_quantity);
+        },
       );
     });
     return cart_products;
