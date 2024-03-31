@@ -80,6 +80,7 @@ export class CartService extends BaseService<CartProduct> {
         },
       );
     });
+    await this.cartProductRepository.save(cart_products);
     return cart_products;
   }
   async getSingleCartProduct(id: string) {
