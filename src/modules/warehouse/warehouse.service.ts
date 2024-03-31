@@ -152,9 +152,9 @@ export class WarehouseService extends BaseService<Warehouse> {
     if (!driver) throw new NotFoundException('Driver not found');
 
     const isDriverAttached = warehouse.drivers.some((d) => d.id === driver_id);
-    if (isDriverAttached) {
-      throw new BadRequestException('Driver already attached to warehouse');
-    }
+    // if (isDriverAttached) {
+    //   throw new BadRequestException('Driver already attached to warehouse');
+    // }
 
     if (driver.warehouse_id !== null) {
       throw new BadRequestException('Driver already attached to warehouse');
