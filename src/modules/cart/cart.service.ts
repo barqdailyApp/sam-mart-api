@@ -267,14 +267,17 @@ export class CartService extends BaseService<CartProduct> {
       )
         cart_product.quantity = product_category_price.min_order_quantity;
       else if (
-        warehouse_product.quantity * cart_product.conversion_factor >=
-        cart_product.quantity - product_category_price.min_order_quantity
+        cart_product.quantity * cart_product.conversion_factor -
+          product_category_price.min_order_quantity <=
+        warehouse_product.quantity
       )
         cart_product.quantity -= product_category_price.min_order_quantity;
-        else if(
-          warehouse_product.quantity * cart_product.conversion_factor >=
-          product_category_price.min_order_quantity)
-          cart_product.quantity = product_category_price.min_order_quantity
+      else if (
+        warehouse_product.quantity >=
+        product_category_price.min_order_quantity *
+          cart_product.conversion_factor
+      )
+        cart_product.quantity = product_category_price.min_order_quantity;
     }
 
     if (!warehouse_product) {
