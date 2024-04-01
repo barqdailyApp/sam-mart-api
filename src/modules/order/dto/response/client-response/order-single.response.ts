@@ -8,7 +8,6 @@ import { Order } from 'src/infrastructure/entities/order/order.entity';
 export class OrderSingleResponse {
   @Expose() order_id: string;
 
-
   @Expose() order_number: string;
 
   @Expose() total_price: number;
@@ -20,11 +19,10 @@ export class OrderSingleResponse {
 
   constructor(order: Order) {
     this.order_id = order.id;
-  
+
     this.order_number = order.number;
     this.order_products = order.shipments[0].shipment_products.length;
     this.total_price = order.total_price;
-
 
     this.shipments = {
       id: order.shipments[0].id,
@@ -47,28 +45,88 @@ export class OrderSingleResponse {
       order_canceled_at: order.shipments[0].order_canceled_at,
       shipment_products: order.shipments[0].shipment_products.map(
         (shipment_product) => {
+          const cart_products =
+            shipment_product.product_category_price.cart_products;
+          const product =
+            shipment_product.product_category_price.product_sub_category
+              .product;
+          const product_offer =
+            shipment_product.product_category_price.product_offer;
           return {
             id: shipment_product.id,
             shipment_id: shipment_product.shipment_id,
             product_id: shipment_product.product_id,
-            product_category_price_id:shipment_product.product_category_price.id,
+            product_category_price_id:
+              shipment_product.product_category_price.id,
             quantity: shipment_product.quantity,
-            price: shipment_product.price,
+            warehouse_quantity:
+              product.warehouses_products.reduce(
+                (acc, cur) => acc + cur.quantity,
+                0,
+              ) /
+              shipment_product.product_category_price.product_measurement
+                .conversion_factor,
+
+            product_price: shipment_product.price,
             product_name_ar:
               shipment_product.product_category_price.product_sub_category
                 .product.name_ar,
             product_name_en:
               shipment_product.product_category_price.product_sub_category
                 .product.name_en,
-            product_logo: toUrl(shipment_product.product_category_price.product_sub_category.product.product_images.find(
-              (x) => x.is_logo === true,
-            ).url),
+            product_logo: toUrl(
+              product.product_images.find((x) => x.is_logo === true).url,
+            ),
             total_price: shipment_product.quantity * shipment_product.price,
-          
+
+            min_order_quantity:
+              product_offer != null
+                ? product_offer.min_offer_quantity
+                : shipment_product.product_category_price.min_order_quantity,
+
+            max_order_quantity:
+              product_offer != null
+                ? product_offer.max_offer_quantity
+                : shipment_product.product_category_price.min_order_quantity,
+
+            product_measurement_id:
+              shipment_product.product_category_price.product_measurement.id,
+            measurement_unit_id:
+              shipment_product.product_category_price.product_measurement
+                .measurement_unit.id,
+            measurement_unit_ar:
+              shipment_product.product_category_price.product_measurement
+                .measurement_unit.name_ar,
+            measurement_unit_en:
+              shipment_product.product_category_price.product_measurement
+                .measurement_unit.name_en,
+            cart_products:
+              cart_products == undefined || cart_products.length == 0
+                ? null
+                : {
+                    id: cart_products[0].id,
+                    warehouse_quantity:
+                      product.warehouses_products.reduce(
+                        (acc, cur) => acc + cur.quantity,
+                        0,
+                      ) / cart_products[0].conversion_factor,
+                    cart_id: cart_products[0].cart_id,
+                    product_id: cart_products[0].product_id,
+                    quantity: cart_products[0].quantity,
+                    min_order_quantity: product_offer
+                      ? product_offer.min_offer_quantity
+                      : shipment_product.product_category_price
+                          .min_order_quantity,
+                    max_order_quantity: product_offer
+                      ? product_offer.max_offer_quantity
+                      : shipment_product.product_category_price
+                          .max_order_quantity,
+                    price: cart_products[0].price,
+                    additions: cart_products[0].additions,
+                  },
           };
         },
       ),
     };
   }
 }
-
