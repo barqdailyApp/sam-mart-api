@@ -11,7 +11,7 @@ class ReturnShipmentProductRequest {
     @ApiProperty()
     @IsNotEmpty()
     @IsUUID()
-    reason_id: string;
+    return_product_reason_id: string;
 
     @ApiProperty()
     @IsNotEmpty()

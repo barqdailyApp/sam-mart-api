@@ -144,14 +144,14 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
     // check if the return products reasons IDs are valid
     const returnedProductsReasons = await this.reasonRepository.find({
       where: {
-        id: In(returned_shipment_products.map((p) => p.reason_id)),
+        id: In(returned_shipment_products.map((p) => p.return_product_reason_id)),
         type: ReasonType.RETURN_ORDER,
       },
     });
 
     if (
       returnedProductsReasons.length !==
-      new Set(returned_shipment_products.map((p) => p.reason_id)).size
+      new Set(returned_shipment_products.map((p) => p.return_product_reason_id)).size
     ) {
       throw new BadRequestException("message.invalid_return_reasons_ids");
     }
