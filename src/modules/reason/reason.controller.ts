@@ -56,7 +56,7 @@ export class ReasonController {
         @Query() query: GetReasonQueryRequest
     ): Promise<ActionResponse<Reason[]>> {
         const { reasons, total } = await this.reasonService.getAll(query);
-        return new PaginatedResponse<Reason[]>(reasons, {
+        return new PaginatedResponse<Reason[]>(this._i18nResponse.entity(reasons), {
             meta: { total, page: query.page, limit: query.limit },
         });
     }
