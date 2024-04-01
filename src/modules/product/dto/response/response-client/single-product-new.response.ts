@@ -72,8 +72,8 @@ export class SingleProductsNewResponse {
             (acc, cur) => acc + cur.quantity,
             0,
           ) / item.conversion_factor,
-        min_order_quantity: product_category_price.min_order_quantity,
-        max_order_quantity: product_category_price.max_order_quantity,
+        min_order_quantity:product_offer.id != null ?product_offer.min_offer_quantity : product_category_price.min_order_quantity,
+        max_order_quantity: product_offer.id != null ?product_offer.max_offer_quantity : product_category_price.max_order_quantity,
         offer: product_offer
           ? {
               product_category_price_id:

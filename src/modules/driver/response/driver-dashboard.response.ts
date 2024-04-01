@@ -29,7 +29,7 @@ export class DriverDashboardResponse {
     this.username = driver.user.name;
     this.email = driver.user.email;
     this.phone = driver.user.phone;
-    this.avatar = driver.user.avatar;
+    this.avatar =toUrl(driver.user.avatar) ;
     this.birth_date = driver.user.birth_date;
     this.created_at = driver.user.created_at;
     this.address = {

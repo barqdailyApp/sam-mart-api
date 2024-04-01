@@ -79,6 +79,8 @@ export class OrderService extends BaseUserService<Order> {
       .leftJoinAndSelect('order.address', 'address')
       .leftJoinAndSelect('order.shipments', 'shipments')
 
+      .leftJoinAndSelect('shipments.order_feedback', 'order_feedback')
+
       .leftJoinAndSelect('shipments.driver', 'driver')
       .leftJoinAndSelect('driver.user', 'shipment_user_driver')
 
@@ -393,6 +395,21 @@ export class OrderService extends BaseUserService<Order> {
       )
 
       .leftJoinAndSelect('product_sub_category.product', 'product')
+      .leftJoinAndSelect('product.warehouses_products', 'warehousesProduct')
+      .leftJoinAndSelect(
+        'product_category_price.product_offer',
+        'product_offer',
+        'product_offer.offer_quantity > 0 AND product_offer.start_date <= :current_date AND product_offer.end_date >= :current_date AND product_offer.is_active = :isActive',
+        {
+          current_date: new Date(),
+          isActive: true,
+        },
+      )
+      
+
+
+
+      
       .leftJoinAndSelect('product.product_images', 'product_images');
 
     //  single order
