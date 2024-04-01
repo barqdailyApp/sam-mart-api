@@ -40,7 +40,6 @@ export class CreateProductRequest {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  @Unique('product')
   barcode: string;
 
 
