@@ -56,9 +56,17 @@ export class CreateProductTransaction extends BaseTransaction<
         measurements,
         name_ar,
         name_en,
-        product_images,barcode
+        product_images,
+        barcode,
       } = query;
       //* -------------------- Create Product ----------------------------
+      //* Check if product barcode exist
+      const productBarcode = await context.findOne(Product, {
+        where: { barcode },
+      });
+      if (productBarcode) {
+        throw new BadRequestException('message.product_barcode_exist');
+      }
 
       const createProduct = context.create(Product, {
         description_ar,
@@ -67,7 +75,7 @@ export class CreateProductTransaction extends BaseTransaction<
         is_recovered,
         name_ar,
         name_en,
-        barcode
+        barcode,
       });
 
       // const moveLogoImage = moveTmpFile(logo, '/product-images/');
@@ -127,7 +135,7 @@ export class CreateProductTransaction extends BaseTransaction<
           conversion_factor: primaryUnit.conversion_factor,
           measurement_unit_id: primaryUnit.measurement_unit_id,
           product_id: saveProduct.id,
-          is_main_unit:primaryUnit.is_main_unit
+          is_main_unit: primaryUnit.is_main_unit,
         },
       );
       const primaryProductMeasurement = await context.save(
@@ -149,12 +157,13 @@ export class CreateProductTransaction extends BaseTransaction<
           conversion_factor: secondaryMeasurements[index].conversion_factor,
           measurement_unit_id: secondaryMeasurements[index].measurement_unit_id,
           product_id: saveProduct.id,
-          is_main_unit:secondaryMeasurements[index].is_main_unit
+          is_main_unit: secondaryMeasurements[index].is_main_unit,
         });
 
         // Set Main Unit
         if (secondaryMeasurements[index].is_main_unit == false) {
-          createProductMeasurement.base_unit_id = primaryProductMeasurement.measurement_unit_id;
+          createProductMeasurement.base_unit_id =
+            primaryProductMeasurement.measurement_unit_id;
         }
 
         // Save Product Measurement

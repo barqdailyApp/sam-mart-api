@@ -185,7 +185,7 @@ export class OrderService extends BaseUserService<Order> {
       });
     }
 
-    if (is_paid) {
+    if (is_paid !== undefined) {
       query = query.andWhere('order.is_paid = :is_paid', {
         is_paid,
       });
