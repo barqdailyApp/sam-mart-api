@@ -40,7 +40,7 @@ export class OrdersResponse {
       products: order.shipments[0].shipment_products.map((shipment_product) => {
         return {
           product_id: shipment_product.product_id,
-          product_category_price_id:shipment_product.product_category_price.id,
+          product_category_price_id: shipment_product.product_category_price.id,
           product_name_ar:
             shipment_product.product_category_price.product_sub_category.product
               .name_ar,
@@ -64,6 +64,14 @@ export class OrdersResponse {
         };
       }),
       status: order.shipments[0].status,
+      feedback: order.shipments[0].order_feedback
+        ? {
+            id: order.shipments[0].order_feedback.id,
+            communication: order.shipments[0].order_feedback.communication,
+            packaging: order.shipments[0].order_feedback.packaging,
+            delivery_time: order.shipments[0].order_feedback.delivery_time,
+          }
+        : null,
     };
   }
 }
