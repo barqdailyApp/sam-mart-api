@@ -5,13 +5,16 @@ import { CreateWorkingAreaRequest } from './dto/requests/requests/create-working
 import { UpdateWorkingAreaRequest } from './dto/requests/requests/update-working-are.request';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { BaseService } from 'src/core/base/service/service.base';
 
 @Injectable()
-export class WorkingAreaService {
+export class WorkingAreaService extends BaseService<WorkingArea> {
   constructor(
     @InjectRepository(WorkingArea)
     private readonly workingArea_repo: Repository<WorkingArea>,
-  ) {}
+  ) {
+    super(workingArea_repo);
+  }
 
   async createWorkingArea(req: CreateWorkingAreaRequest) {
     const workingArea = plainToInstance(WorkingArea, req);

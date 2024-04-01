@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags, ApiHeader } from '@nestjs/swagger';
 import { Router } from 'express';
 import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
@@ -9,6 +9,9 @@ import { Roles } from '../authentication/guards/roles.decorator';
 import { CreateWorkingAreaRequest } from './dto/requests/requests/create-working-area.request';
 import { UpdateWorkingAreaRequest } from './dto/requests/requests/update-working-are.request';
 import { WorkingAreaService } from './working-area.service';
+import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
+import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
+import { applyQueryIncludes } from 'src/core/helpers/service-related.helper';
 
 @ApiBearerAuth()
 @ApiTags("Working-area")
@@ -27,8 +30,14 @@ export class WorkingAreaController {
     ){}
 
     @Get()
-    async getWorkingArea() {
-      return new ActionResponse(await this.workingAreaService.getWorkingArea());
+    async getWorkingArea( @Query() query:PaginatedRequest) {
+      applyQueryIncludes(query, 'city');
+      const workingAreas= await this.workingAreaService.findAll(query);
+      if(query.page && query.limit){
+       const total=await this.workingAreaService.count(query);
+       return new PaginatedResponse(workingAreas,{meta:{total,...query}})
+      }
+      return new ActionResponse(workingAreas);
     }
 
     @Get("/:id")
