@@ -63,11 +63,16 @@ export class SingleProductDashboardNewResponse {
         product.product_sub_categories.length > 0
           ? product.product_sub_categories[0].is_active
           : false,
-          delivery_price: product.product_sub_categories.length > 0
-          ? product.product_sub_categories[0].category_subCategory.section_category.section.delivery_price
-          : 0
+      delivery_price:
+        product.product_sub_categories.length > 0
+          ? product.product_sub_categories[0].category_subCategory
+              .section_category.section.delivery_price
+          : 0,
     }),
       (this.product_measurements = product_measurements.map((item) => {
+        const product_category_price = item.product_category_prices.filter(
+          (x) => x.product_sub_category != null,
+        );
         return {
           product_measurement_id: item.id,
           measurement_unit_id: item.measurement_unit.id,
@@ -76,22 +81,21 @@ export class SingleProductDashboardNewResponse {
           is_main_unit: item.is_main_unit,
           conversion_factor: item.conversion_factor,
           product_category_price:
-            item.product_category_prices.length > 0
+            product_category_price.length > 0
               ? {
-                  product_category_price_id: item.product_category_prices[0].id,
-                  product_price: item.product_category_prices[0].price,
+                  product_category_price_id: product_category_price[0].id,
+                  product_price: product_category_price[0].price,
                   min_order_quantity:
-                    item.product_category_prices[0].min_order_quantity,
+                    product_category_price[0].min_order_quantity,
                   max_order_quantity:
-                    item.product_category_prices[0].max_order_quantity,
+                    product_category_price[0].max_order_quantity,
                 }
               : null,
 
           product_additional_services:
-            item.product_category_prices.length > 0 &&
-            item.product_category_prices[0].product_additional_services.length >
-              0
-              ? item.product_category_prices[0].product_additional_services.map(
+            product_category_price.length > 0 &&
+            product_category_price[0].product_additional_services.length > 0
+              ? product_category_price[0].product_additional_services.map(
                   (x) => {
                     return {
                       product_additional_service_id: x.id,
