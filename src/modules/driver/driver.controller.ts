@@ -55,7 +55,7 @@ import { UpdateProfileDriverRequest } from './requests/update-profile-driver.req
   required: false,
   description: 'Language header: en, ar',
 })
-@UseGuards(JwtAuthGuard, RolesGuard)
+//@UseGuards(JwtAuthGuard, RolesGuard)
 @ApiTags('Driver')
 @Controller('driver')
 export class DriverController {

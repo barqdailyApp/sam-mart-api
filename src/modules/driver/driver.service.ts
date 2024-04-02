@@ -145,7 +145,7 @@ export class DriverService {
       status,
       city_id,
       country_id,
-      region_id,
+      region_id,vehicle_type
     } = driversDashboardQuery;
     const skip = (page - 1) * limit;
 
@@ -198,6 +198,11 @@ export class DriverService {
     if (region_id) {
       query = query.andWhere('driver.region_id = :region_id', {
         region_id,
+      });
+    }
+    if (vehicle_type) {
+      query = query.andWhere('driver.vehicle_type = :vehicle_type', {
+        vehicle_type,
       });
     }
 
