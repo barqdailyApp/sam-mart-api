@@ -57,17 +57,16 @@ export class DeleteDriverAccountTransaction extends BaseTransaction<
         throw new Error('message.driver_has_active_orders');
       }
       await context.update(
-        Driver,
-        { id: req.driver_id },
+        User,
+        { id: driver.user_id },
         {
-          user: {
-            username: `${driver.user.name}_${timesTampDeleted}`,
-            phone: `${driver.user.phone}_${timesTampDeleted}`,
-          },
+          username: `${driver.user.name}_${timesTampDeleted}`,
+          phone: `${driver.user.phone}_${timesTampDeleted}`,
         },
       );
 
       await context.softDelete(Driver, { id: req.driver_id });
+      await context.softDelete(User, { id: driver.user_id });
 
       return await context.findOne(Driver, {
         where: { id: req.driver_id },
