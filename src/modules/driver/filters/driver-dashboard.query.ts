@@ -65,4 +65,13 @@ export class DriversDashboardQuery {
   @IsString()
   region_id: string;
 
+  @ApiProperty({
+    nullable: true,
+    required: false,
+  })
+  @Transform(({ value }) => {
+    return value.toUpperCase();
+  })
+  @IsOptional()
+  vehicle_type: string;
 }
