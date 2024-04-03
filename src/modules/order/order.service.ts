@@ -78,6 +78,8 @@ export class OrderService extends BaseUserService<Order> {
       .createQueryBuilder('order')
 
       .leftJoinAndSelect('order.user', 'user')
+      .leftJoinAndSelect('order.slot', 'slot')
+
       .leftJoinAndSelect('order.section', 'section_order')
       .leftJoinAndSelect('order.warehouse', 'warehouse_order')
       .leftJoinAndSelect('order.address', 'address')

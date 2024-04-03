@@ -8,6 +8,11 @@ import { Order } from 'src/infrastructure/entities/order/order.entity';
 export class OrdersResponse {
   @Expose() order_id: string;
   @Expose() order_number: string;
+  @Expose()  delivery_type: DeliveryType;
+  @Expose() delivery_day: string;
+  @Expose() slot: any;
+  @Expose() estimated_delivery_time: Date;
+
   @Expose() total_price: number;
   @Expose() address: any;
   @Expose() shipments: any;
@@ -16,6 +21,17 @@ export class OrdersResponse {
     this.order_id = order.id;
     this.order_number = order.number;
     this.total_price = order.total_price;
+    this.delivery_type = order.delivery_type;
+    this.estimated_delivery_time = order.estimated_delivery_time;
+    this.delivery_day = order.delivery_day;
+    this.slot = order.slot
+      ? {
+          id: order.slot_id,
+          start_time: order.slot.start_time,
+          end_time: order.slot.end_time,
+          time_zone: order.slot.time_zone,
+        }
+      : null;
 
     this.address = {
       id: order.address.id,
