@@ -43,6 +43,17 @@ export class OrderSingleResponse {
       order_shipped_at: order.shipments[0].order_shipped_at,
       order_delivered_at: order.shipments[0].order_delivered_at,
       order_canceled_at: order.shipments[0].order_canceled_at,
+      shipment_feedback: order.shipments[0].order_feedback
+        ? {
+            id: order.shipments[0].order_feedback.id,
+            communication: order.shipments[0].order_feedback.communication,
+            packaging: order.shipments[0].order_feedback.packaging,
+            delivery_time: order.shipments[0].order_feedback.delivery_time,
+            client_id: order.shipments[0].order_feedback.user_id,
+            driver_id: order.shipments[0].order_feedback.driver_id,
+            shipment_id: order.shipments[0].order_feedback.shipment_id,
+          }
+        : null,
       shipment_products: order.shipments[0].shipment_products.map(
         (shipment_product) => {
           const cart_products =
