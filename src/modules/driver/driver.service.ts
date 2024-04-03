@@ -35,8 +35,8 @@ export class DriverService {
     private shipmentRepository: Repository<Shipment>,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
     private readonly deleteAccountTransaction: DeleteDriverAccountTransaction,
-    @Inject(UpdateProfileDriverTransaction) private readonly updateProfileDriverTransaction: UpdateProfileDriverTransaction,
-
+    @Inject(UpdateProfileDriverTransaction)
+    private readonly updateProfileDriverTransaction: UpdateProfileDriverTransaction,
   ) {}
 
   async single(): Promise<Driver> {
@@ -132,8 +132,9 @@ export class DriverService {
   async updateProfileDriver(
     updateProfileDriverRequest: UpdateProfileDriverRequest,
   ) {
-   return await this.updateProfileDriverTransaction.run(updateProfileDriverRequest);
-
+    return await this.updateProfileDriverTransaction.run(
+      updateProfileDriverRequest,
+    );
   }
 
   async allDriversDashboard(driversDashboardQuery: DriversDashboardQuery) {
@@ -145,7 +146,8 @@ export class DriverService {
       status,
       city_id,
       country_id,
-      region_id,vehicle_type
+      region_id,
+      vehicle_type,
     } = driversDashboardQuery;
     const skip = (page - 1) * limit;
 
@@ -201,8 +203,8 @@ export class DriverService {
       });
     }
     if (vehicle_type) {
-      query = query.andWhere('driver.vehicle_type = :vehicle_type', {
-        vehicle_type,
+      query = query.andWhere('driver.vehicle_type LIKE :vehicle_type', {
+        vehicle_type: `%${vehicle_type}%`,
       });
     }
 
