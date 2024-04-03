@@ -371,6 +371,7 @@ export class OrderService extends BaseUserService<Order> {
 
       .leftJoinAndSelect('shipments.warehouse', 'warehouse_shipment')
       .leftJoinAndSelect('shipments.shipment_products', 'shipment_products')
+      .leftJoinAndSelect('shipments.order_feedback', 'order_feedback')
 
       .leftJoinAndSelect(
         'shipment_products.product_category_price',
@@ -417,7 +418,7 @@ export class OrderService extends BaseUserService<Order> {
 
       .leftJoinAndSelect('product.product_images', 'product_images')
       .leftJoinAndSelect(
-        'product_category_prices.cart_products',
+        'product_category_price.cart_products',
         'cart_products',
         'cart_products.cart_id = :cart_id',
         { cart_id: cartUser.id },
@@ -683,6 +684,7 @@ export class OrderService extends BaseUserService<Order> {
 
       .leftJoinAndSelect('shipments.warehouse', 'warehouse_shipment')
       .leftJoinAndSelect('shipments.shipment_products', 'shipment_products')
+      .leftJoinAndSelect('shipments.order_feedback', 'order_feedback')
 
       .leftJoinAndSelect(
         'shipment_products.product_category_price',

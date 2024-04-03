@@ -41,7 +41,7 @@ export class ShipmentSingleResponse {
     this.status = shipments.status;
     this.driver= shipments.driver_id
     ? {
-        id: shipments.driver.user.id,
+        id: shipments.driver.id,
         username: shipments.driver.user.name,
         email: shipments.driver.user.email,
         phone: shipments.driver.user.phone,
