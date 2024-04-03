@@ -6,6 +6,18 @@ import { Shipment } from 'src/infrastructure/entities/order/shipment.entity';
 @Exclude()
 export class ShipmentSingleResponse {
   @Expose() shipment_id: string;
+  @Expose()  order_confirmed_at: Date;
+
+  @Expose()  order_on_processed_at: Date;
+
+  @Expose() order_ready_for_pickup_at: Date;
+
+  @Expose()  order_shipped_at: Date;
+
+  @Expose()  order_delivered_at: Date;
+
+  @Expose() order_canceled_at: Date;
+
   @Expose() status: ShipmentStatusEnum;
   @Expose() driver: any;
 
@@ -20,6 +32,12 @@ export class ShipmentSingleResponse {
 
   constructor(shipments: Shipment) {
     this.shipment_id = shipments.id;
+    this.order_confirmed_at = shipments.order_confirmed_at;
+    this.order_on_processed_at = shipments.order_on_processed_at;
+    this.order_ready_for_pickup_at = shipments.order_ready_for_pickup_at;
+    this.order_shipped_at = shipments.order_shipped_at;
+    this.order_delivered_at = shipments.order_delivered_at;
+    this.order_canceled_at = shipments.order_canceled_at;
     this.status = shipments.status;
     this.driver= shipments.driver_id
     ? {
