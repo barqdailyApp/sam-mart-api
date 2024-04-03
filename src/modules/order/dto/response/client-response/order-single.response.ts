@@ -29,7 +29,7 @@ export class OrderSingleResponse {
       order_id: order.shipments[0].order_id,
       driver: order.shipments[0].driver_id
         ? {
-            id: order.shipments[0].driver.user.id,
+            id: order.shipments[0].driver.id,
             username: order.shipments[0].driver.user.name,
             phone: order.shipments[0].driver.user.phone,
             avatar: toUrl(order.shipments[0].driver.user.avatar),

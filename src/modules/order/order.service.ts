@@ -32,6 +32,7 @@ import { ReturnOrderProduct } from 'src/infrastructure/entities/order/return-ord
 import { ReturnProductReason } from 'src/infrastructure/entities/order/return-order/return-product-reason.entity';
 import { UpdateReturnOrderStatusRequest } from './dto/request/update-return-order-statu.request';
 import { OrderGateway } from 'src/integration/gateways/order.gateway';
+import { Cart } from 'src/infrastructure/entities/cart/cart.entity';
 
 @Injectable()
 export class OrderService extends BaseUserService<Order> {
@@ -56,6 +57,9 @@ export class OrderService extends BaseUserService<Order> {
     @Inject(REQUEST) request: Request,
     private readonly makeOrdrTransacton: MakeOrderTransaction,
     private readonly orderGateway: OrderGateway,
+
+    @InjectRepository(Cart)
+    private readonly cart_repo: Repository<Cart>,
   ) {
     super(orderRepository, request);
   }
@@ -67,7 +71,7 @@ export class OrderService extends BaseUserService<Order> {
   async getAllClientOrders(orderClientQuery: OrderClientQuery) {
     const user = this.currentUser;
 
-    const { limit, page,status } = orderClientQuery;
+    const { limit, page, status } = orderClientQuery;
     const skip = (page - 1) * limit;
 
     let query = this.orderRepository
@@ -348,6 +352,11 @@ export class OrderService extends BaseUserService<Order> {
   }
 
   async getSingleOrder(order_id: string) {
+    const user = this.currentUser;
+    const cartUser = await this.cart_repo.findOne({
+      where: { user_id: user.id },
+    });
+
     let query = this.orderRepository
       .createQueryBuilder('order')
 
@@ -405,12 +414,23 @@ export class OrderService extends BaseUserService<Order> {
           isActive: true,
         },
       )
-      
 
-
-
-      
-      .leftJoinAndSelect('product.product_images', 'product_images');
+      .leftJoinAndSelect('product.product_images', 'product_images')
+      .leftJoinAndSelect(
+        'product_category_prices.cart_products',
+        'cart_products',
+        'cart_products.cart_id = :cart_id',
+        { cart_id: cartUser.id },
+      )
+      .leftJoinAndSelect('cart_products.cart', 'cart')
+      .leftJoinAndSelect(
+        'cart_products.product_category_price',
+        'cart_product_category_price',
+      )
+      .leftJoinAndSelect(
+        'cart_product_category_price.product_offer',
+        'cart_product_offer',
+      );
 
     //  single order
     query = query.where('order.id = :id', { id: order_id });
