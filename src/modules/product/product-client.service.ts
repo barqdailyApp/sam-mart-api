@@ -311,11 +311,11 @@ export class ProductClientService {
         'product_category_prices',
       )
 
-      .innerJoinAndSelect(
+      .leftJoinAndSelect(
         'product_category_prices.product_additional_services',
         'product_additional_services',
       )
-      .innerJoinAndSelect(
+      .leftJoinAndSelect(
         'product_additional_services.additional_service',
         'additional_service',
       )
