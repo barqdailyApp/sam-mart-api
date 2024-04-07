@@ -48,7 +48,7 @@ export class RegisterDriverTransaction extends BaseTransaction<
 
       //* -------------------- Create User ----------------------------
       const createUser = context.create(User, {
-        username,
+        username:phone,
         email,
         phone,
         birth_date,
