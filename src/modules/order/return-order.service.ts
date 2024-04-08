@@ -322,9 +322,17 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
     }
 
     if (this.currentUser.roles.includes(Role.CLIENT)) {
-      query.filters.push(`order.user_id=${this.currentUser.id}`);
+      if (query.filters[0]) {
+        query.filters[0] = `${query.filters[0]},order.user_id=${this.currentUser.id}`;
+      } else {
+        query.filters.push(`order.user_id=${this.currentUser.id}`);
+      }
     } else if (this.currentUser.roles.includes(Role.DRIVER)) {
-      query.filters.push(`driver_id=${this.currentUser.id}`);
+      if (query.filters[0]) {
+        query.filters[0] = `${query.filters[0]},driver_id=${this.currentUser.id}`;
+      } else {
+        query.filters.push(`driver_id=${this.currentUser.id}`);
+      }
     }
 
     return await this.findAll(query);
