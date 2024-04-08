@@ -3,6 +3,7 @@ import { ProductCategoryPrice } from '../product/product-category-price.entity';
 import { AuditableEntity } from 'src/infrastructure/base/auditable.entity';
 import { Shipment } from './shipment.entity';
 import { ReturnOrderProduct } from './return-order/return-order-product.entity';
+import { Product } from '../product/product.entity';
 @Entity()
 export class ShipmentProduct extends AuditableEntity {
   @ManyToOne(() => Shipment, (shipment) => shipment.shipment_products)
@@ -10,8 +11,14 @@ export class ShipmentProduct extends AuditableEntity {
 
   @Column()
   shipment_id: string;
+
+  @ManyToOne(() => Product, product => product.shipment_products)
+  @JoinColumn({ name: 'product_id' })
+  product: Product;
+
   @Column()
   product_id: string;
+  
   @Column({ nullable: true })
   section_id: string;
   @Column()
@@ -43,7 +50,7 @@ export class ShipmentProduct extends AuditableEntity {
   price: number;
 
   // to check if the product can be asked for return or not
-  @Column({type:"boolean", default:true})
+  @Column({ type: "boolean", default: true })
   can_return: boolean;
 
   @Column({ type: 'simple-array', nullable: true })

@@ -6,6 +6,7 @@ import { ProductSubCategory } from './product-sub-category.entity';
 import { WarehouseOperations } from '../warehouse/warehouse-opreations.entity';
 import { WarehouseProducts } from '../warehouse/warehouse-products.entity';
 import { ProductFavorite } from './product-favorite.entity';
+import { ShipmentProduct } from '../order/shipment-product.entity';
 
 @Entity()
 export class Product extends AuditableEntity {
@@ -27,8 +28,8 @@ export class Product extends AuditableEntity {
   @Column({ default: false })
   is_recovered: boolean;
 
-  @Column({nullable:true})
-  barcode:string
+  @Column({ nullable: true })
+  barcode: string
 
   @OneToMany(() => ProductImage, (productImage) => productImage.product)
   product_images: ProductImage[];
@@ -56,4 +57,10 @@ export class Product extends AuditableEntity {
     (productFavorite) => productFavorite.product,
   )
   products_favorite: ProductFavorite[];
+
+  @OneToMany(
+    () => ShipmentProduct,
+    shipmentProduct => shipmentProduct.product
+  )
+  shipment_products: ShipmentProduct[];
 }
