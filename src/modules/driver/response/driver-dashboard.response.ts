@@ -9,6 +9,8 @@ import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
 export class DriverDashboardResponse {
   @Expose() readonly id: string;
   @Expose() readonly username: string;
+  @Expose() readonly user_id: string;
+
   @Expose() readonly email: string;
   @Expose() readonly phone: string;
   @Transform(({ value }) => toUrl(value))
@@ -27,6 +29,7 @@ export class DriverDashboardResponse {
   constructor(driver: Driver) {
     this.id = driver.id;
     this.username = driver.user.name;
+    this.user_id = driver.user.id;
     this.email = driver.user.email;
     this.phone = driver.user.phone;
     this.avatar =toUrl(driver.user.avatar) ;
