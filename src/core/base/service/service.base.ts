@@ -45,7 +45,6 @@ export abstract class BaseService<T extends BaseEntity> implements IBaseService<
     if (options.where && options.where.length) query = { ...query, where: options.where };
     if (options.order) query = { ...query, order: options.order };
     if (options.select) query = { ...query, select: options.select };
-    
     return await this._repo.find(query);
   }
 

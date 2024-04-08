@@ -274,7 +274,7 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
         });
       }
     }
-    
+
     // if the return order is accepted, we need to update the warehouse products
     await this.warehouseOperationTransaction.run({
       products: mappedImportedProducts,
@@ -313,6 +313,14 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
 
   async getReturnOrders(query: PaginatedRequest) {
     query.filters ??= [];
+
+    if (
+      query.filters !== null
+      && typeof query.filters === 'string'
+    ) {
+      query.filters = [query.filters];
+    }
+
     if (this.currentUser.roles.includes(Role.CLIENT)) {
       query.filters.push(`order.user_id=${this.currentUser.id}`);
     } else if (this.currentUser.roles.includes(Role.DRIVER)) {
