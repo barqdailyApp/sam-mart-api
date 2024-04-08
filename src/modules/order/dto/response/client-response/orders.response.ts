@@ -9,6 +9,7 @@ export class OrdersResponse {
   @Expose() order_id: string;
   @Expose() order_number: string;
   @Expose()  delivery_type: DeliveryType;
+  @Expose() delivery_fee: number;
   @Expose() delivery_day: string;
   @Expose() slot: any;
   @Expose() estimated_delivery_time: Date;
@@ -24,6 +25,7 @@ export class OrdersResponse {
     this.delivery_type = order.delivery_type;
     this.estimated_delivery_time = order.estimated_delivery_time;
     this.delivery_day = order.delivery_day;
+    this.delivery_fee = order.delivery_fee;
     this.slot = order.slot
       ? {
           id: order.slot_id,
