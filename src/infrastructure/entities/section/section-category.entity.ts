@@ -3,10 +3,11 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany, Unique } from "typeor
 import { Section } from "./section.entity";
 import { Category } from "../category/category.entity";
 import { CategorySubCategory } from "../category/category-subcategory.entity";
+import { AuditableEntity } from "src/infrastructure/base/auditable.entity";
 
 @Entity()
 // @Unique(["section_id", "order_by"])
-export class SectionCategory extends BaseEntity{
+export class SectionCategory extends AuditableEntity{
 
 @ManyToOne(() => Section, section => section.section_categories,{onDelete:"CASCADE"})
 @JoinColumn({ name: 'section_id' })

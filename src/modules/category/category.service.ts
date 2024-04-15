@@ -242,6 +242,8 @@ export class CategoryService extends BaseService<Category> {
         },
         order: {
           order_by: 'ASC',
+          updated_at:'ASC'
+        
         },
       });
 

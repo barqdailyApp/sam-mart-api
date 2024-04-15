@@ -245,6 +245,7 @@ export class SectionService extends BaseService<Section> {
         },
         order: {
           order_by: 'ASC',
+          updated_at :'ASC'
         },
       });
 

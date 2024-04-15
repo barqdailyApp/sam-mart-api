@@ -13,10 +13,11 @@ import { BaseEntity } from 'src/infrastructure/base/base.entity';
 import { SectionCategory } from '../section/section-category.entity';
 import { MostHitSubcategory } from './most-hit-subcategory.entity';
 import { ProductSubCategory } from '../product/product-sub-category.entity';
+import { AuditableEntity } from 'src/infrastructure/base/auditable.entity';
 
 @Entity()
 // @Unique(["section_category_id", "order_by"])
-export class CategorySubCategory extends BaseEntity {
+export class CategorySubCategory extends AuditableEntity {
   @ManyToOne(
     () => SectionCategory,
     (SectionCategory) => SectionCategory.category_subCategory,
