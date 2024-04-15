@@ -32,6 +32,8 @@ export class ProductsOffersDashboardNewResponse {
   @Expose() mix_order_quantity: number;
 
   @Expose() product_id: string;
+  @Expose() product_barcode: string;
+
   @Expose() name_ar: string;
   @Expose() name_en: string;
   @Expose() product_logo: string;
@@ -65,6 +67,7 @@ export class ProductsOffersDashboardNewResponse {
     this.product_category_price_id = product_offer.product_category_price_id;
 
     this.product_id = product.id;
+    this.product_barcode = product.barcode;
     this.name_ar = product.name_ar;
     this.name_en = product.name_en;
 
