@@ -91,6 +91,8 @@ export class OrderSingleDashboardResponse {
             id: shipment_product.id,
             shipment_id: shipment_product.shipment_id,
             product_id: shipment_product.product_id,
+            barcode:  shipment_product.product_category_price.product_sub_category
+            .product.barcode,
             quantity: shipment_product.quantity,
             price: shipment_product.price,
             product_name_ar:
