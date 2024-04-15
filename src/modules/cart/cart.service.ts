@@ -167,15 +167,7 @@ export class CartService extends BaseService<CartProduct> {
       throw new BadRequestException('message.warehouse_product_not_enough');
     }
 
-    if (additions.length > 0) {
-      const additional_cost = calculateSum(
-        product_price.product_additional_services.map((e) => {
-          return Number(e.price);
-        }),
-      );
-      product_price.price =
-        Number(product_price.price) + Number(additional_cost);
-    }
+
     const cart_product = await this.cartProductRepository.findOne({
       where: {
         cart_id: cart.id,
@@ -198,6 +190,17 @@ export class CartService extends BaseService<CartProduct> {
       product_price.max_order_quantity =
         product_price.product_offer.max_offer_quantity;
       product_price.price = product_price.product_offer.price;
+    }
+    if (additions.length > 0) {
+    
+      const additional_cost = calculateSum(
+        product_price.product_additional_services.map((e) => {
+          return Number(e.price);
+        }),
+      );
+      product_price.price =
+        Number(product_price.price) + Number(additional_cost);
+       
     }
 
     return this.cartProductRepository.save(
