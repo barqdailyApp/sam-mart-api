@@ -1,4 +1,4 @@
-import { Exclude, Expose, Transform, plainToClass } from 'class-transformer';
+import { Exclude, Expose, Transform, Type, plainToClass } from 'class-transformer';
 import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
 import { PaymentMethodEnum } from 'src/infrastructure/data/enums/payment-method';
 import { User } from 'src/infrastructure/entities/user/user.entity';
@@ -13,9 +13,7 @@ import { ShipmentResponse } from './shipment.response';
 export class OrderResponse {
   @Expose() readonly id: string;
 
-  @Transform(({ value }) => plainToClass(UserResponse, value))
-  @Expose()
-  readonly user: UserResponse;
+  @Expose() @Type(() => UserResponse) readonly user: UserResponse;
 
   @Transform(({ value }) => plainToClass(WarehouseResponse, value))
   @Expose()
@@ -57,7 +55,7 @@ export class OrderResponse {
   @Expose() readonly delivery_day: string;
 
   @Expose() readonly number: string;
-  
+
   @Expose() readonly delivery_fee: number;
 
 }

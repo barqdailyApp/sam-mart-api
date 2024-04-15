@@ -10,8 +10,9 @@ export class GetReturnOrderResponse {
     @Expose() admin_note: string;
     @Expose() customer_note: string;
     @Expose() @Type(() => OrderResponse) order: OrderResponse;
-    @Expose() order_id: string;
     @Expose() @Type(() => ReturnOrderProductResponse) returnOrderProducts: ReturnOrderProductResponse[];
     @Expose() @Type(() => DriverClientResponse) driver: DriverClientResponse;
-    @Expose() driver_id: string;
+    @Expose() request_accepted_at: Date;
+    @Expose() created_at: Date;
+    @Expose() updated_at: Date;
 }
