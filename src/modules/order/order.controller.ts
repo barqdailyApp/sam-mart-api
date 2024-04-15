@@ -235,11 +235,10 @@ export class OrderController {
   ): Promise<PaginatedResponse<GetReturnOrderResponse[]>> {
     const returnOrders = await this.returnOrderService.getReturnOrders(query);
     const total = await this.returnOrderService.count(query);
-    // console.log(JSON.stringify(returnOrders, null, 2));
+
     let result = plainToInstance(GetReturnOrderResponse, returnOrders, {
-      // excludeExtraneousValues: true
+      excludeExtraneousValues: true
     });
-    console.log(JSON.stringify(result, null, 2));
     result = this._i18nResponse.entity(result);
 
     return new PaginatedResponse<GetReturnOrderResponse[]>(result, {
