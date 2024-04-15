@@ -36,9 +36,13 @@ export class TransactionService extends BaseUserService<Transaction> {
   }
 
   async getWallet(user_id: string) {
-    const wallet = await this.walletRepository.findOneBy({
-      user_id:user_id?user_id: this.currentUser.id,
-    });
+    const wallet = await this.walletRepository.findOne({
+      where:{
+      user_id:user_id?user_id: this.currentUser.id,},
+    relations:{user:true},
+    select:{user:{name:true,email:true,id:true}}  
+    },
+  );
     return wallet;
   }
 }
