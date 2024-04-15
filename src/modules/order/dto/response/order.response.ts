@@ -34,7 +34,7 @@ export class OrderResponse {
   readonly shipments: ShipmentResponse[];
 
   @Transform(({ obj }) => {
-    return obj.shipments.reduce(
+    return obj.shipments?.reduce(
       (acc, shipment) => acc + shipment.shipment_products.length,
       0,
     );

@@ -1,4 +1,4 @@
-import { Exclude, Expose, Transform, plainToClass } from 'class-transformer';
+import { Exclude, Expose, Transform, Type, plainToClass } from 'class-transformer';
 import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
 import { PaymentMethodEnum } from 'src/infrastructure/data/enums/payment-method';
 import { ShipmentStatusEnum } from 'src/infrastructure/data/enums/shipment_status.enum';
@@ -19,11 +19,12 @@ export class ShipmentProductResponse {
   @Expose() readonly id: string;
 
   @Expose() readonly product_id: string;
+  @Expose() @Type(() => ProductResponse) product: ProductResponse;
 
   @Transform(({ obj }) =>
     plainToClass(
       ProductImagesResponse,
-      obj.product_category_price.product_sub_category.product.product_images.find(
+      obj.product_category_price?.product_sub_category.product.product_images.find(
         (image) => image.is_logo === true,
       ),
     ),
@@ -34,7 +35,7 @@ export class ShipmentProductResponse {
   @Transform(({ obj }) =>
     plainToClass(
       ProductImagesResponse,
-      obj.product_category_price.product_sub_category.product.name_ar,
+      obj.product_category_price?.product_sub_category.product.name_ar,
     ),
   )
   @Expose()
@@ -43,7 +44,7 @@ export class ShipmentProductResponse {
   @Transform(({ obj }) =>
     plainToClass(
       ProductImagesResponse,
-      obj.product_category_price.product_sub_category.product.name_en,
+      obj.product_category_price?.product_sub_category?.product.name_en,
     ),
   )
   @Expose()
@@ -52,7 +53,7 @@ export class ShipmentProductResponse {
   @Transform(({ obj }) =>
     plainToClass(
       ProductImagesResponse,
-      obj.product_category_price.product_sub_category.product.description_ar,
+      obj.product_category_price?.product_sub_category?.product.description_ar,
     ),
   )
   @Expose()
@@ -61,7 +62,7 @@ export class ShipmentProductResponse {
   @Transform(({ obj }) =>
     plainToClass(
       ProductImagesResponse,
-      obj.product_category_price.product_sub_category.product.description_en,
+      obj.product_category_price?.product_sub_category?.product.description_en,
     ),
   )
   @Expose()
@@ -73,7 +74,7 @@ export class ShipmentProductResponse {
   @Transform(({ obj }) =>
     plainToClass(
       MeasurementUnitResponse,
-      obj.product_category_price.product_measurement.measurement_unit,
+      obj.product_category_price?.product_measurement?.measurement_unit,
     ),
   )
   @Expose()

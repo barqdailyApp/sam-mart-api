@@ -38,7 +38,7 @@ export class ProductResponse {
     if (!Array.isArray(obj.warehouses_products)) {
       return 0;
     }
-    return obj.warehouses_products.reduce((acc, cur) => acc + cur.quantity, 0);
+    return obj.warehouses_products?.reduce((acc, cur) => acc + cur.quantity, 0);
   })
   totalQuantity: number ;
 
@@ -47,12 +47,12 @@ export class ProductResponse {
     if (!Array.isArray(obj.products_favorite)) {
       return false;
     }
-    for (let i = 0; i < obj.products_favorite.length; i++) {
-      for (let j = 0; j < obj.product_sub_categories.length; j++) {
+    for (let i = 0; i < obj.products_favorite?.length; i++) {
+      for (let j = 0; j < obj.product_sub_categories?.length; j++) {
         if (
-          obj.products_favorite[i].section_id ===
-          obj.product_sub_categories[j].category_subCategory.section_category
-            .section_id
+          obj.products_favorite[i]?.section_id ===
+          obj.product_sub_categories[j]?.category_subCategory?.section_category
+            ?.section_id
         ) {
           return true;
         }
