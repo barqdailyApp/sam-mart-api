@@ -17,7 +17,7 @@ import { ApiTags, ApiHeader, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
 import { RolesGuard } from '../authentication/guards/roles.guard';
 import { OrderClientQuery } from './filter/order-client.query';
-import { plainToClass } from 'class-transformer';
+import { plainToClass, plainToInstance } from 'class-transformer';
 import { OrderResponse } from './dto/response/order.response';
 import { PageMetaDto } from 'src/core/helpers/pagination/page-meta.dto';
 import { PageDto } from 'src/core/helpers/pagination/page.dto';
@@ -45,6 +45,7 @@ import { ReturnOrderResponse } from 'src/integration/gateways/dto/response/retur
 import { ReturnOrder } from 'src/infrastructure/entities/order/return-order/return-order.entity';
 import { AddReturnOrderReason } from './dto/request/add-return-order-reason.request';
 import { ShipmentDashboardResponse } from './dto/response/dashboard-response/shipment-dashboard.response';
+import { GetReturnOrderResponse } from './dto/response/return-order/get-return-order.response';
 
 @ApiTags('Order')
 @ApiHeader({
@@ -134,7 +135,7 @@ export class OrderController {
   async getDashboardOrdersTotal() {
     const ordersTotal = await this.orderService.getTotalDashboardOrders();
 
-    
+
 
     return new ActionResponse(ordersTotal);
   }
@@ -231,10 +232,16 @@ export class OrderController {
   @Get("/return-orders")
   async getReturnOrder(
     @Query() query: PaginatedRequest
-  ): Promise<PaginatedResponse<ReturnOrder[]>> {
+  ): Promise<PaginatedResponse<GetReturnOrderResponse[]>> {
     const returnOrders = await this.returnOrderService.getReturnOrders(query);
     const total = await this.returnOrderService.count(query);
-    return new PaginatedResponse<ReturnOrder[]>(returnOrders, {
+
+    let result = plainToInstance(GetReturnOrderResponse, returnOrders, {
+      excludeExtraneousValues: true
+    });
+    result = this._i18nResponse.entity(result);
+
+    return new PaginatedResponse<GetReturnOrderResponse[]>(result, {
       meta: { total, ...query },
     })
   }

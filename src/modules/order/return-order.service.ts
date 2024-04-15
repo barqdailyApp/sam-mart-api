@@ -253,6 +253,9 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
 
     returnOrder.status = status;
     returnOrder.admin_note = admin_note;
+    if (returnOrder.status === ReturnOrderStatus.ACCEPTED) {
+      returnOrder.request_accepted_at = new Date();
+    }
 
     const savedReturnOrder = await this.returnOrderRepository.save(returnOrder);
 

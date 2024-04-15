@@ -176,20 +176,31 @@ export class PaginatedRequest {
 
     // convert includes to relations
     this.includes.forEach((include) => {
-      relations = { ...relations, ...this.handleSubRelations(include) };
+      relations = { ...relations, ...this.handleSubRelations(include, relations) };
     });
 
     return relations;
   }
 
   // handle sub relations with level limit of x
-  private handleSubRelations(include: string): IncludesFilter {
+  private handleSubRelations(include: string, relations: IncludesFilter = {}): IncludesFilter {
     const subRelations = include.split('.');
     if (subRelations.length > 1) {
       const subRelation = subRelations.shift();
-      return { [subRelation]: this.handleSubRelations(subRelations.join('.')) };
+      const existingRelation = relations[subRelation];
+      let subRelationValue: IncludesFilter;
+
+      if (typeof existingRelation === 'object' && existingRelation !== null) {
+        // Merge the current subrelation with the existing relations
+        subRelationValue = this.handleSubRelations(subRelations.join('.'), existingRelation);
+      } else {
+        // Create a new subrelation
+        subRelationValue = this.handleSubRelations(subRelations.join('.'));
+      }
+
+      return { ...relations, [subRelation]: subRelationValue };
     } else {
-      return { [include]: true };
+      return { ...relations, [include]: true };
     }
   }
 
