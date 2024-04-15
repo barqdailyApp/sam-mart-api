@@ -16,6 +16,7 @@
     "there_must_be_a_primary_unit": "يجب أن يكون وحدة رئيسية",
     "measurement_Unit_not_found": "وحدة القياس غير موجودة",
     "product_measurement_not_found": "وحدة القياس للمنتج غير موجودة",
+    "invalid_location": "الموقع الذي اخترته خارج نطاق خدمتنا حالياً",
     "region_not_found": "المنطقة غير موجودة",
     "warehouse_product_not_enough": "الكمية غير متوفرة",
     "employee_not_found": "الموظف غير موجود",

@@ -14,6 +14,7 @@
     "product_not_found": "Product not found",
     "product_image_not_found": "Product image not found",
     "there_must_be_a_primary_unit": "there must be a primary unit",
+    "invalid_location": "You selected uncovered location by our services at this time",
     "measurement_Unit_not_found": "Measurement Unit not found",
     "product_measurement_not_found": "Product measurement not found",
     "region_not_found": "Region not found",
