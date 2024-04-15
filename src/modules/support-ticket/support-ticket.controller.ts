@@ -4,6 +4,7 @@ import {
     Controller,
     Delete,
     Get,
+    Inject,
     Param,
     Patch,
     Post,
@@ -33,6 +34,7 @@ import { Roles } from '../authentication/guards/roles.decorator';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { GetCommentQueryRequest } from './dto/request/get-comment-query.request';
 import { query } from 'express';
+import { I18nResponse } from 'src/core/helpers/i18n.helper';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -46,7 +48,8 @@ import { query } from 'express';
 export class SupportTicketController {
     constructor(
         private readonly supportTicketService: SupportTicketService,
-        private readonly ticketCommentService: TicketCommentService
+        private readonly ticketCommentService: TicketCommentService,
+        @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
     ) { }
 
     @Post()
@@ -67,9 +70,12 @@ export class SupportTicketController {
     @Get()
     async getTickets(@Query() query: PaginatedRequest): Promise<ActionResponse<SupportTicketResponse[]>> {
         const tickets = await this.supportTicketService.getTickets(query);
-        const result = plainToInstance(SupportTicketResponse, tickets, {
+        
+        let result = plainToInstance(SupportTicketResponse, tickets, {
             excludeExtraneousValues: true,
         });
+        result = this._i18nResponse.entity(result)
+
         return new ActionResponse<SupportTicketResponse[]>(result);
     }
 
