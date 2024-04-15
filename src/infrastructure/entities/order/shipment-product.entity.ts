@@ -4,6 +4,8 @@ import { AuditableEntity } from 'src/infrastructure/base/auditable.entity';
 import { Shipment } from './shipment.entity';
 import { ReturnOrderProduct } from './return-order/return-order-product.entity';
 import { Product } from '../product/product.entity';
+import { ProductMeasurement } from '../product/product-measurement.entity';
+import { MeasurementUnit } from '../product/measurement-unit.entity';
 @Entity()
 export class ShipmentProduct extends AuditableEntity {
   @ManyToOne(() => Shipment, (shipment) => shipment.shipment_products)
@@ -18,11 +20,15 @@ export class ShipmentProduct extends AuditableEntity {
 
   @Column()
   product_id: string;
-  
+
   @Column({ nullable: true })
   section_id: string;
   @Column()
   quantity: number;
+
+  @ManyToOne(() => MeasurementUnit, (measurementUnit) => measurementUnit.shipment_products)
+  @JoinColumn({ name: 'main_measurement_id' })
+  main_measurement_unit: MeasurementUnit;
 
   @Column()
   main_measurement_id: string;

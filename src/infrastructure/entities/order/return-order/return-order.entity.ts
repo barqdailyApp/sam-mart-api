@@ -44,8 +44,11 @@ export class ReturnOrder extends AuditableEntity {
     @Column({ nullable: true })
     driver_id: string;
 
-    @Column({ nullable: false, unique: true})
+    @Column({ nullable: false, unique: true })
     return_number: string;
+
+    @Column({ nullable: true })
+    request_accepted_at: Date;
 
     @BeforeInsert()
     async generateReturnNumber() {
