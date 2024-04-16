@@ -89,6 +89,7 @@ export class ShipmentSingleResponse {
           id: shipment_product.id,
           shipment_id: shipment_product.shipment_id,
           product_id: shipment_product.product_id,
+          can_return:shipment_product.can_return,
           product_name_ar:
             shipment_product.product_category_price.product_sub_category.product
               .name_ar,
