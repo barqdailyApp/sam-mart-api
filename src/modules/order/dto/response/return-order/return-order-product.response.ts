@@ -36,7 +36,7 @@ export class ReturnOrderProductResponse {
         ),
     )
     @Expose()
-    readonly main_measurement_unit_en: MeasurementUnitResponse;
+    readonly main_measurement_unit: MeasurementUnitResponse;
 
     @Expose() @Type(() => ReasonResponse) returnProductReason: ReasonResponse;
 
