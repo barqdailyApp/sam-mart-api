@@ -249,7 +249,7 @@ export class SectionService extends BaseService<Section> {
         },
       });
 
-      let order = 1;
+      let order = 0;
       for (const item of itemsToUpdate) {
         item.order_by = order++;
       }

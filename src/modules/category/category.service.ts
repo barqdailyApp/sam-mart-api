@@ -247,7 +247,7 @@ export class CategoryService extends BaseService<Category> {
         },
       });
 
-      let order = 1;
+      let order = 0;
       for (const item of itemsToUpdate) {
         item.order_by = order++;
       }
