@@ -9,6 +9,7 @@
     "register_failed": "Register failed",
     "additional_service_unit_not_found": "Additional service unit not found",
     "city_not_found": "City not found",
+    "discount_value_must_be_less_than_product_price":"Discount value must be less than product price",
     "country_not_found": "Country not found",
     "driver_not_found": "Driver not found",
     "product_not_found": "Product not found",
