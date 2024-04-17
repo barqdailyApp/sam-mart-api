@@ -26,6 +26,7 @@ import { validate } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { I18nResponse } from 'src/core/helpers/i18n.helper';
 import { or } from 'sequelize';
+import { fa } from '@faker-js/faker';
 
 @Injectable()
 export class SectionService extends BaseService<Section> {
@@ -144,7 +145,7 @@ export class SectionService extends BaseService<Section> {
     const result = await this.section_category_repo.save({
       ...req,
     });
-    await this.orderItems(req.section_id);
+    await this.orderItems(req.section_id,true);
     return result;
   }
 
@@ -156,7 +157,7 @@ export class SectionService extends BaseService<Section> {
       throw new BadRequestException('category not found');
     }
     const result = await this.section_category_repo.update(req.id, req);
-    await this.orderItems(section_category.section_id);
+    await this.orderItems(section_category.section_id,section_category.order_by>req.order_by?false:true);
     return result;
   }
 
@@ -167,7 +168,7 @@ export class SectionService extends BaseService<Section> {
     if (!section_category) {
       throw new BadRequestException('category not found');
     }
-    this.orderItems(section_category.section_id);
+    this.orderItems(section_category.section_id,true);
     return await this.section_category_repo.softDelete(id);
   }
 
@@ -237,7 +238,7 @@ export class SectionService extends BaseService<Section> {
     await Promise.all(newSections);
   }
 
-  async orderItems(section_id: string) {
+  async orderItems(section_id: string,asc:boolean ) {
     try {
       const itemsToUpdate = await this.section_category_repo.find({
         where: {
@@ -245,11 +246,11 @@ export class SectionService extends BaseService<Section> {
         },
         order: {
           order_by: 'ASC',
-          updated_at :'ASC'
+          updated_at :asc?'ASC':'DESC'
         },
       });
 
-      let order = 0;
+      let order = 1;
       for (const item of itemsToUpdate) {
         item.order_by = order++;
       }
