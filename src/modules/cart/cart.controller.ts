@@ -21,6 +21,7 @@ import { I18nResponse } from 'src/core/helpers/i18n.helper';
 import { ActionResponse } from 'src/core/base/responses/action.response';
 import { UpdateCartProductRequest } from './dto/requests/update-cart-request';
 import { AddRemoveCartProductServiceRequest } from './dto/requests/add-remove-service-request';
+import { Warehouse } from 'src/infrastructure/entities/warehouse/warehouse.entity';
 
 @ApiTags('Cart')
 @ApiHeader({
@@ -48,11 +49,12 @@ export class CartController {
       cart_products.map(
         (e) =>
           new CartProductRespone({
-            id: e.id,
-            additional_services: e.additions,
-            price: e.price,
-            quantity: e.quantity,
-            product: e.product_category_price,
+            id: e.cart.id,
+            additional_services: e.cart.additions,
+            price: e.cart.price,
+            quantity: e.cart.quantity,
+            product: e.cart.product_category_price,
+            warehouse_quantity: e.warehouses_product
           }),
       ),
     );
@@ -60,18 +62,20 @@ export class CartController {
 
   @Post('/add')
   async createCart(@Body() req: AddToCartRequest) {
-    const cart_product = await this.cartService.addToCart(req);
+    const cart_product = (await this.cartService.addToCart(req));
+   
     if (!cart_product) throw new BadRequestException();
     const result = this._i18nResponse.entity(
       await this.cartService.getSingleCartProduct(cart_product.id),
     );
 
     const response = new CartProductRespone({
-      id: result.id,
-      additional_services: result.additions,
-      price: result.price,
-      quantity: result.quantity,
-      product: result.product_category_price,
+      id: result.cart.id,
+      additional_services: result.cart.additions,
+      price: result.cart.price,
+      quantity: result.cart.quantity,
+      product: result.cart.product_category_price,
+      warehouse_quantity: result.warehouse_quantity
     });
 
     return new ActionResponse(response);
@@ -89,11 +93,12 @@ export class CartController {
     return new ActionResponse(
       this._i18nResponse.entity(
         new CartProductRespone({
-          id: get_cart_product.id,
-          additional_services: get_cart_product.additions,
-          price: get_cart_product.price,
-          quantity: get_cart_product.quantity,
-          product: get_cart_product.product_category_price,
+          id: get_cart_product.cart.id,
+          additional_services: get_cart_product.cart.additions,
+          price: get_cart_product.cart.price,
+          quantity: get_cart_product.cart.quantity,
+          product: get_cart_product.cart.product_category_price,
+          Warehouse_quantity: get_cart_product.warehouse_quantity
         }),
       ),
     );
@@ -107,11 +112,12 @@ export class CartController {
     );
 
     const response = new CartProductRespone({
-      id: result.id,
-      additional_services: result.additions,
-      price: result.price,
-      quantity: result.quantity,
-      product: result.product_category_price,
+      id: result.cart.id,
+      additional_services: result.cart.additions,
+      price: result.cart.price,
+      quantity: result.cart.quantity,
+      product: result.cart.product_category_price,
+      warehouse_quantity: result.warehouse_quantity
     });
     return new ActionResponse(response);
   }
@@ -124,11 +130,12 @@ export class CartController {
     );
 
     const response = new CartProductRespone({
-      id: result.id,
-      additional_services: result.additions,
-      price: result.price,
-      quantity: result.quantity,
-      product: result.product_category_price,
+      id: result.cart.id,
+      additional_services: result.cart.additions,
+      price: result.cart.price,
+      quantity: result.cart.quantity,
+      product: result.cart.product_category_price,
+      warehouse_quantity: result.warehouse_quantity
     });
 
     return new ActionResponse(response);
