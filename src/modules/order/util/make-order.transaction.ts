@@ -148,7 +148,7 @@ export class MakeOrderTransaction extends BaseTransaction<
             await context.save(product_offer);
           }
 
-          return new ShipmentProduct({ shipment_id: shipment.id, ...e });
+          return new ShipmentProduct({ shipment_id: shipment.id, ...e,created_at:new Date()});
         }),
       );
       await context.save(shipment_products);

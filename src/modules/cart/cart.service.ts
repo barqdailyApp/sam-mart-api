@@ -231,9 +231,8 @@ export class CartService extends BaseService<CartProduct> {
         price: product_price.price,
         conversion_factor: product_price.product_measurement.conversion_factor,
         main_measurement_id:
-          product_price.product_measurement.is_main_unit == true
-            ? product_price.product_measurement.measurement_unit_id
-            : product_price.product_measurement.base_unit_id,
+         product_price.product_measurement.measurement_unit_id
+           
       }),
     );
   }
