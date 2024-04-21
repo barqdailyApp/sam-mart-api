@@ -7,10 +7,11 @@ import { Order } from 'src/infrastructure/entities/order/order.entity';
 @Exclude()
 export class OrderSingleResponse {
   @Expose() order_id: string;
-
+  @Expose() created_at: Date;
   @Expose() order_number: string;
 
   @Expose() total_price: number;
+  @Expose() delivery_fee: number;
 
   @Expose() order_products: number;
 
@@ -19,7 +20,8 @@ export class OrderSingleResponse {
 
   constructor(order: Order) {
     this.order_id = order.id;
-
+this.created_at = order.created_at;
+    this.delivery_fee = order.delivery_fee;
     this.order_number = order.number;
     this.order_products = order.shipments[0].shipment_products.length;
     this.total_price = order.total_price;
@@ -67,7 +69,7 @@ export class OrderSingleResponse {
             id: shipment_product.id,
             shipment_id: shipment_product.shipment_id,
             product_id: shipment_product.product_id,
-            can_return:shipment_product.can_return,
+            can_return: shipment_product.can_return,
 
             product_category_price_id:
               shipment_product.product_category_price.id,

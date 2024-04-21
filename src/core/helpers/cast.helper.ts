@@ -14,6 +14,20 @@ export function toString(value: any): string {
 export function toLowerCase(value: string): string {
     return value.toLowerCase() || '';
 }
+export function reverseSentence(sentence) {
+    // Split the sentence into an array of words
+    const words = sentence.split(' ');
+  
+    // Reverse the array of words
+    const reversedWords = words.reverse();
+  
+    // Join the reversed words back into a single sentence
+    const reversedSentence = reversedWords.join(' ');
+  
+    // Return the reversed sentence
+    return reversedSentence;
+  }
+  
 
 export function calculateSum(numbers: number[]): number {
     return numbers.reduce((sum, num) => sum + num, 0);

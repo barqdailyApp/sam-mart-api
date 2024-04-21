@@ -58,6 +58,7 @@
     "npm-check-updates": "^16.7.4",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.1",
+    "pdfkit-table": "^0.1.99",
     "pluralize": "^8.0.0",
     "reflect-metadata": "0.1.13",
     "rxjs": "7.8.0",

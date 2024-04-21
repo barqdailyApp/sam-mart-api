@@ -33,7 +33,12 @@ import { ReturnProductReason } from 'src/infrastructure/entities/order/return-or
 import { UpdateReturnOrderStatusRequest } from './dto/request/update-return-order-statu.request';
 import { OrderGateway } from 'src/integration/gateways/order.gateway';
 import { Cart } from 'src/infrastructure/entities/cart/cart.entity';
-
+import * as fs from 'fs';
+import { OrderSingleResponse } from './dto/response/client-response/order-single.response';
+import { features } from 'process';
+import { reverseSentence } from 'src/core/helpers/cast.helper';
+const PdfDocumnet = require('pdfkit-table');
+import { Response } from 'express';
 @Injectable()
 export class OrderService extends BaseUserService<Order> {
   constructor(
@@ -288,6 +293,149 @@ export class OrderService extends BaseUserService<Order> {
       ordersDelivered,
       ordersCanceled,
     };
+  }
+
+  async generateInvoice(id: string,res:Response) {
+    const order_details = new OrderSingleResponse(
+      await this.getSingleOrder(id),
+    );
+    const doc = new PdfDocumnet({
+      size: [300, 620.29],
+      layout: 'portrait',
+      margins: { top: 15, bottom: 15, left: 15, right: 15 },
+      bufferPages: true,
+    });
+    
+    const products_table = order_details.shipments.shipment_products.map(
+      (item) => {
+        return [
+          item.total_price  , 
+          reverseSentence(item.product_name_ar),
+          item.product_price,
+          reverseSentence(item.measurement_unit_ar),
+          item.quantity,
+        ];
+      },
+    );
+    products_table.push([
+      order_details.delivery_fee,
+      '',
+      '',
+      '',
+      'التوصيل سعر',
+    ]);
+    products_table.push([Number(order_details.total_price)+Number(order_details.delivery_fee), '', '', '', 'الاجمالى']);
+    const customFont = fs.readFileSync(`public/assets/fonts/Amiri-Regular.ttf`);
+    doc.registerFont(`Amiri-Regular`, customFont);
+    doc.fontSize(15);
+    doc.font(`Amiri-Regular`).fillColor('black');
+    doc.image('public/assets/images/logo.jpeg', { width: 70, height: 70 });
+    doc.fontSize(20);
+    doc.text('برق ديلى', { features: ['rtla'], align: 'right' })    .fontSize(10);
+
+    doc
+    .text(reverseSentence('تاريخ الطلب: ' + reverseSentence( order_details.created_at.toLocaleString())), {
+      align: 'right',
+      
+     
+    })
+    .fontSize(10);
+
+    doc
+      .text(reverseSentence('رقم الطلب: ' +  order_details.order_number)  , {
+        align: 'right',
+       
+      })
+    
+
+
+      doc.moveDown();
+    const centerX = doc.page.width / 2;
+
+    // Move to the starting position of the divider line (center position)
+    doc.moveTo(centerX - 250, doc.y).lineTo(centerX + 250, doc.y);
+
+    // Set the stroke color to black
+    doc.strokeColor('black');
+
+    // Draw the divider line with black color
+    doc.stroke();
+
+    // Add content to the PDF
+
+    // Write Arabic text
+
+    const table = {
+      headers: [
+        {
+          label: 'الاجمالى',
+
+          align: 'center',
+          headerColor: 'white',
+          font: 'Arial',
+        },
+
+        {
+          label: 'الاسم',
+
+          align: 'center',
+          headerColor: 'white',
+          font: 'Arial',
+        },
+
+        {
+          label: 'السعر',
+          align: 'center',
+          headerColor: 'white',
+          color: 'blue',
+        },
+
+        {
+          label: 'الوحدة',
+          align: 'center',
+          headerColor: 'white',
+        },
+        {
+          label: 'الكمية',
+          align: 'center',
+          headerColor: 'white',
+        },
+      ],
+      rows: [...products_table],
+    };
+
+    await doc.table(table, {
+      prepareHeader: () => doc.fontSize(12),
+      prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
+        doc.font(`Amiri-Regular`).fillColor('black').fontSize(10);
+
+        if (indexRow == table.rows.length - 1 && indexColumn == 4) {
+          const centerX = doc.page.width / 2;
+
+          // Move to the starting position of the divider line (center position)
+          doc.moveTo(centerX - 250, doc.y).lineTo(centerX + 250, doc.y);
+
+          // Set the stroke color to black
+          doc.strokeColor('black');
+
+          // Draw the divider line with black color
+          doc.stroke();
+        }
+      },
+      divider: {
+        horizontal: { opacity: 1, color: 'white' },
+      },
+
+      features: ['rtla'],
+      cellPadding: [0, 10, 0, 10],
+    });
+
+    // Calculate the center position
+    doc.pipe(res);
+
+    // Finalize the PDF
+    doc.end();
+    return order_details;
   }
 
   async getSingleOrderDashboard(order_id: string) {

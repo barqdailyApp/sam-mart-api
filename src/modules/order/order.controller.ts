@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Query,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
@@ -46,6 +47,7 @@ import { ReturnOrder } from 'src/infrastructure/entities/order/return-order/retu
 import { AddReturnOrderReason } from './dto/request/add-return-order-reason.request';
 import { ShipmentDashboardResponse } from './dto/response/dashboard-response/shipment-dashboard.response';
 import { GetReturnOrderResponse } from './dto/response/return-order/get-return-order.response';
+import { Response } from 'express';
 
 @ApiTags('Order')
 @ApiHeader({
@@ -87,6 +89,15 @@ export class OrderController {
     return new ActionResponse(pageDto);
   }
 
+  @Get('invoice/:order_id')
+  async getOrderInvoice(@Param('order_id') order_id: string,@Res() res: Response) {
+    res.setHeader('Content-Type', 'application/pdf');
+   
+    const invoice = await this.orderService.generateInvoice(order_id,res);
+    res.setHeader('Content-Disposition', `attachment; filename=${invoice.order_number}.pdf`);
+
+
+  }
   @Get('single-order/:order_id')
   async getSingleClientOrder(@Param('order_id') order_id: string) {
     const order = await this.orderService.getSingleOrder(order_id);
