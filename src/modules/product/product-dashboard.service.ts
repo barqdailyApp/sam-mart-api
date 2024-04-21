@@ -547,7 +547,7 @@ export class ProductDashboardService {
         'product_measurements.measurement_unit',
         'measurement_unit',
       )
-      .orderBy(productsSort)
+      .orderBy('product.created_at', 'DESC' )
       .skip(skip)
       .take(limit);
     // Add search term condition if provided
@@ -620,7 +620,7 @@ export class ProductDashboardService {
     // Start building the query
     let query = this.productOfferRepository
       .createQueryBuilder('product_offer')
-      .leftJoinAndSelect(
+      .innerJoinAndSelect(
         'product_offer.product_category_price',
         'product_category_prices',
       )
@@ -634,34 +634,34 @@ export class ProductDashboardService {
         'additional_service',
       )
 
-      .leftJoinAndSelect(
+      .innerJoinAndSelect(
         'product_category_prices.product_measurement',
         'product_measurement',
       )
-      .leftJoinAndSelect(
+      .innerJoinAndSelect(
         'product_measurement.measurement_unit',
         'measurement_unit',
       )
 
-      .leftJoinAndSelect(
+      .innerJoinAndSelect(
         'product_category_prices.product_sub_category',
         'product_sub_category',
       )
 
-      .leftJoinAndSelect(
+      .innerJoinAndSelect(
         'product_sub_category.category_subCategory',
         'category_subCategory',
       )
-      .leftJoinAndSelect(
+      .innerJoinAndSelect(
         'category_subCategory.section_category',
         'section_category',
       )
       .leftJoinAndSelect('section_category.section', 'section')
-      .leftJoinAndSelect('product_sub_category.product', 'product')
-      .leftJoinAndSelect('product.warehouses_products', 'warehousesProduct')
-      .leftJoinAndSelect('product.product_measurements', 'product_measurements')
+      .innerJoinAndSelect('product_sub_category.product', 'product')
+      .innerJoinAndSelect('product.warehouses_products', 'warehousesProduct')
+      .innerJoinAndSelect('product.product_measurements', 'product_measurements')
 
-      .leftJoinAndSelect('product.product_images', 'product_images')
+      .innerJoinAndSelect('product.product_images', 'product_images')
 
       .orderBy('product_offer.created_at', 'DESC')  
       .skip(skip)
@@ -772,9 +772,9 @@ export class ProductDashboardService {
     const { category_sub_category_id, product_id } =
       singleProductDashboardQuery;
 
-    const product_check = await this.productSubCategory_repo
-      .createQueryBuilder('productSubCategory')
-      .leftJoinAndSelect('productSubCategory.product', 'product')
+      
+    const product_check = await this.productRepository
+      .createQueryBuilder('product')
       .where('product.id = :product_id OR product.barcode = :product_id', {
         product_id,
       })
