@@ -50,7 +50,7 @@ export class SingleProductsNewResponse {
           ? false
           : true,
       product_logo: toUrl(
-        product.product_images.find((x) => x.is_logo === true).url,
+        product.product_images.find((x) => x.is_logo === true)?.url,
       ),
       product_images: product_images.map((item) => toUrl(item.url)),
     };

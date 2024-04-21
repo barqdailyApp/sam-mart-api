@@ -72,7 +72,7 @@ export class ProductsOffersNewResponse {
     this.product_name_en = product.name_en;
 
     this.product_logo = toUrl(
-      product.product_images.find((x) => x.is_logo === true).url,
+      product.product_images.find((x) => x.is_logo === true)?.url,
     );
     this.product_price_id = product_price.id;
     this.product_price = product_price.price;

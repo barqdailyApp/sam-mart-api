@@ -61,9 +61,11 @@ export class SupportTicketController {
     ): Promise<ActionResponse<SupportTicketResponse>> {
         createTicketRequest.file = file;
         const createdTicket = await this.supportTicketService.createTicket(createTicketRequest);
-        const result = plainToInstance(SupportTicketResponse, createdTicket, {
+        let result = plainToInstance(SupportTicketResponse, createdTicket, {
             excludeExtraneousValues: true,
         });
+
+        result = this._i18nResponse.entity(result);
         return new ActionResponse<SupportTicketResponse>(result);
     }
 

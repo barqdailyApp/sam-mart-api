@@ -34,6 +34,7 @@ import {
   CreateCategoryExcelRequest,
 } from './dto/requests/create-categories-excel-request';
 import { toUrl } from 'src/core/helpers/file.helper';
+import { tr } from '@faker-js/faker';
 
 @Injectable()
 export class CategoryService extends BaseService<Category> {
@@ -132,7 +133,7 @@ export class CategoryService extends BaseService<Category> {
     const result= await this.category_subcategory_repo.save({
       ...req,
     });
-   await this.orderItems(req.section_category_id);
+   await this.orderItems(req.section_category_id,true);
     return result;
    }
 
@@ -144,7 +145,7 @@ export class CategoryService extends BaseService<Category> {
     });
     if (!subcategory) throw new BadRequestException('subcategory not found');
     const result=await this.category_subcategory_repo.update(req.id, req);
-  await  this.orderItems(subcategory.section_category_id);
+  await  this.orderItems(subcategory.section_category_id,subcategory.order_by>req.order_by?false:true);
     return  result;
   }
 
@@ -155,7 +156,7 @@ export class CategoryService extends BaseService<Category> {
       },
     });
     if (!subcategory) throw new BadRequestException('subcategory not found');
-    this.orderItems(subcategory.section_category_id);
+    this.orderItems(subcategory.section_category_id,true);
     return await this.category_subcategory_repo.softDelete(id);
   }
 
@@ -234,7 +235,7 @@ export class CategoryService extends BaseService<Category> {
     return await this._repo.save(newCategories);
   }
 
-  async orderItems(section_category_id: string) {
+  async orderItems(section_category_id: string,asc:boolean) {
     try {
       const itemsToUpdate = await this.category_subcategory_repo.find({
         where: {
@@ -242,7 +243,7 @@ export class CategoryService extends BaseService<Category> {
         },
         order: {
           order_by: 'ASC',
-          updated_at:'ASC'
+          updated_at:asc?'ASC':'DESC'
         
         },
       });
