@@ -136,6 +136,7 @@ export class ProductDashboardService {
       throw new BadRequestException('message.product_offer_already_exist');
     }
 
+
     const createProductOffer = this.productOffer_repo.create(
       createProductOfferRequest,
     );
@@ -599,7 +600,7 @@ export class ProductDashboardService {
     return { products, total };
   }
 
-  async getAllProductsOffersForDashboard2(
+  async getAllProductsOffersForDashboard(
     productsDashboardQuery: ProductsDashboardQuery,
   ) {
     const {
@@ -613,14 +614,8 @@ export class ProductDashboardService {
     } = productsDashboardQuery;
     const skip = (page - 1) * limit;
 
-    let productsSort = {};
 
-    switch (sort) {
-      case 'new':
-        productsSort = { 'product.created_at': 'DESC' };
-
-        break;
-    }
+ 
 
     // Start building the query
     let query = this.productOfferRepository
@@ -668,14 +663,7 @@ export class ProductDashboardService {
 
       .leftJoinAndSelect('product.product_images', 'product_images')
 
-      // .where(
-      //   'product_offer.offer_quantity > 0 AND product_offer.start_date <= :current_date AND product_offer.end_date >= :current_date',
-      //   {
-      //     current_date: new Date(),
-      //   },
-      // )
-      .orderBy(productsSort)
-
+      .orderBy('product_offer.created_at', 'DESC')  
       .skip(skip)
       .take(limit);
 
