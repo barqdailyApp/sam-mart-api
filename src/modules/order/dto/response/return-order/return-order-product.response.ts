@@ -14,6 +14,8 @@ export class ReturnOrderProductResponse {
     @Expose() @Transform(({ obj }) => obj.shipmentProduct?.product?.name_ar) product_name_ar: string;
     @Expose() @Transform(({ obj }) => obj.shipmentProduct?.product?.description_en) description_en: string;
     @Expose() @Transform(({ obj }) => obj.shipmentProduct?.product?.description_ar) description_ar: string;
+    @Expose() @Transform(({ obj }) => obj.shipmentProduct?.product?.barcode) product_barcode: string;
+
     @Expose() quantity: number;
     @Expose() @Transform(({ obj }) => obj.shipmentProduct?.conversion_factor) conversion_factor: string;
     @Expose() @Transform(({ obj }) => obj.shipmentProduct?.price) price: string;
