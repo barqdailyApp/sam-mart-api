@@ -16,10 +16,10 @@ export class Product extends AuditableEntity {
   @Column()
   name_en: string;
 
-  @Column({ type: 'longtext' })
+  @Column({ type: 'longtext',nullable: true })
   description_ar: string;
 
-  @Column({ type: 'longtext' })
+  @Column({ type: 'longtext', nullable: true })
   description_en: string;
 
   @Column({ default: true })
