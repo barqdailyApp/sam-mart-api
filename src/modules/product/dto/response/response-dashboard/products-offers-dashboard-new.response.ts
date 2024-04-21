@@ -47,6 +47,7 @@ export class ProductsOffersDashboardNewResponse {
   @Expose() measurement_unit_en: string;
 
   constructor(product_offer: ProductOffer) {
+    console.log(product_offer);
     const product_category_price = product_offer.product_category_price;
     const product = product_category_price.product_sub_category.product;
     const product_measurement = product_category_price.product_measurement;
@@ -65,6 +66,7 @@ export class ProductsOffersDashboardNewResponse {
     this.offer_end_date = product_offer.end_date;
     this.offer_quantity = product_offer.offer_quantity;
     this.product_category_price_id = product_offer.product_category_price_id;
+
 
     this.product_id = product.id;
     this.product_barcode = product.barcode;
