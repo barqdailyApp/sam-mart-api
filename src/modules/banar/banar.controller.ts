@@ -28,12 +28,12 @@ import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 })
 @ApiTags('Banar')
 @Controller('banar')
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class BanarController {
     constructor(
         private readonly banarService: BanarService,
     ) { }
 
+    @UseGuards(JwtAuthGuard, RolesGuard)
     @Post()
     @Roles(Role.ADMIN)
     @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('banar'))
@@ -49,11 +49,13 @@ export class BanarController {
         return new ActionResponse<BannerResponse>(result);
     }
 
+    @Roles(Role.ADMIN)
+    @UseGuards(JwtAuthGuard, RolesGuard)
     @Get()
     async getBanars(
         @Query() query: PaginatedRequest
     ): Promise<ActionResponse<BannerResponse[]>> {
-        const banners = await this.banarService.getBanars(query);
+        const banners = await this.banarService.findAll(query);
         const count = await this.banarService.count(query);
         const result = plainToInstance(BannerResponse, banners, { excludeExtraneousValues: true })
         if (Object.keys(query).length) {
@@ -67,6 +69,25 @@ export class BanarController {
         return new ActionResponse<BannerResponse[]>(result);
     }
 
+    @Get("/guest")
+    async getGuestBanars(
+        @Query() query: PaginatedRequest
+    ): Promise<ActionResponse<BannerResponse[]>> {
+        const banners = await this.banarService.getGuestBanars(query);
+        const count = await this.banarService.count(query);
+        const result = plainToInstance(BannerResponse, banners, { excludeExtraneousValues: true })
+        if (Object.keys(query).length) {
+            return new PaginatedResponse<BannerResponse[]>(result, {
+                meta: {
+                    total: count,
+                    ...query
+                }
+            });
+        }
+        return new ActionResponse<BannerResponse[]>(result);
+    }
+
+    @UseGuards(JwtAuthGuard, RolesGuard)
     @Get(":banar_id")
     async getBanar(
         @Param('banar_id') id: string,
@@ -76,6 +97,8 @@ export class BanarController {
         return new ActionResponse<BannerResponse>(result);
     }
 
+
+    @UseGuards(JwtAuthGuard, RolesGuard)
     @Patch(":id")
     @Roles(Role.ADMIN)
     @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('banar'))
@@ -92,6 +115,7 @@ export class BanarController {
         return new ActionResponse<BannerResponse>(result);
     }
 
+    @UseGuards(JwtAuthGuard, RolesGuard)
     @Delete(":id")
     @Roles(Role.ADMIN)
     async deleteBanar(
