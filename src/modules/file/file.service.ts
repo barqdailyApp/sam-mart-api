@@ -114,7 +114,7 @@ export class FileService {
 
     // Add images
     rows.forEach((row, index) => {
-      worksheet.getRow(row).height = 50;
+      row.height = 50;
       const imagePath = row['image'] && row['image']['base64'];
       if (imagePath) {
         const imageId = workbook.addImage({
