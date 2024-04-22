@@ -123,7 +123,7 @@ export class FileService {
         });
 
         worksheet.addImage(imageId, {
-          tl: { col: rows.length, row: index },
+          tl: { col: Object.keys(row).length + 1, row: index + 2 },
           ext: { width: 50, height: 50 },
         });
       }
