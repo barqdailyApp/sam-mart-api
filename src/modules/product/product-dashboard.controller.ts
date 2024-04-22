@@ -215,7 +215,7 @@ export class ProductDashboardController {
     const { limit, page } = productsDashboardQuery;
 
     const { products, total } =
-      await this.productDashboardService.getAllProductsOffersForDashboard2(
+      await this.productDashboardService.getAllProductsOffersForDashboard(
         productsDashboardQuery,
       );
     const productsResponse = products.map((product) => {

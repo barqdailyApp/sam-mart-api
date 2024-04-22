@@ -40,18 +40,14 @@ export class BanarService extends BaseService<Banar> {
         return await this.banarRepository.save(createdBanar);
     }
 
-    async getBanars(query: PaginatedRequest) {
-        if (this.currentUser?.roles.includes(Role.ADMIN)) {
-            return await this.findAll(query);
-        } else {
-            return await this.banarRepository.find({
-                where: {
-                    is_active: true,
-                    started_at: LessThanOrEqual(new Date()),
-                    ended_at: MoreThanOrEqual(new Date())
-                }
-            });
-        }
+    async getGuestBanars(query: PaginatedRequest) {
+        return await this.banarRepository.find({
+            where: {
+                is_active: true,
+                started_at: LessThanOrEqual(new Date()),
+                ended_at: MoreThanOrEqual(new Date())
+            }
+        });
     }
 
     async updateBanar(id: string, banar: UpdateBannerRequest) {

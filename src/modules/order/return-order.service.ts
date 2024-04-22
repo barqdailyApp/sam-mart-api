@@ -234,6 +234,7 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
         where: { id: driver_id },
       });
       if (!driver) throw new BadRequestException("message.driver_not_found");
+      returnOrder.driver_id = driver_id;
     }
 
     // mapped the return order products with the updated status
