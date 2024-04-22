@@ -67,5 +67,7 @@
     "banner_not_found":"Banner not found",
     "there_must_be_at_least_one_photo":"There must be at least one photo",
     "product_has_quantity_in_warehouse":"Product has quantity in warehouse",
-    "logo_cannot_be_deleted":"Logo cannot be deleted"
+    "logo_cannot_be_deleted":"Logo cannot be deleted",
+    "product_has_offers": "Product has offers",
+    "product_has_sub_category": "Product has sub category"
 }
