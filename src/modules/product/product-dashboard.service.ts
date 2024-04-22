@@ -136,7 +136,6 @@ export class ProductDashboardService {
       throw new BadRequestException('message.product_offer_already_exist');
     }
 
-
     const createProductOffer = this.productOffer_repo.create(
       createProductOfferRequest,
     );
@@ -547,7 +546,7 @@ export class ProductDashboardService {
         'product_measurements.measurement_unit',
         'measurement_unit',
       )
-      .orderBy('product.created_at', 'DESC' )
+      .orderBy('product.created_at', 'DESC')
       .skip(skip)
       .take(limit);
     // Add search term condition if provided
@@ -614,9 +613,6 @@ export class ProductDashboardService {
     } = productsDashboardQuery;
     const skip = (page - 1) * limit;
 
-
- 
-
     // Start building the query
     let query = this.productOfferRepository
       .createQueryBuilder('product_offer')
@@ -659,11 +655,14 @@ export class ProductDashboardService {
       .leftJoinAndSelect('section_category.section', 'section')
       .innerJoinAndSelect('product_sub_category.product', 'product')
       .innerJoinAndSelect('product.warehouses_products', 'warehousesProduct')
-      .innerJoinAndSelect('product.product_measurements', 'product_measurements')
+      .innerJoinAndSelect(
+        'product.product_measurements',
+        'product_measurements',
+      )
 
       .innerJoinAndSelect('product.product_images', 'product_images')
 
-      .orderBy('product_offer.created_at', 'DESC')  
+      .orderBy('product_offer.created_at', 'DESC')
       .skip(skip)
       .take(limit);
 
@@ -772,7 +771,6 @@ export class ProductDashboardService {
     const { category_sub_category_id, product_id } =
       singleProductDashboardQuery;
 
-      
     const product_check = await this.productRepository
       .createQueryBuilder('product')
       .where('product.id = :product_id OR product.barcode = :product_id', {
@@ -880,8 +878,6 @@ export class ProductDashboardService {
       },
     );
 
-
-
     return await query.getOne();
   }
 
@@ -900,6 +896,7 @@ export class ProductDashboardService {
           is_main_unit: true,
         },
       });
+    //* check if product in warehouse have quantity
     const product_warehouse = await this.warehouse_products_repo.find({
       where: { product_id },
     });
@@ -911,6 +908,30 @@ export class ProductDashboardService {
         'message.product_has_quantity_in_warehouse',
       );
     }
+    //* check if product has sub category
+    const product_category = await this.productSubCategory_repo.find({
+      where: {
+        product_id,
+      },
+    });
+    if (product_category.length > 0) {
+      throw new BadRequestException('message.product_has_sub_category');
+    }
+
+    //* check if product has offers
+    const product_offers = await this.productOfferRepository.find({
+      where: {
+        product_category_price: {
+          product_sub_category: {
+            product_id,
+          },
+        },
+      },
+    });
+    if (product_offers.length > 0) {
+      throw new BadRequestException('message.product_has_offers');
+    }
+
     return await this.productRepository.softDelete({ id: product_id });
   }
 
@@ -925,10 +946,18 @@ export class ProductDashboardService {
     if (!product) {
       throw new NotFoundException('message.product_not_found');
     }
-    if (product.product_images.length == 1) {
-      throw new NotFoundException('message.there_must_be_at_least_one_photo');
+    const image = await this.productImageRepository.findOne({
+      where: { id: image_id },
+    });
+
+    if (!image) {
+      throw new NotFoundException('message.product_image_not_found');
     }
-    await this.singleProductImage(product_id, image_id);
+
+    if (image.is_logo) {
+      throw new BadRequestException('message.logo_cannot_be_deleted');
+    }
+
     return await this.productImageRepository.delete({ id: image_id });
   }
 
@@ -961,7 +990,7 @@ export class ProductDashboardService {
       relations: {
         product_images: true,
         warehouses_products: true,
-        product_measurements: {measurement_unit: true},
+        product_measurements: { measurement_unit: true },
         product_sub_categories: {
           category_subCategory: {
             section_category: {
@@ -987,16 +1016,15 @@ export class ProductDashboardService {
         // is_active: product.is_active,
         // is_recovered: product.is_recovered,
         product_images: product.product_images.map((image) => ({
-          url:image.url,
+          url: image.url,
           is_logo: image.is_logo,
         })),
         measurement_units_en: product.product_measurements.map(
           (measurement) => measurement.measurement_unit?.name_en,
-        )
-        ,
+        ),
         measurement_units_ar: product.product_measurements.map(
           (measurement) => measurement.measurement_unit?.name_ar,
-        )
+        ),
         // warehousesProducts: product.warehouses_products,
         // productMeasurements: product.product_measurements.map(
         //   (measurement) => ({
@@ -1078,26 +1106,6 @@ export class ProductDashboardService {
     });
 
     return await this.productRepository.save(newProducts);
-  }
-
-  private async singleProductImage(
-    product_id: string,
-    image_id: string,
-  ): Promise<ProductImage> {
-    const product = await this.productRepository.findOne({
-      where: { id: product_id },
-    });
-    if (!product) {
-      throw new NotFoundException('message.product_not_found');
-    }
-
-    const productImage = await this.productImageRepository.findOne({
-      where: { id: image_id },
-    });
-    if (!productImage) {
-      throw new NotFoundException('message.product_image_not_found');
-    }
-    return productImage;
   }
 
   private async SingleProductMeasurement(
