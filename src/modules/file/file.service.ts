@@ -95,7 +95,7 @@ export class FileService {
               base64: imageBase64,
               extension: 'png',
             };
-         delete data['product_images']
+      
             
           } catch (error) {
             console.error(`Error reading image ${imagePath}:`, error);
@@ -123,7 +123,7 @@ export class FileService {
         });
 
         worksheet.addImage(imageId, {
-          tl: { col: Object.keys(row).length + 1, row: index + 2 },
+          tl: { col: Object.keys(row).length + 1, row: index  },
           ext: { width: 50, height: 50 },
         });
       }
