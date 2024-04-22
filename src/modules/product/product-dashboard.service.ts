@@ -989,53 +989,53 @@ export class ProductDashboardService {
     // Create a flat structure for products
     const flattenedProducts = products.map((product) => {
       return {
-        productId: product.id,
-        createdAt: product.created_at,
-        updatedAt: product.updated_at,
+        // productId: product.id,
+        // createdAt: product.created_at,
+        // updatedAt: product.updated_at,
         name_ar: product.name_ar,
         name_en: product.name_en,
         description_ar: product.description_ar,
         description_en: product.description_en,
-        is_active: product.is_active,
-        is_recovered: product.is_recovered,
+        // is_active: product.is_active,
+        // is_recovered: product.is_recovered,
         product_images: product.product_images.map((image) => ({
-          url: toUrl(image.url),
+          url:image.url,
           is_logo: image.is_logo,
         })),
-        warehousesProducts: product.warehouses_products,
-        productMeasurements: product.product_measurements.map(
-          (measurement) => ({
-            measuremen_id: measurement.id,
-            conversion_factor: measurement.conversion_factor,
-            product_id: measurement.product_id,
-            measurement_unit_id: measurement.measurement_unit_id,
-            base_unit_id: measurement.base_unit_id,
-            is_main_unit: measurement.is_main_unit,
-          }),
-        ),
-        productSubCategories: product.product_sub_categories.map(
-          (subCategory) => ({
-            subCategory_id: subCategory.category_subCategory.subcategory.id,
-            subCategory_name_ar:
-              subCategory.category_subCategory.subcategory.name_ar,
-            subCategory_name_en:
-              subCategory.category_subCategory.subcategory.name_en,
-            category_id:
-              subCategory.category_subCategory.section_category.category.id,
-            category_name_ar:
-              subCategory.category_subCategory.section_category.category
-                .name_ar,
-            category_name_en:
-              subCategory.category_subCategory.section_category.category
-                .name_en,
-            section_id:
-              subCategory.category_subCategory.section_category.section.id,
-            section_name_ar:
-              subCategory.category_subCategory.section_category.section.name_ar,
-            section_name_en:
-              subCategory.category_subCategory.section_category.section.name_en,
-          }),
-        ),
+        // warehousesProducts: product.warehouses_products,
+        // productMeasurements: product.product_measurements.map(
+        //   (measurement) => ({
+        //     measuremen_id: measurement.id,
+        //     conversion_factor: measurement.conversion_factor,
+        //     product_id: measurement.product_id,
+        //     measurement_unit_id: measurement.measurement_unit_id,
+        //     base_unit_id: measurement.base_unit_id,
+        //     is_main_unit: measurement.is_main_unit,
+        //   }),
+        // // ),
+        // productSubCategories: product.product_sub_categories.map(
+        //   (subCategory) => ({
+        //     subCategory_id: subCategory.category_subCategory.subcategory.id,
+        //     subCategory_name_ar:
+        //       subCategory.category_subCategory.subcategory.name_ar,
+        //     subCategory_name_en:
+        //       subCategory.category_subCategory.subcategory.name_en,
+        //     category_id:
+        //       subCategory.category_subCategory.section_category.category.id,
+        //     category_name_ar:
+        //       subCategory.category_subCategory.section_category.category
+        //         .name_ar,
+        //     category_name_en:
+        //       subCategory.category_subCategory.section_category.category
+        //         .name_en,
+        //     section_id:
+        //       subCategory.category_subCategory.section_category.section.id,
+        //     section_name_ar:
+        //       subCategory.category_subCategory.section_category.section.name_ar,
+        //     section_name_en:
+        //       subCategory.category_subCategory.section_category.section.name_en,
+        //   }),
+        // ),
       };
     });
 
