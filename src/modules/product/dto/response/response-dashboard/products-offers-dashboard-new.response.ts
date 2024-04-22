@@ -74,7 +74,7 @@ export class ProductsOffersDashboardNewResponse {
     this.name_en = product.name_en;
 
     this.product_logo = toUrl(
-      product.product_images.find((x) => x.is_logo === true).url,
+      product.product_images.find((x) => x.is_logo === true)?.url,
     );
 
     this.product_offer_description_ar = product_offer.description_ar;

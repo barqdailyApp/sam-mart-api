@@ -52,7 +52,7 @@ export class ProductsDashboardNewResponse {
     this.name_en = product.name_en;
     this.barcode = product.barcode;
     this.product_logo = toUrl(
-      product.product_images.find((x) => x.is_logo === true).url,
+      product.product_images.find((x) => x.is_logo === true)?.url,
     );
     this.product_is_active = product.is_active;
     this.product_is_recovered = product.is_recovered;
