@@ -66,5 +66,6 @@
     "driver_has_active_orders":"Driver has active orders",
     "banner_not_found":"Banner not found",
     "there_must_be_at_least_one_photo":"There must be at least one photo",
-    "product_has_quantity_in_warehouse":"Product has quantity in warehouse"
+    "product_has_quantity_in_warehouse":"Product has quantity in warehouse",
+    "logo_cannot_be_deleted":"Logo cannot be deleted"
 }

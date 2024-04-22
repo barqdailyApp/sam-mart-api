@@ -925,10 +925,18 @@ export class ProductDashboardService {
     if (!product) {
       throw new NotFoundException('message.product_not_found');
     }
-    if (product.product_images.length == 1) {
-      throw new NotFoundException('message.there_must_be_at_least_one_photo');
+    const image = await this.productImageRepository.findOne({
+      where: { id: image_id },
+    });
+
+    if (!image) {
+      throw new NotFoundException('message.product_image_not_found');
     }
-    await this.singleProductImage(product_id, image_id);
+
+    if(image.is_logo){
+      throw new BadRequestException('message.logo_cannot_be_deleted');
+    }
+
     return await this.productImageRepository.delete({ id: image_id });
   }
 
@@ -1080,25 +1088,7 @@ export class ProductDashboardService {
     return await this.productRepository.save(newProducts);
   }
 
-  private async singleProductImage(
-    product_id: string,
-    image_id: string,
-  ): Promise<ProductImage> {
-    const product = await this.productRepository.findOne({
-      where: { id: product_id },
-    });
-    if (!product) {
-      throw new NotFoundException('message.product_not_found');
-    }
 
-    const productImage = await this.productImageRepository.findOne({
-      where: { id: image_id },
-    });
-    if (!productImage) {
-      throw new NotFoundException('message.product_image_not_found');
-    }
-    return productImage;
-  }
 
   private async SingleProductMeasurement(
     product_id: string,
