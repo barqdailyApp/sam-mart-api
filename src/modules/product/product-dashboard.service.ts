@@ -961,7 +961,7 @@ export class ProductDashboardService {
       relations: {
         product_images: true,
         warehouses_products: true,
-        product_measurements: true,
+        product_measurements: {measurement_unit: true},
         product_sub_categories: {
           category_subCategory: {
             section_category: {
@@ -990,6 +990,13 @@ export class ProductDashboardService {
           url:image.url,
           is_logo: image.is_logo,
         })),
+        measurement_units_en: product.product_measurements.map(
+          (measurement) => measurement.measurement_unit?.name_en,
+        )
+        ,
+        measurement_units_ar: product.product_measurements.map(
+          (measurement) => measurement.measurement_unit?.name_ar,
+        )
         // warehousesProducts: product.warehouses_products,
         // productMeasurements: product.product_measurements.map(
         //   (measurement) => ({

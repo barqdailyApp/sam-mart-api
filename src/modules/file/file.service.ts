@@ -95,6 +95,7 @@ export class FileService {
               base64: imageBase64,
               extension: 'png',
             };
+         delete data['product_images']
             
           } catch (error) {
             console.error(`Error reading image ${imagePath}:`, error);
@@ -104,6 +105,7 @@ export class FileService {
 
       rows.push(values);
     }
+    
 
     const workbook = new excelJs.Workbook();
     const worksheet = workbook.addWorksheet(sheetName);
