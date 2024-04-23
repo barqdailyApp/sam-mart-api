@@ -137,7 +137,7 @@ export class ShipmentService extends BaseService<Shipment> {
         order_id: order.id,
         user_id: shipment.driver.user_id,
       }),
-    );
+    );}
     await this.shipmentRepository.save(shipment);
     await this.driverRepository.save(driver);
     await this.orderRepository.save(order);
