@@ -11,14 +11,12 @@ export class DriverClientResponse {
   @Expose() readonly username: string;
   @Expose() readonly email: string;
   @Expose() readonly phone: string;
-  @Transform(({ value }) => toUrl(value))
-  @Expose()
-  readonly avatar: string;
+  @Expose() readonly avatar: string;
   @Expose() readonly birth_date: string;
   @Expose() readonly created_at: Date;
   @Expose() readonly is_receive_orders: boolean;
 
-  
+
   @Expose() readonly driver_status: DriverStatus;
 
 
@@ -27,11 +25,12 @@ export class DriverClientResponse {
     this.username = driver?.user.name;
     this.email = driver?.user.email;
     this.phone = driver?.user.phone;
-    this.avatar =toUrl(driver?.user?.avatar) ;
+    if (driver?.user?.avatar) {
+      this.avatar = toUrl(driver?.user?.avatar);
+    }
     this.birth_date = driver?.user?.birth_date;
     this.created_at = driver?.user?.created_at;
     this.is_receive_orders = driver?.is_receive_orders;
     this.driver_status = driver?.status;
-
   }
 }

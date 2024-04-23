@@ -1,4 +1,4 @@
-import { Expose, Type } from "class-transformer";
+import { Expose, Transform, Type } from "class-transformer";
 import { OrderResponse } from "../order.response";
 import { ReturnOrderProductResponse } from "./return-order-product.response";
 import { DriverClientResponse } from "src/modules/driver/response/driver-client.response";
@@ -11,7 +11,7 @@ export class GetReturnOrderResponse {
     @Expose() customer_note: string;
     @Expose() @Type(() => OrderResponse) order: OrderResponse;
     @Expose() @Type(() => ReturnOrderProductResponse) returnOrderProducts: ReturnOrderProductResponse[];
-    @Expose() @Type(() => DriverClientResponse) driver: DriverClientResponse;
+    @Expose() @Transform(({ obj }) => new DriverClientResponse(obj.driver)) driver: DriverClientResponse;
     @Expose() request_accepted_at: Date;
     @Expose() created_at: Date;
     @Expose() updated_at: Date;
