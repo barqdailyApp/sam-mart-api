@@ -82,10 +82,6 @@ export class ReasonService extends BaseService<Reason>{
             take: limit,
         });
 
-        if (!reasons.length) {
-            throw new NotFoundException(`Reason with name ${name} not found`);
-        }
-
         return [reasons, count];
     }
 
