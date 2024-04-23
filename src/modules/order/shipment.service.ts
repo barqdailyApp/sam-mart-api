@@ -46,6 +46,7 @@ import { WarehouseProducts } from 'src/infrastructure/entities/warehouse/warehou
 import { WarehouseOperationTransaction } from '../warehouse/util/warehouse-opreation.transaction';
 import { operationType } from 'src/infrastructure/data/enums/operation-type.enum';
 import { ProductMeasurement } from 'src/infrastructure/entities/product/product-measurement.entity';
+import { PaymentMethodEnum } from 'src/infrastructure/data/enums/payment-method';
 @Injectable()
 export class ShipmentService extends BaseService<Shipment> {
   constructor(
@@ -128,7 +129,7 @@ export class ShipmentService extends BaseService<Shipment> {
       relations: ['address'],
     });
     order.is_paid = true;
-    if(sh)
+    if(shipment.order.payment_method==PaymentMethodEnum.CASH){
     await this.transactionService.makeTransaction(
       new MakeTransactionRequest({
         amount: -order.total_price,
