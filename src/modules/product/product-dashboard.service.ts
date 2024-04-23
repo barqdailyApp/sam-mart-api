@@ -49,6 +49,8 @@ import { NotificationService } from '../notification/notification.service';
 import { SendToUsersNotificationRequest } from '../notification/dto/requests/send-to-users-notification.request';
 import { User } from 'src/infrastructure/entities/user/user.entity';
 import { WarehouseProducts } from 'src/infrastructure/entities/warehouse/warehouse-products.entity';
+import { Section } from 'src/infrastructure/entities/section/section.entity';
+import { Category } from 'src/infrastructure/entities/category/category.entity';
 
 @Injectable()
 export class ProductDashboardService {
@@ -135,7 +137,6 @@ export class ProductDashboardService {
     if (productOffer) {
       throw new BadRequestException('message.product_offer_already_exist');
     }
-
 
     const createProductOffer = this.productOffer_repo.create(
       createProductOfferRequest,
@@ -547,7 +548,7 @@ export class ProductDashboardService {
         'product_measurements.measurement_unit',
         'measurement_unit',
       )
-      .orderBy('product.created_at', 'DESC' )
+      .orderBy('product.created_at', 'DESC')
       .skip(skip)
       .take(limit);
     // Add search term condition if provided
@@ -614,9 +615,6 @@ export class ProductDashboardService {
     } = productsDashboardQuery;
     const skip = (page - 1) * limit;
 
-
- 
-
     // Start building the query
     let query = this.productOfferRepository
       .createQueryBuilder('product_offer')
@@ -659,11 +657,14 @@ export class ProductDashboardService {
       .leftJoinAndSelect('section_category.section', 'section')
       .innerJoinAndSelect('product_sub_category.product', 'product')
       .innerJoinAndSelect('product.warehouses_products', 'warehousesProduct')
-      .innerJoinAndSelect('product.product_measurements', 'product_measurements')
+      .innerJoinAndSelect(
+        'product.product_measurements',
+        'product_measurements',
+      )
 
       .innerJoinAndSelect('product.product_images', 'product_images')
 
-      .orderBy('product_offer.created_at', 'DESC')  
+      .orderBy('product_offer.created_at', 'DESC')
       .skip(skip)
       .take(limit);
 
@@ -772,7 +773,6 @@ export class ProductDashboardService {
     const { category_sub_category_id, product_id } =
       singleProductDashboardQuery;
 
-      
     const product_check = await this.productRepository
       .createQueryBuilder('product')
       .where('product.id = :product_id OR product.barcode = :product_id', {
@@ -880,8 +880,6 @@ export class ProductDashboardService {
       },
     );
 
-
-
     return await query.getOne();
   }
 
@@ -961,7 +959,7 @@ export class ProductDashboardService {
       relations: {
         product_images: true,
         warehouses_products: true,
-        product_measurements: {measurement_unit: true},
+        product_measurements: { measurement_unit: true },
         product_sub_categories: {
           category_subCategory: {
             section_category: {
@@ -987,16 +985,15 @@ export class ProductDashboardService {
         // is_active: product.is_active,
         // is_recovered: product.is_recovered,
         product_images: product.product_images.map((image) => ({
-          url:image.url,
+          url: image.url,
           is_logo: image.is_logo,
         })),
         measurement_units_en: product.product_measurements.map(
           (measurement) => measurement.measurement_unit?.name_en,
-        )
-        ,
+        ),
         measurement_units_ar: product.product_measurements.map(
           (measurement) => measurement.measurement_unit?.name_ar,
-        )
+        ),
         // warehousesProducts: product.warehouses_products,
         // productMeasurements: product.product_measurements.map(
         //   (measurement) => ({
@@ -1031,6 +1028,58 @@ export class ProductDashboardService {
         //       subCategory.category_subCategory.section_category.section.name_en,
         //   }),
         // ),
+      };
+    });
+
+    return await this._fileService.exportExcel(
+      flattenedProducts,
+      'products',
+      'products',
+    );
+  }
+
+  async exportLinkedProducts() {
+    const productSubCategory = await this.productSubCategory_repo.find({
+      relations: {
+        product: {
+          product_images: true,
+          product_measurements: { measurement_unit: true },
+        },
+        category_subCategory: {
+          subcategory: true,
+          section_category: { category: true },
+        },
+      },
+      order: { category_subCategory:{subcategory:{name_ar: "ASC"}} },
+    });
+
+    // Create a flat structure for products
+    const flattenedProducts = productSubCategory.map((product) => {
+    console.log(product.id)
+      return {
+        // productId: product.id,
+        // createdAt: product.created_at,
+        // updatedAt: product.updated_at,
+        name_ar: product.product.name_ar,
+        name_en: product.product.name_en,
+        description_ar: product.product?.description_ar,
+        description_en: product.product?.description_en,
+        subcategory_ar: product.category_subCategory.subcategory.name_ar,
+        subcategory_en: product.category_subCategory.subcategory.name_en,
+        category_ar:
+          product.category_subCategory.section_category.category.name_ar,
+        category_en:
+          product.category_subCategory.section_category.category.name_en,
+        product_images: product.product.product_images.map((image) => ({
+          url: image.url,
+          is_logo: image.is_logo,
+        })),
+        measurement_units_en: product.product.product_measurements.map(
+          (measurement) => measurement.measurement_unit?.name_en,
+        ),
+        measurement_units_ar: product.product.product_measurements.map(
+          (measurement) => measurement.measurement_unit?.name_ar,
+        ),
       };
     });
 

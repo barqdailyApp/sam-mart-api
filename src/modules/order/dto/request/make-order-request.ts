@@ -14,6 +14,12 @@ export class PaymentMethodRequest {
   @IsString()
   @ValidateIf((obj) => obj. payment_method_id !=null)
   transaction_number: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  @ValidateIf((obj) => obj. payment_method_id !=null)
+  wallet_number: string;
 }
 
 export class OrderSlotRequest {

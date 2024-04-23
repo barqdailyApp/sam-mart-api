@@ -128,6 +128,7 @@ export class ShipmentService extends BaseService<Shipment> {
       relations: ['address'],
     });
     order.is_paid = true;
+    if(sh)
     await this.transactionService.makeTransaction(
       new MakeTransactionRequest({
         amount: -order.total_price,

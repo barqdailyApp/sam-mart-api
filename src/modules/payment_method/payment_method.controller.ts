@@ -1,4 +1,4 @@
-import { Controller, Get, Inject, Query } from '@nestjs/common';
+import { Controller, Get, Inject, Post, Query } from '@nestjs/common';
 import { PaymentMethodService } from './payment_method.service';
 import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 import { ActionResponse } from 'src/core/base/responses/action.response';
@@ -27,5 +27,9 @@ export class PaymentMethodController {
         return payment;
       })),
     );
+  }
+  @Post('cash-out')
+  async cashOut() {
+    // return await this.paymentService.jawalicashOut("10020","777687613");
   }
 }

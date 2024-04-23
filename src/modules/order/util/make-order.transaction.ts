@@ -36,6 +36,7 @@ import { NotificationTypes } from 'src/infrastructure/data/enums/notification-ty
 import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
 import { PaymentMethodEnum } from 'src/infrastructure/data/enums/payment-method';
 import { PaymentMethod } from 'src/infrastructure/entities/payment_method/payment_method.entity';
+import { PaymentMethodService } from 'src/modules/payment_method/payment_method.service';
 @Injectable()
 export class MakeOrderTransaction extends BaseTransaction<
   MakeOrderRequest,
@@ -46,6 +47,7 @@ export class MakeOrderTransaction extends BaseTransaction<
     @Inject(REQUEST) readonly request: Request,
     private readonly orderGateway: OrderGateway,
     private readonly notificationService: NotificationService,
+    private readonly paymentService: PaymentMethodService,
   ) {
     super(dataSource);
   }
@@ -61,7 +63,7 @@ export class MakeOrderTransaction extends BaseTransaction<
       });
       if (!section.delivery_type.includes(req.delivery_type)) {
         throw new BadRequestException(
-          "message.section_does_not_support_this_type_of_delivery",
+          'message.section_does_not_support_this_type_of_delivery',
         );
       }
 
@@ -70,7 +72,9 @@ export class MakeOrderTransaction extends BaseTransaction<
         where: [{ is_favorite: true, user_id: user.id }],
       });
       if (!address) {
-        throw new BadRequestException("message.user_does_not_have_a_default_address");
+        throw new BadRequestException(
+          'message.user_does_not_have_a_default_address',
+        );
       }
       const cart = await context.findOne(Cart, { where: { user_id: user.id } });
 
@@ -78,7 +82,7 @@ export class MakeOrderTransaction extends BaseTransaction<
         where: { cart_id: cart.id, section_id: req.section_id },
       });
       if (cart_products.length == 0) {
-        throw new BadRequestException("message.cart_is_empty");
+        throw new BadRequestException('message.cart_is_empty');
       }
       const payment_method = await context.findOne(PaymentMethod, {
         where: {
@@ -99,6 +103,7 @@ export class MakeOrderTransaction extends BaseTransaction<
         delivery_fee: section.delivery_price,
         number: generateOrderNumber(count),
         address_id: address.id,
+        is_paid: payment_method.type != PaymentMethodEnum.CASH ? true : false,
         payment_method: payment_method.type,
         payment_method_id: req.payment_method.payment_method_id,
         transaction_number:
@@ -106,6 +111,7 @@ export class MakeOrderTransaction extends BaseTransaction<
             ? null
             : req.payment_method.transaction_number,
       });
+     
 
       if (order.delivery_type == DeliveryType.FAST) {
         const currentDate = new Date();
@@ -148,7 +154,11 @@ export class MakeOrderTransaction extends BaseTransaction<
             await context.save(product_offer);
           }
 
-          return new ShipmentProduct({ shipment_id: shipment.id, ...e,created_at:new Date()});
+          return new ShipmentProduct({
+            shipment_id: shipment.id,
+            ...e,
+            created_at: new Date(),
+          });
         }),
       );
       await context.save(shipment_products);
@@ -158,8 +168,18 @@ export class MakeOrderTransaction extends BaseTransaction<
       );
       if (order.total_price < section.min_order_price) {
         throw new BadRequestException(
-          "message.total_price_is_less_than_min_order_price",
+          'message.total_price_is_less_than_min_order_price',
         );
+      }
+      if (payment_method.type == PaymentMethodEnum.JAWALI) {
+        const make_payment = await this.paymentService.jawalicashOut(
+          req.payment_method.transaction_number,
+          req.payment_method.wallet_number,
+         Number( order.total_price) + Number(order.delivery_fee),
+        );
+        if (!make_payment) {
+          throw new BadRequestException('payment failed');
+        }
       }
 
       await context.save(Order, order);

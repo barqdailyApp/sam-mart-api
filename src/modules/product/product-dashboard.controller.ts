@@ -304,6 +304,19 @@ export class ProductDashboardController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
+  @Get('attached/export')
+  @Header(
+    'Content-type',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  )
+  async exportAttchedProducts(@Res() res: Response) {
+    const File = await this.productDashboardService.exportLinkedProducts();
+    res.download(`${File}`);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
   @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
   @Post('import')

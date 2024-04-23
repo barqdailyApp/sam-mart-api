@@ -10,6 +10,7 @@ import { NotificationModule } from '../notification/notification.module';
 import { ReasonService } from '../reason/reason.service';
 import { TransactionService } from '../transaction/transaction.service';
 import { WarehouseOperationTransaction } from '../warehouse/util/warehouse-opreation.transaction';
+import { PaymentMethodService } from '../payment_method/payment_method.service';
 
 @Module({
   controllers: [OrderController, ShipmentController],
@@ -21,6 +22,7 @@ import { WarehouseOperationTransaction } from '../warehouse/util/warehouse-oprea
     ReasonService,
     TransactionService,
     WarehouseOperationTransaction,
+    PaymentMethodService
   ],
   imports: [GatewaysModule, NotificationModule,],
 })
