@@ -89,7 +89,7 @@ export class ReasonService extends BaseService<Reason>{
 
         const reason = await this.findOne(id);
         if (!reason) {
-            throw new NotFoundException(`Reason with id ${id} not found`);
+            throw new NotFoundException(`Reason with given id ${id} not found`);
         }
 
         Object.assign(reason, req);
@@ -101,7 +101,7 @@ export class ReasonService extends BaseService<Reason>{
     async deleteReason(id: string): Promise<boolean> {
         const reason = await this.findOne(id);
         if (!reason) {
-            throw new NotFoundException(`Reason with id ${id} not found`);
+            throw new NotFoundException(`Reason with given id ${id} not found`);
         }
 
         const deletedReason = await this.reasonRepository.delete(id);
