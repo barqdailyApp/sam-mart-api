@@ -154,7 +154,7 @@ export class ProductCategoryPriceService {
         'message.no_relation_between_product_and_sub_category',
       );
     }
-    return await this.productSubCategory_repo.remove(productSubCategory);
+    return await this.productSubCategory_repo.softDelete(productSubCategory.id);
   }
 
   async getAllUnitPriceProduct(product_sub_category_id: string) {
