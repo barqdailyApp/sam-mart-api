@@ -23,16 +23,15 @@ export class DriverClientResponse {
 
 
   constructor(driver: Driver) {
-    this.id = driver.id;
-    this.username = driver.user.name;
-    this.email = driver.user.email;
-    this.phone = driver.user.phone;
-    this.avatar =toUrl(driver.user.avatar) ;
-    this.birth_date = driver.user.birth_date;
-    this.created_at = driver.user.created_at;
-    this.is_receive_orders = driver.is_receive_orders;
-   
-    this.driver_status = driver.status;
+    this.id = driver?.id;
+    this.username = driver?.user.name;
+    this.email = driver?.user.email;
+    this.phone = driver?.user.phone;
+    this.avatar =toUrl(driver?.user?.avatar) ;
+    this.birth_date = driver?.user?.birth_date;
+    this.created_at = driver?.user?.created_at;
+    this.is_receive_orders = driver?.is_receive_orders;
+    this.driver_status = driver?.status;
 
   }
 }

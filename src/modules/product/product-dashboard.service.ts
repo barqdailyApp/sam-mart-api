@@ -898,6 +898,7 @@ export class ProductDashboardService {
           is_main_unit: true,
         },
       });
+    //* check if product in warehouse have quantity
     const product_warehouse = await this.warehouse_products_repo.find({
       where: { product_id },
     });
@@ -909,6 +910,30 @@ export class ProductDashboardService {
         'message.product_has_quantity_in_warehouse',
       );
     }
+    //* check if product has sub category
+    const product_category = await this.productSubCategory_repo.find({
+      where: {
+        product_id,
+      },
+    });
+    if (product_category.length > 0) {
+      throw new BadRequestException('message.product_has_sub_category');
+    }
+
+    //* check if product has offers
+    const product_offers = await this.productOfferRepository.find({
+      where: {
+        product_category_price: {
+          product_sub_category: {
+            product_id,
+          },
+        },
+      },
+    });
+    if (product_offers.length > 0) {
+      throw new BadRequestException('message.product_has_offers');
+    }
+
     return await this.productRepository.softDelete({ id: product_id });
   }
 
@@ -923,10 +948,18 @@ export class ProductDashboardService {
     if (!product) {
       throw new NotFoundException('message.product_not_found');
     }
-    if (product.product_images.length == 1) {
-      throw new NotFoundException('message.there_must_be_at_least_one_photo');
+    const image = await this.productImageRepository.findOne({
+      where: { id: image_id },
+    });
+
+    if (!image) {
+      throw new NotFoundException('message.product_image_not_found');
     }
-    await this.singleProductImage(product_id, image_id);
+
+    if (image.is_logo) {
+      throw new BadRequestException('message.logo_cannot_be_deleted');
+    }
+
     return await this.productImageRepository.delete({ id: image_id });
   }
 
@@ -1127,26 +1160,6 @@ export class ProductDashboardService {
     });
 
     return await this.productRepository.save(newProducts);
-  }
-
-  private async singleProductImage(
-    product_id: string,
-    image_id: string,
-  ): Promise<ProductImage> {
-    const product = await this.productRepository.findOne({
-      where: { id: product_id },
-    });
-    if (!product) {
-      throw new NotFoundException('message.product_not_found');
-    }
-
-    const productImage = await this.productImageRepository.findOne({
-      where: { id: image_id },
-    });
-    if (!productImage) {
-      throw new NotFoundException('message.product_image_not_found');
-    }
-    return productImage;
   }
 
   private async SingleProductMeasurement(
