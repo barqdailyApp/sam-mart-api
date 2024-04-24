@@ -627,6 +627,16 @@ export class ShipmentService extends BaseService<Shipment> {
     //     text_en: 'the request has been canceled',
     //   }),
     // );
+
+    await this.transactionService.makeTransaction(
+      new MakeTransactionRequest({
+        amount: shipment.order.total_price,
+        type: TransactionTypes.ORDER_RETURN,
+        order_id: shipment.order.id,
+        user_id: shipment.order.user_id,
+      }),
+    );
+
     if(shipment.driver){
     await this.notificationService.create(
       new NotificationEntity({

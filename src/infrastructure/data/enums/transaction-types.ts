@@ -4,4 +4,5 @@ export enum TransactionTypes {
     ORDER_COMMISSION = 'ORDER_COMMISSION',
     ADMIN_RESET = 'ADMIN_RESET',
     OTHER = 'OTHER',
+    ORDER_RETURN = 'ORDER_RETURN',
 }
