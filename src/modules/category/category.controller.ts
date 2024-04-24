@@ -67,7 +67,6 @@ export class CategoryController {
     @UploadedFile(new UploadValidator().build())
     logo: Express.Multer.File,
   ) {
-    
     req.logo = logo;
     return new ActionResponse(await this.categoryService.createCategory(req));
   }
@@ -149,20 +148,31 @@ export class CategoryController {
   @ApiBearerAuth()
   @Delete('/:id')
   async deleteCategory(@Param('id') id: string) {
-    const category = await this.categoryService.softDelete(id);
+    const category = await this.categoryService._repo.findOne({
+      where: {
+        id,
+      },
+      relations: { section_categories: { category_subCategory: true } },
+    });
+    if (
+      category.section_categories.map((e) => e.category_subCategory).length > 0
+    ) {
+      throw new BadRequestException('category has subcategories');
+    }
+    const deleted_category = await this.categoryService.softDelete(id);
 
-    return new ActionResponse(category);
+    return new ActionResponse(deleted_category);
   }
   @Get('/:section_category_id/subcategories')
   async getCAtegorySubcategory(
     @Param('section_category_id') id: string,
-    @Query('name') name="",
+    @Query('name') name = '',
     @Query('all') all?: boolean,
   ) {
     const subcategories = await this.categoryService.getCategorySubcategory(
       id,
       all,
-      name
+      name,
     );
     const data = this._i18nResponse.entity(subcategories);
     return new ActionResponse(

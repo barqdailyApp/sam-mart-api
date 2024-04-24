@@ -1,6 +1,27 @@
-import { Body, ClassSerializerInterceptor, Controller, Delete, Get, Header, Param, Post, Put, Query, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  ClassSerializerInterceptor,
+  Controller,
+  Delete,
+  Get,
+  Header,
+  Param,
+  Post,
+  Put,
+  Query,
+  Res,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiConsumes, ApiHeader, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiConsumes,
+  ApiHeader,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ActionResponse } from 'src/core/base/responses/action.response';
 import { UploadValidator } from 'src/core/validators/upload.validator';
 import { CreateCategoryRequest } from '../category/dto/requests/create-category-request';
@@ -19,7 +40,10 @@ import { UpdateCategoryRequest } from '../category/dto/requests/update-category-
 import { Response } from 'express';
 import { ImportCategoryRequest } from '../category/dto/requests/import-category-request';
 import { plainToInstance } from 'class-transformer';
-import { MostHitSubCategoryResponse, MostHitSubcategoryReponseWithInfo } from './dto/response/most-hit-subcategory.response';
+import {
+  MostHitSubCategoryResponse,
+  MostHitSubcategoryReponseWithInfo,
+} from './dto/response/most-hit-subcategory.response';
 import { toUrl } from 'src/core/helpers/file.helper';
 
 @ApiHeader({
@@ -31,11 +55,12 @@ import { toUrl } from 'src/core/helpers/file.helper';
 @Controller('subcategory')
 @ApiBearerAuth()
 export class SubcategoryController {
-  constructor(private readonly subcategoryService: SubcategoryService,
-    private readonly _i18nResponse: I18nResponse,) { }
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(Role.ADMIN)
- 
+  constructor(
+    private readonly subcategoryService: SubcategoryService,
+    private readonly _i18nResponse: I18nResponse,
+  ) {}
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('logo'))
   @ApiConsumes('multipart/form-data')
   @Post()
@@ -44,15 +69,15 @@ export class SubcategoryController {
     @UploadedFile(new UploadValidator().build())
     logo: Express.Multer.File,
   ) {
- 
     req.logo = logo;
-    return new ActionResponse(await this.subcategoryService.createSubcategory(req));
+    return new ActionResponse(
+      await this.subcategoryService.createSubcategory(req),
+    );
   }
 
   @Get()
   async getCategories(@Query() query: PaginatedRequest) {
-    const categories =
-      await this.subcategoryService.findAll(query);
+    const categories = await this.subcategoryService.findAll(query);
     const categoriesRespone = categories.map((e) => new CategoryResponse(e));
 
     if (query.page && query.limit) {
@@ -65,32 +90,44 @@ export class SubcategoryController {
     }
   }
 
-
   @Get('/most-hit-subcategory')
   async getMostHitSubcategory(@Query() query: QueryHitsSubCategoryRequest) {
-    const subcategories = await this.subcategoryService.getMostHitSubcategory(query);
-    const result = plainToInstance(MostHitSubcategoryReponseWithInfo, subcategories,
-      { excludeExtraneousValues: true }
+    const subcategories = await this.subcategoryService.getMostHitSubcategory(
+      query,
+    );
+    const result = plainToInstance(
+      MostHitSubcategoryReponseWithInfo,
+      subcategories,
+      { excludeExtraneousValues: true },
     );
 
-    return new ActionResponse<MostHitSubcategoryReponseWithInfo[]>(this._i18nResponse.entity(result));
+    return new ActionResponse<MostHitSubcategoryReponseWithInfo[]>(
+      this._i18nResponse.entity(result),
+    );
   }
-  @Get("/:id")
+  @Get('/:id')
   async getSubcategory(@Param('id') id: string) {
-    const category = 
-      await this.subcategoryService.findOne(id);
-    category.logo = toUrl( category.logo);
+    const category = await this.subcategoryService.findOne(id);
+    category.logo = toUrl(category.logo);
     return new ActionResponse(category);
-    
   }
 
-  @Get("/:id")
+  @Get('/:id')
   async deleteSubcategory(@Param('id') id: string) {
-    const subcategory = 
-      await this.subcategoryService.softDelete(id);
-   
-    return new ActionResponse(subcategory);
-    
+    const subcategory = await this.subcategoryService._repo.findOne({
+      where: { id },
+      relations: { product_sub_categories: { product: true } },
+    });
+    if (
+      subcategory.category_subCategory
+        .map((e) => e.product_sub_categories.map((e) => e.product))
+        .flat().length > 0
+    ) {
+      throw new BadRequestException('Subcategory has product');
+    }
+    const deleted_subcategory = await this.subcategoryService.softDelete(id);
+
+    return new ActionResponse(deleted_subcategory);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -104,21 +141,26 @@ export class SubcategoryController {
     logo: Express.Multer.File,
   ) {
     req.logo = logo;
-    return new ActionResponse(await this.subcategoryService.updateSubCategory(req));
+    return new ActionResponse(
+      await this.subcategoryService.updateSubCategory(req),
+    );
   }
   @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.ADMIN)
-
-  @Delete("/:sub_category_id")
+  @Roles(Role.ADMIN)
+  @Delete('/:sub_category_id')
   async delete(@Param('sub_category_id') id: string) {
-    return new ActionResponse(await this.subcategoryService.deleteSubCategory(id));
+    return new ActionResponse(
+      await this.subcategoryService.deleteSubCategory(id),
+    );
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
-
   @Get('/export')
-  @Header('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+  @Header(
+    'Content-type',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  )
   async exportSubCategory(@Res() res: Response) {
     const File = await this.subcategoryService.exportSubCategory();
     res.download(`${File}`);
@@ -126,14 +168,13 @@ export class SubcategoryController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
-
   @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
-  @Post("/import")
+  @Post('/import')
   async importSubCategory(
     @Body() req: ImportCategoryRequest,
     @UploadedFile(new UploadValidator().build())
-    file: Express.Multer.File
+    file: Express.Multer.File,
   ) {
     req.file = file;
     const result = await this.subcategoryService.importSubCategory(req);
