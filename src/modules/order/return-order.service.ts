@@ -33,6 +33,9 @@ import { ReasonType } from 'src/infrastructure/data/enums/reason-type.enum';
 import { WarehouseOperationTransaction } from '../warehouse/util/warehouse-opreation.transaction';
 import { operationType } from 'src/infrastructure/data/enums/operation-type.enum';
 import { ProductMeasurement } from 'src/infrastructure/entities/product/product-measurement.entity';
+import { TransactionService } from '../transaction/transaction.service';
+import { MakeTransactionRequest } from '../transaction/dto/requests/make-transaction-request';
+import { TransactionTypes } from 'src/infrastructure/data/enums/transaction-types';
 
 @Injectable()
 export class ReturnOrderService extends BaseService<ReturnOrder> {
@@ -59,6 +62,8 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
 
 
     @Inject(REQUEST) readonly request: Request,
+    @Inject(TransactionService)
+    private readonly transactionService: TransactionService,
     private readonly orderGateway: OrderGateway,
     private readonly notificationService: NotificationService,
     private readonly warehouseOperationTransaction: WarehouseOperationTransaction,
@@ -203,6 +208,8 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
     return_order_id: string,
     req: UpdateReturnOrderStatusRequest,
   ) {
+
+    let amount_of_returned_money = 0;
     const returnOrder = await this.returnOrderRepository.findOne({
       where: { id: return_order_id },
       relations: ['order', 'order.user', 'order.shipments'],
@@ -276,6 +283,8 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
           product_measurement_id: product_measurement.id,
           quantity: return_product.quantity * return_product.shipmentProduct.conversion_factor,
         });
+
+        amount_of_returned_money += return_product.quantity * return_product.shipmentProduct.price;
       }
     }
 
@@ -285,6 +294,15 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
       warehouse_id: returnOrder.order.shipments[0].warehouse_id,
       type: operationType.IMPORT,
     });
+
+    await this.transactionService.makeTransaction(
+      new MakeTransactionRequest({
+        amount: amount_of_returned_money,
+        type: TransactionTypes.ORDER_RETURN,
+        order_id: returnOrder.order.id,
+        user_id: returnOrder.order.user_id,
+      }),
+    );
 
     const shipment = await this.shipmentRepository.findOne({
       where: { order_id: returnOrder.order_id },
