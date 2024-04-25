@@ -81,6 +81,7 @@ export class OrderService extends BaseUserService<Order> {
 
     let query = this.orderRepository
       .createQueryBuilder('order')
+      .withDeleted()
 
       .leftJoinAndSelect('order.user', 'user')
       .leftJoinAndSelect('order.slot', 'slot')
@@ -148,6 +149,7 @@ export class OrderService extends BaseUserService<Order> {
 
     let query = this.orderRepository
       .createQueryBuilder('order')
+      .withDeleted()
       .leftJoinAndSelect(
         'order.user',
         'user',
@@ -248,40 +250,41 @@ export class OrderService extends BaseUserService<Order> {
       where: {
         status: ShipmentStatusEnum.PENDING,
       },
+      withDeleted: true,
     });
 
     const ordersDriversAccepted = await this.shipmentRepository.count({
       where: {
         status: ShipmentStatusEnum.CONFIRMED,
-      },
+      },withDeleted: true,
     });
     const ordersReadyForPickup = await this.shipmentRepository.count({
       where: {
         status: ShipmentStatusEnum.READY_FOR_PICKUP,
-      },
+      },withDeleted: true,
     });
     const ordersProcessing = await this.shipmentRepository.count({
       where: {
         status: ShipmentStatusEnum.PROCESSING,
-      },
+      },withDeleted: true,
     });
 
     const ordersPicked = await this.shipmentRepository.count({
       where: {
         status: ShipmentStatusEnum.PICKED_UP,
-      },
+      },withDeleted: true,
     });
 
     const ordersDelivered = await this.shipmentRepository.count({
       where: {
         status: ShipmentStatusEnum.DELIVERED,
-      },
+      },withDeleted: true,
     });
 
     const ordersCanceled = await this.shipmentRepository.count({
       where: {
         status: ShipmentStatusEnum.CANCELED,
-      },
+      },withDeleted: true,
     });
     return {
       ordersTotal,
@@ -295,7 +298,7 @@ export class OrderService extends BaseUserService<Order> {
     };
   }
 
-  async generateInvoice(id: string,res:Response) {
+  async generateInvoice(id: string, res: Response) {
     const order_details = new OrderSingleResponse(
       await this.getSingleOrder(id),
     );
@@ -305,11 +308,11 @@ export class OrderService extends BaseUserService<Order> {
       margins: { top: 15, bottom: 15, left: 15, right: 15 },
       bufferPages: true,
     });
-    
+
     const products_table = order_details.shipments.shipment_products.map(
       (item) => {
         return [
-          item.total_price  , 
+          item.total_price,
           reverseSentence(item.product_name_ar),
           item.product_price,
           reverseSentence(item.measurement_unit_ar),
@@ -324,32 +327,38 @@ export class OrderService extends BaseUserService<Order> {
       '',
       'التوصيل سعر',
     ]);
-    products_table.push([Number(order_details.total_price)+Number(order_details.delivery_fee), '', '', '', 'الاجمالى']);
+    products_table.push([
+      Number(order_details.total_price) + Number(order_details.delivery_fee),
+      '',
+      '',
+      '',
+      'الاجمالى',
+    ]);
     const customFont = fs.readFileSync(`public/assets/fonts/Amiri-Regular.ttf`);
     doc.registerFont(`Amiri-Regular`, customFont);
     doc.fontSize(15);
     doc.font(`Amiri-Regular`).fillColor('black');
     doc.image('public/assets/images/logo.jpeg', { width: 70, height: 70 });
     doc.fontSize(20);
-    doc.text('برق ديلى', { features: ['rtla'], align: 'right' })    .fontSize(10);
+    doc.text('برق ديلى', { features: ['rtla'], align: 'right' }).fontSize(10);
 
     doc
-    .text(reverseSentence('تاريخ الطلب: ' + reverseSentence( order_details.created_at.toLocaleString())), {
+      .text(
+        reverseSentence(
+          'تاريخ الطلب: ' +
+            reverseSentence(order_details.created_at.toLocaleString()),
+        ),
+        {
+          align: 'right',
+        },
+      )
+      .fontSize(10);
+
+    doc.text(reverseSentence('رقم الطلب: ' + order_details.order_number), {
       align: 'right',
-      
-     
-    })
-    .fontSize(10);
+    });
 
-    doc
-      .text(reverseSentence('رقم الطلب: ' +  order_details.order_number)  , {
-        align: 'right',
-       
-      })
-    
-
-
-      doc.moveDown();
+    doc.moveDown();
     const centerX = doc.page.width / 2;
 
     // Move to the starting position of the divider line (center position)
@@ -448,7 +457,7 @@ export class OrderService extends BaseUserService<Order> {
     }
     let query = this.orderRepository
       .createQueryBuilder('order')
-
+      .withDeleted()
       .leftJoinAndSelect('order.user', 'user')
       .leftJoinAndSelect('order.section', 'section_order')
       .leftJoinAndSelect('order.warehouse', 'warehouse_order')
@@ -509,7 +518,7 @@ export class OrderService extends BaseUserService<Order> {
 
     let query = this.orderRepository
       .createQueryBuilder('order')
-
+      .withDeleted()
       .leftJoinAndSelect('order.user', 'user')
       .leftJoinAndSelect('order.section', 'section_order')
       .leftJoinAndSelect('order.warehouse', 'warehouse_order')
@@ -604,6 +613,7 @@ export class OrderService extends BaseUserService<Order> {
     // Start building the query with necessary joins to fetch related entities.
     let query = this.shipmentRepository
       .createQueryBuilder('shipments')
+      .withDeleted()
       .leftJoinAndSelect('shipments.order', 'order')
       .leftJoinAndSelect('order.user', 'user')
       .leftJoinAndSelect('order.address', 'address')
@@ -708,6 +718,7 @@ export class OrderService extends BaseUserService<Order> {
       where: {
         user_id: user.id,
       },
+
     });
     const ordersNew = await this.shipmentRepository.count({
       where: {
@@ -719,6 +730,7 @@ export class OrderService extends BaseUserService<Order> {
         },
       },
       relations: { order: true },
+      withDeleted: true,
     });
     const ordersActive = await this.shipmentRepository.count({
       where: {
@@ -731,6 +743,7 @@ export class OrderService extends BaseUserService<Order> {
         driver_id: driver.id,
         warehouse_id: driver.warehouse_id,
       },
+      withDeleted: true,
     });
 
     const ordersDelivered = await this.shipmentRepository.count({
@@ -739,6 +752,7 @@ export class OrderService extends BaseUserService<Order> {
         driver_id: driver.id,
         warehouse_id: driver.warehouse_id,
       },
+      withDeleted:true
     });
 
     return {
@@ -753,6 +767,7 @@ export class OrderService extends BaseUserService<Order> {
     const skip = (page - 1) * limit;
     let query = this.shipmentRepository
       .createQueryBuilder('shipments')
+      .withDeleted()
       .leftJoinAndSelect('shipments.order', 'order')
       .leftJoinAndSelect('order.user', 'user')
       .leftJoinAndSelect('order.address', 'address')
@@ -826,6 +841,7 @@ export class OrderService extends BaseUserService<Order> {
   async getSingleShipment(shipment_id: string) {
     let query = this.shipmentRepository
       .createQueryBuilder('shipments')
+      .withDeleted()
       .leftJoinAndSelect('shipments.order', 'order')
       .leftJoinAndSelect('order.user', 'user')
       .leftJoinAndSelect('order.address', 'address')
