@@ -314,6 +314,20 @@ export class ProductDashboardController {
     res.download(`${File}`);
   }
 
+  
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @Get('warehouse/export')
+  @Header(
+    'Content-type',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  )
+  async exportWarehouseProducts(@Res() res: Response,@Query("warehouse_id") warehouse_id:string) {
+    const File = await this.productDashboardService.exportWarehouseProducts(warehouse_id);
+    res.download(`${File}`);
+  }
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()

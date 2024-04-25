@@ -1083,26 +1083,27 @@ export class ProductDashboardService {
           section_category: { category: true },
         },
       },
-      order: { category_subCategory:{subcategory:{name_ar: "ASC"}} },
+      order: { category_subCategory: { subcategory: { name_ar: 'ASC' } } },
     });
 
     // Create a flat structure for products
     const flattenedProducts = productSubCategory.map((product) => {
-    console.log(product.id)
+ 
       return {
         // productId: product.id,
         // createdAt: product.created_at,
         // updatedAt: product.updated_at,
-        name_ar: product.product.name_ar,
-        name_en: product.product.name_en,
-        description_ar: product.product?.description_ar,
-        description_en: product.product?.description_en,
-        subcategory_ar: product.category_subCategory.subcategory.name_ar,
-        subcategory_en: product.category_subCategory.subcategory.name_en,
         category_ar:
           product.category_subCategory.section_category.category.name_ar,
         category_en:
           product.category_subCategory.section_category.category.name_en,
+        subcategory_ar: product.category_subCategory.subcategory.name_ar,
+        subcategory_en: product.category_subCategory.subcategory.name_en,
+        name_ar: product.product.name_ar,
+        name_en: product.product.name_en,
+        description_ar: product.product?.description_ar,
+        description_en: product.product?.description_en,
+
         product_images: product.product.product_images.map((image) => ({
           url: image.url,
           is_logo: image.is_logo,
@@ -1113,6 +1114,43 @@ export class ProductDashboardService {
         measurement_units_ar: product.product.product_measurements.map(
           (measurement) => measurement.measurement_unit?.name_ar,
         ),
+      };
+    });
+
+    return await this._fileService.exportExcel(
+      flattenedProducts,
+      'products',
+      'products',
+    );
+  }
+  async exportWarehouseProducts(warehouse_id: string) {
+    const warehouse_products = await this.warehouse_products_repo.find({
+      where: { warehouse_id },
+      relations: {
+        product: {product_images:true},
+        product_measurement: { measurement_unit: true },
+      },withDeleted:true
+    });
+
+    // Create a flat structure for products
+    const flattenedProducts = warehouse_products.map((product) => {
+
+      return {
+   
+        name_ar: product.product.name_ar,
+        name_en: product.product.name_en,
+        quatntity: product.quantity,
+        measurement_units_ar: product.product_measurement.measurement_unit.name_ar,
+        measurement_units_en: product.product_measurement.measurement_unit.name_en,
+      
+        description_ar: product.product?.description_ar,
+        description_en: product.product?.description_en,
+
+        product_images: product.product.product_images.map((image) => ({
+          url: image.url,
+          is_logo: image.is_logo,
+        })),
+
       };
     });
 
