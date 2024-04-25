@@ -58,7 +58,7 @@ export class CartService extends BaseService<CartProduct> {
             category_subCategory: { section_category: true },
           },
         },
-      },
+      },withDeleted:true
     });
     const cart_products_warehouse = await Promise.all(
       cart_products.map(async (e) => {
@@ -102,7 +102,7 @@ export class CartService extends BaseService<CartProduct> {
             category_subCategory: { section_category: true },
           },
         },
-      },
+      },withDeleted:true
     });
     cart_product.product_category_price.product_sub_category.product.warehouses_products.filter(
       (w) => w.warehouse_id == cart_product.warehouse_id,
