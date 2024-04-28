@@ -27,3 +27,27 @@ export class SendToUsersNotificationRequest {
   @IsString()
   title_en: string;
 }
+
+export class SendToAllUsersNotificationRequest {
+
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  message_ar: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  message_en: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  title_ar: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  title_en: string;
+}

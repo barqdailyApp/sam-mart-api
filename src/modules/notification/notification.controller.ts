@@ -25,7 +25,7 @@ import { ActionResponse } from 'src/core/base/responses/action.response';
 
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { SendToUsersNotificationRequest } from './dto/requests/send-to-users-notification.request';
+import { SendToAllUsersNotificationRequest, SendToUsersNotificationRequest } from './dto/requests/send-to-users-notification.request';
 import { NotificationQuery } from './dto/filters/notification.query';
 import { PageMetaDto } from 'src/core/helpers/pagination/page-meta.dto';
 import { PageDto } from 'src/core/helpers/pagination/page.dto';
@@ -52,6 +52,14 @@ export class NotificationController {
     @Body() sendToUsersNotificationRequest: SendToUsersNotificationRequest,
   ) {
     await this.notificationService.sendToUsers(sendToUsersNotificationRequest);
+  }
+
+  
+  @Post('send-to-all')
+  async sendToAll(
+    @Body() sendToUsersNotificationRequest: SendToAllUsersNotificationRequest,
+  ) {
+  return new ActionResponse(  await this.notificationService.sendToALl(sendToUsersNotificationRequest));
   }
   @Get('all-My-Notifications')
   async allMyNotifications(@Query() notificationQuery: NotificationQuery) {

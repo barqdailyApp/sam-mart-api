@@ -18,7 +18,10 @@ import {
   applyQueryFilters,
   applyQuerySort,
 } from 'src/core/helpers/service-related.helper';
-import { SendToUsersNotificationRequest } from './dto/requests/send-to-users-notification.request';
+import {
+  SendToAllUsersNotificationRequest,
+  SendToUsersNotificationRequest,
+} from './dto/requests/send-to-users-notification.request';
 import { NotificationTypes } from 'src/infrastructure/data/enums/notification-types.enum';
 import { NotificationQuery } from './dto/filters/notification.query';
 
@@ -119,5 +122,28 @@ export class NotificationService extends BaseUserService<NotificationEntity> {
         console.error('Error sending notifications:', error);
       });
     }
+  }
+  async sendToALl(
+    sendToUsersNotificationRequest: SendToAllUsersNotificationRequest,
+  ) {
+    const { message_ar, message_en, title_ar, title_en } =
+      sendToUsersNotificationRequest;
+
+    const users = await this.userRepository.find();
+
+    users.map(async (user) => {
+      return this.create(
+        new NotificationEntity({
+          user_id: user.id,
+          url: user.id,
+          type: NotificationTypes.USERS,
+          title_ar: title_ar,
+          title_en: title_en,
+          text_ar: message_ar,
+          text_en: message_en,
+        }),
+      );
+    });
+    return "notification sent successfully";
   }
 }
