@@ -23,6 +23,7 @@ import { ShipmentFeedback } from '../order/shipment-feedback.entity';
 import { Wallet } from '../wallet/wallet.entity';
 import { NotificationEntity } from '../notification/notification.entity';
 import { UserStatus } from 'src/infrastructure/data/enums/user-status.enum';
+import { PromoCode } from '../promo-code/promo-code.entity';
 
 @Entity()
 export class User extends AuditableEntity {
@@ -40,6 +41,7 @@ export class User extends AuditableEntity {
 
   @Column({ nullable: true })
   email_verified_at: Date;
+
 
 
   @OneToOne(() => Wallet, (wallet) => wallet.user)

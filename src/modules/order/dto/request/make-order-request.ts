@@ -40,13 +40,10 @@ export class MakeOrderRequest {
   @IsString()
   section_id: string;
 
-  // @ApiProperty({
-  //   type: 'enum',
-  //   enum: [PaymentMethodEnum.CASH, PaymentMethodEnum.WALLET],
-  // })
-  // @IsEnum(PaymentMethodEnum)
-  // @IsNotEmpty()
-  // payment_method: PaymentMethodEnum;
+  @ApiProperty({required:false})
+  @IsOptional()
+  @IsString()
+  promo_code: string;
 
   @ApiProperty()
   @IsNotEmpty()

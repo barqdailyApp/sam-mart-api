@@ -25,6 +25,7 @@ import { TransactionModule } from './transaction/transaction.module';
 import { NotificationModule } from "./notification/notification.module";
 import { PaymentMethodModule } from './payment_method/payment_method.module';
 import { ReasonModule } from "./reason/reason.module";
+import { PromoCodeModule } from './promo-code/promo-code.module';
 
 
 @Module({
@@ -54,7 +55,8 @@ import { ReasonModule } from "./reason/reason.module";
     TransactionModule,
     NotificationModule,
     PaymentMethodModule,
-    ReasonModule
+    ReasonModule,
+    PromoCodeModule
   ],
   exports: [],
   providers: [],

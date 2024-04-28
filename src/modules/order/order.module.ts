@@ -11,6 +11,7 @@ import { ReasonService } from '../reason/reason.service';
 import { TransactionService } from '../transaction/transaction.service';
 import { WarehouseOperationTransaction } from '../warehouse/util/warehouse-opreation.transaction';
 import { PaymentMethodService } from '../payment_method/payment_method.service';
+import { PromoCodeService } from '../promo-code/promo-code.service';
 
 @Module({
   controllers: [OrderController, ShipmentController],
@@ -22,8 +23,9 @@ import { PaymentMethodService } from '../payment_method/payment_method.service';
     ReasonService,
     TransactionService,
     WarehouseOperationTransaction,
-    PaymentMethodService
+    PaymentMethodService,
+    PromoCodeService,
   ],
-  imports: [GatewaysModule, NotificationModule,],
+  imports: [GatewaysModule, NotificationModule],
 })
 export class OrderModule {}

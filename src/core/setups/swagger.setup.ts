@@ -2,6 +2,7 @@ import { INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { PaymentMethod } from 'src/infrastructure/entities/payment_method/payment_method.entity';
+import { PromoCode } from 'src/infrastructure/entities/promo-code/promo-code.entity';
 
 import { AdditionalServiceModule } from 'src/modules/additional-service/additional-service.module';
 import { AddressModule } from 'src/modules/address/address.module';
@@ -22,6 +23,7 @@ import { ShipmentController } from 'src/modules/order/shipment.controller';
 import { PaymentMethodModule } from 'src/modules/payment_method/payment_method.module';
 import { ProductCategoryPriceModule } from 'src/modules/product-category-price/product-category-price.module';
 import { ProductModule } from 'src/modules/product/product.module';
+import { PromoCodeModule } from 'src/modules/promo-code/promo-code.module';
 import { ReasonModule } from 'src/modules/reason/reason.module';
 import { RegionModule } from 'src/modules/region/region.module';
 import { SectionModule } from 'src/modules/section/section.module';
@@ -77,9 +79,11 @@ export default (app: INestApplication, config: ConfigService) => {
       NotificationModule,
       PaymentMethodModule,
       ReasonModule,
-      TransactionModule
+      TransactionModule,
+      PromoCodeModule,
     ],
     operationIdFactory,
+
   });
 
   SwaggerModule.setup('swagger', app, publicDocument);

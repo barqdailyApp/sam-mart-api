@@ -52,6 +52,7 @@ import { NotificationEntity } from '../entities/notification/notification.entity
 import { Constant } from '../entities/constant/constant.entity';
 import { PaymentMethod } from '../entities/payment_method/payment_method.entity';
 import { Reason } from '../entities/reason/reason.entity';
+import { PromoCode } from '../entities/promo-code/promo-code.entity';
 
 export const DB_ENTITIES = [
   User,
@@ -108,7 +109,8 @@ export const DB_ENTITIES = [
   NotificationEntity,
   Constant,
   PaymentMethod,
-  Reason
+  Reason,
+  PromoCode
 ];
 
 export const DB_VIEWS = [];

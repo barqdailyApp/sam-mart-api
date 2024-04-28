@@ -37,6 +37,7 @@ import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
 import { PaymentMethodEnum } from 'src/infrastructure/data/enums/payment-method';
 import { PaymentMethod } from 'src/infrastructure/entities/payment_method/payment_method.entity';
 import { PaymentMethodService } from 'src/modules/payment_method/payment_method.service';
+import { PromoCodeService } from 'src/modules/promo-code/promo-code.service';
 @Injectable()
 export class MakeOrderTransaction extends BaseTransaction<
   MakeOrderRequest,
@@ -48,6 +49,7 @@ export class MakeOrderTransaction extends BaseTransaction<
     private readonly orderGateway: OrderGateway,
     private readonly notificationService: NotificationService,
     private readonly paymentService: PaymentMethodService,
+    private readonly promoCodeService: PromoCodeService,
   ) {
     super(dataSource);
   }
@@ -111,7 +113,6 @@ export class MakeOrderTransaction extends BaseTransaction<
             ? null
             : req.payment_method.transaction_number,
       });
-     
 
       if (order.delivery_type == DeliveryType.FAST) {
         const currentDate = new Date();
@@ -171,11 +172,22 @@ export class MakeOrderTransaction extends BaseTransaction<
           'message.total_price_is_less_than_min_order_price',
         );
       }
+
+      let total = Number(order.total_price) + Number(order.delivery_fee);
+      if (req.promo_code) {
+        const promo_code = await this.promoCodeService.getValidPromoCodeByCode(
+          req.promo_code,
+        );
+        if (promo_code) {
+          total -= promo_code.discount;
+          order.total_price = total;
+        }
+      }
       if (payment_method.type == PaymentMethodEnum.JAWALI) {
         const make_payment = await this.paymentService.jawalicashOut(
           req.payment_method.transaction_number,
           req.payment_method.wallet_number,
-         Number( order.total_price) + Number(order.delivery_fee),
+          total,
         );
         if (!make_payment) {
           throw new BadRequestException('payment failed');

@@ -13,6 +13,7 @@ import { Transaction } from '../wallet/transaction.entity';
 import { ReturnOrder } from './return-order/return-order.entity';
 import { PaymentMethod } from '../payment_method/payment_method.entity';
 import { Reason } from '../reason/reason.entity';
+import { PromoCode } from '../promo-code/promo-code.entity';
 
 @Entity()
 export class Order extends OwnedEntity {
@@ -35,6 +36,11 @@ export class Order extends OwnedEntity {
   @JoinColumn()
   address: Address;
 
+  @ManyToOne(() => PromoCode, (promoCode) => promoCode.orders)
+  @JoinColumn()
+  promo_code: PromoCode;
+  @Column({ nullable: true })
+  promo_code_id: string;
   @Column()
   address_id: string;
 
