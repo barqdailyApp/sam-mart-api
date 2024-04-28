@@ -1,4 +1,4 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { TransactionService } from './transaction.service';
 import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
@@ -8,6 +8,7 @@ import { applyQueryFilters, applyQueryIncludes } from 'src/core/helpers/service-
 import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
 import { RolesGuard } from '../authentication/guards/roles.guard';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
+import { MakeTransactionRequest } from './dto/requests/make-transaction-request';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -40,4 +41,12 @@ export class TransactionController {
   async getWallet(@Query("user_id") user_id:string ) {
     return new ActionResponse(await this.transactionService.getWallet(user_id));
   }
+
+  @Post()
+ async makeTransaction(@Body() request: MakeTransactionRequest) { 
+    return new ActionResponse(await this.transactionService.makeTransaction(request));
+    
+  }
+
+
 }

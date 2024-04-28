@@ -62,6 +62,7 @@
     "product_additional_service_not_found" :"Product Additional Service not found",
     "email_exists" :"Email already exists",
     "phone_exists":"Phone already exists",
+    "insufficient_balance":"insufficient balance",
     "product_barcode_exist":"Product barcode already exists",
     "driver_has_active_orders":"Driver has active orders",
     "banner_not_found":"Banner not found",

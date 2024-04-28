@@ -25,6 +25,8 @@ import { PromoCodeService } from '../promo-code/promo-code.service';
     WarehouseOperationTransaction,
     PaymentMethodService,
     PromoCodeService,
+    TransactionService
+    
   ],
   imports: [GatewaysModule, NotificationModule],
 })

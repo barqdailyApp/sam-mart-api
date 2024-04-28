@@ -38,6 +38,11 @@ import { PaymentMethodEnum } from 'src/infrastructure/data/enums/payment-method'
 import { PaymentMethod } from 'src/infrastructure/entities/payment_method/payment_method.entity';
 import { PaymentMethodService } from 'src/modules/payment_method/payment_method.service';
 import { PromoCodeService } from 'src/modules/promo-code/promo-code.service';
+import { TransactionService } from 'src/modules/transaction/transaction.service';
+import { MakeTransactionRequest } from 'src/modules/transaction/dto/requests/make-transaction-request';
+import { TransactionTypes } from 'src/infrastructure/data/enums/transaction-types';
+import { Wallet } from 'src/infrastructure/entities/wallet/wallet.entity';
+import { Transaction } from 'src/infrastructure/entities/wallet/transaction.entity';
 @Injectable()
 export class MakeOrderTransaction extends BaseTransaction<
   MakeOrderRequest,
@@ -50,6 +55,7 @@ export class MakeOrderTransaction extends BaseTransaction<
     private readonly notificationService: NotificationService,
     private readonly paymentService: PaymentMethodService,
     private readonly promoCodeService: PromoCodeService,
+    private readonly transactionService: TransactionService,
   ) {
     super(dataSource);
   }
@@ -183,6 +189,7 @@ export class MakeOrderTransaction extends BaseTransaction<
           order.total_price = total;
         }
       }
+      await context.save(Order, order);
       if (payment_method.type == PaymentMethodEnum.JAWALI) {
         const make_payment = await this.paymentService.jawalicashOut(
           req.payment_method.transaction_number,
@@ -193,8 +200,29 @@ export class MakeOrderTransaction extends BaseTransaction<
           throw new BadRequestException('payment failed');
         }
       }
+      if (payment_method.type == PaymentMethodEnum.WALLET) {
+        
+    const wallet = await context.findOneBy(Wallet,{user_id:user.id});
 
-      await context.save(Order, order);
+    wallet.balance = Number( wallet.balance) - Number(total);
+    if(wallet.balance < 0){
+      throw new BadRequestException("message.insufficient_balance");
+    }
+    const transaction = plainToInstance(Transaction, {
+      amount: -total,
+      user_id: user.id,
+      type: TransactionTypes.ORDER_PAYMENT,
+      wallet_id: wallet.id,
+    });
+
+
+
+    await context.save(transaction);
+   
+    await context .save(wallet);
+  
+      }
+
       await context.delete(CartProduct, cart_products);
 
       //warehouse opreation

@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Transaction } from 'src/infrastructure/entities/wallet/transaction.entity';
 import { Wallet } from 'src/infrastructure/entities/wallet/wallet.entity';
@@ -21,17 +21,26 @@ export class TransactionService extends BaseUserService<Transaction> {
   }
 
   async makeTransaction(req: MakeTransactionRequest) {
+
     const wallet = await this.walletRepository.findOneBy({
       user_id: req.user_id,
     });
+
     wallet.balance = Number( wallet.balance) + Number(req.amount);
+    if(wallet.balance < 0){
+      throw new BadRequestException("message.insufficient_balance");
+    }
     const transaction = plainToInstance(Transaction, {
       ...req,
       wallet_id: wallet.id,
     });
 
+
+
     await this.transactionRepository.save(transaction);
+   
     await this.walletRepository.save(wallet);
+  
     return transaction;
   }
 
