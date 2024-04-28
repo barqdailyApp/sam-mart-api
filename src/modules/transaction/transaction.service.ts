@@ -27,9 +27,7 @@ export class TransactionService extends BaseUserService<Transaction> {
     });
 
     wallet.balance = Number( wallet.balance) + Number(req.amount);
-    if(wallet.balance < 0){
-      throw new BadRequestException("message.insufficient_balance");
-    }
+   
     const transaction = plainToInstance(Transaction, {
       ...req,
       wallet_id: wallet.id,
