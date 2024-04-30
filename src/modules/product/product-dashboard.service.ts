@@ -593,8 +593,8 @@ export class ProductDashboardService {
     }
 
     if (product_barcode) {
-      query = query.andWhere('product.barcode = :product_barcode', {
-        product_barcode,
+      query = query.andWhere('product.barcode LIKE :product_barcode', {
+       product_barcode: `%${product_barcode}%`,
       });
     }
     const [products, total] = await query.getManyAndCount();
@@ -1129,7 +1129,7 @@ export class ProductDashboardService {
       relations: {
         product: {product_images:true},
         product_measurement: { measurement_unit: true },
-      },withDeleted:true
+      }
     });
 
     // Create a flat structure for products
