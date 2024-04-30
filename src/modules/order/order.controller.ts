@@ -181,14 +181,14 @@ export class OrderController {
   async getTotalDriverShipments() {
     const shipmentsTotal = await this.orderService.getTotalDriverShipments();
 
-    const shipmentsTotalResponse = new ShipmentsTotalDriverResponse(
-      shipmentsTotal.ordersNew,
-      shipmentsTotal.ordersActive,
+    // const shipmentsTotalResponse = new ShipmentsTotalDriverResponse(
+    //   shipmentsTotal.ordersNew,
+    //   shipmentsTotal.ordersActive,
 
-      shipmentsTotal.ordersDelivered,
-    );
+    //   shipmentsTotal.ordersDelivered,
+    // );
 
-    return new ActionResponse(shipmentsTotalResponse);
+    return new ActionResponse(shipmentsTotal);
   }
 
   @Get('driver-shipments')
