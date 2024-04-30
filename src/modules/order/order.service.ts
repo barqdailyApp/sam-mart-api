@@ -755,10 +755,18 @@ export class OrderService extends BaseUserService<Order> {
       withDeleted:true
     });
 
+    const ordersReturn  = await this.ReturnOrderRepository.count({
+      where: {
+         driver_id: driver.id,
+         status: ReturnOrderStatus.ACCEPTED,
+        }
+    })
+
     return {
       ordersNew,
       ordersActive,
       ordersDelivered,
+      ordersReturn
     };
   }
   async getDashboardShipments(driverShipmentsQuery: DriverShipmentsQuery) {
