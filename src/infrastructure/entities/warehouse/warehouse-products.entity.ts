@@ -3,9 +3,10 @@ import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { Product } from '../product/product.entity';
 import { Warehouse } from './warehouse.entity';
 import { ProductMeasurement } from '../product/product-measurement.entity';
+import { AuditableEntity } from 'src/infrastructure/base/auditable.entity';
 
 @Entity()
-export class WarehouseProducts extends BaseEntity {
+export class WarehouseProducts extends AuditableEntity {
   @ManyToOne(() => Warehouse, (warehouse) => warehouse.products, {
     onDelete: 'CASCADE',
   })

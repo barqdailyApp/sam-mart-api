@@ -71,13 +71,14 @@ export class WarehouseService extends BaseService<Warehouse> {
             barcode: query.product_barcode,
           },
         },
-      ],
+      ],order:{updated_at:'DESC'},
       relations: {
         product: { product_images: true },
         product_measurement: { measurement_unit: true },
       },
       skip: (query.page - 1) * query.limit,
       take: query.limit,
+      
     });
     return products;
   }

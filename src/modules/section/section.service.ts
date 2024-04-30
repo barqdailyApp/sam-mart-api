@@ -163,11 +163,12 @@ export class SectionService extends BaseService<Section> {
 
   async deleteSectionCategory(id: string) {
     const section_category = await this.section_category_repo.findOne({
-      where: { id: id },
+      where: { id: id },relations:{category_subCategory:true}
     });
     if (!section_category) {
       throw new BadRequestException('category not found');
     }
+    if(section_category.category_subCategory.length>0) throw new BadRequestException('category has subcategories');
     this.orderItems(section_category.section_id,true);
     return await this.section_category_repo.softDelete(id);
   }
