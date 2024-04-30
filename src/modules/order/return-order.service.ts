@@ -350,10 +350,14 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
         query.filters.push(`order.user_id=${this.currentUser.id}`);
       }
     } else if (this.currentUser.roles.includes(Role.DRIVER)) {
+      const driver = await this.driverRepository.findOne({
+        where: { user_id: this.currentUser?.id },
+      });
+      
       if (query.filters[0]) {
-        query.filters[0] = `${query.filters[0]},driver_id=${this.currentUser.id}`;
+        query.filters[0] = `${query.filters[0]},driver_id=${driver?.id}`;
       } else {
-        query.filters.push(`driver_id=${this.currentUser.id}`);
+        query.filters.push(`driver_id=${driver?.id}`);
       }
     }
 
