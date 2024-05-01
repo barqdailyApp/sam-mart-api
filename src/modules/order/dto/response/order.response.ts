@@ -15,13 +15,9 @@ export class OrderResponse {
 
   @Expose() @Type(() => UserResponse) readonly user: UserResponse;
 
-  @Transform(({ value }) => plainToClass(WarehouseResponse, value))
-  @Expose()
-  readonly warehouse: WarehouseResponse;
+  @Expose() @Type(() => WarehouseResponse) readonly warehouse: WarehouseResponse;
 
-  @Transform(({ value }) => plainToClass(AddressResponse, value))
-  @Expose()
-  readonly address: AddressResponse;
+  @Expose() @Type(() => AddressResponse) readonly address: AddressResponse;
 
   @Transform(({ value }) => plainToClass(SectionResponse, value))
   @Expose()

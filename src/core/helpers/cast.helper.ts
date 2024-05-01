@@ -8,7 +8,7 @@ interface ToNumberOptions {
 }
 
 export function toString(value: any): string {
-    return value.toString() || '';
+    return value?.toString() || '';
 }
 
 export function toLowerCase(value: string): string {
