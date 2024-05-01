@@ -256,35 +256,41 @@ export class OrderService extends BaseUserService<Order> {
     const ordersDriversAccepted = await this.shipmentRepository.count({
       where: {
         status: ShipmentStatusEnum.CONFIRMED,
-      },withDeleted: true,
+      },
+      withDeleted: true,
     });
     const ordersReadyForPickup = await this.shipmentRepository.count({
       where: {
         status: ShipmentStatusEnum.READY_FOR_PICKUP,
-      },withDeleted: true,
+      },
+      withDeleted: true,
     });
     const ordersProcessing = await this.shipmentRepository.count({
       where: {
         status: ShipmentStatusEnum.PROCESSING,
-      },withDeleted: true,
+      },
+      withDeleted: true,
     });
 
     const ordersPicked = await this.shipmentRepository.count({
       where: {
         status: ShipmentStatusEnum.PICKED_UP,
-      },withDeleted: true,
+      },
+      withDeleted: true,
     });
 
     const ordersDelivered = await this.shipmentRepository.count({
       where: {
         status: ShipmentStatusEnum.DELIVERED,
-      },withDeleted: true,
+      },
+      withDeleted: true,
     });
 
     const ordersCanceled = await this.shipmentRepository.count({
       where: {
         status: ShipmentStatusEnum.CANCELED,
-      },withDeleted: true,
+      },
+      withDeleted: true,
     });
     return {
       ordersTotal,
@@ -328,7 +334,7 @@ export class OrderService extends BaseUserService<Order> {
       'التوصيل سعر',
     ]);
 
-    if(order_details.promo_code_discount){
+    if (order_details.promo_code_discount) {
       products_table.push([
         -order_details.promo_code_discount,
         '',
@@ -338,7 +344,13 @@ export class OrderService extends BaseUserService<Order> {
       ]);
     }
     products_table.push([
-      Number(order_details.total_price) + Number(order_details.delivery_fee),
+      Number(order_details.total_price) +
+        Number(order_details.delivery_fee) -
+        Number(
+          order_details.promo_code_discount
+            ? order_details.promo_code_discount
+            : 0,
+        ),
       '',
       '',
       '',
@@ -728,7 +740,6 @@ export class OrderService extends BaseUserService<Order> {
       where: {
         user_id: user.id,
       },
-
     });
     const ordersNew = await this.shipmentRepository.count({
       where: {
@@ -762,21 +773,21 @@ export class OrderService extends BaseUserService<Order> {
         driver_id: driver.id,
         warehouse_id: driver.warehouse_id,
       },
-      withDeleted:true
+      withDeleted: true,
     });
 
-    const ordersReturn  = await this.ReturnOrderRepository.count({
+    const ordersReturn = await this.ReturnOrderRepository.count({
       where: {
-         driver_id: driver.id,
-         status: ReturnOrderStatus.ACCEPTED,
-        }
-    })
+        driver_id: driver.id,
+        status: ReturnOrderStatus.ACCEPTED,
+      },
+    });
 
     return {
       ordersNew,
       ordersActive,
       ordersDelivered,
-      ordersReturn
+      ordersReturn,
     };
   }
   async getDashboardShipments(driverShipmentsQuery: DriverShipmentsQuery) {
