@@ -330,11 +330,11 @@ export class OrderService extends BaseUserService<Order> {
 
     if(order_details.promo_code_discount){
       products_table.push([
-        order_details.promo_code_discount,
+        -order_details.promo_code_discount,
         '',
         '',
         '',
-        'خصم القيمة',
+        'الخصم قيمة',
       ]);
     }
     products_table.push([
