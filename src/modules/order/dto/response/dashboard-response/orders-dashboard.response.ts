@@ -9,15 +9,13 @@ export class OrdersDashboardResponse {
   @Expose() slot_id: string;
   @Expose() section_id: string;
   @Expose() order_created_at: Date;
-  
+
   @Expose() order_number: string;
   @Expose() transaction_number: string;
 
-   
   @Expose() delivery_type: DeliveryType;
   @Expose() delivery_fee: number;
 
-  
   @Expose() total_price: number;
   @Expose() payment_method: PaymentMethodEnum;
   @Expose() is_paid: boolean;
@@ -29,6 +27,7 @@ export class OrdersDashboardResponse {
   @Expose() user: any;
   @Expose() address: any;
   @Expose() shipments: any;
+  @Expose() promo_code_discount: number;
 
   constructor(order: Order) {
     this.order_id = order.id;
@@ -36,6 +35,7 @@ export class OrdersDashboardResponse {
     this.section_id = order.section_id;
     this.order_created_at = order.created_at;
     this.order_number = order.number;
+    this.promo_code_discount = order.promo_code_discount;
     this.transaction_number = order.transaction_number;
     this.order_products = order.shipments[0].shipment_products.length;
     this.total_price = order.total_price;
@@ -48,10 +48,10 @@ export class OrdersDashboardResponse {
     this.warehouse = {
       id: order.warehouse.id,
       name_ar: order.warehouse.name_ar,
-      name_en: order.warehouse.name_en,      
+      name_en: order.warehouse.name_en,
       latitude: order.warehouse.latitude,
       longitude: order.warehouse.longitude,
-    }
+    };
     this.user = {
       id: order.user.id,
       username: order.user.name,

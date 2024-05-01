@@ -58,4 +58,6 @@ export class OrderResponse {
 
   @Expose() readonly delivery_fee: number;
 
+  @Expose() readonly promo_code_discount: number;
+
 }

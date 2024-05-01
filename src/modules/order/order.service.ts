@@ -327,6 +327,16 @@ export class OrderService extends BaseUserService<Order> {
       '',
       'التوصيل سعر',
     ]);
+
+    if(order_details.promo_code_discount){
+      products_table.push([
+        order_details.promo_code_discount,
+        '',
+        '',
+        '',
+        'خصم القيمة',
+      ]);
+    }
     products_table.push([
       Number(order_details.total_price) + Number(order_details.delivery_fee),
       '',

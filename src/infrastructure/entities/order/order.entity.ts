@@ -93,4 +93,7 @@ export class Order extends OwnedEntity {
 
   @Column({ nullable: true })
   slot_id: string;
+
+  @Column({nullable:true})
+  promo_code_discount:number
 }
