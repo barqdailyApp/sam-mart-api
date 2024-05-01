@@ -158,7 +158,7 @@ export class CategoryService extends BaseService<Category> {
     });
     
     if (!subcategory) throw new BadRequestException('subcategory not found');
-    if(subcategory.product_sub_categories.length>0) throw new BadRequestException('subcategory has products');
+    if(subcategory.product_sub_categories.length>0) throw new BadRequestException('message.subcategory_has_products');
     this.orderItems(subcategory.section_category_id,true);
     return await this.category_subcategory_repo.softDelete(id);
   }

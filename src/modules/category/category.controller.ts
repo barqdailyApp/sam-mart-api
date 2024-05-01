@@ -157,7 +157,7 @@ export class CategoryController {
     if (
       category.section_categories.map((e) => e.category_subCategory).length > 0
     ) {
-      throw new BadRequestException('category has subcategories');
+      throw new BadRequestException('message.category_has_subcategories');
     }
     const deleted_category = await this.categoryService.softDelete(id);
 
