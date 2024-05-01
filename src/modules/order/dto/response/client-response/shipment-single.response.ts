@@ -54,6 +54,7 @@ export class ShipmentSingleResponse {
       number: shipments.order.number,
       total_price: shipments.order.total_price,
       is_paid: shipments.order.is_paid,
+      promo_code_discount: shipments.order.promo_code_discount,
       payment_method: shipments.order.payment_method,
       delivery_type: shipments.order.delivery_type,
       delivery_day: shipments.order.delivery_day,
