@@ -143,26 +143,6 @@ export class CategoryController {
     return new ActionResponse(category);
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  @ApiBearerAuth()
-  @Delete('/:id')
-  async deleteCategory(@Param('id') id: string) {
-    const category = await this.categoryService._repo.findOne({
-      where: {
-        id,
-      },
-      relations: { section_categories: { category_subCategory: true } },
-    });
-    if (
-      category.section_categories.map((e) => e.category_subCategory).length > 0
-    ) {
-      throw new BadRequestException('message.category_has_subcategories');
-    }
-    const deleted_category = await this.categoryService.softDelete(id);
-
-    return new ActionResponse(deleted_category);
-  }
   @Get('/:section_category_id/subcategories')
   async getCAtegorySubcategory(
     @Param('section_category_id') id: string,
@@ -216,5 +196,26 @@ export class CategoryController {
     return new ActionResponse(
       await this.categoryService.deleteCategorySubcategory(id),
     );
+  }
+  
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @Delete('/:id')
+  async deleteCategory(@Param('id') id: string) {
+    const category = await this.categoryService._repo.findOne({
+      where: {
+        id,
+      },
+      relations: { section_categories: { category_subCategory: true } },
+    });
+    if (
+      category.section_categories.map((e) => e.category_subCategory).length > 0
+    ) {
+      throw new BadRequestException('message.category_has_subcategories');
+    }
+    const deleted_category = await this.categoryService.softDelete(id);
+
+    return new ActionResponse(deleted_category);
   }
 }
