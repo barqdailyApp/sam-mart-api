@@ -51,6 +51,7 @@ import { User } from 'src/infrastructure/entities/user/user.entity';
 import { WarehouseProducts } from 'src/infrastructure/entities/warehouse/warehouse-products.entity';
 import { Section } from 'src/infrastructure/entities/section/section.entity';
 import { Category } from 'src/infrastructure/entities/category/category.entity';
+import { DeleteProductTransaction } from './utils/delete-product.transaction';
 
 @Injectable()
 export class ProductDashboardService {
@@ -89,6 +90,9 @@ export class ProductDashboardService {
 
     @Inject(CreateProductTransaction)
     private readonly addProductTransaction: CreateProductTransaction,
+
+    @Inject(DeleteProductTransaction)
+    private readonly deleteProductTransaction: DeleteProductTransaction,
 
     @Inject(SubcategoryService)
     private readonly subCategoryService: SubcategoryService,
@@ -594,7 +598,7 @@ export class ProductDashboardService {
 
     if (product_barcode) {
       query = query.andWhere('product.barcode LIKE :product_barcode', {
-       product_barcode: `%${product_barcode}%`,
+        product_barcode: `%${product_barcode}%`,
       });
     }
     const [products, total] = await query.getManyAndCount();
@@ -884,57 +888,9 @@ export class ProductDashboardService {
   }
 
   async deleteProduct(product_id: string): Promise<DeleteResult> {
-    const product = await this.productRepository.findOne({
-      where: { id: product_id },
+    return await this.deleteProductTransaction.run({
+      product_id,
     });
-    if (!product) {
-      throw new NotFoundException('message.product_not_found');
-    }
-    // check if product in warehouse have quantity
-    const product_main_measurement =
-      await this.productMeasurementRepository.findOne({
-        where: {
-          product_id,
-          is_main_unit: true,
-        },
-      });
-    //* check if product in warehouse have quantity
-    const product_warehouse = await this.warehouse_products_repo.find({
-      where: { product_id },
-    });
-    const product_quantities =
-      product_warehouse.reduce((acc, cur) => acc + cur.quantity, 0) /
-      product_main_measurement.conversion_factor;
-    if (product_quantities > 0) {
-      throw new BadRequestException(
-        'message.product_has_quantity_in_warehouse',
-      );
-    }
-    //* check if product has sub category
-    const product_category = await this.productSubCategory_repo.find({
-      where: {
-        product_id,
-      },
-    });
-    if (product_category.length > 0) {
-      throw new BadRequestException('message.product_has_sub_category');
-    }
-
-    //* check if product has offers
-    const product_offers = await this.productOfferRepository.find({
-      where: {
-        product_category_price: {
-          product_sub_category: {
-            product_id,
-          },
-        },
-      },
-    });
-    if (product_offers.length > 0) {
-      throw new BadRequestException('message.product_has_offers');
-    }
-
-    return await this.productRepository.softDelete({ id: product_id });
   }
 
   async deleteProductImage(
@@ -1011,10 +967,10 @@ export class ProductDashboardService {
         // productId: product.id,
         // createdAt: product.created_at,
         // updatedAt: product.updated_at,
-        barcode:product.barcode,
+        barcode: product.barcode,
         name_ar: product.name_ar,
         name_en: product.name_en,
-    
+
         description_ar: product.description_ar,
         description_en: product.description_en,
         // is_active: product.is_active,
@@ -1090,12 +1046,11 @@ export class ProductDashboardService {
 
     // Create a flat structure for products
     const flattenedProducts = productSubCategory.map((product) => {
- 
       return {
         // productId: product.id,
         // createdAt: product.created_at,
         // updatedAt: product.updated_at,
-        barcode:product.product.barcode,
+        barcode: product.product.barcode,
         category_ar:
           product.category_subCategory.section_category.category.name_ar,
         category_en:
@@ -1104,7 +1059,7 @@ export class ProductDashboardService {
         subcategory_en: product.category_subCategory.subcategory.name_en,
         name_ar: product.product.name_ar,
         name_en: product.product.name_en,
-      
+
         description_ar: product.product?.description_ar,
         description_en: product.product?.description_en,
 
@@ -1131,24 +1086,24 @@ export class ProductDashboardService {
     const warehouse_products = await this.warehouse_products_repo.find({
       where: { warehouse_id },
       relations: {
-        product: {product_images:true},
+        product: { product_images: true },
         product_measurement: { measurement_unit: true },
-      }
+      },
     });
-
 
     // Create a flat structure for products
     const flattenedProducts = warehouse_products.map((product) => {
-     
       return {
-        barcode:product.product.barcode,
+        barcode: product.product.barcode,
         name_ar: product.product.name_ar,
         name_en: product.product.name_en,
-      
+
         quatntity: product.quantity,
-        measurement_units_ar: product.product_measurement.measurement_unit.name_ar,
-        measurement_units_en: product.product_measurement.measurement_unit.name_en,
-      
+        measurement_units_ar:
+          product.product_measurement.measurement_unit.name_ar,
+        measurement_units_en:
+          product.product_measurement.measurement_unit.name_en,
+
         description_ar: product.product?.description_ar,
         description_en: product.product?.description_en,
 
@@ -1156,7 +1111,6 @@ export class ProductDashboardService {
           url: image.url,
           is_logo: image.is_logo,
         })),
-
       };
     });
 
