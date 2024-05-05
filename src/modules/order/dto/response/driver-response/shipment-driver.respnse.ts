@@ -29,7 +29,7 @@ export class ShipmentDriverResponse {
   readonly shipment_products: ShipmentProductResponse[];
 
 
-  
+
   @Transform(({ value }) => plainToClass(OrderDriverResponse, value))
   @Expose()
   readonly order: OrderDriverResponse;
@@ -42,4 +42,10 @@ export class ShipmentDriverResponse {
   @Expose() readonly order_shipped_at: Date;
 
   @Expose() readonly order_delivered_at: Date;
+
+  @Expose() readonly order_canceled_at: Date;
+
+  @Expose() readonly cancel_reason_id: string;
+
+  @Expose() readonly canceled_by: string;
 }

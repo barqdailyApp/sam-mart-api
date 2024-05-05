@@ -17,6 +17,7 @@ export class ShipmentSingleResponse {
   @Expose()  order_delivered_at: Date;
 
   @Expose() order_canceled_at: Date;
+  @Expose() canceled_by: string;
 
   @Expose() status: ShipmentStatusEnum;
   @Expose() driver: any;
@@ -38,6 +39,7 @@ export class ShipmentSingleResponse {
     this.order_shipped_at = shipments.order_shipped_at;
     this.order_delivered_at = shipments.order_delivered_at;
     this.order_canceled_at = shipments.order_canceled_at;
+    this.canceled_by = shipments.canceled_by;
     this.status = shipments.status;
     this.driver= shipments.driver_id
     ? {

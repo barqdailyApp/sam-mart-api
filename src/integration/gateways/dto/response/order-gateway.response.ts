@@ -24,4 +24,5 @@ export class OrderGatewayResponse {
     @Expose() order_delivered_at: Date;
     @Expose() order_canceled_at: Date;
     @Expose() cancel_reason_id: Date;
+    @Expose() canceled_by: string;
 }
