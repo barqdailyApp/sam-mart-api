@@ -45,7 +45,7 @@ export class PromoCodeController {
   async getPromoCode(@Query() query: PaginatedRequest) {
     const promo_codes = await this.promoCodeService.findAll(query);
     if (query.limit && query.page) {
-      const total = await this.promoCodeService.count();
+      const total = await this.promoCodeService.count(query);
       return new PaginatedResponse(promo_codes, {
         meta: { total, page: query.page, limit: query.limit },
       });
