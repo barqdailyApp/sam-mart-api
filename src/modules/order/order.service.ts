@@ -39,10 +39,12 @@ import { features } from 'process';
 import { reverseSentence } from 'src/core/helpers/cast.helper';
 const PdfDocumnet = require('pdfkit-table');
 import { Response } from 'express';
+import { Product } from 'src/infrastructure/entities/product/product.entity';
 @Injectable()
 export class OrderService extends BaseUserService<Order> {
   constructor(
     @InjectRepository(Order) private orderRepository: Repository<Order>,
+    @InjectRepository(Product) private productRepository: Repository<Product>,
 
     @InjectRepository(Shipment)
     private shipmentRepository: Repository<Shipment>,
@@ -292,6 +294,11 @@ export class OrderService extends BaseUserService<Order> {
       },
       withDeleted: true,
     });
+
+    const returnedOrder = await this.ReturnOrderRepository.count({
+      
+    })
+    const products= await this.productRepository.count({})
     return {
       ordersTotal,
       ordersNew,
@@ -301,6 +308,8 @@ export class OrderService extends BaseUserService<Order> {
       ordersPicked,
       ordersDelivered,
       ordersCanceled,
+      returnedOrder,
+      products
     };
   }
 
