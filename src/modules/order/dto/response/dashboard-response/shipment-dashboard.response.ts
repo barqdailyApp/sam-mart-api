@@ -30,6 +30,7 @@ export class ShipmentDashboardResponse {
       delivery_day: shipments.order.delivery_day,
       delivery_fee: shipments.order.delivery_fee,
       created_at: shipments.order.created_at,
+      estimated_delivery_time: shipments.order.estimated_delivery_time,
       client: {
         id: shipments.order.user.id,
         name: shipments.order.user.name,
