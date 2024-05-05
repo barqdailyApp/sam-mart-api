@@ -21,4 +21,10 @@ export class UpdatePromoCodeRequest {
     @IsOptional()
     @IsNumber()
     number_of_uses: number;
+    @ApiProperty()
+    @IsOptional()
+    @Transform(({ value }) => Boolean(value))
+    is_active: boolean;
+
+
 }
