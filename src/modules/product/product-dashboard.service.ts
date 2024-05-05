@@ -1013,6 +1013,7 @@ export class ProductDashboardService {
         // updatedAt: product.updated_at,
         name_ar: product.name_ar,
         name_en: product.name_en,
+        barcode:product.barcode,
         description_ar: product.description_ar,
         description_en: product.description_en,
         // is_active: product.is_active,
@@ -1101,6 +1102,7 @@ export class ProductDashboardService {
         subcategory_en: product.category_subCategory.subcategory.name_en,
         name_ar: product.product.name_ar,
         name_en: product.product.name_en,
+        barcode:product.product.barcode,
         description_ar: product.product?.description_ar,
         description_en: product.product?.description_en,
 
@@ -1132,13 +1134,15 @@ export class ProductDashboardService {
       }
     });
 
+
     // Create a flat structure for products
     const flattenedProducts = warehouse_products.map((product) => {
-
+      console.log(product.id)
       return {
    
         name_ar: product.product.name_ar,
         name_en: product.product.name_en,
+        barcode:product.product.barcode,
         quatntity: product.quantity,
         measurement_units_ar: product.product_measurement.measurement_unit.name_ar,
         measurement_units_en: product.product_measurement.measurement_unit.name_en,
