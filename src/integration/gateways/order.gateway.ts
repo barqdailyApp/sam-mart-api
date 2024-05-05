@@ -94,6 +94,7 @@ export class OrderGateway
           order_shipped_at: body.shipment.order_shipped_at,
           order_delivered_at: body.shipment.order_delivered_at,
           cancel_reason_id: body.shipment.cancel_reason_id,
+          canceled_by: body.shipment?.canceled_by,
           order_canceled_at: body.shipment.order_canceled_at,
           shipment_id: body.shipment.id
         },
