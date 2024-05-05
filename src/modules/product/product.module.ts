@@ -7,6 +7,7 @@ import { SubcategoryService } from '../subcategory/subcategory.service';
 import { ProductClientService } from './product-client.service';
 import { ProductClientController } from './product-client.controller';
 import { NotificationModule } from '../notification/notification.module';
+import { DeleteProductTransaction } from './utils/delete-product.transaction';
 
 @Module({
   controllers: [ProductDashboardController, ProductClientController],
@@ -15,6 +16,7 @@ import { NotificationModule } from '../notification/notification.module';
     SubcategoryService,
     ProductClientService,
     ProductDashboardService,
+    DeleteProductTransaction
   ],
   imports: [MeasurementUnitModule,NotificationModule],
   exports: [],
