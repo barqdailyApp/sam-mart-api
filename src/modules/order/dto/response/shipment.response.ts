@@ -43,4 +43,5 @@ export class ShipmentResponse {
 
   @Expose() readonly cancel_reason_id: string;
 
+  @Expose() readonly canceled_by: string;
 }

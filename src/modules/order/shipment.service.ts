@@ -129,15 +129,16 @@ export class ShipmentService extends BaseService<Shipment> {
       relations: ['address'],
     });
     order.is_paid = true;
-    if(shipment.order.payment_method==PaymentMethodEnum.CASH){
-    await this.transactionService.makeTransaction(
-      new MakeTransactionRequest({
-        amount: -(Number(order.total_price)+Number(order.delivery_fee)),
-        type: TransactionTypes.ORDER_DELIVERD,
-        order_id: order.id,
-        user_id: shipment.driver.user_id,
-      }),
-    );}
+    if (shipment.order.payment_method == PaymentMethodEnum.CASH) {
+      await this.transactionService.makeTransaction(
+        new MakeTransactionRequest({
+          amount: -(Number(order.total_price) + Number(order.delivery_fee)),
+          type: TransactionTypes.ORDER_DELIVERD,
+          order_id: order.id,
+          user_id: shipment.driver.user_id,
+        }),
+      );
+    }
     await this.shipmentRepository.save(shipment);
     await this.driverRepository.save(driver);
     await this.orderRepository.save(order);
@@ -574,12 +575,13 @@ export class ShipmentService extends BaseService<Shipment> {
 
     shipment.status = ShipmentStatusEnum.CANCELED;
     shipment.order_canceled_at = new Date();
+    shipment.canceled_by = currentUserRole[0];
     shipment.cancelShipmentReason = reason;
     if (shipment.driver) {
       driver.current_orders = driver.current_orders - 1;
       await this.driverRepository.save(driver);
     }
-
+    
     await this.shipmentRepository.save(shipment);
 
     const mappedImportedProducts = [];
@@ -637,18 +639,19 @@ export class ShipmentService extends BaseService<Shipment> {
       }),
     );
 
-    if(shipment.driver){
-    await this.notificationService.create(
-      new NotificationEntity({
-        user_id: shipment.driver.user_id,
-        url: shipment.order.id,
-        type: NotificationTypes.ORDERS,
-        title_ar: 'تحديث الطلب',
-        title_en: 'order updated',
-        text_ar: 'تم الغاء الطلب',
-        text_en: 'the request has been canceled',
-      }),
-    );}
+    if (shipment.driver) {
+      await this.notificationService.create(
+        new NotificationEntity({
+          user_id: shipment.driver.user_id,
+          url: shipment.order.id,
+          type: NotificationTypes.ORDERS,
+          title_ar: 'تحديث الطلب',
+          title_en: 'order updated',
+          text_ar: 'تم الغاء الطلب',
+          text_en: 'the request has been canceled',
+        }),
+      );
+    }
     delete shipment.shipment_products;
     return shipment;
   }
@@ -724,7 +727,7 @@ export class ShipmentService extends BaseService<Shipment> {
         ? 'ASSIGNED'
         : ShipmentStatusEnum.CONFIRMED;
 
-    const to_rooms = ['admin',shipment.order.user_id];
+    const to_rooms = ['admin', shipment.order.user_id];
     if (action === AddDriverShipmentOption.DRIVER_ASSIGN_SHIPMENT) {
       if (shipment.order.delivery_type === DeliveryType.FAST) {
         // if he assigned to fast delivery, notify the drivers in the warehouse. to avoid double accept

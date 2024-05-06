@@ -8,6 +8,7 @@ import { ShipmentStatusEnum } from 'src/infrastructure/data/enums/shipment_statu
 import { ShipmentChat } from './shipment-chat.entity';
 import { ShipmentFeedback } from './shipment-feedback.entity';
 import { Reason } from '../reason/reason.entity';
+import { Role } from 'src/infrastructure/data/enums/role.enum';
 
 @Entity()
 export class Shipment extends AuditableEntity {
@@ -29,16 +30,19 @@ export class Shipment extends AuditableEntity {
 
   @Column()
   warehouse_id: string;
-  
+
   @Column({ default: ShipmentStatusEnum.PENDING })
   status: ShipmentStatusEnum;
-  
-  @ManyToOne(()=> Reason, reason => reason.cancelShipment, {onDelete: 'SET NULL'})
-  @JoinColumn({name: 'cancel_reason_id'})
+
+  @ManyToOne(() => Reason, reason => reason.cancelShipment, { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'cancel_reason_id' })
   cancelShipmentReason: Reason;
 
-  @Column({nullable: true})
+  @Column({ nullable: true })
   cancel_reason_id: string;
+
+  @Column({ type: 'enum', enum: Role, nullable: true })
+  canceled_by: Role;
 
   @Column({ nullable: true })
   order_confirmed_at: Date;

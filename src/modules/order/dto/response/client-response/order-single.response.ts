@@ -45,6 +45,7 @@ export class OrderSingleResponse {
       order_shipped_at: order.shipments[0].order_shipped_at,
       order_delivered_at: order.shipments[0].order_delivered_at,
       order_canceled_at: order.shipments[0].order_canceled_at,
+      canceled_by: order.shipments[0]?.canceled_by,
       shipment_feedback: order.shipments[0].order_feedback
         ? {
             id: order.shipments[0].order_feedback.id,

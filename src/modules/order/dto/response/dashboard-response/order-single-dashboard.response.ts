@@ -87,6 +87,7 @@ export class OrderSingleDashboardResponse {
       order_shipped_at: order.shipments[0].order_shipped_at,
       order_delivered_at: order.shipments[0].order_delivered_at,
       order_canceled_at: order.shipments[0].order_canceled_at,
+      canceled_by: order.shipments[0]?.canceled_by,
       shipment_products: order.shipments[0].shipment_products.map(
         (shipment_product) => {
           return {
