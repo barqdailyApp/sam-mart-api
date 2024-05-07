@@ -156,11 +156,12 @@ export class ProductDashboardService {
       createProductOffer.price =
         productCategoryPrice.price - createProductOffer.discount_value;
     } else {
-      // if (createProductOffer.discount_value >= 1) {
-      //   throw new BadRequestException(
-      //     'message.discount_value_must_be_less_than_1',
-      //   );
-      // }
+      if (createProductOffer.discount_value >= 1 || createProductOffer.discount_value < 0) {
+        throw new BadRequestException(
+          'message.discount_value_must_be_between_0_and_1',
+        );
+      }
+      
       const discountedPercentage =
         (productCategoryPrice.price * createProductOffer.discount_value) / 100;
       createProductOffer.price =
