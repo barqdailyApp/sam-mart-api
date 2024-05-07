@@ -44,17 +44,27 @@ export class CartController {
     const cart_products = this._i18nResponse.entity(
       await this.cartService.getCartProducts(cart.id),
     );
-
+    
     return new ActionResponse(
       cart_products.map(
         (e) =>
           new CartProductRespone({
             id: e.cart.id,
             additional_services: e.cart.additions,
-            price: e.cart.price,
+            price:
+              Number(e.cart.product_category_price.price) +
+              (e.cart.additions?.length > 0
+                ? Number(
+                    e.cart.product_category_price.product_additional_services.filter(
+                      (j) => {
+                        return e.cart.additions?.includes(j.id);
+                      },
+                    )[0].price,
+                  )
+                : 0),
             quantity: e.cart.quantity,
             product: e.cart.product_category_price,
-            warehouse_quantity: e.warehouses_product
+            warehouse_quantity: e.warehouses_product,
           }),
       ),
     );
@@ -62,8 +72,8 @@ export class CartController {
 
   @Post('/add')
   async createCart(@Body() req: AddToCartRequest) {
-    const cart_product = (await this.cartService.addToCart(req));
-   
+    const cart_product = await this.cartService.addToCart(req);
+
     if (!cart_product) throw new BadRequestException();
     const result = this._i18nResponse.entity(
       await this.cartService.getSingleCartProduct(cart_product.id),
@@ -75,7 +85,7 @@ export class CartController {
       price: result.cart.price,
       quantity: result.cart.quantity,
       product: result.cart.product_category_price,
-      warehouse_quantity: result.warehouse_quantity
+      warehouse_quantity: result.warehouse_quantity,
     });
 
     return new ActionResponse(response);
@@ -85,11 +95,9 @@ export class CartController {
   async deleteCartProduct(@Param('cart_product_id') cart_product_id: string) {
     const get_cart_product = await this.cartService.getSingleCartProduct(
       cart_product_id,
-    )
-     await this.cartService.deleteCartProduct(
-      cart_product_id,
     );
- 
+    await this.cartService.deleteCartProduct(cart_product_id);
+
     return new ActionResponse(
       this._i18nResponse.entity(
         new CartProductRespone({
@@ -98,7 +106,7 @@ export class CartController {
           price: get_cart_product.cart.price,
           quantity: get_cart_product.cart.quantity,
           product: get_cart_product.cart.product_category_price,
-          Warehouse_quantity: get_cart_product.warehouse_quantity
+          Warehouse_quantity: get_cart_product.warehouse_quantity,
         }),
       ),
     );
@@ -117,7 +125,7 @@ export class CartController {
       price: result.cart.price,
       quantity: result.cart.quantity,
       product: result.cart.product_category_price,
-      warehouse_quantity: result.warehouse_quantity
+      warehouse_quantity: result.warehouse_quantity,
     });
     return new ActionResponse(response);
   }
@@ -135,7 +143,7 @@ export class CartController {
       price: result.cart.price,
       quantity: result.cart.quantity,
       product: result.cart.product_category_price,
-      warehouse_quantity: result.warehouse_quantity
+      warehouse_quantity: result.warehouse_quantity,
     });
 
     return new ActionResponse(response);

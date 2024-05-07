@@ -58,11 +58,31 @@ export class CartService extends BaseService<CartProduct> {
             category_subCategory: { section_category: true },
           },
         },
-      },withDeleted:true
+      },
+      withDeleted: true,
     });
     const cart_products_warehouse = await Promise.all(
       cart_products.map(async (e) => {
-        if (!e.is_offer) {
+        const is_offer =
+          e.product_category_price.product_offer &&
+          e.product_category_price.product_offer.offer_quantity > 0 &&
+          e.product_category_price.product_offer.is_active &&
+          e.product_category_price.product_offer.start_date < new Date() &&
+          new Date() < e.product_category_price.product_offer.end_date;
+
+        if (is_offer) {
+          e.product_category_price.min_order_quantity =
+            e.product_category_price.product_offer.min_offer_quantity;
+          e.product_category_price.max_order_quantity =
+            e.product_category_price.product_offer.max_offer_quantity;
+          e.product_category_price.price =
+            e.product_category_price.product_offer.price;
+        }
+        if (e.quantity < e.product_category_price.min_order_quantity) {
+          e.quantity = e.product_category_price.min_order_quantity;
+        }
+
+        if (!is_offer) {
           delete e.product_category_price.product_offer;
         }
 
@@ -102,7 +122,8 @@ export class CartService extends BaseService<CartProduct> {
             category_subCategory: { section_category: true },
           },
         },
-      },withDeleted:true
+      },
+      withDeleted: true,
     });
     cart_product.product_category_price.product_sub_category.product.warehouses_products.filter(
       (w) => w.warehouse_id == cart_product.warehouse_id,
@@ -161,7 +182,7 @@ export class CartService extends BaseService<CartProduct> {
          )`,
       )
       .getOne();
-  
+
     const warehouse_product = await this.WarehouseProductsRepository.findOne({
       where: {
         warehouse_id: nearst_warehouse.id,
@@ -171,8 +192,6 @@ export class CartService extends BaseService<CartProduct> {
     if (!warehouse_product) {
       throw new BadRequestException('message.warehouse_product_not_enough');
     }
- 
-
 
     const cart_product = await this.cartProductRepository.findOne({
       where: {
@@ -207,14 +226,14 @@ export class CartService extends BaseService<CartProduct> {
         Number(product_price.price) + Number(additional_cost);
     }
     warehouse_product.quantity =
-    warehouse_product.quantity -
-    product_price.min_order_quantity *
-      product_price.product_measurement.conversion_factor;
-      console.log(warehouse_product.quantity) 
+      warehouse_product.quantity -
+      product_price.min_order_quantity *
+        product_price.product_measurement.conversion_factor;
+    console.log(warehouse_product.quantity);
 
-  if (warehouse_product.quantity < 0) {
-    throw new BadRequestException('message.warehouse_product_not_enough');
-  }
+    if (warehouse_product.quantity < 0) {
+      throw new BadRequestException('message.warehouse_product_not_enough');
+    }
 
     return await this.cartProductRepository.save(
       new CartProduct({
@@ -231,8 +250,7 @@ export class CartService extends BaseService<CartProduct> {
         price: product_price.price,
         conversion_factor: product_price.product_measurement.conversion_factor,
         main_measurement_id:
-         product_price.product_measurement.measurement_unit_id
-           
+          product_price.product_measurement.measurement_unit_id,
       }),
     );
   }

@@ -87,7 +87,19 @@ export class MakeOrderTransaction extends BaseTransaction<
       const cart = await context.findOne(Cart, { where: { user_id: user.id } });
 
       const cart_products = await context.find(CartProduct, {
-        where: { cart_id: cart.id, section_id: req.section_id },
+        where: { cart_id: cart.id, section_id: req.section_id }, relations: {
+          product_category_price: {
+            product_additional_services: { additional_service: true },
+  
+            product_measurement: { measurement_unit: true },
+  
+            product_offer: true,
+            product_sub_category: {
+              product: { product_images: true, warehouses_products: true },
+              category_subCategory: { section_category: true },
+            },
+          },
+        },
       });
       if (cart_products.length == 0) {
         throw new BadRequestException('message.cart_is_empty');
@@ -145,8 +157,27 @@ export class MakeOrderTransaction extends BaseTransaction<
 
       const shipment_products = await Promise.all(
         cart_products.map(async (e) => {
+
+          const is_offer =
+          e.product_category_price.product_offer &&
+          e.product_category_price.product_offer.offer_quantity > 0 &&
+          e.product_category_price.product_offer.is_active &&
+          e.product_category_price.product_offer.start_date < new Date() &&
+          new Date() < e.product_category_price.product_offer.end_date;
+
+        if (is_offer) {
+          e.product_category_price.min_order_quantity =
+            e.product_category_price.product_offer.min_offer_quantity;
+          e.product_category_price.max_order_quantity =
+            e.product_category_price.product_offer.max_offer_quantity;
+          e.product_category_price.price =
+            e.product_category_price.product_offer.price;
+        }
+        if (e.quantity < e.product_category_price.min_order_quantity) {
+          e.quantity = e.product_category_price.min_order_quantity;
+        }
           //handling offer
-          if (e.is_offer == true) {
+          if (is_offer == true) {
             const product_offer = await context.findOne(ProductOffer, {
               where: { product_category_price_id: e.product_category_price_id },
             });
@@ -163,7 +194,16 @@ export class MakeOrderTransaction extends BaseTransaction<
 
           return new ShipmentProduct({
             shipment_id: shipment.id,
-            ...e,
+            ...e,price: Number(e.product_category_price.price) +
+            (e.additions?.length > 0
+              ? Number(
+                  e.product_category_price.product_additional_services.filter(
+                    (j) => {
+                      return e.additions?.includes(j.id);
+                    },
+                  )[0].price,
+                )
+              : 0),
             created_at: new Date(),
           });
         }),
