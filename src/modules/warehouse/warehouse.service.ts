@@ -55,6 +55,7 @@ export class WarehouseService extends BaseService<Warehouse> {
 
   async getWarehouseProduct(query: WarehouseProductsQuery) {
     if (!query.name) query.name = '';
+    console.log(query.product_barcode)
     const products = await this.warehouseProducts_repo.findAndCount({
       where: [
         {
@@ -71,7 +72,7 @@ export class WarehouseService extends BaseService<Warehouse> {
         },
         {
           warehouse_id: query.warehouse_id,
-          product: { barcode: query.product_barcode },
+          product: { barcode:Like( `%${query.product_barcode}%`)}
         },
       ],
       order: { updated_at: 'DESC' },
