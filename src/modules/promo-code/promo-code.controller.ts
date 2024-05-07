@@ -11,7 +11,7 @@ import { CreatePromoCodeRequest } from './dto/request/create-promo-code.request'
 import { PromoCodeService } from './promo-code.service';
 import { plainToInstance } from 'class-transformer';
 import { PromoCode } from 'src/infrastructure/entities/promo-code/promo-code.entity';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
 import { RolesGuard } from '../authentication/guards/roles.guard';
 import { Roles } from '../authentication/guards/roles.decorator';
@@ -20,9 +20,15 @@ import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 import { ActionResponse } from 'src/core/base/responses/action.response';
 import { PromoCodeResponse } from './dto/response/promo-code.response';
+@ApiHeader({
+  name: 'Accept-Language',
+  required: false,
+  description: 'Language header: en, ar',
+})
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiTags('Promo Code')
+
 @Controller('promo-code')
 export class PromoCodeController {
   constructor(private readonly promoCodeService: PromoCodeService) {}

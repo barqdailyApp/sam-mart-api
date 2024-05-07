@@ -13,6 +13,7 @@
     "country_not_found": "Country not found",
     "driver_not_found": "Driver not found",
     "product_not_found": "Product not found",
+    "invalid_promo_code":"invalid promo code",
     "product_image_not_found": "Product image not found",
     "there_must_be_a_primary_unit": "there must be a primary unit",
     "invalid_location": "You selected uncovered location by our services at this time",

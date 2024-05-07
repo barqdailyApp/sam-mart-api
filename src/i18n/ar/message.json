@@ -45,6 +45,7 @@
     "cart_is_empty": "السلة فارغة",
     "total_price_is_less_than_min_order_price": "السعر الكلي للطلب اقل من السعر الادنى للطلب",
     "user_not_found": "المستخدم غير موجود",
+    "invalid_promo_code":"كود الخصم غير صالح",
     "section_not_found": "القسم غير موجود",
     "category_has_subcategories":"القسم يحتوى على اقسام فرعية",
     "insufficient_balance":"لا يوجد رصيد كافى",
