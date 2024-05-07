@@ -82,7 +82,17 @@ export class CartController {
     const response = new CartProductRespone({
       id: result.cart.id,
       additional_services: result.cart.additions,
-      price: result.cart.price,
+      price:
+      Number(result.cart.product_category_price.price) +
+      (result.cart.additions?.length > 0
+        ? Number(
+          result.cart.product_category_price.product_additional_services.filter(
+              (j) => {
+                return result.cart.additions?.includes(j.id);
+              },
+            )[0].price,
+          )
+        : 0),
       quantity: result.cart.quantity,
       product: result.cart.product_category_price,
       warehouse_quantity: result.warehouse_quantity,
@@ -103,7 +113,17 @@ export class CartController {
         new CartProductRespone({
           id: get_cart_product.cart.id,
           additional_services: get_cart_product.cart.additions,
-          price: get_cart_product.cart.price,
+          price:
+      Number(get_cart_product.cart.product_category_price.price) +
+      (get_cart_product.cart.additions?.length > 0
+        ? Number(
+          get_cart_product.cart.product_category_price.product_additional_services.filter(
+              (j) => {
+                return get_cart_product.cart.additions?.includes(j.id);
+              },
+            )[0].price,
+          )
+        : 0),
           quantity: get_cart_product.cart.quantity,
           product: get_cart_product.cart.product_category_price,
           Warehouse_quantity: get_cart_product.warehouse_quantity,
@@ -122,7 +142,17 @@ export class CartController {
     const response = new CartProductRespone({
       id: result.cart.id,
       additional_services: result.cart.additions,
-      price: result.cart.price,
+      price:
+      Number(result.cart.product_category_price.price) +
+      (result.cart.additions?.length > 0
+        ? Number(
+          result.cart.product_category_price.product_additional_services.filter(
+              (j) => {
+                return result.cart.additions?.includes(j.id);
+              },
+            )[0].price,
+          )
+        : 0),
       quantity: result.cart.quantity,
       product: result.cart.product_category_price,
       warehouse_quantity: result.warehouse_quantity,
@@ -140,7 +170,17 @@ export class CartController {
     const response = new CartProductRespone({
       id: result.cart.id,
       additional_services: result.cart.additions,
-      price: result.cart.price,
+      price:
+      Number(result.cart.product_category_price.price) +
+      (result.cart.additions?.length > 0
+        ? Number(
+          result.cart.product_category_price.product_additional_services.filter(
+              (j) => {
+                return result.cart.additions?.includes(j.id);
+              },
+            )[0].price,
+          )
+        : 0),
       quantity: result.cart.quantity,
       product: result.cart.product_category_price,
       warehouse_quantity: result.warehouse_quantity,
