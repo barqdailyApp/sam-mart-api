@@ -184,7 +184,7 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
         client: this.currentUser,
         driver: null,
         order,
-        return_order: savedReturnOrder,
+        returnOrder: savedReturnOrder,
         warehouse: shipment.warehouse,
       },
     });
@@ -212,7 +212,7 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
     let amount_of_returned_money = 0;
     const returnOrder = await this.returnOrderRepository.findOne({
       where: { id: return_order_id },
-      relations: ['order', 'order.user', 'order.shipments'],
+      relations: ['order', 'order.user', 'order.shipments', 'order.address'],
     });
 
     if (!returnOrder) throw new NotFoundException('return order not found');
@@ -315,7 +315,7 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
         client: returnOrder.order.user,
         driver: driver,
         order: returnOrder.order,
-        return_order: savedReturnOrder,
+        returnOrder: savedReturnOrder,
         warehouse: shipment.warehouse,
       },
     });

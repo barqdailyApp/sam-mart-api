@@ -29,7 +29,7 @@ export class OrderResponse {
 
   @Transform(({ obj }) => {
     return obj.shipments?.reduce(
-      (acc, shipment) => acc + shipment.shipment_products.length,
+      (acc, shipment) => acc + shipment?.shipment_products?.length,
       0,
     );
   })

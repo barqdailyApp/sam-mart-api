@@ -90,10 +90,10 @@ export class OrderController {
   }
 
   @Get('invoice/:order_id')
-  async getOrderInvoice(@Param('order_id') order_id: string,@Res() res: Response) {
+  async getOrderInvoice(@Param('order_id') order_id: string, @Res() res: Response) {
     res.setHeader('Content-Type', 'application/pdf');
-   
-    const invoice = await this.orderService.generateInvoice(order_id,res);
+
+    const invoice = await this.orderService.generateInvoice(order_id, res);
     res.setHeader('Content-Disposition', `attachment; filename=${invoice.order_number}.pdf`);
 
 
@@ -228,7 +228,11 @@ export class OrderController {
     @Param('order_id') order_id: string,
     @Body() req: ReturnOrderRequest
   ) {
-    return new ActionResponse(await this.returnOrderService.returnOrder(order_id, req));
+    const data = await this.returnOrderService.returnOrder(order_id, req)
+    const result = plainToInstance(GetReturnOrderResponse,data,{
+      excludeExtraneousValues: true
+    })
+    return new ActionResponse(result);
   }
 
   @Roles(Role.ADMIN)
@@ -237,7 +241,11 @@ export class OrderController {
     @Param('return_order_id') return_order_id: string,
     @Body() req: UpdateReturnOrderStatusRequest
   ) {
-    return new ActionResponse(await this.returnOrderService.updateReturnOrderStatus(return_order_id, req));
+    const data = await this.returnOrderService.updateReturnOrderStatus(return_order_id, req);
+    const result = plainToInstance(GetReturnOrderResponse,data,{
+      excludeExtraneousValues: true
+    })
+    return new ActionResponse(result);
   }
 
   @Get("/return-orders")
