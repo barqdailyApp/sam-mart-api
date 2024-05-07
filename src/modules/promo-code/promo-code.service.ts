@@ -18,7 +18,7 @@ export class PromoCodeService extends BaseService<PromoCode> {
       where: { code, expire_at: MoreThan(new Date()), is_active: true },
     });
     if(!valid_code || valid_code.current_uses >= valid_code.number_of_uses){
-        throw new  BadRequestException('Invalid promo code')
+        throw new  BadRequestException('message.invalid_promo_code');
 
   
 }
