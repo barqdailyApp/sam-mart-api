@@ -7,6 +7,7 @@ class ReturnOrderRequest {
     @Expose() admin_note: string;
     @Expose() customer_note: string;
     @Expose() order_id: string;
+    @Expose() return_number: string;
 }
 
 export class ReturnOrderResponse extends OrderStatusChangeResponse {

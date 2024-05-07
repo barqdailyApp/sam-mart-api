@@ -12,6 +12,6 @@ export interface ReturnOrderPayload {
         order: Order;
         driver: Driver; // this for the new driver who will be assigned to get the returned order in case it's accepted
         client: User;
-        return_order: ReturnOrder;
+        returnOrder: ReturnOrder;
     }
 }
