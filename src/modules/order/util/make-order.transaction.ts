@@ -229,6 +229,8 @@ export class MakeOrderTransaction extends BaseTransaction<
           order.total_price = total;
           order.promo_code_id=promo_code.id;
           order.promo_code_discount=promo_code.discount;
+          promo_code.current_uses++;
+          await context.save(promo_code);
         }
       }
       await context.save(Order, order);
