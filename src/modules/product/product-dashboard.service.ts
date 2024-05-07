@@ -597,7 +597,7 @@ export class ProductDashboardService {
     }
 
     if (product_barcode) {
-      query = query.andWhere('product.barcode LIKE :product_barcode', {
+      query = query.orWhere('product.barcode LIKE :product_barcode', {
         product_barcode: `%${product_barcode}%`,
       });
     }
