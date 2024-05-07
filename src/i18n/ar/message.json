@@ -73,5 +73,6 @@
     "product_has_quantity_in_warehouse":"المنتج لديه كمية في المستودع",
     "logo_cannot_be_deleted":"لا يمكن حذف الشعار",
     "product_has_offers": "المنتج لديه عروض",
-    "product_has_sub_category": "المنتج لديه فئة فرعية"
+    "product_has_sub_category": "المنتج لديه فئة فرعية",
+    "discount_value_must_be_between_0_and_1" :  "قيمة الخصم يجب أن تكون بين 0 و 1"
 }
