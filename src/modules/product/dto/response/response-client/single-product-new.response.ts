@@ -19,7 +19,7 @@ export class SingleProductsNewResponse {
     const product_measurements = product.product_measurements;
     const product_images = product.product_images;
     let product_is_fav = false;
-    if(product.products_favorite != undefined){
+    if (product.products_favorite != undefined) {
       for (let i = 0; i < product.products_favorite.length; i++) {
         for (let j = 0; j < product.product_sub_categories.length; j++) {
           if (
@@ -62,18 +62,24 @@ export class SingleProductsNewResponse {
         product_category_price.product_additional_services;
       return {
         product_measurement_id: item.id,
-        conversion_factor:item.conversion_factor,
+        conversion_factor: item.conversion_factor,
         is_main_unit: item.is_main_unit,
         measurement_unit_ar: item.measurement_unit.name_ar,
         measurement_unit_en: item.measurement_unit.name_en,
-        
+
         warehouse_quantity:
           product.warehouses_products.reduce(
             (acc, cur) => acc + cur.quantity,
             0,
           ) / item.conversion_factor,
-        min_order_quantity:product_offer != null ?product_offer.min_offer_quantity : product_category_price.min_order_quantity,
-        max_order_quantity: product_offer != null ?product_offer.max_offer_quantity : product_category_price.max_order_quantity,
+        min_order_quantity:
+          product_offer != null
+            ? product_offer.min_offer_quantity
+            : product_category_price.min_order_quantity,
+        max_order_quantity:
+          product_offer != null
+            ? product_offer.max_offer_quantity
+            : product_category_price.max_order_quantity,
         offer: product_offer
           ? {
               product_category_price_id:
@@ -105,10 +111,10 @@ export class SingleProductsNewResponse {
             : {
                 id: cart_products[0].id,
                 warehouse_quantity:
-                product.warehouses_products.reduce(
-                  (acc, cur) => acc + cur.quantity,
-                  0,
-                ) / cart_products[0].conversion_factor,
+                  product.warehouses_products.reduce(
+                    (acc, cur) => acc + cur.quantity,
+                    0,
+                  ) / cart_products[0].conversion_factor,
                 cart_id: cart_products[0].cart_id,
                 product_id: cart_products[0].product_id,
                 quantity: cart_products[0].quantity,
@@ -118,7 +124,19 @@ export class SingleProductsNewResponse {
                 max_order_quantity: product_offer
                   ? product_offer.max_offer_quantity
                   : product_category_price.max_order_quantity,
-                price: cart_products[0].price,
+                price:
+                  Number(
+                    product_offer
+                      ? product_offer.price
+                      : product_category_price.price,
+                  ) +
+                  Number(
+                    cart_products[0].additions?.length > 0
+                      ? product_additional_services.filter((j) => {
+                          return cart_products[0].additions?.includes(j.id);
+                        })[0].price
+                      : 0,
+                  ),
                 additions: cart_products[0].additions,
               },
       };
