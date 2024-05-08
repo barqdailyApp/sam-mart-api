@@ -960,6 +960,7 @@ export class ProductDashboardService {
           },
         },
       },
+      order: { name_ar: 'ASC' },
     });
 
     // Create a flat structure for products
@@ -1092,7 +1093,7 @@ export class ProductDashboardService {
       relations: {
         product: { product_images: true },
         product_measurement: { measurement_unit: true },
-      },
+      },order: { product: { name_ar: 'ASC' } },
     });
 
     // Create a flat structure for products
