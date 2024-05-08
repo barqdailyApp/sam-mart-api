@@ -1043,15 +1043,13 @@ export class ProductDashboardService {
           section_category: { category: true },
         },
       },
-      order: { category_subCategory: { subcategory: { name_ar: 'ASC' } } },
+      order: { category_subCategory: { subcategory: { name_ar: 'ASC' } }, product: { name_ar: 'ASC' } },
     });
 
     // Create a flat structure for products
     const flattenedProducts = productSubCategory.map((product) => {
       return {
-        // productId: product.id,
-        // createdAt: product.created_at,
-        // updatedAt: product.updated_at,
+      
         barcode: product.product.barcode,
         category_ar:
           product.category_subCategory.section_category.category.name_ar,
