@@ -1033,6 +1033,7 @@ export class ProductDashboardService {
   async exportLinkedProducts() {
     const productSubCategory = await this.productSubCategory_repo.find({
       relations: {
+        product_prices: true,
         product: {
           product_images: true,
           product_measurements: { measurement_unit: true },
@@ -1072,8 +1073,12 @@ export class ProductDashboardService {
           (measurement) => measurement.measurement_unit?.name_en,
         ),
         measurement_units_ar: product.product.product_measurements.map(
-          (measurement) => measurement.measurement_unit?.name_ar,
+          (measurement) =>  measurement.measurement_unit?.name_ar ,
         ),
+        prices:product.product_prices.map((price) => ({
+          price: price.price,
+        }))
+       
       };
     });
 
