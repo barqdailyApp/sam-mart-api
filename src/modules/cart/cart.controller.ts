@@ -44,7 +44,7 @@ export class CartController {
     const cart_products = this._i18nResponse.entity(
       await this.cartService.getCartProducts(cart.id),
     );
-    
+
     return new ActionResponse(
       cart_products.map(
         (e) =>
@@ -83,16 +83,16 @@ export class CartController {
       id: result.cart.id,
       additional_services: result.cart.additions,
       price:
-      Number(result.cart.product_category_price.price) +
-      (result.cart.additions?.length > 0
-        ? Number(
-          result.cart.product_category_price.product_additional_services.filter(
-              (j) => {
-                return result.cart.additions?.includes(j.id);
-              },
-            )[0].price,
-          )
-        : 0),
+        Number(result.cart.product_category_price.price) +
+        (result.cart.additions?.length > 0
+          ? Number(
+              result.cart.product_category_price.product_additional_services.filter(
+                (j) => {
+                  return result.cart.additions?.includes(j.id);
+                },
+              )[0].price,
+            )
+          : 0),
       quantity: result.cart.quantity,
       product: result.cart.product_category_price,
       warehouse_quantity: result.warehouse_quantity,
@@ -113,17 +113,7 @@ export class CartController {
         new CartProductRespone({
           id: get_cart_product.cart.id,
           additional_services: get_cart_product.cart.additions,
-          price:
-      Number(get_cart_product.cart.product_category_price.price) +
-      (get_cart_product.cart.additions?.length > 0
-        ? Number(
-          get_cart_product.cart.product_category_price.product_additional_services.filter(
-              (j) => {
-                return get_cart_product.cart.additions?.includes(j.id);
-              },
-            )[0].price,
-          )
-        : 0),
+          price: get_cart_product.cart.price,
           quantity: get_cart_product.cart.quantity,
           product: get_cart_product.cart.product_category_price,
           Warehouse_quantity: get_cart_product.warehouse_quantity,
@@ -143,16 +133,16 @@ export class CartController {
       id: result.cart.id,
       additional_services: result.cart.additions,
       price:
-      Number(result.cart.product_category_price.price) +
-      (result.cart.additions?.length > 0
-        ? Number(
-          result.cart.product_category_price.product_additional_services.filter(
-              (j) => {
-                return result.cart.additions?.includes(j.id);
-              },
-            )[0].price,
-          )
-        : 0),
+        Number(result.cart.product_category_price.price) +
+        (result.cart.additions?.length > 0
+          ? Number(
+              result.cart.product_category_price.product_additional_services.filter(
+                (j) => {
+                  return result.cart.additions?.includes(j.id);
+                },
+              )[0].price,
+            )
+          : 0),
       quantity: result.cart.quantity,
       product: result.cart.product_category_price,
       warehouse_quantity: result.warehouse_quantity,
@@ -171,16 +161,16 @@ export class CartController {
       id: result.cart.id,
       additional_services: result.cart.additions,
       price:
-      Number(result.cart.product_category_price.price) +
-      (result.cart.additions?.length > 0
-        ? Number(
-          result.cart.product_category_price.product_additional_services.filter(
-              (j) => {
-                return result.cart.additions?.includes(j.id);
-              },
-            )[0].price,
-          )
-        : 0),
+        Number(result.cart.product_category_price.price) +
+        (result.cart.additions?.length > 0
+          ? Number(
+              result.cart.product_category_price.product_additional_services.filter(
+                (j) => {
+                  return result.cart.additions?.includes(j.id);
+                },
+              )[0].price,
+            )
+          : 0),
       quantity: result.cart.quantity,
       product: result.cart.product_category_price,
       warehouse_quantity: result.warehouse_quantity,

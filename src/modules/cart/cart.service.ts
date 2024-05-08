@@ -125,6 +125,23 @@ export class CartService extends BaseService<CartProduct> {
       },
       withDeleted: true,
     });
+    const is_offer =
+      cart_product.product_category_price.product_offer &&
+      cart_product.product_category_price.product_offer.offer_quantity > 0 &&
+      cart_product.product_category_price.product_offer.is_active &&
+      cart_product.product_category_price.product_offer.start_date <
+        new Date() &&
+      new Date() < cart_product.product_category_price.product_offer.end_date;
+
+    if (is_offer) {
+      cart_product.product_category_price.min_order_quantity =
+        cart_product.product_category_price.product_offer.min_offer_quantity;
+      cart_product.product_category_price.max_order_quantity =
+        cart_product.product_category_price.product_offer.max_offer_quantity;
+      cart_product.product_category_price.price =
+        cart_product.product_category_price.product_offer.price;
+    }
+
     cart_product.product_category_price.product_sub_category.product.warehouses_products.filter(
       (w) => w.warehouse_id == cart_product.warehouse_id,
     );
@@ -286,13 +303,21 @@ export class CartService extends BaseService<CartProduct> {
         },
       },
     });
-    if (cart_product.is_offer) {
+    const is_offer =
+      product_category_price.product_offer &&
+      product_category_price.product_offer.offer_quantity > 0 &&
+      product_category_price.product_offer.is_active &&
+      product_category_price.product_offer.start_date < new Date() &&
+      new Date() < product_category_price.product_offer.end_date;
+
+    if (is_offer) {
       product_category_price.min_order_quantity =
         product_category_price.product_offer.min_offer_quantity;
       product_category_price.max_order_quantity =
         product_category_price.product_offer.max_offer_quantity;
       product_category_price.price = product_category_price.product_offer.price;
     }
+
     if (req.add == true) {
       if (
         cart_product.quantity + product_category_price.min_order_quantity >
