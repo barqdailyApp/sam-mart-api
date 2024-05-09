@@ -29,6 +29,8 @@ export class ProductResponse {
 
   @Expose() readonly updated_at: Date;
 
+  @Expose() readonly deleted_at: Date;
+
   @Transform(({ value }) => plainToClass(ProductSubCategoryResponse, value))
   @Expose()
   product_sub_categories: ProductSubCategoryResponse[];
