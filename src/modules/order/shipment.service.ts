@@ -759,7 +759,7 @@ export class ShipmentService extends BaseService<Shipment> {
         title_ar: 'تحديث الطلب',
         title_en: 'order updated',
         text_ar: 'تم تعيين سائق للطلب',
-        text_en: 'A driver has been assigned to the request',
+        text_en: 'A driver has been assigned to the order',
       }),
     );
 
