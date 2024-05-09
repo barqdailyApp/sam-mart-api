@@ -506,7 +506,7 @@ export class ProductClientService {
     // Start building the query
     let query = this.productRepository
       .createQueryBuilder('product')
-      .innerJoinAndSelect('product.product_images', 'product_images').orderBy("product_images.is_logo", "ASC")
+      .innerJoinAndSelect('product.product_images', 'product_images').orderBy("product_images.is_logo", "DESC")
       .innerJoinAndSelect(
         'product.product_sub_categories',
         'product_sub_categories',
