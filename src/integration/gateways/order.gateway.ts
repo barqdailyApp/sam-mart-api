@@ -112,6 +112,7 @@ export class OrderGateway
     const message = plainToInstance(ReturnOrderResponse,
       {
         ...body,
+        warehouse: { ...i18nEntity(body.warehouse, 'en') },
         driver: {
           ...body.driver,
           user: body.driver?.user,

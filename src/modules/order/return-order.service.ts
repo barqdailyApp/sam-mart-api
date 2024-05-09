@@ -353,7 +353,7 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
       const driver = await this.driverRepository.findOne({
         where: { user_id: this.currentUser?.id },
       });
-      
+
       if (query.filters[0]) {
         query.filters[0] = `${query.filters[0]},driver_id=${driver?.id}`;
       } else {
@@ -361,7 +361,7 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
       }
     }
 
-    return await this.findAll(query);
+    return await this.findAll(query, true);
   }
 
   get currentUser(): User {

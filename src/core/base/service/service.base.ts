@@ -37,7 +37,7 @@ export abstract class BaseService<T extends BaseEntity> implements IBaseService<
   }
 
   @UseInterceptors(GlobalExceptionFilter)
-  async findAll(options?: PaginatedRequest): Promise<T[]> {
+  async findAll(options?: PaginatedRequest, withDeleted?: boolean): Promise<T[]> {
     let query: any;
     if (!isNaN(options.skip)) query = { skip: options.skip };
     if (!isNaN(options.take)) query = { ...query, take: options.take };
@@ -45,6 +45,7 @@ export abstract class BaseService<T extends BaseEntity> implements IBaseService<
     if (options.where && options.where.length) query = { ...query, where: options.where };
     if (options.order) query = { ...query, order: options.order };
     if (options.select) query = { ...query, select: options.select };
+    if (withDeleted) query = { ...query, withDeleted: true };
     return await this._repo.find(query);
   }
 
