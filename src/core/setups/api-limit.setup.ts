@@ -4,6 +4,6 @@ export default () =>
   ThrottlerModule.forRoot([
     {
       ttl: 60000,
-      limit: 500,
+      limit: 1200,
     },
   ]);

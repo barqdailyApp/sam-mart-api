@@ -304,6 +304,18 @@ export class ProductDashboardController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
+  @Get('unattched/export')
+  @Header(
+    'Content-type',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  )
+  async exportunAttchedProducts(@Res() res: Response) {
+    const File = await this.productDashboardService.exportunLiknedProducts();
+    res.download(`${File}`);
+  }
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
   @Get('attached/export')
   @Header(
     'Content-type',
@@ -314,7 +326,6 @@ export class ProductDashboardController {
     res.download(`${File}`);
   }
 
-  
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
@@ -323,8 +334,13 @@ export class ProductDashboardController {
     'Content-type',
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   )
-  async exportWarehouseProducts(@Res() res: Response,@Query("warehouse_id") warehouse_id:string) {
-    const File = await this.productDashboardService.exportWarehouseProducts(warehouse_id);
+  async exportWarehouseProducts(
+    @Res() res: Response,
+    @Query('warehouse_id') warehouse_id: string,
+  ) {
+    const File = await this.productDashboardService.exportWarehouseProducts(
+      warehouse_id,
+    );
     res.download(`${File}`);
   }
 

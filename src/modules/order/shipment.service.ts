@@ -212,7 +212,7 @@ export class ShipmentService extends BaseService<Shipment> {
         title_ar: 'تحديث الطلب',
         title_en: 'order updated',
         text_ar: 'تم خروج الطلب من المخزن بنجاح',
-        text_en: 'The order has been successfully removed from the warehouse',
+        text_en: 'The order is on the way to you',
       }),
     );
     return shipment;
@@ -333,7 +333,7 @@ export class ShipmentService extends BaseService<Shipment> {
         title_ar: 'تحديث الطلب',
         title_en: 'order updated',
         text_ar: 'تم تجهز الطلب من المخزن بنجاح',
-        text_en: 'The order has been successfully removed from the warehouse',
+        text_en: 'The order has been prepared ',
       }),
     );
 
@@ -345,7 +345,7 @@ export class ShipmentService extends BaseService<Shipment> {
         title_ar: 'تحديث الطلب',
         title_en: 'order updated',
         text_ar: 'تم تجهز الطلب من المخزن بنجاح',
-        text_en: 'The order has been successfully removed from the warehouse',
+        text_en: 'The order has been prepared ',
       }),
     );
     return shipment;

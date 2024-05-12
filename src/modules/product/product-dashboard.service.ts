@@ -156,12 +156,15 @@ export class ProductDashboardService {
       createProductOffer.price =
         productCategoryPrice.price - createProductOffer.discount_value;
     } else {
-      if (createProductOffer.discount_value >= 1 || createProductOffer.discount_value < 0) {
+      if (
+        createProductOffer.discount_value >= 1 ||
+        createProductOffer.discount_value < 0
+      ) {
         throw new BadRequestException(
           'message.discount_value_must_be_between_0_and_1',
         );
       }
-      
+
       const discountedPercentage =
         (productCategoryPrice.price * createProductOffer.discount_value) / 100;
       createProductOffer.price =
@@ -1030,11 +1033,114 @@ export class ProductDashboardService {
       'products',
     );
   }
+  async exportunLiknedProducts() {
+    const products = await this.productRepository
+      .createQueryBuilder('product')
+      .leftJoinAndSelect('product.warehouses_products', 'warehouses_products')
+      .where('warehouses_products.id IS NULL')
+      .leftJoinAndSelect('product.product_images', 'product_images')
+      .leftJoinAndSelect(
+        'product.product_sub_categories',
+        'product_sub_categories',
+      )
+      .leftJoinAndSelect(
+        'product_sub_categories.category_subCategory',
+        'product_category_subCategory',
+      )
+      .leftJoinAndSelect(
+        'product_category_subCategory.subcategory',
+        'subcategory',
+      )
+      .leftJoinAndSelect(
+        'product_category_subCategory.section_category',
+        'product_section_category',
+      )
+      .leftJoinAndSelect('product_section_category.category', 'category')
+
+      .leftJoinAndSelect('product.product_measurements', 'product_measurements')
+   .leftJoinAndSelect('product_measurements.measurement_unit', 'measurement_unit')
+      // Include other relations as needed
+      .orderBy('product.name_ar', 'ASC')
+      .getMany();
+    // Create a flat structure for products
+    const flattenedProducts = products.map((product) => {
+   
+      return {
+        // productId: product.id,
+        // createdAt: product.created_at,
+        // updatedAt: product.updated_at,
+        barcode: product.barcode,
+        name_ar: product.name_ar,
+        name_en: product.name_en,
+        subcategory:
+          product.product_sub_categories[0]?.category_subCategory.subcategory
+            .name_ar,
+        category:
+          product.product_sub_categories[0]?.category_subCategory
+            .section_category.category.name_ar,
+
+        description_ar: product.description_ar,
+        description_en: product.description_en,
+        // is_active: product.is_active,
+        // is_recovered: product.is_recovered,
+        product_images: product.product_images.map((image) => ({
+          url: image.url,
+          is_logo: image.is_logo,
+        })),
+        measurement_units_en: product.product_measurements.map(
+          (measurement) => measurement.measurement_unit?.name_en,
+        ),
+        measurement_units_ar: product.product_measurements.map(
+          (measurement) => measurement.measurement_unit?.name_ar,
+        ),
+        // warehousesProducts: product.warehouses_products,
+        // productMeasurements: product.product_measurements.map(
+        //   (measurement) => ({
+        //     measuremen_id: measurement.id,
+        //     conversion_factor: measurement.conversion_factor,
+        //     product_id: measurement.product_id,
+        //     measurement_unit_id: measurement.measurement_unit_id,
+        //     base_unit_id: measurement.base_unit_id,
+        //     is_main_unit: measurement.is_main_unit,
+        //   }),
+        // // ),
+        // productSubCategories: product.product_sub_categories.map(
+        //   (subCategory) => ({
+        //     subCategory_id: subCategory.category_subCategory.subcategory.id,
+        //     subCategory_name_ar:
+        //       subCategory.category_subCategory.subcategory.name_ar,
+        //     subCategory_name_en:
+        //       subCategory.category_subCategory.subcategory.name_en,
+        //     category_id:
+        //       subCategory.category_subCategory.section_category.category.id,
+        //     category_name_ar:
+        //       subCategory.category_subCategory.section_category.category
+        //         .name_ar,
+        //     category_name_en:
+        //       subCategory.category_subCategory.section_category.category
+        //         .name_en,
+        //     section_id:
+        //       subCategory.category_subCategory.section_category.section.id,
+        //     section_name_ar:
+        //       subCategory.category_subCategory.section_category.section.name_ar,
+        //     section_name_en:
+        //       subCategory.category_subCategory.section_category.section.name_en,
+        //   }),
+        // ),
+      };
+    });
+
+    return await this._fileService.exportExcel(
+      flattenedProducts,
+      'products',
+      'products',
+    );
+  }
 
   async exportLinkedProducts() {
     const productSubCategory = await this.productSubCategory_repo.find({
       relations: {
-        product_prices: {product_measurement:{measurement_unit:true}},
+        product_prices: { product_measurement: { measurement_unit: true } },
         product: {
           product_images: true,
           product_measurements: { measurement_unit: true },
@@ -1044,13 +1150,15 @@ export class ProductDashboardService {
           section_category: { category: true },
         },
       },
-      order: { category_subCategory: { subcategory: { name_ar: 'ASC' } }, product: { name_ar: 'ASC' } },
+      order: {
+        category_subCategory: { subcategory: { name_ar: 'ASC' } },
+        product: { name_ar: 'ASC' },
+      },
     });
 
     // Create a flat structure for products
     const flattenedProducts = productSubCategory.map((product) => {
       return {
-      
         barcode: product.product.barcode,
         category_ar:
           product.category_subCategory.section_category.category.name_ar,
@@ -1072,12 +1180,14 @@ export class ProductDashboardService {
           (measurement) => measurement.measurement_unit?.name_en,
         ),
         measurement_units_ar: product.product.product_measurements.map(
-          (measurement) =>  measurement.measurement_unit?.name_ar ,
+          (measurement) => measurement.measurement_unit?.name_ar,
         ),
-        prices:product.product_prices.map((price) => 
-          price.price +":"+price.product_measurement.measurement_unit.name_en
-       )
-       
+        prices: product.product_prices.map(
+          (price) =>
+            price.price +
+            ':' +
+            price.product_measurement.measurement_unit.name_en,
+        ),
       };
     });
 
@@ -1087,13 +1197,15 @@ export class ProductDashboardService {
       'products',
     );
   }
+
   async exportWarehouseProducts(warehouse_id: string) {
     const warehouse_products = await this.warehouse_products_repo.find({
       where: { warehouse_id },
       relations: {
         product: { product_images: true },
         product_measurement: { measurement_unit: true },
-      },order: { product: { name_ar: 'ASC' } },
+      },
+      order: { product: { name_ar: 'ASC' } },
     });
 
     // Create a flat structure for products
