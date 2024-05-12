@@ -6,8 +6,10 @@ import StorageSetup from './storage.setup';
 import ServeStaticSetup from './serve-static.setup';
 import I18nSetup from './i18n.setup';
 import ScheduleSetup from './schedule.setup';
+import ApiRequestLimit from './api-limit.setup';
 
 export default () => [
+  ApiRequestLimit(),
   ConfigurationSetup(), // Configuration Setup
   DatabaseSetup(), // Database Setup
   StorageSetup(), // Storage Setup

@@ -9,20 +9,28 @@ import { AppService } from './app.service';
 import { CoreModule } from './core/core.module';
 import { FileModule } from './modules/file/file.module';
 import { AddressModule } from './modules/address/address.module';
-
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
 @Module({
   imports: [
-    AssemblyModule,         // ?Assembly
-    CoreModule,             // !Global
-    InfrastructureModule,   // !Global
-    IntegrationModule,      // !Global
-    UserModule,             // !Global
-    AuthenticationModule,   // !Global
-    FileModule,           // !Global
-    AddressModule
+    AssemblyModule, // ?Assembly
+    CoreModule, // !Global
+    InfrastructureModule, // !Global
+    IntegrationModule, // !Global
+    UserModule, // !Global
+    AuthenticationModule, // !Global
+    FileModule, // !Global
+    AddressModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
-export class AppModule { }
+export class AppModule {}
