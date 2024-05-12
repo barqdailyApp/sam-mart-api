@@ -6,13 +6,13 @@ export class CartProductRespone {
   readonly product: any;
   section_id: string;
   quantity: number;
+  original_price: number;
   price: number;
   unit: string;
   product_id: string;
-  warehouse_quantity:number;
+  warehouse_quantity: number;
   additional_services: any;
   constructor(data: any) {
-    console.log(data.warehouse_quantity);
     return {
       id: data.id,
       product_id: data.product.product_sub_category.product.id,
@@ -21,6 +21,7 @@ export class CartProductRespone {
         data.product.product_sub_category.category_subCategory.section_category
           .section_id,
       description: data.product.product_sub_category.product.description,
+      original_price: Number(data.original_price),
       price: data.price,
       quantity: data.quantity,
       unit: data.product.product_measurement.measurement_unit.name,
@@ -32,8 +33,8 @@ export class CartProductRespone {
       max_order_quantity: data.product.product_offer
         ? data.product.product_offer.max_offer_quantity
         : data.product.max_order_quantity,
-        warehouse_quantity:data.warehouse_quantity,
-      
+      warehouse_quantity: data.warehouse_quantity,
+
       additional_services: data.product.product_additional_services.filter(
         (e) => {
           if (data.additional_services.includes(e.id)) {

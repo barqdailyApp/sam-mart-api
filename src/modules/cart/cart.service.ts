@@ -188,7 +188,7 @@ export class CartService extends BaseService<CartProduct> {
         },
       },
     });
-
+let original_price=product_price.price;
     const nearst_warehouse = await this.warehouseRepository
       .createQueryBuilder('warehouse')
       .where('is_active = :is_active', { is_active: true })
@@ -239,6 +239,7 @@ export class CartService extends BaseService<CartProduct> {
           return Number(e.price);
         }),
       );
+      original_price = Number(original_price) + Number(additional_cost);
       product_price.price =
         Number(product_price.price) + Number(additional_cost);
     }
@@ -246,7 +247,7 @@ export class CartService extends BaseService<CartProduct> {
       warehouse_product.quantity -
       product_price.min_order_quantity *
         product_price.product_measurement.conversion_factor;
-    console.log(warehouse_product.quantity);
+    
 
     if (warehouse_product.quantity < 0) {
       throw new BadRequestException('message.warehouse_product_not_enough');
@@ -264,7 +265,7 @@ export class CartService extends BaseService<CartProduct> {
         quantity: product_price.min_order_quantity,
         product_id: product_price.product_sub_category.product_id,
         product_category_price_id: req.product_category_price_id,
-        price: product_price.price,
+        price: original_price,
         conversion_factor: product_price.product_measurement.conversion_factor,
         main_measurement_id:
           product_price.product_measurement.measurement_unit_id,

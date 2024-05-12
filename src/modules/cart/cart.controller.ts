@@ -51,6 +51,7 @@ export class CartController {
           new CartProductRespone({
             id: e.cart.id,
             additional_services: e.cart.additions,
+            original_price:e.cart.price,
             price:
               Number(e.cart.product_category_price.price) +
               (e.cart.additions?.length > 0
@@ -82,6 +83,7 @@ export class CartController {
     const response = new CartProductRespone({
       id: result.cart.id,
       additional_services: result.cart.additions,
+      original_price: result.cart.price,
       price:
         Number(result.cart.product_category_price.price) +
         (result.cart.additions?.length > 0
@@ -113,6 +115,7 @@ export class CartController {
         new CartProductRespone({
           id: get_cart_product.cart.id,
           additional_services: get_cart_product.cart.additions,
+          original_price:get_cart_product.cart.price,
           price: get_cart_product.cart.price,
           quantity: get_cart_product.cart.quantity,
           product: get_cart_product.cart.product_category_price,
@@ -132,6 +135,7 @@ export class CartController {
     const response = new CartProductRespone({
       id: result.cart.id,
       additional_services: result.cart.additions,
+      original_price:result.cart.price,
       price:
         Number(result.cart.product_category_price.price) +
         (result.cart.additions?.length > 0
@@ -160,6 +164,7 @@ export class CartController {
     const response = new CartProductRespone({
       id: result.cart.id,
       additional_services: result.cart.additions,
+      original_price:result.cart.price,
       price:
         Number(result.cart.product_category_price.price) +
         (result.cart.additions?.length > 0
