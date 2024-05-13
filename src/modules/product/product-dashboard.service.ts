@@ -1038,6 +1038,7 @@ export class ProductDashboardService {
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.warehouses_products', 'warehouses_products')
       .where('warehouses_products.id IS NULL')
+      .orWhere('product.product_sub_categories IS NULL')
       .leftJoinAndSelect('product.product_images', 'product_images')
       .leftJoinAndSelect(
         'product.product_sub_categories',
@@ -1058,13 +1059,15 @@ export class ProductDashboardService {
       .leftJoinAndSelect('product_section_category.category', 'category')
 
       .leftJoinAndSelect('product.product_measurements', 'product_measurements')
-   .leftJoinAndSelect('product_measurements.measurement_unit', 'measurement_unit')
+      .leftJoinAndSelect(
+        'product_measurements.measurement_unit',
+        'measurement_unit',
+      )
       // Include other relations as needed
       .orderBy('product.name_ar', 'ASC')
       .getMany();
     // Create a flat structure for products
     const flattenedProducts = products.map((product) => {
-   
       return {
         // productId: product.id,
         // createdAt: product.created_at,
