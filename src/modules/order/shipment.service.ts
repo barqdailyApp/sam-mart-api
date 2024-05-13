@@ -412,7 +412,17 @@ export class ShipmentService extends BaseService<Shipment> {
       user: userInfo,
       action: 'ADD_MESSAGE',
     });
-
+    await this.notificationService.create(
+      new NotificationEntity({
+        user_id: newMessage.user_id,
+        url: newMessage.id,
+        type: NotificationTypes.SHIPMENT_CHAT,
+        title_ar: 'محادثة',
+        title_en: 'chat',
+        text_ar: 'تم اضافة رسالة جديدة',
+        text_en: 'new message added',
+      }),
+    );
     return savedMessage;
   }
 

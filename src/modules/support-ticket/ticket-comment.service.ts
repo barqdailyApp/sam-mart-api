@@ -14,6 +14,9 @@ import { SupportTicketGateway } from 'src/integration/gateways/support-ticket.ga
 import { GetCommentQueryRequest } from './dto/request/get-comment-query.request';
 import { plainToInstance } from 'class-transformer';
 import { UserResponse } from '../user/dto/responses/user.response';
+import { NotificationService } from '../notification/notification.service';
+import { NotificationEntity } from 'src/infrastructure/entities/notification/notification.entity';
+import { NotificationTypes } from 'src/infrastructure/data/enums/notification-types.enum';
 
 
 @Injectable()
@@ -25,6 +28,8 @@ export class TicketCommentService extends BaseService<TicketComment> {
         @Inject(REQUEST) private readonly request: Request,
         @Inject(FileService) private _fileService: FileService,
         private readonly supportTicketGateway: SupportTicketGateway,
+        private readonly notificationService: NotificationService,
+
     ) {
         super(ticketCommentRepository);
     }
@@ -59,6 +64,14 @@ export class TicketCommentService extends BaseService<TicketComment> {
             attachment: attachedFile
         });
 
+        if (
+            ticket.is_counter_active &&
+            !this.currentUser.roles.includes(Role.ADMIN)
+        ) {
+            ticket.new_messages_count++;
+            await this.supportTicketRepository.save(ticket);
+        }
+
         const savedComment = await this.ticketCommentRepository.save(newComment);
         const userInfo = plainToInstance(UserResponse, this.currentUser, {
             excludeExtraneousValues: true
@@ -70,6 +83,18 @@ export class TicketCommentService extends BaseService<TicketComment> {
             user: userInfo,
             action: 'ADD_COMMENT'
         });
+
+        await this.notificationService.create(
+            new NotificationEntity({
+                user_id: savedComment.user_id,
+                url: savedComment.ticket_id,
+                type: NotificationTypes.TICKET,
+                title_ar: 'دعم فنى',
+                title_en: 'Support',
+                text_ar: 'تم اضافة تعليقك بنجاح',
+                text_en: 'Your comment has been added successfully',
+            }),
+        );
         return savedComment;
     }
 
@@ -80,8 +105,18 @@ export class TicketCommentService extends BaseService<TicketComment> {
         if (!supportTicket)
             throw new BadRequestException('Ticket not found');
 
-        if (!this.currentUser.roles.includes(Role.ADMIN) && supportTicket.user_id !== this.currentUser.id) {
+        if (
+            !this.currentUser.roles.includes(Role.ADMIN) &&
+            supportTicket.user_id !== this.currentUser.id
+        ) {
             throw new UnauthorizedException('You are not allowed to view this ticket');
+        }
+
+        // if the user is admin, then we will reset the new messages count
+        if (this.currentUser.roles.includes(Role.ADMIN)) {
+            supportTicket.is_counter_active = false;
+            supportTicket.new_messages_count = 0;
+            await this.supportTicketRepository.save(supportTicket);
         }
 
         return await this.ticketCommentRepository.find({
