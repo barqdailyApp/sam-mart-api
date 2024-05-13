@@ -64,6 +64,14 @@ export class TicketCommentService extends BaseService<TicketComment> {
             attachment: attachedFile
         });
 
+        if (
+            ticket.is_counter_active &&
+            !this.currentUser.roles.includes(Role.ADMIN)
+        ) {
+            ticket.new_messages_count++;
+            await this.supportTicketRepository.save(ticket);
+        }
+
         const savedComment = await this.ticketCommentRepository.save(newComment);
         const userInfo = plainToInstance(UserResponse, this.currentUser, {
             excludeExtraneousValues: true
@@ -78,15 +86,15 @@ export class TicketCommentService extends BaseService<TicketComment> {
 
         await this.notificationService.create(
             new NotificationEntity({
-              user_id: savedComment.user_id,
-              url: savedComment.ticket_id,
-              type: NotificationTypes.TICKET,
-              title_ar: 'دعم فنى',
-              title_en: 'Support',
-              text_ar: 'تم اضافة تعليقك بنجاح',
-              text_en: 'Your comment has been added successfully',
+                user_id: savedComment.user_id,
+                url: savedComment.ticket_id,
+                type: NotificationTypes.TICKET,
+                title_ar: 'دعم فنى',
+                title_en: 'Support',
+                text_ar: 'تم اضافة تعليقك بنجاح',
+                text_en: 'Your comment has been added successfully',
             }),
-          );
+        );
         return savedComment;
     }
 
@@ -97,8 +105,18 @@ export class TicketCommentService extends BaseService<TicketComment> {
         if (!supportTicket)
             throw new BadRequestException('Ticket not found');
 
-        if (!this.currentUser.roles.includes(Role.ADMIN) && supportTicket.user_id !== this.currentUser.id) {
+        if (
+            !this.currentUser.roles.includes(Role.ADMIN) &&
+            supportTicket.user_id !== this.currentUser.id
+        ) {
             throw new UnauthorizedException('You are not allowed to view this ticket');
+        }
+
+        // if the user is admin, then we will reset the new messages count
+        if (this.currentUser.roles.includes(Role.ADMIN)) {
+            supportTicket.is_counter_active = false;
+            supportTicket.new_messages_count = 0;
+            await this.supportTicketRepository.save(supportTicket);
         }
 
         return await this.ticketCommentRepository.find({
