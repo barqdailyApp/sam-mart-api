@@ -21,6 +21,7 @@ export class CartProductResponse {
   @Expose() readonly section_id: string;
 
   @Expose() readonly quantity: number;
+  @Expose() readonly is_recoverd: number;
 
   @Expose() readonly main_measurement_id: string;
 

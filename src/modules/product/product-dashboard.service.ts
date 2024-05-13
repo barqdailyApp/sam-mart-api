@@ -1047,7 +1047,7 @@ export class ProductDashboardService {
       .leftJoinAndSelect(
         'product_sub_categories.category_subCategory',
         'product_category_subCategory',
-      ).  orWhere('product_category_subCategory IS NULL')
+      ).  orWhere('product_category_subCategory.id IS NULL')
       .leftJoinAndSelect(
         'product_category_subCategory.subcategory',
         'subcategory',

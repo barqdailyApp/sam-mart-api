@@ -39,6 +39,9 @@ product_category_price_id:string
 @Column({nullable:true,default:false})
 is_offer:boolean
 
+@Column({default:true})
+is_recovered:boolean
+
 @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
 price:number;
 
