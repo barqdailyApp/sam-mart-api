@@ -9,5 +9,7 @@ export enum NotificationTypes {
   SUBSCRIPTION_RENEWAL = 'subscription-renewal',
   GIFT = 'someone-sent-a-gift',
   USERS = 'send-to-users',
-  ORDERS = 'biker-change-state-order'
+  ORDERS = 'biker-change-state-order',
+  TICKET = 'support-ticket',
+  SHIPMENT_CHAT = 'shipment-chat',
 }
