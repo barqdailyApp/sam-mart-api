@@ -14,6 +14,9 @@ import { SupportTicketGateway } from 'src/integration/gateways/support-ticket.ga
 import { GetCommentQueryRequest } from './dto/request/get-comment-query.request';
 import { plainToInstance } from 'class-transformer';
 import { UserResponse } from '../user/dto/responses/user.response';
+import { NotificationService } from '../notification/notification.service';
+import { NotificationEntity } from 'src/infrastructure/entities/notification/notification.entity';
+import { NotificationTypes } from 'src/infrastructure/data/enums/notification-types.enum';
 
 
 @Injectable()
@@ -25,6 +28,8 @@ export class TicketCommentService extends BaseService<TicketComment> {
         @Inject(REQUEST) private readonly request: Request,
         @Inject(FileService) private _fileService: FileService,
         private readonly supportTicketGateway: SupportTicketGateway,
+        private readonly notificationService: NotificationService,
+
     ) {
         super(ticketCommentRepository);
     }
@@ -70,6 +75,18 @@ export class TicketCommentService extends BaseService<TicketComment> {
             user: userInfo,
             action: 'ADD_COMMENT'
         });
+
+        await this.notificationService.create(
+            new NotificationEntity({
+              user_id: savedComment.user_id,
+              url: savedComment.ticket_id,
+              type: NotificationTypes.TICKET,
+              title_ar: 'دعم فنى',
+              title_en: 'Support',
+              text_ar: 'تم اضافة تعليقك بنجاح',
+              text_en: 'Your comment has been added successfully',
+            }),
+          );
         return savedComment;
     }
 
