@@ -1038,7 +1038,7 @@ export class ProductDashboardService {
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.warehouses_products', 'warehouses_products')
       .where('warehouses_products.id IS NULL')
-      .orWhere('product.product_sub_categories IS NULL')
+
       .leftJoinAndSelect('product.product_images', 'product_images')
       .leftJoinAndSelect(
         'product.product_sub_categories',
@@ -1047,7 +1047,7 @@ export class ProductDashboardService {
       .leftJoinAndSelect(
         'product_sub_categories.category_subCategory',
         'product_category_subCategory',
-      )
+      ).  orWhere('product_category_subCategory IS NULL')
       .leftJoinAndSelect(
         'product_category_subCategory.subcategory',
         'subcategory',
