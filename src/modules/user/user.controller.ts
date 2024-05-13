@@ -169,7 +169,7 @@ export class UserController {
 
   @Put('/language')
   async updateLanguage(@Body() req: UpdateLanguageRequest) {
-    const user = await this._service.findOne(req.user_id);
+    const user = await this._service.findOne(this.request.user.id);
 
     user.language = req.language;
     return await this._service.update(user);
