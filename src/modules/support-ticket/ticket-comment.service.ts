@@ -1,4 +1,9 @@
-import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { REQUEST } from '@nestjs/core';
@@ -18,44 +23,54 @@ import { NotificationService } from '../notification/notification.service';
 import { NotificationEntity } from 'src/infrastructure/entities/notification/notification.entity';
 import { NotificationTypes } from 'src/infrastructure/data/enums/notification-types.enum';
 
-
 @Injectable()
 export class TicketCommentService extends BaseService<TicketComment> {
-    constructor(
-        @InjectRepository(TicketComment) private readonly ticketCommentRepository: Repository<TicketComment>,
-        @InjectRepository(TicketAttachment) private readonly ticketAttachmentRepository: Repository<TicketAttachment>,
-        @InjectRepository(SupportTicket) private readonly supportTicketRepository: Repository<SupportTicket>,
-        @Inject(REQUEST) private readonly request: Request,
-        @Inject(FileService) private _fileService: FileService,
-        private readonly supportTicketGateway: SupportTicketGateway,
-        private readonly notificationService: NotificationService,
+  constructor(
+    @InjectRepository(TicketComment)
+    private readonly ticketCommentRepository: Repository<TicketComment>,
+    @InjectRepository(TicketAttachment)
+    private readonly ticketAttachmentRepository: Repository<TicketAttachment>,
+    @InjectRepository(SupportTicket)
+    private readonly supportTicketRepository: Repository<SupportTicket>,
+    @Inject(REQUEST) private readonly request: Request,
+    @Inject(FileService) private _fileService: FileService,
+    private readonly supportTicketGateway: SupportTicketGateway,
+    private readonly notificationService: NotificationService,
+  ) {
+    super(ticketCommentRepository);
+  }
 
-    ) {
-        super(ticketCommentRepository);
+  async addComment(
+    ticketId: string,
+    { file, comment_text }: AddTicketCommentRequest,
+  ): Promise<TicketComment> {
+    let attachedFile = null;
+    if (file) {
+      const tempImage = await this._fileService.upload(file, `support-tickets`);
+
+      const createAttachedFile = this.ticketAttachmentRepository.create({
+        file_url: tempImage,
+        file_name: file.originalname,
+        file_type: file.mimetype,
+      });
+      attachedFile = await this.ticketAttachmentRepository.save(
+        createAttachedFile,
+      );
     }
 
-    async addComment(ticketId: string, { file, comment_text }: AddTicketCommentRequest): Promise<TicketComment> {
-        let attachedFile = null;
-        if (file) {
-            const tempImage = await this._fileService.upload(
-                file,
-                `support-tickets`,
-            );
+    const ticket = await this.supportTicketRepository.findOne({
+      where: { id: ticketId },
+    });
+    if (!ticket) throw new BadRequestException('Ticket not found');
 
-            const createAttachedFile = this.ticketAttachmentRepository.create({
-                file_url: tempImage,
-                file_name: file.originalname,
-                file_type: file.mimetype,
-            })
-            attachedFile = await this.ticketAttachmentRepository.save(createAttachedFile);
-        }
-
-        const ticket = await this.supportTicketRepository.findOne({ where: { id: ticketId } })
-        if (!ticket) throw new BadRequestException('Ticket not found');
-
-        if (!this.currentUser.roles.includes(Role.ADMIN) && ticket.user_id !== this.currentUser.id) {
-            throw new UnauthorizedException('You are not allowed to add comment to this ticket')
-        }
+    if (
+      !this.currentUser.roles.includes(Role.ADMIN) &&
+      ticket.user_id !== this.currentUser.id
+    ) {
+      throw new UnauthorizedException(
+        'You are not allowed to add comment to this ticket',
+      );
+    }
 
         const newComment = await this.ticketCommentRepository.create({
             comment_text,
@@ -72,38 +87,42 @@ export class TicketCommentService extends BaseService<TicketComment> {
             await this.supportTicketRepository.save(ticket);
         }
 
-        const savedComment = await this.ticketCommentRepository.save(newComment);
-        const userInfo = plainToInstance(UserResponse, this.currentUser, {
-            excludeExtraneousValues: true
-        })
+    const savedComment = await this.ticketCommentRepository.save(newComment);
+    const userInfo = plainToInstance(UserResponse, this.currentUser, {
+      excludeExtraneousValues: true,
+    });
 
-        this.supportTicketGateway.handleSendMessage({
-            supportTicket: ticket,
-            ticketComment: savedComment,
-            user: userInfo,
-            action: 'ADD_COMMENT'
-        });
+    this.supportTicketGateway.handleSendMessage({
+      supportTicket: ticket,
+      ticketComment: savedComment,
+      user: userInfo,
+      action: 'ADD_COMMENT',
+    });
 
-        await this.notificationService.create(
-            new NotificationEntity({
-                user_id: savedComment.user_id,
-                url: savedComment.ticket_id,
-                type: NotificationTypes.TICKET,
-                title_ar: 'دعم فنى',
-                title_en: 'Support',
-                text_ar: 'تم اضافة تعليقك بنجاح',
-                text_en: 'Your comment has been added successfully',
-            }),
-        );
-        return savedComment;
-    }
+    await this.notificationService.create(
+      new NotificationEntity({
+        user_id: ticket.user_id,
+        url: savedComment.ticket_id,
+        type: NotificationTypes.TICKET,
+        title_ar: 'دعم فنى',
+        title_en: 'Support',
+        text_ar: 'تم اضافة تعليقك بنجاح',
+        text_en: 'Your comment has been added successfully',
+      }),
+    );
+    return savedComment;
+  }
 
-    async getCommentsByChunk(ticketId: string, query: GetCommentQueryRequest): Promise<TicketComment[]> {
-        const { limit = 10, offset = 0 } = query;
+  async getCommentsByChunk(
+    ticketId: string,
+    query: GetCommentQueryRequest,
+  ): Promise<TicketComment[]> {
+    const { limit = 10, offset = 0 } = query;
 
-        const supportTicket = await this.supportTicketRepository.findOne({ where: { id: ticketId } })
-        if (!supportTicket)
-            throw new BadRequestException('Ticket not found');
+    const supportTicket = await this.supportTicketRepository.findOne({
+      where: { id: ticketId },
+    });
+    if (!supportTicket) throw new BadRequestException('Ticket not found');
 
         if (
             !this.currentUser.roles.includes(Role.ADMIN) &&
@@ -119,16 +138,16 @@ export class TicketCommentService extends BaseService<TicketComment> {
             await this.supportTicketRepository.save(supportTicket);
         }
 
-        return await this.ticketCommentRepository.find({
-            where: { ticket_id: ticketId },
-            relations: ['user', 'attachment'],
-            order: { created_at: 'DESC' },
-            skip: offset,
-            take: limit,
-        });
-    }
+    return await this.ticketCommentRepository.find({
+      where: { ticket_id: ticketId },
+      relations: ['user', 'attachment'],
+      order: { created_at: 'DESC' },
+      skip: offset,
+      take: limit,
+    });
+  }
 
-    get currentUser() {
-        return this.request.user;
-    }
+  get currentUser() {
+    return this.request.user;
+  }
 }
