@@ -557,7 +557,7 @@ export class ProductDashboardService {
         'measurement_unit',
       )
       .orderBy('category_subCategory.order_by', 'ASC')
-      .orderBy('product.created_at', 'DESC')
+      // .orderBy('product.created_at', 'DESC')
       .skip(skip)
       .take(limit);
     // Add search term condition if provided
