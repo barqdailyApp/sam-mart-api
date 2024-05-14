@@ -3,14 +3,19 @@ import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
 import { or } from 'sequelize';
 import { BaseService } from 'src/core/base/service/service.base';
+
 import { PaymentMethod } from 'src/infrastructure/entities/payment_method/payment_method.entity';
 import { Repository } from 'typeorm';
+import { KuraimiUserCheckRequest } from './dto/requests/kuraimi-user-check';
+import { User } from 'src/infrastructure/entities/user/user.entity';
+import { decodeUUID } from 'src/core/helpers/cast.helper';
 
 @Injectable()
 export class PaymentMethodService extends BaseService<PaymentMethod> {
   constructor(
     @InjectRepository(PaymentMethod)
     private readonly payment_repo: Repository<PaymentMethod>,
+    @InjectRepository(User) private readonly user_repo: Repository<User>,
   ) {
     super(payment_repo);
   }
@@ -123,7 +128,7 @@ export class PaymentMethodService extends BaseService<PaymentMethod> {
         console.log(enquire_response.data);
         if (
           enquire_response.data.responseStatus.systemStatusDesc === 'Success' &&
-         Number (enquire_response.data.responseBody.txnamount) >=  order_price
+          Number(enquire_response.data.responseBody.txnamount) >= order_price
         ) {
           try {
             const response = await axios.post(
@@ -166,13 +171,30 @@ export class PaymentMethodService extends BaseService<PaymentMethod> {
           } catch (error) {
             console.log(error);
           }
-        }
-        else throw new BadRequestException('The amount is not enough');
+        } else throw new BadRequestException('The amount is not enough');
       }
     }
   }
   catch(error) {
     console.error('Error sending SMS:', error);
     return false;
+  }
+
+  async checkUser(req: KuraimiUserCheckRequest) {
+    const allowed_zones = ['YE0012003', 'YE0012004', 'YE0012005'];
+
+    const user = await this.user_repo.findOne({
+      where: [
+        {
+          username: '+967' + req.MobileNumber,
+          email: req.Email,
+          id: req.SCustID ? decodeUUID(req.SCustID) : null,
+        },
+      ],
+    });
+
+    if (!user || !allowed_zones.includes(req.CustomerZone)) return null;
+
+    return user;
   }
 }
