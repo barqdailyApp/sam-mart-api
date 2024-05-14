@@ -92,6 +92,15 @@ export class SupportTicketService extends BaseService<SupportTicket> {
         return await this.supportTicketRepository.save(ticket);
     }
 
+    async reActiveCounter(ticketId: string) {
+        const ticket = await this.supportTicketRepository.findOne({ where: { id: ticketId } });
+        if (!ticket) throw new BadRequestException('Ticket not found');
+
+        ticket.is_counter_active = true;
+        ticket.new_messages_count = 0;
+        return await this.supportTicketRepository.save(ticket);
+    }
+
     get currentUser() {
         return this.request.user;
     }

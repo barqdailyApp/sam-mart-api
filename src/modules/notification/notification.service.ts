@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { FcmIntegrationService } from '../../integration/notify/fcm-integration.service';
@@ -24,6 +24,8 @@ import {
 } from './dto/requests/send-to-users-notification.request';
 import { NotificationTypes } from 'src/infrastructure/data/enums/notification-types.enum';
 import { NotificationQuery } from './dto/filters/notification.query';
+import { Roles } from '../authentication/guards/roles.decorator';
+import { Role } from 'src/infrastructure/data/enums/role.enum';
 
 @Injectable()
 export class NotificationService extends BaseUserService<NotificationEntity> {
@@ -129,7 +131,7 @@ export class NotificationService extends BaseUserService<NotificationEntity> {
     const { message_ar, message_en, title_ar, title_en } =
       sendToUsersNotificationRequest;
 
-    const users = await this.userRepository.find();
+    const users = await this.userRepository.find({where:{roles:Role.CLIENT}});
 
     users.map(async (user) => {
       return this.create(

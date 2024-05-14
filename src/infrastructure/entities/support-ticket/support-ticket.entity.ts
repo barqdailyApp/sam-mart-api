@@ -48,6 +48,13 @@ export class SupportTicket extends AuditableEntity {
     @Column({ nullable: true })
     subject_id: string;
 
+    @Column({ nullable: true, default: 0 })
+    new_messages_count: number;
+
+    @Column({ nullable: true, default: true })
+    is_counter_active: boolean;
+
+
     @BeforeInsert()
     async generateTicketNum() {
         const uuid = uuidv4();

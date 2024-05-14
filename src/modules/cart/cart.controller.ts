@@ -116,7 +116,17 @@ export class CartController {
           id: get_cart_product.cart.id,
           additional_services: get_cart_product.cart.additions,
           original_price:get_cart_product.cart.price,
-          price: get_cart_product.cart.price,
+          price:   
+          Number(get_cart_product.cart.product_category_price.price) +
+          (get_cart_product.cart.additions?.length > 0
+            ? Number(
+              get_cart_product.cart.product_category_price.product_additional_services.filter(
+                  (j) => {
+                    return get_cart_product.cart.additions?.includes(j.id);
+                  },
+                )[0].price,
+              )
+            : 0),
           quantity: get_cart_product.cart.quantity,
           product: get_cart_product.cart.product_category_price,
           Warehouse_quantity: get_cart_product.warehouse_quantity,

@@ -556,7 +556,8 @@ export class ProductDashboardService {
         'product_measurements.measurement_unit',
         'measurement_unit',
       )
-      .orderBy('product.created_at', 'DESC')
+      .orderBy('category_subCategory.order_by', 'ASC')
+      // .orderBy('product.created_at', 'DESC')
       .skip(skip)
       .take(limit);
     // Add search term condition if provided
@@ -671,6 +672,7 @@ export class ProductDashboardService {
       )
 
       .innerJoinAndSelect('product.product_images', 'product_images')
+      
 
       .orderBy('product_offer.created_at', 'DESC')
       .skip(skip)
