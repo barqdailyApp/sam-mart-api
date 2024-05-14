@@ -20,7 +20,7 @@ export class UpdateProfileDriverRequest {
   @ApiProperty({ nullable: true, required: false ,})
   @IsOptional()
   @IsString()
-  username: string;
+  name: string;
 
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()

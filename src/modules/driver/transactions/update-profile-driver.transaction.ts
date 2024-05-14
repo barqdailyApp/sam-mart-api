@@ -46,7 +46,7 @@ export class UpdateProfileDriverTransaction extends BaseTransaction<
       //* This Data user needed
       const {
         driver_id,
-        username,
+        name,
         email,
         phone,
         avatarFile,
@@ -68,6 +68,7 @@ export class UpdateProfileDriverTransaction extends BaseTransaction<
         where: { id: driver_id },
         relations: { user: true },
       });
+      
 
       if (!driver) {
         throw new BadRequestException('message.driver_not_found');
@@ -99,6 +100,7 @@ export class UpdateProfileDriverTransaction extends BaseTransaction<
           throw new BadRequestException('message.phone_exists');
         }
         driver.user.phone = phone;
+        driver.user.username=phone;
       }
 
       if (avatarFile) {
@@ -110,10 +112,7 @@ export class UpdateProfileDriverTransaction extends BaseTransaction<
         //* set avatar path
         driver.user.avatar = pathAvatar;
       }
-      if (username) {
-        driver.user.username = username;
-      }
-
+    
       if (birth_date) {
         driver.user.birth_date = birth_date;
       }
@@ -123,7 +122,7 @@ export class UpdateProfileDriverTransaction extends BaseTransaction<
         email: driver.user.email,
         phone: driver.user.phone,
         birth_date: driver.user.birth_date,
-        name: username,
+        name: name,
         avatar: driver.user.avatar,
       });
 
