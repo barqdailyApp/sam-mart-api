@@ -50,7 +50,7 @@ export class SendOtpTransaction extends BaseTransaction<
       // save otp
       await context.save(Otp, otp);
       // return code
-      return code.toString();
+      return "code";
     } catch (error) {
       throw new BadRequestException(
         this._config.get('app.env') !== 'prod' ?

@@ -1147,7 +1147,7 @@ export class ProductDashboardService {
       relations: {
         product_prices: { product_measurement: { measurement_unit: true } },
         product: {
-          product_images: true,
+      
           product_measurements: { measurement_unit: true },
         },
         category_subCategory: {
@@ -1156,8 +1156,8 @@ export class ProductDashboardService {
         },
       },
       order: {
-        category_subCategory: { subcategory: { name_ar: 'ASC' } },
-        product: { name_ar: 'ASC' },
+       category_subCategory:{section_category:{category:{name_ar:"ASC"}}},
+       
       },
     });
 
@@ -1177,10 +1177,7 @@ export class ProductDashboardService {
         description_ar: product.product?.description_ar,
         description_en: product.product?.description_en,
 
-        product_images: product.product.product_images.map((image) => ({
-          url: image.url,
-          is_logo: image.is_logo,
-        })),
+     
         measurement_units_en: product.product.product_measurements.map(
           (measurement) => measurement.measurement_unit?.name_en,
         ),
