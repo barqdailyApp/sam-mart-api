@@ -93,7 +93,7 @@ export class CartService extends BaseService<CartProduct> {
 
         warehouses_product.quantity =
           warehouses_product.quantity / e.conversion_factor;
-        const min_order_quantity = e.is_offer
+        const min_order_quantity = is_offer
           ? e.product_category_price.product_offer.min_offer_quantity
           : e.product_category_price.min_order_quantity;
         if (warehouses_product.quantity < e.quantity)
@@ -188,7 +188,7 @@ export class CartService extends BaseService<CartProduct> {
         },
       },
     });
-let original_price=product_price.price;
+    let original_price = product_price.price;
     const nearst_warehouse = await this.warehouseRepository
       .createQueryBuilder('warehouse')
       .where('is_active = :is_active', { is_active: true })
@@ -247,7 +247,6 @@ let original_price=product_price.price;
       warehouse_product.quantity -
       product_price.min_order_quantity *
         product_price.product_measurement.conversion_factor;
-    
 
     if (warehouse_product.quantity < 0) {
       throw new BadRequestException('message.warehouse_product_not_enough');
