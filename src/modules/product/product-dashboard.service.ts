@@ -672,7 +672,6 @@ export class ProductDashboardService {
       )
 
       .innerJoinAndSelect('product.product_images', 'product_images')
-      
 
       .orderBy('product_offer.created_at', 'DESC')
       .skip(skip)
@@ -1049,7 +1048,8 @@ export class ProductDashboardService {
       .leftJoinAndSelect(
         'product_sub_categories.category_subCategory',
         'product_category_subCategory',
-      ).  orWhere('product_category_subCategory.id IS NULL')
+      )
+      .orWhere('product_category_subCategory.id IS NULL')
       .leftJoinAndSelect(
         'product_category_subCategory.subcategory',
         'subcategory',
@@ -1147,7 +1147,6 @@ export class ProductDashboardService {
       relations: {
         product_prices: { product_measurement: { measurement_unit: true } },
         product: {
-      
           product_measurements: { measurement_unit: true },
         },
         category_subCategory: {
@@ -1156,8 +1155,12 @@ export class ProductDashboardService {
         },
       },
       order: {
-       category_subCategory:{section_category:{category:{name_ar:"ASC"}}},
-       
+        category_subCategory: {
+          
+          section_category: { category: { name_ar: 'ASC' } },
+          subcategory: { name_ar: 'ASC' },
+        
+        },
       },
     });
 
@@ -1177,7 +1180,6 @@ export class ProductDashboardService {
         description_ar: product.product?.description_ar,
         description_en: product.product?.description_en,
 
-     
         measurement_units_en: product.product.product_measurements.map(
           (measurement) => measurement.measurement_unit?.name_en,
         ),
