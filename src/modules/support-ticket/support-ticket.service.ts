@@ -14,94 +14,123 @@ import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { TicketCommentService } from './ticket-comment.service';
 import { ReasonService } from '../reason/reason.service';
 import { ReasonType } from 'src/infrastructure/data/enums/reason-type.enum';
-
+import { NotificationTypes } from 'src/infrastructure/data/enums/notification-types.enum';
+import { User } from 'src/infrastructure/entities/user/user.entity';
+import { NotificationService } from '../notification/notification.service';
+import { NotificationEntity } from 'src/infrastructure/entities/notification/notification.entity';
 
 @Injectable()
 export class SupportTicketService extends BaseService<SupportTicket> {
-    constructor(
-        @InjectRepository(SupportTicket) private readonly supportTicketRepository: Repository<SupportTicket>,
-        @InjectRepository(TicketAttachment) private readonly ticketAttachmentRepository: Repository<TicketAttachment>,
+  constructor(
+    @InjectRepository(SupportTicket)
+    private readonly supportTicketRepository: Repository<SupportTicket>,
+    @InjectRepository(TicketAttachment)
+    private readonly ticketAttachmentRepository: Repository<TicketAttachment>,
 
-        @Inject(REQUEST) private readonly request: Request,
-        @Inject(FileService) private _fileService: FileService,
-        @Inject(ReasonService) private readonly reasonService: ReasonService,
+    @Inject(REQUEST) private readonly request: Request,
+    @Inject(FileService) private _fileService: FileService,
+    @Inject(ReasonService) private readonly reasonService: ReasonService,
 
-        private readonly ticketCommentService: TicketCommentService,
+    private readonly ticketCommentService: TicketCommentService,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    private readonly notificationService: NotificationService,
+  ) {
+    super(supportTicketRepository);
+  }
 
-    ) {
-        super(supportTicketRepository);
+  async createTicket({ subject_id, description, file }: CreateTicketRequest) {
+    let attachedFile = null;
+    if (file) {
+      const tempImage = await this._fileService.upload(file, `support-tickets`);
+
+      const createAttachedFile = this.ticketAttachmentRepository.create({
+        file_url: tempImage,
+        file_name: file.originalname,
+        file_type: file.mimetype,
+      });
+      attachedFile = await this.ticketAttachmentRepository.save(
+        createAttachedFile,
+      );
     }
 
-    async createTicket({ subject_id, description, file }: CreateTicketRequest) {
+    const subject = await this.reasonService.findOne({
+      id: subject_id,
+      type: ReasonType.SUPPORT_TICKET,
+    });
+    if (!subject) throw new BadRequestException('Subject not found');
 
-        let attachedFile = null;
-        if (file) {
-            const tempImage = await this._fileService.upload(
-                file,
-                `support-tickets`,
-            );
+    const newTicket = await this.supportTicketRepository.create({
+      subject,
+      description,
+      user: this.currentUser,
+      attachment: attachedFile,
+    });
 
-            const createAttachedFile = this.ticketAttachmentRepository.create({
-                file_url: tempImage,
-                file_name: file.originalname,
-                file_type: file.mimetype,
-            })
-            attachedFile = await this.ticketAttachmentRepository.save(createAttachedFile);
-        }
+    const savedTicket = await this.supportTicketRepository.save(newTicket);
+    await this.ticketCommentService.addComment(savedTicket.id, {
+      comment_text: description ?? subject.name_en,
+      file: file ?? null,
+    });
 
-        const subject = await this.reasonService.findOne({ id: subject_id, type: ReasonType.SUPPORT_TICKET });
-        if (!subject) throw new BadRequestException('Subject not found');
+    const UserAdmin = await this.userRepository
+      .createQueryBuilder('user')
+      .where('FIND_IN_SET(:role, user.roles) > 0', { role: Role.ADMIN })
+      .getOne();
 
-        const newTicket = await this.supportTicketRepository.create({
-            subject,
-            description,
-            user: this.currentUser,
-            attachment: attachedFile
-        });
+    await this.notificationService.create(
+      new NotificationEntity({
+        user_id: UserAdmin.id,
+        url: savedTicket.id,
+        type: NotificationTypes.TICKET,
+        title_ar: 'دعم فنى',
+        title_en: 'Support',
+        text_ar: subject.name_ar,
+        text_en: subject.name_en,
+      }),
+    );
 
-        const savedTicket = await this.supportTicketRepository.save(newTicket);
-        await this.ticketCommentService.addComment(savedTicket.id, {
-            comment_text: description ?? subject.name_en,
-            file: file ?? null
-        });
+    return savedTicket;
+  }
 
-        return savedTicket;
+  async getTickets(options?: PaginatedRequest) {
+    options.filters ??= [];
+    options.includes ??= [];
+
+    options.includes.push('subject');
+    options.includes.push('attachment');
+
+    if (this.currentUser.roles.includes(Role.ADMIN)) {
+      options.includes.push('user');
+    } else {
+      options.filters.push(`user_id=${this.currentUser.id}`);
     }
 
-    async getTickets(options?: PaginatedRequest) {
-        options.filters ??= [];
-        options.includes ??= [];
+    return await this.findAll(options);
+  }
 
-        options.includes.push('subject');
-        options.includes.push('attachment');
+  async chnageTicketStatus(ticketId: string, status: SupportTicketStatus) {
+    const ticket = await this.supportTicketRepository.findOne({
+      where: { id: ticketId },
+    });
+    if (!ticket) throw new BadRequestException('Ticket not found');
 
-        if (this.currentUser.roles.includes(Role.ADMIN)) {
-            options.includes.push('user');
-        } else {
-            options.filters.push(`user_id=${this.currentUser.id}`);
-        }
+    ticket.status = status;
+    return await this.supportTicketRepository.save(ticket);
+  }
 
-        return await this.findAll(options);
-    }
+  async reActiveCounter(ticketId: string) {
+    const ticket = await this.supportTicketRepository.findOne({
+      where: { id: ticketId },
+    });
+    if (!ticket) throw new BadRequestException('Ticket not found');
 
-    async chnageTicketStatus(ticketId: string, status: SupportTicketStatus) {
-        const ticket = await this.supportTicketRepository.findOne({ where: { id: ticketId } });
-        if (!ticket) throw new BadRequestException('Ticket not found');
+    ticket.is_counter_active = true;
+    ticket.new_messages_count = 0;
+    return await this.supportTicketRepository.save(ticket);
+  }
 
-        ticket.status = status;
-        return await this.supportTicketRepository.save(ticket);
-    }
-
-    async reActiveCounter(ticketId: string) {
-        const ticket = await this.supportTicketRepository.findOne({ where: { id: ticketId } });
-        if (!ticket) throw new BadRequestException('Ticket not found');
-
-        ticket.is_counter_active = true;
-        ticket.new_messages_count = 0;
-        return await this.supportTicketRepository.save(ticket);
-    }
-
-    get currentUser() {
-        return this.request.user;
-    }
+  get currentUser() {
+    return this.request.user;
+  }
 }

@@ -409,8 +409,8 @@ export class ShipmentService extends BaseService<Shipment> {
           type: NotificationTypes.SHIPMENT_CHAT,
           title_ar: 'محادثة',
           title_en: 'chat',
-          text_ar: 'تم اضافة رسالة جديدة',
-          text_en: 'new message added',
+          text_ar: newMessage.message,
+          text_en: newMessage.message,
         }),
       );
     } else {

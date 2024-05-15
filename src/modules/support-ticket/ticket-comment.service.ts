@@ -22,12 +22,14 @@ import { UserResponse } from '../user/dto/responses/user.response';
 import { NotificationService } from '../notification/notification.service';
 import { NotificationEntity } from 'src/infrastructure/entities/notification/notification.entity';
 import { NotificationTypes } from 'src/infrastructure/data/enums/notification-types.enum';
+import { User } from 'src/infrastructure/entities/user/user.entity';
 
 @Injectable()
 export class TicketCommentService extends BaseService<TicketComment> {
   constructor(
     @InjectRepository(TicketComment)
     private readonly ticketCommentRepository: Repository<TicketComment>,
+ 
     @InjectRepository(TicketAttachment)
     private readonly ticketAttachmentRepository: Repository<TicketAttachment>,
     @InjectRepository(SupportTicket)
@@ -72,20 +74,20 @@ export class TicketCommentService extends BaseService<TicketComment> {
       );
     }
 
-        const newComment = await this.ticketCommentRepository.create({
-            comment_text,
-            user_id: this.currentUser.id,
-            ticket,
-            attachment: attachedFile
-        });
+    const newComment = await this.ticketCommentRepository.create({
+      comment_text,
+      user_id: this.currentUser.id,
+      ticket,
+      attachment: attachedFile,
+    });
 
-        if (
-            ticket.is_counter_active &&
-            !this.currentUser.roles.includes(Role.ADMIN)
-        ) {
-            ticket.new_messages_count++;
-            await this.supportTicketRepository.save(ticket);
-        }
+    if (
+      ticket.is_counter_active &&
+      !this.currentUser.roles.includes(Role.ADMIN)
+    ) {
+      ticket.new_messages_count++;
+      await this.supportTicketRepository.save(ticket);
+    }
 
     const savedComment = await this.ticketCommentRepository.save(newComment);
     const userInfo = plainToInstance(UserResponse, this.currentUser, {
@@ -99,17 +101,21 @@ export class TicketCommentService extends BaseService<TicketComment> {
       action: 'ADD_COMMENT',
     });
 
-    await this.notificationService.create(
-      new NotificationEntity({
-        user_id: ticket.user_id,
-        url: savedComment.ticket_id,
-        type: NotificationTypes.TICKET,
-        title_ar: 'دعم فنى',
-        title_en: 'Support',
-        text_ar: 'تم اضافة تعليقك بنجاح',
-        text_en: 'Your comment has been added successfully',
-      }),
-    );
+    if (this.currentUser.id !== ticket.user_id) {
+      await this.notificationService.create(
+        new NotificationEntity({
+          user_id: ticket.user_id,
+          url: savedComment.ticket_id,
+          type: NotificationTypes.TICKET,
+          title_ar: 'دعم فنى',
+          title_en: 'Support',
+          text_ar: newComment.comment_text,
+          text_en: newComment.comment_text,
+        }),
+      );
+    }
+
+
     return savedComment;
   }
 
@@ -124,19 +130,21 @@ export class TicketCommentService extends BaseService<TicketComment> {
     });
     if (!supportTicket) throw new BadRequestException('Ticket not found');
 
-        if (
-            !this.currentUser.roles.includes(Role.ADMIN) &&
-            supportTicket.user_id !== this.currentUser.id
-        ) {
-            throw new UnauthorizedException('You are not allowed to view this ticket');
-        }
+    if (
+      !this.currentUser.roles.includes(Role.ADMIN) &&
+      supportTicket.user_id !== this.currentUser.id
+    ) {
+      throw new UnauthorizedException(
+        'You are not allowed to view this ticket',
+      );
+    }
 
-        // if the user is admin, then we will reset the new messages count
-        if (this.currentUser.roles.includes(Role.ADMIN)) {
-            supportTicket.is_counter_active = false;
-            supportTicket.new_messages_count = 0;
-            await this.supportTicketRepository.save(supportTicket);
-        }
+    // if the user is admin, then we will reset the new messages count
+    if (this.currentUser.roles.includes(Role.ADMIN)) {
+      supportTicket.is_counter_active = false;
+      supportTicket.new_messages_count = 0;
+      await this.supportTicketRepository.save(supportTicket);
+    }
 
     return await this.ticketCommentRepository.find({
       where: { ticket_id: ticketId },
