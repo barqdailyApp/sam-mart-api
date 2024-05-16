@@ -36,7 +36,7 @@ export class PaymentMethodController {
     @Inject(REQUEST) private request: Request,
   ) {}
 
-  @Get()
+  @Post()
   async getPaymentMethods(@Query() query: PaginatedRequest) {
     return new ActionResponse(
       this._i18nResponse.entity(
