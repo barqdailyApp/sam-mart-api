@@ -337,6 +337,7 @@ export class ProductClientService {
         'section_category',
       )
       .innerJoinAndSelect('product_sub_category.product', 'product')
+      .innerJoinAndSelect('product.warehouses_products', 'warehousesProduct')
       .innerJoinAndSelect(
         'product.product_measurements',
         'product_measurements',
