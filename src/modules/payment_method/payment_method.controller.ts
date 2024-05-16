@@ -59,14 +59,14 @@ export class PaymentMethodController {
     if (user) {
       return new KuraimiUserResponse({
         Code: '1',
-        SCustID: encodeUUID(user.id),
+        // SCustID: encodeUUID(user.id),
         DescriptionAr: 'تم التحقق من تفاصيل العملية بنجاح',
         DescriptionEn: 'Customer details verified successfully ',
       });
     } else
       return new KuraimiUserResponse({
         Code: '2',
-        SCustID: null,
+        // SCustID: null,
         DescriptionAr: 'تفاصيل العملية غير صالحة',
         DescriptionEn: 'Invalid customer details',
       });

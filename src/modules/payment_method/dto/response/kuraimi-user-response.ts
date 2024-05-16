@@ -1,7 +1,7 @@
 export class KuraimiUserResponse{
 
     Code: string
-    SCustID:any
+    // SCustID:any
     DescriptionAr:string
     DescriptionEn:string   
     constructor(data: Partial<KuraimiUserResponse>) {
