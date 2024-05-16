@@ -36,7 +36,7 @@ export class PaymentMethodController {
     @Inject(REQUEST) private request: Request,
   ) {}
 
-  @Post()
+  @Get()
   async getPaymentMethods(@Query() query: PaginatedRequest) {
     return new ActionResponse(
       this._i18nResponse.entity(
@@ -48,7 +48,7 @@ export class PaymentMethodController {
     );
   }
 
-  @Get('kuraimi/check-user')
+  @Post('kuraimi/check-user')
   async checkUser(@Query() req: KuraimiUserCheckRequest) {
   
     if (
