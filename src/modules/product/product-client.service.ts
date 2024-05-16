@@ -311,14 +311,8 @@ export class ProductClientService {
         'product_category_prices',
       )
 
-      .leftJoinAndSelect(
-        'product_category_prices.product_additional_services',
-        'product_additional_services',
-      )
-      .leftJoinAndSelect(
-        'product_additional_services.additional_service',
-        'additional_service',
-      )
+      
+     
 
       .innerJoinAndSelect(
         'product_category_prices.product_measurement',
@@ -342,9 +336,7 @@ export class ProductClientService {
         'category_subCategory.section_category',
         'section_category',
       )
-      .innerJoinAndSelect('section_category.section', 'section')
       .innerJoinAndSelect('product_sub_category.product', 'product')
-      .innerJoinAndSelect('product.warehouses_products', 'warehousesProduct')
       .innerJoinAndSelect(
         'product.product_measurements',
         'product_measurements',
