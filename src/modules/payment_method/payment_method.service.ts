@@ -181,7 +181,7 @@ export class PaymentMethodService extends BaseService<PaymentMethod> {
   }
 
   async checkUser(req: KuraimiUserCheckRequest) {
-    const allowed_zones = ['YE0012003', 'YE0012004', 'YE0012005'];
+    
 
     const user = await this.user_repo.findOne({
       where: [
@@ -193,7 +193,7 @@ export class PaymentMethodService extends BaseService<PaymentMethod> {
       ],
     });
 
-    if (!user || !allowed_zones.includes(req.CustomerZone)) return null;
+    if (!user ) return null;
 
     return user;
   }

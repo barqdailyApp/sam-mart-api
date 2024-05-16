@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsString, ValidateIf } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString, ValidateIf } from 'class-validator';
 
 export class KuraimiUserCheckRequest {
   @ApiProperty({ required: false })
@@ -31,7 +31,8 @@ export class KuraimiUserCheckRequest {
 
   @IsNotEmpty()
 
-  @ApiProperty()
+  @ApiProperty({required:false})
   @IsString()
+  @IsOptional()
   CustomerZone: string;
 }
