@@ -31,8 +31,8 @@ export class KuraimiUserCheckRequest {
 
   @IsNotEmpty()
 
-  @ApiProperty({required:false})
+  @ApiProperty()
   @IsString()
-  @IsOptional()
+
   CustomerZone: string;
 }
