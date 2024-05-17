@@ -158,7 +158,7 @@ export class ProductClientService {
     if (user_id) {
       const cartUser = await this.cart_repo.findOne({ where: { user_id } });
       if (!cartUser) {
-        throw new NotFoundException("message.user_not_found");
+        throw new NotFoundException('message.user_not_found');
       }
 
       query = query.leftJoinAndSelect(
@@ -254,8 +254,8 @@ export class ProductClientService {
 
   //* Get All Products Offers  For Client
 
-
   async getAllProductsOffersForClient(productClientQuery: ProductClientQuery) {
+
     const {
       page,
       limit,
@@ -311,9 +311,6 @@ export class ProductClientService {
         'product_category_prices',
       )
 
-      
-     
-
       .innerJoinAndSelect(
         'product_category_prices.product_measurement',
         'product_measurement',
@@ -342,31 +339,30 @@ export class ProductClientService {
         'product.product_measurements',
         'product_measurements',
       )
-      .innerJoinAndSelect(
-        'product_measurements.product_category_prices',
-        'product_category_prices_measurement',
-      )
+      // .innerJoinAndSelect(
+      //   'product_measurements.product_category_prices',
+      //   'product_category_prices_measurement',
+      // )
 
-      .innerJoinAndSelect(
-        'product_category_prices_measurement.product_sub_category',
-        'product_sub_category_measurement',
-      )
+      // .innerJoinAndSelect(
+      //   'product_category_prices_measurement.product_sub_category',
+      //   'product_sub_category_measurement',
+      // )
 
-      .innerJoinAndSelect(
-        'product_sub_category_measurement.category_subCategory',
-        'category_subCategory_measurement',
-      )
-      .innerJoinAndSelect(
-        'category_subCategory_measurement.section_category',
-        'section_category_measurement',
-      )
-      .innerJoinAndSelect(
-        'section_category_measurement.section',
-        'section_measurement',
-      )
+      // .innerJoinAndSelect(
+      //   'product_sub_category_measurement.category_subCategory',
+      //   'category_subCategory_measurement',
+      // )
+      // .innerJoinAndSelect(
+      //   'category_subCategory_measurement.section_category',
+      //   'section_category_measurement',
+      // )
+      // .innerJoinAndSelect(
+      //   'section_category_measurement.section',
+      //   'section_measurement',
+      // )
 
       .innerJoinAndSelect('product.product_images', 'product_images')
-    
 
       .where(
         'product_offer.offer_quantity > 0 AND product_offer.start_date <= :current_date AND product_offer.end_date >= :current_date AND product_offer.is_active = :isActive',
@@ -383,7 +379,7 @@ export class ProductClientService {
     if (user_id) {
       const cartUser = await this.cart_repo.findOne({ where: { user_id } });
       if (!cartUser) {
-        throw new NotFoundException("message.user_not_found");
+        throw new NotFoundException('message.user_not_found');
       }
 
       query = query.leftJoinAndSelect(
@@ -434,7 +430,7 @@ export class ProductClientService {
       }
     }
 
-    // Conditional where clause based on sub category
+    // // Conditional where clause based on sub category
     if (category_sub_category_id) {
       query = query.andWhere(
         'product_sub_category.category_sub_category_id = :category_sub_category_id',
@@ -442,27 +438,27 @@ export class ProductClientService {
           category_sub_category_id,
         },
       );
-      query = query.andWhere(
-        'product_sub_category_measurement.category_sub_category_id = :category_sub_category_id',
-        {
-          category_sub_category_id,
-        },
-      );
+      // query = query.andWhere(
+      //   'product_sub_category_measurement.category_sub_category_id = :category_sub_category_id',
+      //   {
+      //     category_sub_category_id,
+      //   },
+      // );
       query = query.andWhere('product.is_active = true');
       query = query.andWhere('product_sub_category.is_active = true');
     }
 
-    // Conditional where clause based on section
+    // // Conditional where clause based on section
     if (section_id) {
       query = query.andWhere('section_category.section_id = :section_id', {
         section_id,
       });
-      query = query.andWhere(
-        'section_category_measurement.section_id = :section_id',
-        {
-          section_id,
-        },
-      );
+      // query = query.andWhere(
+      //   'section_category_measurement.section_id = :section_id',
+      //   {
+      //     section_id,
+      //   },
+      // );
       query = query.andWhere('product.is_active = true');
       query = query.andWhere('product_sub_category.is_active = true');
     }
@@ -499,7 +495,8 @@ export class ProductClientService {
     // Start building the query
     let query = this.productRepository
       .createQueryBuilder('product')
-      .innerJoinAndSelect('product.product_images', 'product_images').orderBy("product_images.is_logo", "DESC")
+      .innerJoinAndSelect('product.product_images', 'product_images')
+      .orderBy('product_images.is_logo', 'DESC')
       .innerJoinAndSelect(
         'product.product_sub_categories',
         'product_sub_categories',
@@ -565,7 +562,7 @@ export class ProductClientService {
     if (user_id) {
       const cartUser = await this.cart_repo.findOne({ where: { user_id } });
       if (!cartUser) {
-        throw new NotFoundException("message.user_not_found");
+        throw new NotFoundException('message.user_not_found');
       }
 
       query = query.leftJoinAndSelect(
@@ -767,7 +764,7 @@ export class ProductClientService {
     if (user_id) {
       const cartUser = await this.cart_repo.findOne({ where: { user_id } });
       if (!cartUser) {
-        throw new NotFoundException("message.user_not_found");
+        throw new NotFoundException('message.user_not_found');
       }
 
       query = query.leftJoinAndSelect(

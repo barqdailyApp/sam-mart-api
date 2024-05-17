@@ -21,6 +21,7 @@ import { toUrl } from 'src/core/helpers/file.helper';
 export class ProductsOffersNewResponse {
   @Expose() section_id: string;
   @Expose() product_category_price_id: string;
+  @Expose() category_sub_category_id: string;
   @Expose() is_quantity_available: boolean;
   @Expose() warehouse_quantity: number;
 
@@ -48,15 +49,17 @@ export class ProductsOffersNewResponse {
     const product = product_category_price.product_sub_category.product;
     const product_measurement = product_category_price.product_measurement;
     const measurement_unit = product_measurement.measurement_unit;
-    const product_price =
-      product_category_price.product_sub_category.product.product_measurements.find(
-        (item) => item.id === product_measurement.id,
-      ).product_category_prices[0];
+    // const product_price =
+    //   product_category_price.product_sub_category.product.product_measurements.find(
+    //     (item) => item.id === product_measurement.id,
+    //   ).product_category_prices[0];
     const cart_products = product_category_price.cart_products;
 
     // Manually setting the values based on the transformation logic
     this.section_id = section_category.section_id;
     this.product_category_price_id = product_category_price.id;
+    this.category_sub_category_id =
+      product_category_price.product_sub_category.category_sub_category_id;
     this.offer_id = product_offer.id;
     this.offer_price = product_offer.price;
     this.is_quantity_available =
@@ -74,8 +77,8 @@ export class ProductsOffersNewResponse {
     this.product_logo = toUrl(
       product.product_images.find((x) => x.is_logo === true)?.url,
     );
-    this.product_price_id = product_price.id;
-    this.product_price = product_price.price;
+    this.product_price_id = product_category_price.id;
+    this.product_price = product_category_price.price;
     this.min_order_quantity = product_offer.min_offer_quantity;
     this.mix_order_quantity = product_offer.max_offer_quantity;
     this.product_measurement_id = product_measurement.id;
