@@ -187,8 +187,8 @@ export class PaymentMethodService extends BaseService<PaymentMethod> {
       where: [
         {
           username: '+967' + req.MobileNumber,
-          email: req.Email,
-          id: req.SCustID ? decodeUUID(req.SCustID) : null,
+          // email: req.Email,
+          // id: req.SCustID ? decodeUUID(req.SCustID) : null,
         },
       ],
     });
