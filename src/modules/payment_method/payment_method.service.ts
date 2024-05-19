@@ -216,10 +216,11 @@ export class PaymentMethodService extends BaseService<PaymentMethod> {
           AMOUNT: 1000.0,
           CRCY: 'YER',
           MRCHNTNAME : 'Merchant 1',
-          PINPASS: '0000',
+          PINPASS: Buffer.from("0000").toString('base64'),
         },
       },
     );
+    console.log(Buffer.from("0000").toString('base64'));
     console.log(response.headers);
     console.log(response.data);
     return response;
