@@ -220,6 +220,8 @@ export class PaymentMethodService extends BaseService<PaymentMethod> {
         },
       },
     );
+    console.log(response.headers);
+    console.log(response.data);
     return response;
   }
 }
