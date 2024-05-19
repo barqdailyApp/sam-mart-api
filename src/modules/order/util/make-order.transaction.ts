@@ -226,7 +226,7 @@ export class MakeOrderTransaction extends BaseTransaction<
         );
         if (promo_code) {
           total -= promo_code.discount;
-          order.total_price = total;
+          // order.total_price = total;
           order.promo_code_id=promo_code.id;
           order.promo_code_discount=promo_code.discount;
           promo_code.current_uses++;
