@@ -215,7 +215,7 @@ export class PaymentMethodService extends BaseService<PaymentMethod> {
           REFNO: '123456',
           AMOUNT: 1000.0,
           CRCY: 'YER',
-          'MRCHNTNAME ': 'Merchant 1',
+          MRCHNTNAME : 'Merchant 1',
           PINPASS: '0000',
         },
       },
