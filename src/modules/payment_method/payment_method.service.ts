@@ -201,28 +201,33 @@ export class PaymentMethodService extends BaseService<PaymentMethod> {
   }
 
   async kuraimiPay() {
-    const response = await axios.post(
-      'https://web.krmbank.net.ye:44746/alk-payments-exp/v1/PHEPaymentAPI/EPayment/SendPayment',
-   
-      {
-        auth:{
-          username: 'bArQ#UaT_',
-          password: "b@Rq_12!34#5"
+    try {
+      const response = await axios.post(
+        'https://web.krmbank.net.ye:44746/alk-payments-exp/v1/PHEPaymentAPI/EPayment/SendPayment',
 
+        {
+          auth: {
+            username: 'bArQ#UaT_',
+            password: 'b@Rq_12!34#5',
+          },
+          body: {
+            SCustID: 'b31a2e97300d_95e7_420f_0d06_1cfbb460',
+            REFNO: '123456',
+            AMOUNT: 1000.0,
+            CRCY: 'YER',
+            MRCHNTNAME: 'Merchant 1',
+            PINPASS: Buffer.from('0000').toString('base64'),
+          },
         },
-        body: {
-          SCustID : 'b31a2e97300d_95e7_420f_0d06_1cfbb460',
-          REFNO: '123456',
-          AMOUNT: 1000.0,
-          CRCY: 'YER',
-          MRCHNTNAME : 'Merchant 1',
-          PINPASS: Buffer.from("0000").toString('base64'),
-        },
-      },
-    );
-    console.log(Buffer.from("0000").toString('base64'));
-    console.log(response.headers);
-    console.log(response.data);
-    return response;
+      );
+    } catch (error) {
+      console.log(error);
+      console.log(error.response.data);
+      console.log(error.response.headers);
+      console.log(error.response.body);
+      console.log(error.request);
+    }
+
+  
   }
 }
