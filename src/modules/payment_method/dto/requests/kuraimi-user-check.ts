@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsOptional, IsString, ValidateIf } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  ValidateIf,
+} from 'class-validator';
 
 export class KuraimiUserCheckRequest {
   @ApiProperty({ required: false })
@@ -9,19 +15,18 @@ export class KuraimiUserCheckRequest {
     // Validate if both SCustID and MobileNumber are null
     return object.Email == null && object.MobileNumber == null;
   })
- 
   SCustID: string;
 
-  @ApiProperty({required: false})
+  @ApiProperty({ required: false })
   @IsString()
   @IsNotEmpty()
   @ValidateIf((object, value) => {
     // Validate if both SCustID and MobileNumber are null
     return object.SCustID === null && object.Email === null;
   })
-  MobileNumber: string;
+  MobileNo: string;
 
-  @ApiProperty({required: false})
+  @ApiProperty({ required: false })
   @ValidateIf((object, value) => {
     // Validate if both SCustID and MobileNumber are null
     return object.SCustID === null && object.MobileNumber === null;
@@ -30,9 +35,7 @@ export class KuraimiUserCheckRequest {
   Email: string;
 
   @IsNotEmpty()
-
   @ApiProperty()
   @IsString()
-
   CustomerZone: string;
 }
