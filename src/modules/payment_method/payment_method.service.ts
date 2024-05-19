@@ -211,12 +211,12 @@ export class PaymentMethodService extends BaseService<PaymentMethod> {
 
         },
         body: {
-          'SCustID ': 'b31a2e97300d_95e7_420f_0d06_1cfbb460',
+          SCustID : 'b31a2e97300d_95e7_420f_0d06_1cfbb460',
           REFNO: '123456',
           AMOUNT: 1000.0,
           CRCY: 'YER',
           'MRCHNTNAME ': 'Merchant 1',
-          PINPASS: 'MTIzNA== ',
+          PINPASS: '0000',
         },
       },
     );
