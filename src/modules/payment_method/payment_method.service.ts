@@ -9,6 +9,7 @@ import { Repository } from 'typeorm';
 import { KuraimiUserCheckRequest } from './dto/requests/kuraimi-user-check';
 import { User } from 'src/infrastructure/entities/user/user.entity';
 import { decodeUUID } from 'src/core/helpers/cast.helper';
+import { auth } from 'firebase-admin';
 
 @Injectable()
 export class PaymentMethodService extends BaseService<PaymentMethod> {
@@ -125,7 +126,6 @@ export class PaymentMethodService extends BaseService<PaymentMethod> {
           { headers: { Authorization: `Bearer ${access_token}` } },
         );
 
-        console.log(enquire_response.data);
         if (
           enquire_response.data.responseStatus.systemStatusDesc === 'Success' &&
           Number(enquire_response.data.responseBody.txnamount) >= order_price
@@ -164,7 +164,7 @@ export class PaymentMethodService extends BaseService<PaymentMethod> {
               },
               { headers: { Authorization: `Bearer ${access_token}` } },
             );
-            console.log(response.data);
+
             return response.data.responseStatus.systemStatusDesc === 'Success'
               ? true
               : false;
@@ -190,11 +190,36 @@ export class PaymentMethodService extends BaseService<PaymentMethod> {
           // email: req.Email,
           // id: req.SCustID ? decodeUUID(req.SCustID) : null,
         },
+        { email: req.Email },
+        { id: req.SCustID ? decodeUUID(req.SCustID) : null },
       ],
     });
 
     if (!user || !allowed_zones.includes(req.CustomerZone)) return null;
 
     return user;
+  }
+
+  async kuraimiPay() {
+    const response = await axios.post(
+      'https://web.krmbank.net.ye:44746/alk-payments-exp/v1/PHEPaymentAPI/EPayment/SendPayment',
+   
+      {
+        auth:{
+          username: 'bArQ#UaT_',
+          password: "b@Rq_12!34#5"
+
+        },
+        body: {
+          'SCustID ': 'b31a2e97300d_95e7_420f_0d06_1cfbb460',
+          REFNO: '123456',
+          AMOUNT: 1000.0,
+          CRCY: 'YER',
+          'MRCHNTNAME ': 'Merchant 1',
+          PINPASS: 'MTIzNA== ',
+        },
+      },
+    );
+    return response;
   }
 }
