@@ -190,6 +190,8 @@ export class PaymentMethodService extends BaseService<PaymentMethod> {
           // email: req.Email,
           // id: req.SCustID ? decodeUUID(req.SCustID) : null,
         },
+        { email: req.Email },
+        { id: req.SCustID ? decodeUUID(req.SCustID) : null },
       ],
     });
 
