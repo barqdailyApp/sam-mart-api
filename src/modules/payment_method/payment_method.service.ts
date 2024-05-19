@@ -222,10 +222,11 @@ export class PaymentMethodService extends BaseService<PaymentMethod> {
       );
     } catch (error) {
       console.log(error);
-      console.log(error.response.data);
       console.log(error.response.headers);
       console.log(error.response.body);
-      console.log(error.request);
+      console.log(error.response.data);
+   
+     
     }
 
   
