@@ -17,12 +17,14 @@ export class OrderSingleResponse {
   @Expose() promo_code_discount: number;
   @Expose() address: any;
   @Expose() shipments: any;
+  @Expose() products_price:number
 
   constructor(order: Order) {
     this.order_id = order.id;
     this.created_at = order.created_at;
     this.delivery_fee = order.delivery_fee;
     this.order_number = order.number;
+    this.products_price=order.products_price;
     this.order_products = order.shipments[0].shipment_products.length;
     this.total_price = order.total_price;
     this.promo_code_discount = order.promo_code_discount;

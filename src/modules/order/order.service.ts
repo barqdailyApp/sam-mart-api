@@ -295,10 +295,8 @@ export class OrderService extends BaseUserService<Order> {
       withDeleted: true,
     });
 
-    const returnedOrder = await this.ReturnOrderRepository.count({
-      
-    })
-    const products= await this.productRepository.count({})
+    const returnedOrder = await this.ReturnOrderRepository.count({});
+    const products = await this.productRepository.count({});
     return {
       ordersTotal,
       ordersNew,
@@ -309,7 +307,7 @@ export class OrderService extends BaseUserService<Order> {
       ordersDelivered,
       ordersCanceled,
       returnedOrder,
-      products
+      products,
     };
   }
 
@@ -353,13 +351,7 @@ export class OrderService extends BaseUserService<Order> {
       ]);
     }
     products_table.push([
-      Number(order_details.total_price) +
-        Number(order_details.delivery_fee) -
-        Number(
-          order_details.promo_code_discount
-            ? order_details.promo_code_discount
-            : 0,
-        ),
+      Number(order_details.total_price) ,
       '',
       '',
       '',

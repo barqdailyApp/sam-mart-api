@@ -17,11 +17,13 @@ export class OrdersResponse {
   @Expose() total_price: number;
   @Expose() address: any;
   @Expose() shipments: any;
+  @Expose() products_price: number;
 
   constructor(order: Order) {
     this.order_id = order.id;
     this.order_number = order.number;
     this.total_price = order.total_price;
+    this.products_price=order.products_price;
     this.delivery_type = order.delivery_type;
     this.estimated_delivery_time = order.estimated_delivery_time;
     this.delivery_day = order.delivery_day;

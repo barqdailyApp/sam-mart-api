@@ -125,7 +125,7 @@ export class ShipmentService extends BaseService<Shipment> {
     if (shipment.order.payment_method == PaymentMethodEnum.CASH) {
       await this.transactionService.makeTransaction(
         new MakeTransactionRequest({
-          amount: -(Number(order.total_price) + Number(order.delivery_fee)),
+          amount: -order.total_price,
           type: TransactionTypes.ORDER_DELIVERD,
           order_id: order.id,
           user_id: shipment.driver.user_id,

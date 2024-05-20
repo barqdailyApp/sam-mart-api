@@ -211,7 +211,7 @@ export class PaymentMethodService extends BaseService<PaymentMethod> {
             password: 'b@Rq_12!34#5',
           },
           body: {
-            SCustID: 'b31a2e97300d_95e7_420f_0d06_1cfbb460',
+            SCustID: '3b4c88225683_af8b_4a33_c669_640743d7',
             REFNO: '123456',
             AMOUNT: 1000.0,
             CRCY: 'YER',

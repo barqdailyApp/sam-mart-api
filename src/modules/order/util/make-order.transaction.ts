@@ -209,7 +209,7 @@ export class MakeOrderTransaction extends BaseTransaction<
         }),
       );
       await context.save(shipment_products);
-      order.total_price = shipment_products.reduce(
+      order.products_price = shipment_products.reduce(
         (a, b) => a + b.price * b.quantity,
         0,
       );
@@ -219,14 +219,15 @@ export class MakeOrderTransaction extends BaseTransaction<
         );
       }
 
-      let total = Number(order.total_price) + Number(order.delivery_fee);
+      let total = Number(order.products_price) + Number(order.delivery_fee);
+      order.total_price = total;
       if (req.promo_code) {
         const promo_code = await this.promoCodeService.getValidPromoCodeByCode(
           req.promo_code,
         );
         if (promo_code) {
           total -= promo_code.discount;
-          // order.total_price = total;
+          order.total_price = total;
           order.promo_code_id=promo_code.id;
           order.promo_code_discount=promo_code.discount;
           promo_code.current_uses++;

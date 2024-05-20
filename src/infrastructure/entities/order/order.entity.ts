@@ -55,6 +55,9 @@ export class Order extends OwnedEntity {
   returnOrders: ReturnOrder[];
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  products_price: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   total_price: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })

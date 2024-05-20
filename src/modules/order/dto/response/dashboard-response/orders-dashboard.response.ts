@@ -30,6 +30,8 @@ export class OrdersDashboardResponse {
   @Expose() shipments: any;
   @Expose() promo_code_discount: number;
 
+  @Expose() products_price:number;
+
   constructor(order: Order) {
     this.order_id = order.id;
     this.slot_id = order.slot_id;
@@ -40,6 +42,7 @@ export class OrdersDashboardResponse {
     this.transaction_number = order.transaction_number;
     this.order_products = order.shipments[0].shipment_products.length;
     this.total_price = order.total_price;
+    this.products_price=order.products_price;
     this.payment_method = order.payment_method;
     this.is_paid = order.is_paid;
     this.delivery_day = order.delivery_day;
