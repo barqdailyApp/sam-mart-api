@@ -53,6 +53,9 @@ export class ShipmentSingleResponse {
       id: shipments.order.id,
       number: shipments.order.number,
       total_price: shipments.order.total_price,
+
+      products_price: shipments.order.products_price,
+
       is_paid: shipments.order.is_paid,
       promo_code_discount: shipments.order.promo_code_discount,
       payment_method: shipments.order.payment_method,
