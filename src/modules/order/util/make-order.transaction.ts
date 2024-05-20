@@ -213,7 +213,7 @@ export class MakeOrderTransaction extends BaseTransaction<
         (a, b) => a + b.price * b.quantity,
         0,
       );
-      if (order.total_price < section.min_order_price) {
+      if (order.products_price < section.min_order_price) {
         throw new BadRequestException(
           'message.total_price_is_less_than_min_order_price',
         );
