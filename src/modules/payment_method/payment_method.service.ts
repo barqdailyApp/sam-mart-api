@@ -10,7 +10,7 @@ import { KuraimiUserCheckRequest } from './dto/requests/kuraimi-user-check';
 import { User } from 'src/infrastructure/entities/user/user.entity';
 import { decodeUUID } from 'src/core/helpers/cast.helper';
 import { auth } from 'firebase-admin';
-
+import * as https from 'https';
 @Injectable()
 export class PaymentMethodService extends BaseService<PaymentMethod> {
   constructor(
@@ -199,18 +199,22 @@ export class PaymentMethodService extends BaseService<PaymentMethod> {
 
     return user;
   }
-
+ 
   async kuraimiPay() {
+    const httpsAgent = new https.Agent({ rejectUnauthorized: false });
+   
+    const username = "bArQ#UaT_";
+const password = "b@Rq_12!34#5";
+
+    
     try {
       const response = await axios.post(
         'https://web.krmbank.net.ye:44746/alk-payments-exp/v1/PHEPaymentAPI/EPayment/SendPayment',
 
-        {
-          auth: {
-            username: 'bArQ#UaT_',
-            password: 'b@Rq_12!34#5',
-          },
-          body: {
+        
+         
+          
+          {
             SCustID: '3b4c88225683_af8b_4a33_c669_640743d7',
             REFNO: '123456',
             AMOUNT: 1000.0,
@@ -218,13 +222,26 @@ export class PaymentMethodService extends BaseService<PaymentMethod> {
             MRCHNTNAME: 'Merchant 1',
             PINPASS: Buffer.from('0000').toString('base64'),
           },
-        },
+          {
+            auth:{username:username,password},
+           
+            httpsAgent: httpsAgent, // Pass the custom agent to ignore SSL certificate validation
+          }
+          
+
+          
+        
       );
+      // console.log(JSON.stringify(response))
+      console.log(response.data)
+    
+      
+
     } catch (error) {
-      console.log(error);
-      console.log(error.response.headers);
-      console.log(error.response.body);
-      console.log(error.response.data);
+      console.log(error.response)
+    
+      
+  
    
      
     }
