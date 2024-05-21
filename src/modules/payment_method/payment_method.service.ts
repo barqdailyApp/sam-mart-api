@@ -225,6 +225,8 @@ export class PaymentMethodService extends BaseService<PaymentMethod> {
           httpsAgent: httpsAgent, // Pass the custom agent to ignore SSL certificate validation
         },
       );
+      console.log(response.data);
+      if( response.data["Code"]==1) 
       return response.data;
     } catch (error) {
       console.log(error.response);
