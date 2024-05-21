@@ -51,7 +51,6 @@ export class PaymentMethodController {
 
   @Post('kuraimi/check-user')
   async checkUser(@Body() req: KuraimiUserCheckRequest) {
-  
     if (
       this.request.headers.authorization != 'Basic a3VyYWltaV9wYXk6Z14jM3ZQN0A='
     )
@@ -74,7 +73,6 @@ export class PaymentMethodController {
   }
   @Post('cash-out')
   async cashOut() {
-   return await this.paymentService.kuraimiPay();
-    // return await this.paymentService.jawalicashOut("10020","777687613");
+    // return await this.paymentService.kuraimiPay();
   }
 }

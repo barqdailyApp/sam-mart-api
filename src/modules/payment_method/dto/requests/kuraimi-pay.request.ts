@@ -9,8 +9,8 @@ export class KuraimiPayRequest {
 
   REFNO: string;
 
-  CRCY: string;
-  MRCHNTNAME: string;
+  AMOUNT: number;
+
   PINPASS: string;
 
   constructor(data: Partial<KuraimiPayRequest>) {

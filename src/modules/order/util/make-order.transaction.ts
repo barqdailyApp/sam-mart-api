@@ -43,6 +43,7 @@ import { MakeTransactionRequest } from 'src/modules/transaction/dto/requests/mak
 import { TransactionTypes } from 'src/infrastructure/data/enums/transaction-types';
 import { Wallet } from 'src/infrastructure/entities/wallet/wallet.entity';
 import { Transaction } from 'src/infrastructure/entities/wallet/transaction.entity';
+import { encodeUUID } from 'src/core/helpers/cast.helper';
 @Injectable()
 export class MakeOrderTransaction extends BaseTransaction<
   MakeOrderRequest,
@@ -87,12 +88,13 @@ export class MakeOrderTransaction extends BaseTransaction<
       const cart = await context.findOne(Cart, { where: { user_id: user.id } });
 
       const cart_products = await context.find(CartProduct, {
-        where: { cart_id: cart.id, section_id: req.section_id }, relations: {
+        where: { cart_id: cart.id, section_id: req.section_id },
+        relations: {
           product_category_price: {
             product_additional_services: { additional_service: true },
-  
+
             product_measurement: { measurement_unit: true },
-  
+
             product_offer: true,
             product_sub_category: {
               product: { product_images: true, warehouses_products: true },
@@ -127,9 +129,9 @@ export class MakeOrderTransaction extends BaseTransaction<
         payment_method: payment_method.type,
         payment_method_id: req.payment_method.payment_method_id,
         transaction_number:
-          payment_method.type == PaymentMethodEnum.CASH
-            ? null
-            : req.payment_method.transaction_number,
+          payment_method.type == PaymentMethodEnum.JAWALI
+            ? req.payment_method.transaction_number
+            : null,
       });
 
       if (order.delivery_type == DeliveryType.FAST) {
@@ -157,25 +159,24 @@ export class MakeOrderTransaction extends BaseTransaction<
 
       const shipment_products = await Promise.all(
         cart_products.map(async (e) => {
-
           const is_offer =
-          e.product_category_price.product_offer &&
-          e.product_category_price.product_offer.offer_quantity > 0 &&
-          e.product_category_price.product_offer.is_active &&
-          e.product_category_price.product_offer.start_date < new Date() &&
-          new Date() < e.product_category_price.product_offer.end_date;
+            e.product_category_price.product_offer &&
+            e.product_category_price.product_offer.offer_quantity > 0 &&
+            e.product_category_price.product_offer.is_active &&
+            e.product_category_price.product_offer.start_date < new Date() &&
+            new Date() < e.product_category_price.product_offer.end_date;
 
-        if (is_offer) {
-          e.product_category_price.min_order_quantity =
-            e.product_category_price.product_offer.min_offer_quantity;
-          e.product_category_price.max_order_quantity =
-            e.product_category_price.product_offer.max_offer_quantity;
-          e.product_category_price.price =
-            e.product_category_price.product_offer.price;
-        }
-        if (e.quantity < e.product_category_price.min_order_quantity) {
-          e.quantity = e.product_category_price.min_order_quantity;
-        }
+          if (is_offer) {
+            e.product_category_price.min_order_quantity =
+              e.product_category_price.product_offer.min_offer_quantity;
+            e.product_category_price.max_order_quantity =
+              e.product_category_price.product_offer.max_offer_quantity;
+            e.product_category_price.price =
+              e.product_category_price.product_offer.price;
+          }
+          if (e.quantity < e.product_category_price.min_order_quantity) {
+            e.quantity = e.product_category_price.min_order_quantity;
+          }
           //handling offer
           if (is_offer == true) {
             const product_offer = await context.findOne(ProductOffer, {
@@ -194,16 +195,18 @@ export class MakeOrderTransaction extends BaseTransaction<
 
           return new ShipmentProduct({
             shipment_id: shipment.id,
-            ...e,price: Number(e.product_category_price.price) +
-            (e.additions?.length > 0
-              ? Number(
-                  e.product_category_price.product_additional_services.filter(
-                    (j) => {
-                      return e.additions?.includes(j.id);
-                    },
-                  )[0].price,
-                )
-              : 0),
+            ...e,
+            price:
+              Number(e.product_category_price.price) +
+              (e.additions?.length > 0
+                ? Number(
+                    e.product_category_price.product_additional_services.filter(
+                      (j) => {
+                        return e.additions?.includes(j.id);
+                      },
+                    )[0].price,
+                  )
+                : 0),
             created_at: new Date(),
           });
         }),
@@ -228,8 +231,8 @@ export class MakeOrderTransaction extends BaseTransaction<
         if (promo_code) {
           total -= promo_code.discount;
           order.total_price = total;
-          order.promo_code_id=promo_code.id;
-          order.promo_code_discount=promo_code.discount;
+          order.promo_code_id = promo_code.id;
+          order.promo_code_discount = promo_code.discount;
           promo_code.current_uses++;
           await context.save(promo_code);
         }
@@ -244,28 +247,33 @@ export class MakeOrderTransaction extends BaseTransaction<
         if (!make_payment) {
           throw new BadRequestException('payment failed');
         }
-      }
-      if (payment_method.type == PaymentMethodEnum.WALLET) {
-        
-    const wallet = await context.findOneBy(Wallet,{user_id:user.id});
+      } else if (payment_method.type == PaymentMethodEnum.WALLET) {
+        const wallet = await context.findOneBy(Wallet, { user_id: user.id });
 
-    wallet.balance = Number( wallet.balance) - Number(total);
-    if(wallet.balance < 0){
-      throw new BadRequestException("message.insufficient_balance");
-    }
-    const transaction = plainToInstance(Transaction, {
-      amount: -total,
-      user_id: user.id,
-      type: TransactionTypes.ORDER_PAYMENT,
-      wallet_id: wallet.id,
-    });
+        wallet.balance = Number(wallet.balance) - Number(total);
+        if (wallet.balance < 0) {
+          throw new BadRequestException('message.insufficient_balance');
+        }
+        const transaction = plainToInstance(Transaction, {
+          amount: -total,
+          user_id: user.id,
+          type: TransactionTypes.ORDER_PAYMENT,
+          wallet_id: wallet.id,
+        });
 
+        await context.save(transaction);
 
-
-    await context.save(transaction);
-   
-    await context .save(wallet);
-  
+        await context.save(wallet);
+      } else if (payment_method.type == PaymentMethodEnum.KURAIMI) {
+        const make_payment = await this.paymentService.kuraimiPay({
+          AMOUNT: total,
+          REFNO: order.id,
+          SCustID: encodeUUID(order.user_id),
+          PINPASS: req.payment_method.transaction_number,
+        });
+        if (!make_payment) {
+          throw new BadRequestException('payment failed');
+        }
       }
 
       await context.delete(CartProduct, cart_products);
