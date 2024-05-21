@@ -18,6 +18,11 @@ export class UpdateLinkProductSubcategoryRequest {
 
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()
+  @IsString()
+  category_sub_category_id: string;
+
+  @ApiProperty({ nullable: true, required: false })
+  @IsOptional()
   @Transform(({ value }) => {
     return value === 'true'  || value === true;
   })

@@ -100,12 +100,27 @@ export class ProductCategoryPriceService {
     product_sub_category_id: string,
     updateLinkProductSubcategoryRequest: UpdateLinkProductSubcategoryRequest,
   ) {
-    const { order_by, is_active } = updateLinkProductSubcategoryRequest;
+    const productSubCategory = await this.productSubCategory_repo.findOne({
+      where: { id: product_sub_category_id },
+    })
+    if(!productSubCategory){
+      throw new NotFoundException('message.product_sub_category_id_not_found')
+    }
+    if(!updateLinkProductSubcategoryRequest.category_sub_category_id){
+      
+    
+    const subcategory = await this.categorySubcategory_repo.findOne({
+      where: { id: updateLinkProductSubcategoryRequest.category_sub_category_id },
+    })
+  if(!subcategory){
+    throw new NotFoundException('message.sub_category_id_not_found')
+  }}
+    const { order_by, is_active , category_sub_category_id} = updateLinkProductSubcategoryRequest;
     return await this.productSubCategory_repo.update(
       {
         id: product_sub_category_id,
       },
-      { order_by, is_active },
+      { order_by, is_active,  category_sub_category_id:  category_sub_category_id },
     );
   }
 

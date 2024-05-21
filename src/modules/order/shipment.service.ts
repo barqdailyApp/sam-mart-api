@@ -504,9 +504,10 @@ export class ShipmentService extends BaseService<Shipment> {
 
   async assignDriver(shipment_id: string, driver_id: string) {
     return this.addDriverToShipment(
-      shipment_id,
+      shipment_id,  
       AddDriverShipmentOption.DRIVER_ASSIGN_SHIPMENT,
       driver_id,
+      
     );
   }
 
@@ -678,19 +679,22 @@ export class ShipmentService extends BaseService<Shipment> {
     shipment_id: string,
     action: AddDriverShipmentOption,
     driver_id?: string,
+   
   ): Promise<Shipment> {
     const driver = await this.getDriver(driver_id);
 
     if (!driver) {
       throw new NotFoundException('message.driver_not_found');
     }
-    const max_orders = await this.constantRepository.findOne({
-      where: { type: ConstantType.ORDER_LIMIT },
-    });
-    if (driver.current_orders >= Number(max_orders.variable)) {
-      throw new BadRequestException(
-        'message.driver_has_reached_maximum_number_of_orders',
-      );
+    if (AddDriverShipmentOption.DRIVER_ACCEPT_SHIPMENT) {
+      const max_orders = await this.constantRepository.findOne({
+        where: { type: ConstantType.ORDER_LIMIT },
+      });
+      if (driver.current_orders >= Number(max_orders.variable)) {
+        throw new BadRequestException(
+          'message.driver_has_reached_maximum_number_of_orders',
+        );
+      }
     }
     driver.current_orders = driver.current_orders + 1;
 
