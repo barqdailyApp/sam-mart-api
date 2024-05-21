@@ -494,7 +494,7 @@ export class ProductClientService {
     }
     // Start building the query
     let query = this.productRepository
-      .createQueryBuilder('product')
+      .createQueryBuilder('product').withDeleted()
       .innerJoinAndSelect('product.product_images', 'product_images')
       .orderBy('product_images.is_logo', 'DESC')
       .innerJoinAndSelect(
