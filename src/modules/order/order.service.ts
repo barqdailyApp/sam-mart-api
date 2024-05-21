@@ -351,7 +351,7 @@ export class OrderService extends BaseUserService<Order> {
       ]);
     }
     products_table.push([
-      Number(order_details.total_price) ,
+      Number(order_details.total_price),
       '',
       '',
       '',
@@ -488,6 +488,10 @@ export class OrderService extends BaseUserService<Order> {
       .leftJoinAndSelect('order.shipments', 'shipments')
 
       .leftJoinAndSelect('shipments.driver', 'driver')
+      .leftJoinAndSelect(
+        'shipments.cancelShipmentReason',
+        'cancelShipmentReason',
+      )
       .leftJoinAndSelect('driver.user', 'shipment_user_driver')
 
       .leftJoinAndSelect('shipments.warehouse', 'warehouse_shipment')
