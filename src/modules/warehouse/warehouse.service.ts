@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/core/base/service/service.base';
 import { BaseUserService } from 'src/core/base/service/user-service.base';
 import { Warehouse } from 'src/infrastructure/entities/warehouse/warehouse.entity';
-import { In, Repository, Like } from 'typeorm';
+import { In, Repository, Like, LessThan, LessThanOrEqual } from 'typeorm';
 import { WarehouseOperationTransaction } from './util/warehouse-opreation.transaction';
 import { WarehouseOperationRequest } from './dto/requests/warehouse-operation.request';
 import { UpdateWarehouseRequest } from './dto/requests/update-warehouse.request';
@@ -55,7 +55,7 @@ export class WarehouseService extends BaseService<Warehouse> {
 
   async getWarehouseProduct(query: WarehouseProductsQuery) {
     if (!query.name) query.name = '';
-    console.log(query.product_barcode)
+
     const products = await this.warehouseProducts_repo.findAndCount({
       where: [
         {
@@ -63,16 +63,19 @@ export class WarehouseService extends BaseService<Warehouse> {
           product: {
             name_ar: Like(`%${query.name}%`),
           },
+          quantity: query.quantity ? LessThanOrEqual(query.quantity) : null,
         },
         {
           warehouse_id: query.warehouse_id,
           product: {
             name_en: Like(`%${query.name}%`),
           },
+          quantity: query.quantity ? LessThanOrEqual(query.quantity) : null,
         },
         {
           warehouse_id: query.warehouse_id,
-          product: { barcode:Like( `%${query.product_barcode}%`)}
+          product: { barcode: Like(`%${query.product_barcode}%`) },
+          quantity: query.quantity ? LessThanOrEqual(query.quantity) : null,
         },
       ],
       order: { updated_at: 'DESC' },

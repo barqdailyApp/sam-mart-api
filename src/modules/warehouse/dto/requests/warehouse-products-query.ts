@@ -28,6 +28,13 @@ export class WarehouseProductsQuery {
 
   @ApiPropertyOptional()
   @IsOptional()
+  @Transform(({ value }) => parseInt(value))
+  @IsNumber()
+  
+  quantity: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsString()
   product_barcode: string;
 }
