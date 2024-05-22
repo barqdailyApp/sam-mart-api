@@ -58,7 +58,7 @@ export class PaymentMethodController {
 
   @Get()
   async getPaymentMethods(@Query() query: PaginatedRequest) {
-    applyQueryFilters(query, `is_active = true`);
+    applyQueryFilters(query, `is_active=1`);
     return new ActionResponse(
       this._i18nResponse.entity(
         (await this.paymentService.findAll(query)).map((payment) => {
