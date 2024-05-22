@@ -7,6 +7,7 @@ import {
   Param,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { I18nResponse } from 'src/core/helpers/i18n.helper';
 import { MeasurementUnitService } from './measurement-unit.service';
@@ -16,6 +17,10 @@ import { UpdateMeasurementUnitRequest } from './dto/requests/update-measurement-
 import { plainToClass } from 'class-transformer';
 import { MeasurementUnitResponse } from './dto/responses/measurement-unit.response';
 import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
+import { Role } from 'src/infrastructure/data/enums/role.enum';
+import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
+import { Roles } from '../authentication/guards/roles.decorator';
+import { RolesGuard } from '../authentication/guards/roles.guard';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -24,6 +29,8 @@ import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
   description: 'Language header: en, ar',
 })
 @ApiTags('Measurement-Unit')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN)
 @Controller('measurement-unit')
 export class MeasurementUnitController {
   constructor(
