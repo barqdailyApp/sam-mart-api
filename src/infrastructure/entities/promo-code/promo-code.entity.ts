@@ -26,4 +26,7 @@ export class PromoCode extends AuditableEntity {
 
   @Column({default:0})
   current_uses: number;
+
+  @Column({nullable:true})
+  note:string
 }

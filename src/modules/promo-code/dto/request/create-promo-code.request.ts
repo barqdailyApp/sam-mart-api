@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
-import { IsDate, IsNumber, IsString } from "class-validator";
+import { IsDate, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreatePromoCodeRequest {
     @ApiProperty()
@@ -17,4 +17,9 @@ export class CreatePromoCodeRequest {
     @ApiProperty()
     @IsNumber()
     number_of_uses: number;
+
+    @ApiProperty({required:false})
+    @IsOptional()
+    @IsString()
+    note:string
 }

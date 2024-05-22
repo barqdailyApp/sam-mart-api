@@ -31,5 +31,9 @@ export class UpdatePromoCodeRequest {
     @Transform(({ value }) => Boolean(value))
     is_active: boolean;
 
+    @ApiProperty({required:false})
+    @IsOptional()
+    @IsString()
+    note:string
 
 }

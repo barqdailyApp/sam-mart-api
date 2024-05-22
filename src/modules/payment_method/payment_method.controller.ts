@@ -1,17 +1,27 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   ForbiddenException,
   Get,
   Inject,
   Post,
+  Put,
   Query,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { PaymentMethodService } from './payment_method.service';
 import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 import { ActionResponse } from 'src/core/base/responses/action.response';
 import { toUrl } from 'src/core/helpers/file.helper';
-import { ApiHeader, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiConsumes,
+  ApiHeader,
+  ApiTags,
+} from '@nestjs/swagger';
 import { I18nResponse } from 'src/core/helpers/i18n.helper';
 import { KuraimiUserCheckRequest } from './dto/requests/kuraimi-user-check';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -22,6 +32,15 @@ import { Request } from 'express';
 import { KuraimiUserResponse } from './dto/response/kuraimi-user-response';
 import { encodeUUID } from 'src/core/helpers/cast.helper';
 import { REQUEST } from '@nestjs/core';
+import { FileInterceptor } from '@nestjs/platform-express';
+
+import { UploadValidator } from 'src/core/validators/upload.validator';
+import { EditPaymentMethodRequest } from './dto/requests/edit-payment-method.request';
+import { applyQueryFilters } from 'src/core/helpers/service-related.helper';
+import { Role } from 'src/infrastructure/data/enums/role.enum';
+import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
+import { Roles } from '../authentication/guards/roles.decorator';
+import { RolesGuard } from '../authentication/guards/roles.guard';
 @ApiHeader({
   name: 'Accept-Language',
   required: false,
@@ -39,6 +58,7 @@ export class PaymentMethodController {
 
   @Get()
   async getPaymentMethods(@Query() query: PaginatedRequest) {
+    applyQueryFilters(query, `is_active = true`);
     return new ActionResponse(
       this._i18nResponse.entity(
         (await this.paymentService.findAll(query)).map((payment) => {
@@ -47,6 +67,37 @@ export class PaymentMethodController {
         }),
       ),
     );
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @Get('/admin')
+  async getPaymentMethodsAmin(@Query() query: PaginatedRequest) {
+    
+    return new ActionResponse(
+      (await this.paymentService.findAll(query)).map((payment) => {
+        payment.logo = toUrl(payment.logo);
+        return payment;
+      }),
+    );
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('logo'))
+  @ApiConsumes('multipart/form-data')
+  @Put()
+  async editPaymentMethod(
+    @Body() req: EditPaymentMethodRequest,
+    @UploadedFile(new UploadValidator().build())
+    logo: Express.Multer.File,
+  ) {
+    req.logo = logo;
+    const editPaymentMethod = await this.paymentService.editPaymentMethod(req);
+
+    return new ActionResponse(editPaymentMethod);
   }
 
   @Post('kuraimi/check-user')

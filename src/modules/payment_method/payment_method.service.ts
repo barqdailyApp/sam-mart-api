@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
 import { or } from 'sequelize';
@@ -12,9 +17,13 @@ import { decodeUUID } from 'src/core/helpers/cast.helper';
 import { auth } from 'firebase-admin';
 import * as https from 'https';
 import { KuraimiPayRequest } from './dto/requests/kuraimi-pay.request';
+import { EditPaymentMethodRequest } from './dto/requests/edit-payment-method.request';
+import { FileService } from '../file/file.service';
+
 @Injectable()
 export class PaymentMethodService extends BaseService<PaymentMethod> {
   constructor(
+    @Inject(FileService) private _fileService: FileService,
     @InjectRepository(PaymentMethod)
     private readonly payment_repo: Repository<PaymentMethod>,
     @InjectRepository(User) private readonly user_repo: Repository<User>,
@@ -226,10 +235,28 @@ export class PaymentMethodService extends BaseService<PaymentMethod> {
         },
       );
       console.log(response.data);
-      if( response.data["Code"]==1) 
-      return response.data;
+      if (response.data['Code'] == 1) return response.data;
     } catch (error) {
       console.log(error.response);
     }
+  }
+
+  async editPaymentMethod(req: EditPaymentMethodRequest) {
+    const payment_method = await this.payment_repo.findOne({
+      where: { id: req.id },
+    });
+    if (!payment_method) {
+      throw new ForbiddenException('Payment Method Not Found');
+    }
+    if (req.logo) {
+      await this._fileService.delete(payment_method.logo);
+      const logo = await this._fileService.upload(req.logo, 'payment_method');
+      payment_method.logo = logo;
+    }
+    const edited_payment_method = await this.payment_repo.update(
+      payment_method.id,
+      { ...req, logo: payment_method.logo },
+    );
+    return edited_payment_method;
   }
 }
