@@ -73,7 +73,7 @@ export class DriverController {
     );
     return new ActionResponse(this._i18nResponse.entity(driversResponse));
   }
-
+  @Roles(Role.ADMIN)
   @Get('all-drivers-dashboard')
   async allDriversDashboard(
     @Query() driversDashboardQuery: DriversDashboardQuery,
@@ -90,12 +90,14 @@ export class DriverController {
 
     return new ActionResponse(pageDto);
   }
+  @Roles(Role.ADMIN)
   @Get('single-driver-dashboard/:driver_id')
   async singleDriverDashboard(@Param('driver_id') id: string) {
     const driver = await this.driverService.singleDriverDashboard(id);
     const driverResponse = new DriverDashboardResponse(driver);
     return new ActionResponse(driverResponse);
   }
+  @Roles(Role.ADMIN)
   @Get('total-driver-dashboard')
   async totalClientDashboard() {
     const total = await this.driverService.totalDriverDashboard();

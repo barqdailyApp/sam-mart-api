@@ -29,6 +29,8 @@ import { SendToAllUsersNotificationRequest, SendToUsersNotificationRequest } fro
 import { NotificationQuery } from './dto/filters/notification.query';
 import { PageMetaDto } from 'src/core/helpers/pagination/page-meta.dto';
 import { PageDto } from 'src/core/helpers/pagination/page.dto';
+import { Role } from 'src/infrastructure/data/enums/role.enum';
+import { Roles } from '../authentication/guards/roles.decorator';
 
 @ApiBearerAuth()
 @ApiTags('Notifications')
@@ -37,6 +39,7 @@ import { PageDto } from 'src/core/helpers/pagination/page.dto';
   required: false,
   description: 'Language header: en, ar',
 })
+@Roles(Role.ADMIN, Role.CLIENT,Role.DRIVER)
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('notification')
 export class NotificationController {
@@ -46,7 +49,7 @@ export class NotificationController {
     @InjectRepository(User)
     public userRepository: Repository<User>,
   ) {}
-
+  @Roles(Role.ADMIN)
   @Post('send-to-users')
   async sendToUsers(
     @Body() sendToUsersNotificationRequest: SendToUsersNotificationRequest,
@@ -54,7 +57,7 @@ export class NotificationController {
     await this.notificationService.sendToUsers(sendToUsersNotificationRequest);
   }
 
-  
+  @Roles(Role.ADMIN)
   @Post('send-to-all')
   async sendToAll(
     @Body() sendToUsersNotificationRequest: SendToAllUsersNotificationRequest,

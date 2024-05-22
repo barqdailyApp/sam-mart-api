@@ -22,6 +22,8 @@ import { Region } from 'src/infrastructure/entities/region/region.entity';
 import { RegionResponse } from './dto/responses/region.response';
 import { UpdateRegionRequest } from './dto/requests/update-region.request';
 import { ActionResponse } from 'src/core/base/responses/action.response';
+import { Role } from 'src/infrastructure/data/enums/role.enum';
+import { Roles } from '../authentication/guards/roles.decorator';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -36,7 +38,8 @@ export class RegionController {
     private readonly regionService: RegionService,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
   ) {}
-
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @Post('create-region')
   async create(@Body() createRegionRequest: CreateRegionRequest) {
     return new ActionResponse(
@@ -75,7 +78,8 @@ export class RegionController {
     );
     return new ActionResponse(regionsResponse);
   }
-
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @Put(':region_id/update-region')
   async update(
     @Param('region_id') id: string,
@@ -85,7 +89,8 @@ export class RegionController {
       await this.regionService.update(id, updateRegionRequest),
     );
   }
-
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @Delete(':region_id/delete-region')
   async delete(@Param('region_id') id: string) {
     return new ActionResponse(await this.regionService.delete(id));

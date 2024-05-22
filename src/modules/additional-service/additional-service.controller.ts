@@ -16,6 +16,8 @@ import { AdditionalServiceService } from './additional-service.service';
 import { AdditionalServiceResponse } from './dto/responses/additional-service.response';
 import { CreateAdditionalServiceRequest } from './dto/requests/create-additional-service.request';
 import { UpdateAdditionalServiceRequest } from './dto/requests/update-additional-service.request';
+import { Role } from 'src/infrastructure/data/enums/role.enum';
+import { Roles } from '../authentication/guards/roles.decorator';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -31,6 +33,7 @@ export class AdditionalServiceController {
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
   ) {}
 
+  @Roles(Role.ADMIN)
   @Get('all-additionalServices-units')
   async allAdditionalServices() {
     const additionalServices = await this.additionalServiceService.findAll();
@@ -55,6 +58,7 @@ export class AdditionalServiceController {
     );
     return new ActionResponse(additionalServiceResponse);
   }
+  @Roles(Role.ADMIN)
 
   @Post('create-additional-service-unit')
   async createAdditionalService(
@@ -66,7 +70,7 @@ export class AdditionalServiceController {
       ),
     );
   }
-
+  @Roles(Role.ADMIN)
   @Put(':additional_service_id/update-additional-service-unit')
   async updateAdditionalService(
     @Param('additional_service_id') id: string,
@@ -79,6 +83,7 @@ export class AdditionalServiceController {
       ),
     );
   }
+  @Roles(Role.ADMIN)
 
   @Delete(':additional_service_id/delete-additional-service-unit')
   async deleteAdditionalService(@Param('additional_service_id') id: string) {

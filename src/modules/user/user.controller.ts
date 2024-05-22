@@ -59,6 +59,7 @@ import { UserStatusRequest } from './dto/requests/update-user-status.request';
   description: 'Language header: en, ar',
 })
 @UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN, Role.CLIENT,Role.DRIVER)
 @ApiTags('User')
 @Controller('users')
 export class UserController {
@@ -115,6 +116,7 @@ export class UserController {
     return new ActionResponse(result);
   }
 
+  @Roles(Role.ADMIN)
   @Get('all-clients-dashboard')
   async getAllClientsDashboard(
     @Query() usersDashboardQuery: UsersDashboardQuery,
@@ -129,14 +131,14 @@ export class UserController {
 
     return new ActionResponse(pageDto);
   }
-
+  @Roles(Role.ADMIN)
   @Get('single-client-dashboard/:user_id')
   async getSingleClient(@Param('user_id') user_id: string) {
     const user = await this._service.getSingleClientDashboard(user_id);
     const userResponse = new UserDashboardResponse(user);
     return new ActionResponse(userResponse);
   }
-
+  @Roles(Role.ADMIN)
   @Get('total-clients-dashboard')
   async getTotalClients() {
     const { active, blocked, purchased, total } =

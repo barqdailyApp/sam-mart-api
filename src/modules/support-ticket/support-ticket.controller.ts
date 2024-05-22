@@ -44,6 +44,7 @@ import { I18nResponse } from 'src/core/helpers/i18n.helper';
 })
 @ApiTags('Support Ticket')
 @UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN, Role.CLIENT,Role.DRIVER)
 @Controller('support-ticket')
 export class SupportTicketController {
     constructor(

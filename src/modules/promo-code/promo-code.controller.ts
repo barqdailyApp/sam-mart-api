@@ -27,6 +27,7 @@ import { PromoCodeResponse } from './dto/response/promo-code.response';
 })
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN, Role.CLIENT,Role.DRIVER)
 @ApiTags('Promo Code')
 
 @Controller('promo-code')

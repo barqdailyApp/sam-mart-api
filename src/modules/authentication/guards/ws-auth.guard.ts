@@ -28,6 +28,7 @@ export class WsJwtAuthGuard implements CanActivate {
       const user: User = await this.userRepository.findOneBy({
         id: jwtPayload.sub,
       });
+      
 
       context.switchToWs().getClient().user = user;
       return Boolean(user);
