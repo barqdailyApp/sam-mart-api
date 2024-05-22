@@ -154,8 +154,8 @@ export class ShipmentService extends BaseService<Shipment> {
         type: NotificationTypes.ORDERS,
         title_ar: 'تحديث الطلب',
         title_en: 'order updated',
-        text_ar: 'تم توصيل الطلب بنجاح',
-        text_en: 'The order was delivered successfully',
+        text_ar: 'تم توصيل الطلب',
+        text_en: 'order delivered',
       }),
     );
     return shipment;
@@ -199,8 +199,8 @@ export class ShipmentService extends BaseService<Shipment> {
         type: NotificationTypes.ORDERS,
         title_ar: 'تحديث الطلب',
         title_en: 'order updated',
-        text_ar: 'تم خروج الطلب من المخزن بنجاح',
-        text_en: 'The order is on the way to you',
+        text_ar: 'الطلب في الطريق',
+        text_en: 'order on the way',
       }),
     );
     return shipment;
@@ -252,8 +252,8 @@ export class ShipmentService extends BaseService<Shipment> {
         type: NotificationTypes.ORDERS,
         title_ar: 'تحديث الطلب',
         title_en: 'order updated',
-        text_ar: 'جارى تجهيز الطلب',
-        text_en: 'order is being prepared',
+        text_ar: 'جاري تجهيز الطلب',
+        text_en: 'order is under processing',
       }),
     );
 
@@ -264,8 +264,8 @@ export class ShipmentService extends BaseService<Shipment> {
         type: NotificationTypes.ORDERS,
         title_ar: 'تحديث الطلب',
         title_en: 'order updated',
-        text_ar: 'جارى تجهيز الطلب',
-        text_en: 'order is being prepared',
+        text_ar: 'جاري تجهيز الطلب',
+        text_en: 'order is under processing',
       }),
     );
     return shipment;
@@ -320,8 +320,8 @@ export class ShipmentService extends BaseService<Shipment> {
         type: NotificationTypes.ORDERS,
         title_ar: 'تحديث الطلب',
         title_en: 'order updated',
-        text_ar: 'تم تجهز الطلب من المخزن بنجاح',
-        text_en: 'The order has been prepared ',
+        text_ar: 'تم تجهيز الطلب',
+        text_en: 'order ready',
       }),
     );
 
@@ -332,8 +332,8 @@ export class ShipmentService extends BaseService<Shipment> {
         type: NotificationTypes.ORDERS,
         title_ar: 'تحديث الطلب',
         title_en: 'order updated',
-        text_ar: 'تم تجهز الطلب من المخزن بنجاح',
-        text_en: 'The order has been prepared ',
+        text_ar: 'تم تجهيز الطلب',
+        text_en: 'order ready',
       }),
     );
     return shipment;
@@ -407,8 +407,8 @@ export class ShipmentService extends BaseService<Shipment> {
           user_id: shipment.order.user_id,
           url: newMessage.id,
           type: NotificationTypes.SHIPMENT_CHAT,
-          title_ar: 'محادثة',
-          title_en: 'chat',
+          title_ar: 'رسالة جديدة',
+          title_en: 'new chat message',
           text_ar: newMessage.message,
           text_en: newMessage.message,
         }),
@@ -771,8 +771,8 @@ export class ShipmentService extends BaseService<Shipment> {
         type: NotificationTypes.ORDERS,
         title_ar: 'تحديث الطلب',
         title_en: 'order updated',
-        text_ar: 'تم تعيين سائق للطلب',
-        text_en: 'A driver has been assigned to the order',
+        text_ar: 'تم تاكيد الطلب',
+        text_en: 'order confirmed',
       }),
     );
 
