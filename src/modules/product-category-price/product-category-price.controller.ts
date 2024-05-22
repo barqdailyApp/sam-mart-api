@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { ProductCategoryPriceService } from './product-category-price.service';
 import { ApiBearerAuth, ApiBody, ApiHeader, ApiTags } from '@nestjs/swagger';
@@ -16,6 +17,10 @@ import { plainToClass } from 'class-transformer';
 import { ProductCategoryPriceResponse } from '../product/dto/response/product-category-price.response';
 import { CreateLinkProductSubcategoryRequest } from './dto/request/create-link-product-subcateory.request';
 import { UpdateLinkProductSubcategoryRequest } from './dto/request/update-link-product-subcateory.request';
+import { Role } from 'src/infrastructure/data/enums/role.enum';
+import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
+import { Roles } from '../authentication/guards/roles.decorator';
+import { RolesGuard } from '../authentication/guards/roles.guard';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -23,6 +28,8 @@ import { UpdateLinkProductSubcategoryRequest } from './dto/request/update-link-p
   description: 'Language header: en, ar',
 })
 @ApiTags('Product-Category-Price')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN)
 @Controller('product-category-price')
 export class ProductCategoryPriceController {
   constructor(
