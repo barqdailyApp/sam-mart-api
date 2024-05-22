@@ -22,6 +22,8 @@ import { ActionResponse } from 'src/core/base/responses/action.response';
 import { UpdateCartProductRequest } from './dto/requests/update-cart-request';
 import { AddRemoveCartProductServiceRequest } from './dto/requests/add-remove-service-request';
 import { Warehouse } from 'src/infrastructure/entities/warehouse/warehouse.entity';
+import { Role } from 'src/infrastructure/data/enums/role.enum';
+import { Roles } from '../authentication/guards/roles.decorator';
 
 @ApiTags('Cart')
 @ApiHeader({
@@ -31,6 +33,7 @@ import { Warehouse } from 'src/infrastructure/entities/warehouse/warehouse.entit
 })
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.CLIENT)
 @Controller('cart')
 export class CartController {
   constructor(
