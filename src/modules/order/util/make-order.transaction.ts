@@ -112,6 +112,8 @@ export class MakeOrderTransaction extends BaseTransaction<
           is_active: true,
         },
       });
+      if(!payment_method){
+        throw new BadRequestException('message.payment_method_not_found');}
 
       const count = await context
         .createQueryBuilder(Order, 'order')
