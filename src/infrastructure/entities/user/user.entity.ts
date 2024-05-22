@@ -106,7 +106,7 @@ export class User extends AuditableEntity {
   @OneToMany(() => NotificationEntity, (notification) => notification.user)
   notifications: NotificationEntity[];
 
-  @Column({ type: 'enum', enum: Language, default: Language.EN })
+  @Column({ type: 'enum', enum: Language, default: Language.AR })
   language: Language;
   constructor(partial: Partial<User>) {
     super();
