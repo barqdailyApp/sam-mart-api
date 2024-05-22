@@ -74,7 +74,8 @@ export class SubcategoryController {
       await this.subcategoryService.createSubcategory(req),
     );
   }
-
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @Get()
   async getCategories(@Query() query: PaginatedRequest) {
     const categories = await this.subcategoryService.findAll(query);
@@ -131,7 +132,7 @@ export class SubcategoryController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  //@Roles(Role.ADMIN)
+  @Roles(Role.ADMIN)
   @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('logo'))
   @ApiConsumes('multipart/form-data')
   @Put()

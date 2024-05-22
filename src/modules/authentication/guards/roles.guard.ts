@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
 import { Repository } from 'typeorm';
 import { DriverStatus } from 'src/infrastructure/data/enums/driver-status.enum';
+import { UserStatus } from 'src/infrastructure/data/enums/user-status.enum';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -29,6 +30,10 @@ export class RolesGuard implements CanActivate {
         if (requiredRoles.includes(Role.DRIVER)) {
             await this.checkDriverStatus(user, requiredRoles);
         }
+      
+   
+        if(user.user_status==UserStatus.BlockedClient)
+            throw new UnauthorizedException(`This account has been blocked`)  
 
         return requiredRoles.some((role) => user.roles?.includes(role));
     }
