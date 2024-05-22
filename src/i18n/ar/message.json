@@ -12,6 +12,7 @@
     "country_not_found": "الدولة غير موجودة",
     "discount_value_must_be_less_than_product_price":"قيمة العرض يجب ان تكون اقل من سعر المنتج",
     "driver_not_found": "السائق غير موجود",
+    "payment_method_not_found":"طريقة الدفع غير موجودة",
     "product_not_found": "المنتج غير موجود",
     "product_image_not_found": "صورة المنتج غير موجودة",
     "there_must_be_a_primary_unit": "يجب أن يكون وحدة رئيسية",
