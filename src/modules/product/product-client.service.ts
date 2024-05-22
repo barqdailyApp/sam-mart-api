@@ -494,7 +494,7 @@ export class ProductClientService {
     }
     // Start building the query
     let query = this.productRepository
-      .createQueryBuilder('product').withDeleted()
+      .createQueryBuilder('product')
       .innerJoinAndSelect('product.product_images', 'product_images')
       .orderBy('product_images.is_logo', 'DESC')
       .innerJoinAndSelect(
@@ -621,7 +621,11 @@ export class ProductClientService {
         },
       );
     }
-    return await query.getOne();
+    const proucut=await query.getOne();
+    if(!proucut){
+      throw new NotFoundException('message.product_not_found');
+    }
+    return await proucut;
   }
 
   //* Add Or remove Product Favorite
