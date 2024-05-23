@@ -9,6 +9,7 @@ import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
 import { RolesGuard } from '../authentication/guards/roles.guard';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { MakeTransactionRequest } from './dto/requests/make-transaction-request';
+import { Roles } from '../authentication/guards/roles.decorator';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -16,7 +17,9 @@ import { MakeTransactionRequest } from './dto/requests/make-transaction-request'
   description: 'Language header: en, ar',
 })
 @ApiTags('Transaction')
+
 @UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN, Role.CLIENT,Role.DRIVER)
 @Controller('transaction')
 export class TransactionController {
   constructor(private readonly transactionService: TransactionService) {}

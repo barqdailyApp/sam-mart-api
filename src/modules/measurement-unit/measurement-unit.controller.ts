@@ -16,6 +16,8 @@ import { UpdateMeasurementUnitRequest } from './dto/requests/update-measurement-
 import { plainToClass } from 'class-transformer';
 import { MeasurementUnitResponse } from './dto/responses/measurement-unit.response';
 import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
+import { Role } from 'src/infrastructure/data/enums/role.enum';
+import { Roles } from '../authentication/guards/roles.decorator';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -30,7 +32,7 @@ export class MeasurementUnitController {
     private readonly measurementUnitService: MeasurementUnitService,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
   ) {}
-
+  @Roles(Role.ADMIN)
   @Get('all-measurement-units')
   async allMeasurementUnits() {
     const measurementUnits = await this.measurementUnitService.findAll();
@@ -51,7 +53,7 @@ export class MeasurementUnitController {
 
     return new ActionResponse(measurementUnitResponse);
   }
-
+  @Roles(Role.ADMIN)
   @Post('create-measurement-unit')
   async createMeasurementUnit(
     @Body() createMeasurementUnitRequest: CreateMeasurementUnitRequest,
@@ -60,7 +62,7 @@ export class MeasurementUnitController {
       await this.measurementUnitService.create(createMeasurementUnitRequest),
     );
   }
-
+  @Roles(Role.ADMIN)
   @Put(':measurement_unit_id/update-measurement-unit')
   async updateMeasurementUnit(
     @Param('measurement_unit_id') id: string,
@@ -73,7 +75,7 @@ export class MeasurementUnitController {
       ),
     );
   }
-
+  @Roles(Role.ADMIN)
   @Delete(':measurement_unit_id/delete-measurement-unit')
   async deleteMeasurementUnit(@Param('measurement_unit_id') id: string) {
     return new ActionResponse(await this.measurementUnitService.delete(id));

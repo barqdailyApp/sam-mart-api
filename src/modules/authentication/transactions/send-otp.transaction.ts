@@ -29,7 +29,7 @@ export class SendOtpTransaction extends BaseTransaction<
   ): Promise<string> {
     try {
       const user = await context.findOneBy<User>(User, {
-        [req.type]: req.username,
+        [req.type]: req.username, roles: req.role
       });
 
       // check if user roles contains the role that we're trying to send otp to
