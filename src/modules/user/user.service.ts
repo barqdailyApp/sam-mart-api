@@ -105,6 +105,7 @@ export class UserService extends BaseService<User> {
         await this.sendOtpTransaction.run({
           type: 'phone',
           username: updatdReq.phone,
+          role: user.roles[0],
         });
       } else {
         user.phone = updatdReq.phone;
