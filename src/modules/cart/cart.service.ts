@@ -68,7 +68,8 @@ export class CartService extends BaseService<CartProduct> {
           e.product_category_price.product_offer.offer_quantity > 0 &&
           e.product_category_price.product_offer.is_active &&
           e.product_category_price.product_offer.start_date < new Date() &&
-          new Date() < e.product_category_price.product_offer.end_date;
+          new Date() < e.product_category_price.product_offer.end_date &&
+          e.product_category_price.product_offer.offer_quantity >= e.quantity;
 
         if (is_offer) {
           e.product_category_price.min_order_quantity =
@@ -131,7 +132,9 @@ export class CartService extends BaseService<CartProduct> {
       cart_product.product_category_price.product_offer.is_active &&
       cart_product.product_category_price.product_offer.start_date <
         new Date() &&
-      new Date() < cart_product.product_category_price.product_offer.end_date;
+      new Date() < cart_product.product_category_price.product_offer.end_date &&
+      cart_product.product_category_price.product_offer.offer_quantity >=
+        cart_product.quantity;
 
     if (is_offer) {
       cart_product.product_category_price.min_order_quantity =
@@ -224,8 +227,9 @@ export class CartService extends BaseService<CartProduct> {
       product_price.product_offer.offer_quantity > 0 &&
       product_price.product_offer.is_active &&
       product_price.product_offer.start_date < new Date() &&
-      new Date() < product_price.product_offer.end_date;
-
+      new Date() < product_price.product_offer.end_date &&
+      product_price.product_offer.offer_quantity >=
+        product_price.min_order_quantity;
     if (is_offer) {
       product_price.min_order_quantity =
         product_price.product_offer.min_offer_quantity;
@@ -308,7 +312,11 @@ export class CartService extends BaseService<CartProduct> {
       product_category_price.product_offer.offer_quantity > 0 &&
       product_category_price.product_offer.is_active &&
       product_category_price.product_offer.start_date < new Date() &&
-      new Date() < product_category_price.product_offer.end_date;
+      new Date() < product_category_price.product_offer.end_date &&
+      req.add == true
+        ? product_category_price.product_offer.offer_quantity >=
+          product_category_price.min_order_quantity + cart_product.quantity
+        : true;
 
     if (is_offer) {
       product_category_price.min_order_quantity =

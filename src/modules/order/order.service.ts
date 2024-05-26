@@ -404,7 +404,7 @@ export class OrderService extends BaseUserService<Order> {
 
           align: 'center',
           headerColor: 'white',
-          font: 'Arial',
+          font: 'Arial',       width: 40
         },
 
         {
@@ -412,25 +412,26 @@ export class OrderService extends BaseUserService<Order> {
 
           align: 'center',
           headerColor: 'white',
-          font: 'Arial',
+          font: 'Arial',       width: 105
         },
 
         {
           label: 'السعر',
           align: 'center',
           headerColor: 'white',
-          color: 'blue',
+          color: 'blue',       width: 40
         },
 
         {
           label: 'الوحدة',
           align: 'center',
-          headerColor: 'white',
+          headerColor: 'white',       width: 50
         },
         {
           label: 'الكمية',
           align: 'center',
           headerColor: 'white',
+          width: 55
         },
       ],
       rows: [...products_table],
@@ -439,8 +440,10 @@ export class OrderService extends BaseUserService<Order> {
     await doc.table(table, {
       prepareHeader: () => doc.fontSize(12),
       prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
-        doc.font(`Amiri-Regular`).fillColor('black').fontSize(10);
+        doc.font(`Amiri-Regular`,{ features: ['rtla'], align: 'right' }).fillColor('black').fontSize(9);
+        doc.text('', ).fontSize(10);
 
+   
         if (indexRow == table.rows.length - 1 && indexColumn == 4) {
           const centerX = doc.page.width / 2;
 
@@ -459,7 +462,7 @@ export class OrderService extends BaseUserService<Order> {
       },
 
       features: ['rtla'],
-      cellPadding: [0, 10, 0, 10],
+      cellPadding: [0, 0, 0, 0],
     });
 
     // Calculate the center position

@@ -166,7 +166,8 @@ export class MakeOrderTransaction extends BaseTransaction<
             e.product_category_price.product_offer.offer_quantity > 0 &&
             e.product_category_price.product_offer.is_active &&
             e.product_category_price.product_offer.start_date < new Date() &&
-            new Date() < e.product_category_price.product_offer.end_date;
+            new Date() < e.product_category_price.product_offer.end_date
+            && e.quantity <= e.product_category_price.product_offer.offer_quantity;
 
           if (is_offer) {
             e.product_category_price.min_order_quantity =

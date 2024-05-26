@@ -84,6 +84,7 @@ export class SingleProductsNewResponse {
           ? {
               product_category_price_id:
                 product_offer.product_category_price_id,
+                quantity: product_offer.offer_quantity,
 
               offer_id: product_offer.id,
               offer_price: product_offer.price,
