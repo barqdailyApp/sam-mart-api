@@ -10,6 +10,15 @@ import {
 
 export class UpdateProductMeasurementRequest {
 
+
+
+
+
+  @ApiProperty({ nullable: true, required: false })
+  @IsOptional()
+  @IsString()
+  measurement_unit_id: string;
+
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()
   @IsNumber()

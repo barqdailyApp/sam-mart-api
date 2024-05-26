@@ -396,16 +396,17 @@ export class ProductDashboardService {
     product_measurement_unit_id: string,
     updateProductMeasurementRequest: UpdateProductMeasurementRequest,
   ) {
-    const { conversion_factor, is_main_unit } = updateProductMeasurementRequest;
+    const { conversion_factor, is_main_unit ,measurement_unit_id } = updateProductMeasurementRequest;
 
     // Check if the product exists
     const product = await this.productRepository.findOne({
-      where: { id: product_id },
+      where: { id: product_id },relations: { product_measurements: true },
     });
+
     if (!product) {
       throw new NotFoundException('message.product_not_found');
     }
-
+  
     // Check if the product measurement exists
     const productMeasurement = await this.productMeasurementRepository.findOne({
       where: { id: product_measurement_unit_id },
@@ -415,7 +416,7 @@ export class ProductDashboardService {
     }
 
     // Prepare the update data
-    const updateData: any = { conversion_factor, is_main_unit };
+    const updateData: any = { conversion_factor, is_main_unit ,measurement_unit_id };
 
     // If the unit is marked as the main unit, ensure the conversion factor is 1
 
