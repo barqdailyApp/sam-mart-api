@@ -105,19 +105,19 @@ export class ProductClientService {
       // .leftJoinAndSelect('product.products_favorite', 'products_favorite')
 
       .innerJoinAndSelect('product.product_images', 'product_images')
-      .innerJoinAndSelect(
-        'product.product_sub_categories',
-        'product_sub_categories',
-      )
-      .innerJoinAndSelect(
-        'product_sub_categories.category_subCategory',
-        'product_category_subCategory',
-      )
-      .innerJoinAndSelect(
-        'product_category_subCategory.section_category',
-        'product_section_category',
-      )
-      .innerJoinAndSelect('product_section_category.section', 'product_section')
+      // .innerJoinAndSelect(
+      //   'product.product_sub_categories',
+      //   'product_sub_categories',
+      // )
+      // .innerJoinAndSelect(
+      //   'product_sub_categories.category_subCategory',
+      //   'product_category_subCategory',
+      // )
+      // .innerJoinAndSelect(
+      //   'product_category_subCategory.section_category',
+      //   'product_section_category',
+      // )
+      // .innerJoinAndSelect('product_section_category.section', 'product_section')
       .innerJoinAndSelect('product.warehouses_products', 'warehousesProduct')
       .innerJoinAndSelect(
         'product.product_measurements',
@@ -141,15 +141,15 @@ export class ProductClientService {
           isActive: true,
         },
       )
-      .innerJoin(
+      .innerJoinAndSelect(
         'product_category_prices.product_sub_category',
         'product_sub_category',
       )
-      .innerJoin(
+      .innerJoinAndSelect(
         'product_sub_category.category_subCategory',
         'category_subCategory',
       )
-      .innerJoin('category_subCategory.section_category', 'section_category')
+      .innerJoinAndSelect('category_subCategory.section_category', 'section_category')
       .orderBy(productsSort)
 
       .skip(skip)
@@ -218,19 +218,21 @@ export class ProductClientService {
         },
       );
       query = query.andWhere('product.is_active = true');
-      query = query.andWhere('product_sub_categories.is_active = true');
-      query = query.andWhere(
-        'product_sub_categories.category_sub_category_id = :category_sub_category_id',
-        {
-          category_sub_category_id,
-        },
-      );
+      query = query.andWhere('product_sub_category.is_active = true');
+      // query = query.andWhere(
+      //   'product_sub_categories.category_sub_category_id = :category_sub_category_id',
+      //   {
+      //     category_sub_category_id,
+      //   },
+      // );
       const categorySubcategory = await this.categorySubcategory_repo.findOne({
         where: { id: category_sub_category_id },
       });
-      await this.subCategoryService.updateMostHitSubCategory({
-        sub_category_id: categorySubcategory.subcategory_id,
-      });
+      if (categorySubcategory) {
+        await this.subCategoryService.updateMostHitSubCategory({
+          sub_category_id: categorySubcategory.subcategory_id,
+        });
+      }
     }
 
     // Conditional where clause based on section
@@ -239,13 +241,13 @@ export class ProductClientService {
         section_id,
       });
       query = query.andWhere('product.is_active = true');
-      query = query.andWhere('product_sub_categories.is_active = true');
-      query = query.andWhere(
-        'product_section_category.section_id = :section_id',
-        {
-          section_id,
-        },
-      );
+      query = query.andWhere('product_sub_category.is_active = true');
+      // query = query.andWhere(
+      //   'product_section_category.section_id = :section_id',
+      //   {
+      //     section_id,
+      //   },
+      // );
     }
 
     const [products, total] = await query.getManyAndCount();
@@ -255,7 +257,6 @@ export class ProductClientService {
   //* Get All Products Offers  For Client
 
   async getAllProductsOffersForClient(productClientQuery: ProductClientQuery) {
-
     const {
       page,
       limit,
@@ -621,8 +622,8 @@ export class ProductClientService {
         },
       );
     }
-    const proucut=await query.getOne();
-    if(!proucut){
+    const proucut = await query.getOne();
+    if (!proucut) {
       throw new NotFoundException('message.product_not_found');
     }
     return await proucut;
