@@ -79,7 +79,7 @@ export class RegisterDriverTransaction extends BaseTransaction<
 
       //* save user
       const savedUser = await context.save(User, createUser);
-      console.log('savedUser', savedUser);
+     
       //* This Data driver needed
       const {
         country_id,
@@ -142,7 +142,7 @@ export class RegisterDriverTransaction extends BaseTransaction<
       CreateDriver.license_image = pathLicenseImage;
       const savedDriver = await context.save(Driver, CreateDriver);
       await context.save(new Wallet({ user_id: savedUser.id }));
-      console.log('savedDriver', savedDriver);
+     
       // return user
       return savedUser;
     } catch (error) {

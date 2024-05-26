@@ -26,7 +26,7 @@ export class StorageManager {
     try {
    
       const extension = getFileExtension(file);
-      console.log('extension',extension);
+     
 
       const fileName = getFileName(file);
 

@@ -18,7 +18,7 @@ export class SingleProductDashboardNewResponse {
   @Expose() product_measurements: any[];
 
   constructor(product: Product) {
-    console.log(product);
+   
     const product_sub_categories = product.product_sub_categories;
     const product_measurements = product.product_measurements;
     const product_images = product.product_images;

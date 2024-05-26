@@ -64,7 +64,7 @@ export class AuthenticationController {
     avatarFile: Express.Multer.File,
   ): Promise<ActionResponse<RegisterResponse>> {
     req.avatarFile = avatarFile;
-    console.log('req.avatarFile', req.avatarFile);
+
     const user = await this.authService.register(req);
     const result = plainToInstance(RegisterResponse, user, {
       excludeExtraneousValues: true,

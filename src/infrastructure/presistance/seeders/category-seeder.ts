@@ -33,7 +33,7 @@ export class CategorySeeder implements Seeder {
   async seed(): Promise<any> {
     const sections_data = fs.readFileSync('./json/sections.json', 'utf8');
     const section_Object: Section[] = JSON.parse(sections_data);
-    console.log(section_Object);
+  
     for (const section of section_Object) {
       const sectionCreated = this.section_repo.create({
         name_ar: section.name_ar,

@@ -38,7 +38,7 @@ export class RolesGuard implements CanActivate {
       await this.checkDriverStatus(user, requiredRoles);
     }
 
-    console.log(user.user_status);
+  
     if (user.user_status == UserStatus.BlockedClient)
       throw new UnauthorizedException(`This account has been blocked`);
 
