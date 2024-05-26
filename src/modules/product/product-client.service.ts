@@ -282,7 +282,7 @@ export class ProductClientService {
 
         break;
       case 'new':
-        productsSort = { 'product.created_at': 'DESC' };
+        productsSort = { 'product_category_prices.order_by': 'ASC' };
 
         break;
       // handle other sort cases if needed
