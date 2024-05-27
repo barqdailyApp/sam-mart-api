@@ -181,7 +181,7 @@ export class PaymentMethodService extends BaseService<PaymentMethod> {
           } catch (error) {
             console.log(error);
           }
-        } else throw new BadRequestException('message.wrong_voucher_code');
+        } else throw new BadRequestException('message.wrong_voucher_number');
       }
     }
   }
