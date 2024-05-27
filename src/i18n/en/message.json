@@ -12,7 +12,7 @@
     "discount_value_must_be_less_than_product_price":"Discount value must be less than product price",
     "country_not_found": "Country not found",
     "payment_method_not_found":"Payment method not found",
-    "wrong_voucher_number":"wrong_voucher_number",
+    "wrong_voucher_number":"wrong voucher number",
     "driver_not_found": "Driver not found",
     "product_not_found": "Product not found",
     "invalid_promo_code":"invalid promo code",
