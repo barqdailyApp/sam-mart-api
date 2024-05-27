@@ -275,7 +275,8 @@ export class MakeOrderTransaction extends BaseTransaction<
           PINPASS: req.payment_method.transaction_number,
         });
         if (make_payment["Code"]!=1) {
-          throw new BadRequestException(make_payment["Message"]);
+          
+          throw new BadRequestException(this.request.headers['accept-language']=="en"?make_payment["Message"]:make_payment["MessageDesc"]);
         }
       }
 
