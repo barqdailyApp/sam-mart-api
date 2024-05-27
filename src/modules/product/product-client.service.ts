@@ -652,7 +652,7 @@ export class ProductClientService {
     });
 
     if (favorite) {
-      return await this.productFavorite_repo.softDelete(favorite.id);
+      return await this.productFavorite_repo.delete(favorite.id);
     } else {
       const newFavorite = this.productFavorite_repo.create({
         product_id,
@@ -710,18 +710,18 @@ export class ProductClientService {
       .innerJoinAndSelect('product_favorite.section', 'section')
 
       .innerJoinAndSelect('product.product_images', 'product_images')
-      .innerJoinAndSelect(
-        'product.product_sub_categories',
-        'product_sub_categories',
-      )
-      .innerJoinAndSelect(
-        'product_sub_categories.category_subCategory',
-        'product_category_subCategory',
-      )
-      .innerJoinAndSelect(
-        'product_category_subCategory.section_category',
-        'product_section_category',
-      )
+      // .innerJoinAndSelect(
+      //   'product.product_sub_categories',
+      //   'product_sub_categories',
+      // )
+      // .innerJoinAndSelect(
+      //   'product_sub_categories.category_subCategory',
+      //   'product_category_subCategory',
+      // )
+      // .innerJoinAndSelect(
+      //   'product_category_subCategory.section_category',
+      //   'product_section_category',
+      // )
       .innerJoinAndSelect('product.warehouses_products', 'warehousesProduct')
       .innerJoinAndSelect(
         'product.product_measurements',
@@ -744,15 +744,15 @@ export class ProductClientService {
           isActive: true,
         },
       )
-      .innerJoin(
+      .innerJoinAndSelect(
         'product_category_prices.product_sub_category',
         'product_sub_category',
       )
-      .innerJoin(
+      .innerJoinAndSelect(
         'product_sub_category.category_subCategory',
         'category_subCategory',
       )
-      .innerJoin('category_subCategory.section_category', 'section_category')
+      .innerJoinAndSelect('category_subCategory.section_category', 'section_category')
 
       .orderBy('productSubCategory.order_by', 'ASC')
       .orderBy(productsSort)
@@ -802,13 +802,13 @@ export class ProductClientService {
         section_id,
       });
       query = query.andWhere('product.is_active = true');
-      query = query.andWhere('product_sub_categories.is_active = true');
-      query = query.andWhere(
-        'product_section_category.section_id = :section_id',
-        {
-          section_id,
-        },
-      );
+      query = query.andWhere('product_sub_category.is_active = true');
+      // query = query.andWhere(
+      //   'product_section_category.section_id = :section_id',
+      //   {
+      //     section_id,
+      //   },
+      // );
     }
 
     query = query.andWhere('product_favorite.user_id = :user_id', {
