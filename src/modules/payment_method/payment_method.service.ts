@@ -236,6 +236,7 @@ export class PaymentMethodService extends BaseService<PaymentMethod> {
       );
       console.log(response.data);
       if (response.data['Code'] == 1) return response.data;
+      else throw new BadRequestException(response["MessageDesc"]);
     } catch (error) {
       console.log(error.response);
     }
