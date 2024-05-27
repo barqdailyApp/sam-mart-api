@@ -652,7 +652,7 @@ export class ProductClientService {
     });
 
     if (favorite) {
-      return await this.productFavorite_repo.softDelete(favorite.id);
+      return await this.productFavorite_repo.delete(favorite.id);
     } else {
       const newFavorite = this.productFavorite_repo.create({
         product_id,
