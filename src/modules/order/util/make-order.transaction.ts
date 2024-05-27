@@ -274,8 +274,8 @@ export class MakeOrderTransaction extends BaseTransaction<
           SCustID: encodeUUID(order.user_id),
           PINPASS: req.payment_method.transaction_number,
         });
-        if (!make_payment) {
-          throw new BadRequestException('payment failed');
+        if (make_payment["Code"]!=1) {
+          throw new BadRequestException(make_payment["Message"]);
         }
       }
 
