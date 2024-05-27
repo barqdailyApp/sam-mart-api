@@ -181,7 +181,7 @@ export class PaymentMethodService extends BaseService<PaymentMethod> {
           } catch (error) {
             console.log(error);
           }
-        } else throw new BadRequestException('The amount is not enough');
+        } else throw new BadRequestException('message.wrong_voucher_code');
       }
     }
   }
@@ -230,7 +230,7 @@ export class PaymentMethodService extends BaseService<PaymentMethod> {
         },
         {
           auth: { username: username, password },
-
+         
           httpsAgent: httpsAgent, // Pass the custom agent to ignore SSL certificate validation
         },
       );
