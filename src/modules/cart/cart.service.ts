@@ -313,10 +313,11 @@ export class CartService extends BaseService<CartProduct> {
       product_category_price.product_offer.is_active &&
       product_category_price.product_offer.start_date < new Date() &&
       new Date() < product_category_price.product_offer.end_date &&
-      req.add == true
+      (req.add == true
         ? product_category_price.product_offer.offer_quantity >=
-          product_category_price.product_offer.min_offer_quantity + cart_product.quantity
-        : true;
+          product_category_price.product_offer.min_offer_quantity +
+            cart_product.quantity
+        : true);
 
     if (is_offer) {
       product_category_price.min_order_quantity =
