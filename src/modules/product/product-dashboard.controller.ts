@@ -337,9 +337,10 @@ export class ProductDashboardController {
   async exportWarehouseProducts(
     @Res() res: Response,
     @Query('warehouse_id') warehouse_id: string,
+    @Query('quantity') quantity: number,
   ) {
     const File = await this.productDashboardService.exportWarehouseProducts(
-      warehouse_id,
+      warehouse_id,quantity
     );
     res.download(`${File}`);
   }

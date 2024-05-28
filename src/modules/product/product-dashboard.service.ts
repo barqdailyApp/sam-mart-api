@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from 'src/infrastructure/entities/product/product.entity';
-import { DeleteResult, IsNull, Not, Repository } from 'typeorm';
+import { DeleteResult, IsNull, LessThan, Not, Repository } from 'typeorm';
 import { CreateProductRequest } from './dto/request/create-product.request';
 import { CreateProductTransaction } from './utils/create-product.transaction';
 import { UpdateProductRequest } from './dto/request/update-product.request';
@@ -1250,9 +1250,9 @@ export class ProductDashboardService {
     );
   }
 
-  async exportWarehouseProducts(warehouse_id: string) {
+  async exportWarehouseProducts(warehouse_id: string,quantity?) {
     const warehouse_products = await this.warehouse_products_repo.find({
-      where: { warehouse_id },
+      where : quantity? {warehouse_id,quantity:LessThan(quantity)} :  { warehouse_id },
       relations: {
         product: { product_images: true },
         product_measurement: { measurement_unit: true },
