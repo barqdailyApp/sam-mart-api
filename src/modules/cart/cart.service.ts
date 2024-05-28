@@ -315,7 +315,7 @@ export class CartService extends BaseService<CartProduct> {
       new Date() < product_category_price.product_offer.end_date &&
       req.add == true
         ? product_category_price.product_offer.offer_quantity >=
-          product_category_price.min_order_quantity + cart_product.quantity
+          product_category_price.product_offer.min_offer_quantity + cart_product.quantity
         : true;
 
     if (is_offer) {
