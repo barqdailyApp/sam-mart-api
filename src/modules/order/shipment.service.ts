@@ -645,6 +645,9 @@ export class ShipmentService extends BaseService<Shipment> {
     //   }),
     // );
 
+    if(shipment.order.paymentMethod.type != PaymentMethodEnum.CASH){
+      
+    
     await this.transactionService.makeTransaction(
       new MakeTransactionRequest({
         amount: shipment.order.total_price,
@@ -652,7 +655,7 @@ export class ShipmentService extends BaseService<Shipment> {
         order_id: shipment.order.id,
         user_id: shipment.order.user_id,
       }),
-    );
+    );}
 
     if (shipment.driver) {
       await this.notificationService.create(
