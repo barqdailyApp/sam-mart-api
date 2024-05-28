@@ -134,8 +134,8 @@ export class ProductDashboardService {
         'message.end_date_must_be_greater_than_start_date',
       );
     }
-    if (order_by) {
-      const highest_number = await this.productOffer_repo.findOne({
+    if (order_by!=null) {
+      const highest_number = await this.productOffer_repo.findOne({where:{},
         order: { order_by: 'DESC' },
       });
 
@@ -143,6 +143,7 @@ export class ProductDashboardService {
         throw new BadRequestException(
           'order_by must be smaller than ' + (highest_number.order_by + 1),
         );
+        else if(order_by < 1) throw new BadRequestException('order_by must be greater than 1');
       const if_exist = await this.productOffer_repo.findOne({
         where: { order_by: order_by },
       });
@@ -256,10 +257,20 @@ export class ProductDashboardService {
           productOffer.product_category_price.price - discountedPercentage;
       }
     }
-    if (order_by) {
+  
+    if (order_by!=null) {
+    
       const if_exist = await this.productOffer_repo.findOne({
         where: { order_by: order_by },
       });
+      const highest_number = await this.productOffer_repo.findOne({where:{},
+        order: { order_by: 'DESC' },
+      });
+      if (order_by > highest_number.order_by + 1)
+        throw new BadRequestException(
+          'order_by must be smaller than ' + (highest_number.order_by + 1),
+        );
+        else if(order_by < 1) throw new BadRequestException('order_by must be greater than 1');
       if(if_exist){
       if_exist.order_by = order_by;
       await this.productOffer_repo.save(if_exist);}
