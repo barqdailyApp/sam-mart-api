@@ -45,9 +45,10 @@ export class ProductsOffersDashboardNewResponse {
   @Expose() measurement_unit_id: string;
   @Expose() measurement_unit_ar: string;
   @Expose() measurement_unit_en: string;
+  @Expose() order_by: number;
 
   constructor(product_offer: ProductOffer) {
-    console.log(product_offer);
+
     const product_category_price = product_offer.product_category_price;
     const product = product_category_price.product_sub_category.product;
     const product_measurement = product_category_price.product_measurement;
@@ -57,6 +58,7 @@ export class ProductsOffersDashboardNewResponse {
 
     this.offer_id = product_offer.id;
     this.offer_price = product_offer.price;
+    this.order_by = product_offer.order_by;
     this.min_order_quantity = product_offer.min_offer_quantity;
     this.mix_order_quantity = product_offer.max_offer_quantity;
     this.offer_is_active = product_offer.is_active;
@@ -65,6 +67,7 @@ export class ProductsOffersDashboardNewResponse {
     this.offer_start_date = product_offer.start_date;
     this.offer_end_date = product_offer.end_date;
     this.offer_quantity = product_offer.offer_quantity;
+    
     this.product_category_price_id = product_offer.product_category_price_id;
 
 
