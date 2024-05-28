@@ -34,6 +34,11 @@ export class UpdateProductOfferRequest {
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()
   @IsNumber()
+  order_by:number;
+
+  @ApiProperty({ nullable: true, required: false })
+  @IsOptional()
+  @IsNumber()
   max_offer_quantity: number;
 
   @ApiProperty({

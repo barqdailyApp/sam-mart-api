@@ -30,6 +30,11 @@ export class CreateProductOfferRequest {
   @IsNumber()
   offer_quantity: number;
 
+  @ApiProperty({ nullable: true, required: false })
+  @IsOptional()
+  @IsNumber()
+  order_by:number;
+
   @ApiProperty()
   @IsNotEmpty()
   @IsNumber()

@@ -46,6 +46,9 @@ export class ProductOffer extends AuditableEntity {
   @Column()
   is_active: boolean;
 
+  @Column({ default: 1})
+  order_by: number;
+
   @Column({nullable: true,type: 'longtext' })
   description_ar: string;
 

@@ -117,8 +117,13 @@ export class ProductDashboardService {
     product_category_price_id: string,
     createProductOfferRequest: CreateProductOfferRequest,
   ) {
-    const { max_offer_quantity, min_offer_quantity, end_date, start_date } =
-      createProductOfferRequest;
+    const {
+      max_offer_quantity,
+      min_offer_quantity,
+      end_date,
+      start_date,
+      order_by,
+    } = createProductOfferRequest;
     if (max_offer_quantity < min_offer_quantity) {
       throw new BadRequestException(
         'message.max_offer_quantity_must_be_greater_than_min_offer_quantity',
@@ -129,6 +134,23 @@ export class ProductDashboardService {
         'message.end_date_must_be_greater_than_start_date',
       );
     }
+    if (order_by) {
+      const highest_number = await this.productOffer_repo.findOne({
+        order: { order_by: 'DESC' },
+      });
+
+      if (order_by > highest_number.order_by + 1)
+        throw new BadRequestException(
+          'order_by must be smaller than ' + (highest_number.order_by + 1),
+        );
+      const if_exist = await this.productOffer_repo.findOne({
+        where: { order_by: order_by },
+      });
+      if(if_exist){
+      if_exist.order_by = order_by;
+      await this.productOffer_repo.save(if_exist);}
+    }
+
     const productCategoryPrice = await this.productCategoryPrice_repo.findOne({
       where: { id: product_category_price_id },
     });
@@ -199,6 +221,7 @@ export class ProductDashboardService {
       min_offer_quantity,
       start_date,
       offer_quantity,
+      order_by,
       description_ar,
       description_en,
     } = updateProductOfferRequest;
@@ -233,6 +256,14 @@ export class ProductDashboardService {
           productOffer.product_category_price.price - discountedPercentage;
       }
     }
+    if (order_by) {
+      const if_exist = await this.productOffer_repo.findOne({
+        where: { order_by: order_by },
+      });
+      if(if_exist){
+      if_exist.order_by = order_by;
+      await this.productOffer_repo.save(if_exist);}
+    }
 
     await this.productOffer_repo.update(
       { id: offer_id },
@@ -241,6 +272,7 @@ export class ProductDashboardService {
         discount_value,
         end_date,
         start_date,
+        order_by,
         is_active,
         max_offer_quantity,
         min_offer_quantity,
@@ -396,17 +428,19 @@ export class ProductDashboardService {
     product_measurement_unit_id: string,
     updateProductMeasurementRequest: UpdateProductMeasurementRequest,
   ) {
-    const { conversion_factor, is_main_unit ,measurement_unit_id } = updateProductMeasurementRequest;
+    const { conversion_factor, is_main_unit, measurement_unit_id } =
+      updateProductMeasurementRequest;
 
     // Check if the product exists
     const product = await this.productRepository.findOne({
-      where: { id: product_id },relations: { product_measurements: true },
+      where: { id: product_id },
+      relations: { product_measurements: true },
     });
 
     if (!product) {
       throw new NotFoundException('message.product_not_found');
     }
-  
+
     // Check if the product measurement exists
     const productMeasurement = await this.productMeasurementRepository.findOne({
       where: { id: product_measurement_unit_id },
@@ -416,7 +450,11 @@ export class ProductDashboardService {
     }
 
     // Prepare the update data
-    const updateData: any = { conversion_factor, is_main_unit ,measurement_unit_id };
+    const updateData: any = {
+      conversion_factor,
+      is_main_unit,
+      measurement_unit_id,
+    };
 
     // If the unit is marked as the main unit, ensure the conversion factor is 1
 
@@ -1157,10 +1195,8 @@ export class ProductDashboardService {
       },
       order: {
         category_subCategory: {
-          
           section_category: { category: { name_ar: 'ASC' } },
           subcategory: { name_ar: 'ASC' },
-        
         },
       },
     });
