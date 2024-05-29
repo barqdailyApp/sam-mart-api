@@ -193,7 +193,7 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
         user_id: this.currentUser.id,
         url: savedReturnOrder.id,
         type: NotificationTypes.ORDERS,
-        title_ar: 'منتجع',
+        title_ar: 'مرتجع',
         title_en: 'return order',
         text_ar: 'هل تريد ارجاع هذا الطلب ؟',
         text_en: 'Do you want to return this order?',
@@ -283,8 +283,12 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
           product_measurement_id: product_measurement.id,
           quantity: return_product.quantity * return_product.shipmentProduct.conversion_factor,
         });
-
+      
         amount_of_returned_money += return_product.quantity * return_product.shipmentProduct.price;
+        if(returnOrder.order.promo_code_discount) {
+          const    discount_precentage = (returnOrder.order.products_price+ returnOrder.order.delivery_fee)/returnOrder.order.total_price*100
+          amount_of_returned_money -= amount_of_returned_money*discount_precentage/100
+            }
       }
     }
 
