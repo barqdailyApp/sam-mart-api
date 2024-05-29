@@ -289,15 +289,7 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
 
         amount_of_returned_money +=
           return_product.quantity * return_product.shipmentProduct.price;
-        if (returnOrder.order.promo_code_discount) {
-          const discount_precentage =
-            (Number(returnOrder.order.total_price) /
-              (Number(returnOrder.order.products_price) +
-                Number(returnOrder.order.delivery_fee))) *
-            100;
-          amount_of_returned_money -=
-            (Number(amount_of_returned_money) * discount_precentage) / 100;
-        }
+     
       }
     }
 
