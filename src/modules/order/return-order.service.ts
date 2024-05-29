@@ -60,14 +60,12 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
     @InjectRepository(ProductMeasurement)
     private productMeasurementRepository: Repository<ProductMeasurement>,
 
-
     @Inject(REQUEST) readonly request: Request,
     @Inject(TransactionService)
     private readonly transactionService: TransactionService,
     private readonly orderGateway: OrderGateway,
     private readonly notificationService: NotificationService,
     private readonly warehouseOperationTransaction: WarehouseOperationTransaction,
-
   ) {
     super(returnOrderRepository);
   }
@@ -123,8 +121,8 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
     );
     if (canNotReturnProducts) {
       throw new BadRequestException(
-        "message.not_allowed_to_return_already_returned" +
-        JSON.stringify(canNotReturnProducts),
+        'message.not_allowed_to_return_already_returned' +
+          JSON.stringify(canNotReturnProducts),
       );
     }
 
@@ -149,16 +147,19 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
     // check if the return products reasons IDs are valid
     const returnedProductsReasons = await this.reasonRepository.find({
       where: {
-        id: In(returned_shipment_products.map((p) => p.return_product_reason_id)),
+        id: In(
+          returned_shipment_products.map((p) => p.return_product_reason_id),
+        ),
         type: ReasonType.RETURN_ORDER,
       },
     });
 
     if (
       returnedProductsReasons.length !==
-      new Set(returned_shipment_products.map((p) => p.return_product_reason_id)).size
+      new Set(returned_shipment_products.map((p) => p.return_product_reason_id))
+        .size
     ) {
-      throw new BadRequestException("message.invalid_return_reasons_ids");
+      throw new BadRequestException('message.invalid_return_reasons_ids');
     }
 
     const returnOrder = await this.returnOrderRepository.create({
@@ -208,7 +209,6 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
     return_order_id: string,
     req: UpdateReturnOrderStatusRequest,
   ) {
-
     let amount_of_returned_money = 0;
     const returnOrder = await this.returnOrderRepository.findOne({
       where: { id: return_order_id },
@@ -232,7 +232,9 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
     });
 
     if (returnOrderProducts.length !== return_order_products.length) {
-      throw new BadRequestException("message.invalid_return_order_products_ids");
+      throw new BadRequestException(
+        'message.invalid_return_order_products_ids',
+      );
     }
 
     let driver: Driver = null;
@@ -240,7 +242,7 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
       driver = await this.driverRepository.findOne({
         where: { id: driver_id },
       });
-      if (!driver) throw new BadRequestException("message.driver_not_found");
+      if (!driver) throw new BadRequestException('message.driver_not_found');
       returnOrder.driver_id = driver_id;
     }
 
@@ -255,9 +257,7 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
       };
     });
 
-    await this.returnOrderProductRepository.save(
-      mappedReturnProductsNewStatus,
-    );
+    await this.returnOrderProductRepository.save(mappedReturnProductsNewStatus);
 
     returnOrder.status = status;
     returnOrder.admin_note = admin_note;
@@ -270,25 +270,34 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
     const mappedImportedProducts = [];
     for (const return_product of mappedReturnProductsNewStatus) {
       // because shipmentProduct.product_measurement_id is the unit name not the main unit id
-      const product_measurement = await this.productMeasurementRepository.findOne({
-        where: {
-          product_id: return_product.shipmentProduct.product_id,
-          is_main_unit: true,
-        },
-      });
+      const product_measurement =
+        await this.productMeasurementRepository.findOne({
+          where: {
+            product_id: return_product.shipmentProduct.product_id,
+            is_main_unit: true,
+          },
+        });
 
       if (return_product.status === ReturnOrderStatus.ACCEPTED) {
         mappedImportedProducts.push({
           product_id: return_product.shipmentProduct.product_id,
           product_measurement_id: product_measurement.id,
-          quantity: return_product.quantity * return_product.shipmentProduct.conversion_factor,
+          quantity:
+            return_product.quantity *
+            return_product.shipmentProduct.conversion_factor,
         });
-      
-        amount_of_returned_money += return_product.quantity * return_product.shipmentProduct.price;
-        if(returnOrder.order.promo_code_discount) {
-          const    discount_precentage = (returnOrder.order.products_price+ returnOrder.order.delivery_fee)/returnOrder.order.total_price*100
-          amount_of_returned_money -= amount_of_returned_money*discount_precentage/100
-            }
+
+        amount_of_returned_money +=
+          return_product.quantity * return_product.shipmentProduct.price;
+        if (returnOrder.order.promo_code_discount) {
+          const discount_precentage =
+            ((Number(returnOrder.order.products_price) +
+              Number(returnOrder.order.delivery_fee)) /
+              Number(returnOrder.order.total_price)) *
+            100;
+          amount_of_returned_money -=
+            (Number(amount_of_returned_money) * discount_precentage) / 100;
+        }
       }
     }
 
@@ -340,10 +349,7 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
   async getReturnOrders(query: PaginatedRequest) {
     query.filters ??= [];
 
-    if (
-      query.filters !== null
-      && typeof query.filters === 'string'
-    ) {
+    if (query.filters !== null && typeof query.filters === 'string') {
       query.filters = [query.filters];
     }
 
