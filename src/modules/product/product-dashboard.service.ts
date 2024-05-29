@@ -723,7 +723,7 @@ export class ProductDashboardService {
 
       .innerJoinAndSelect('product.product_images', 'product_images')
 
-      .orderBy('product_offer.created_at', 'DESC')
+      .orderBy('product_offer.order_by', 'ASC')
       .skip(skip)
       .take(limit);
 
