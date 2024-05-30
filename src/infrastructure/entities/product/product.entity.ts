@@ -1,5 +1,5 @@
 import { AuditableEntity } from 'src/infrastructure/base/auditable.entity';
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, Index, OneToMany } from 'typeorm';
 import { ProductImage } from './product-image.entity';
 import { ProductMeasurement } from './product-measurement.entity';
 import { ProductSubCategory } from './product-sub-category.entity';
@@ -9,6 +9,7 @@ import { ProductFavorite } from './product-favorite.entity';
 import { ShipmentProduct } from '../order/shipment-product.entity';
 
 @Entity()
+
 export class Product extends AuditableEntity {
   @Column()
   name_ar: string;
@@ -28,6 +29,7 @@ export class Product extends AuditableEntity {
   @Column({ default: false })
   is_recovered: boolean;
 
+  @Index()
   @Column({ nullable: true })
   barcode: string
 
