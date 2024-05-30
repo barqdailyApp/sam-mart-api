@@ -189,17 +189,17 @@ export class ReturnOrderService extends BaseService<ReturnOrder> {
         warehouse: shipment.warehouse,
       },
     });
-    await this.notificationService.create(
-      new NotificationEntity({
-        user_id: this.currentUser.id,
-        url: savedReturnOrder.id,
-        type: NotificationTypes.ORDERS,
-        title_ar: 'مرتجع',
-        title_en: 'return order',
-        text_ar: 'هل تريد ارجاع هذا الطلب ؟',
-        text_en: 'Do you want to return this order?',
-      }),
-    );
+    // await this.notificationService.create(
+    //   new NotificationEntity({
+    //     user_id: this.currentUser.id,
+    //     url: savedReturnOrder.id,
+    //     type: NotificationTypes.ORDERS,
+    //     title_ar: 'مرتجع',
+    //     title_en: 'return order',
+    //     text_ar: 'هل تريد ارجاع هذا الطلب ؟',
+    //     text_en: 'Do you want to return this order?',
+    //   }),
+    // );
 
     return savedReturnOrder;
   }
