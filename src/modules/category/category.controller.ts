@@ -207,10 +207,10 @@ export class CategoryController {
       where: {
         id,
       },
-      relations: { section_categories: { category_subCategory: true } },
+      relations: { section_categories: { category_subCategory: true, } },
     });
     if (
-      category.section_categories.map((e) => e.category_subCategory).length > 0
+      category.section_categories.length > 0
     ) {
       throw new BadRequestException('message.category_has_subcategories');
     }

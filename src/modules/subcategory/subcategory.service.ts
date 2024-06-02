@@ -192,12 +192,15 @@ export class SubcategoryService extends BaseService<Subcategory> {
   }
 
   async deleteSubCategory(id: string) {
-    const subcategory = await this._repo.findOne({ where: { id: id },relations:{product_sub_categories:true} });
+    const subcategory = await this._repo.findOne({ where: { id: id },relations:{category_subCategory:true,product_sub_categories:true} });
     if (!subcategory) {
       throw new NotFoundException('Subcategory not found');
     }
     if(subcategory.product_sub_categories.length>0){
       throw new NotFoundException('Subcategory has products');
+    }
+    if(subcategory.category_subCategory.length>0){
+      throw new NotFoundException("Subcategory is linked to categories");
     }
     await this._fileService.delete(subcategory.logo);
     return await this.subcategory_repo.softDelete(id);

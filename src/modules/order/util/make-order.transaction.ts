@@ -353,6 +353,8 @@ export class MakeOrderTransaction extends BaseTransaction<
           warehouse_id: shipment.warehouse_id,
         },
       });
+
+      if(order.delivery_type == DeliveryType.FAST){
       for (let index = 0; index < driversWarehouse.length; index++) {
         await this.notificationService.create(
           new NotificationEntity({
@@ -365,7 +367,7 @@ export class MakeOrderTransaction extends BaseTransaction<
             text_en: 'Do you want to take this order?',
           }),
         );
-      }
+      }}
 
       return order;
     } catch (error) {
