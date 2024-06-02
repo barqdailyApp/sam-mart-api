@@ -37,7 +37,13 @@ export class SlotService {
       const ordersDay = slots[i].orders.filter(
         (order) => order.delivery_day === delivery_day,
       );
-      if (ordersDay.length < 10) {
+      
+      
+      const delivery_date= new Date(new Date(delivery_day).setHours(Number(slots[i].start_time.split(":")[0]),Number( slots[i].start_time.split(":")[1]), 0, 0));
+      
+      
+      if (ordersDay.length < 10 && delivery_date>new Date() )  {
+
         availableSlots.push(slots[i]);
       }
     }
