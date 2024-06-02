@@ -152,6 +152,7 @@ export class MakeOrderTransaction extends BaseTransaction<
         order.estimated_delivery_time = new Date(
           req.slot_day.day + 'T' + slot.start_time,
         );
+        order.estimated_delivery_time.setHours(order.estimated_delivery_time.getHours()-3);
       }
 
       const shipment = await context.save(Shipment, {

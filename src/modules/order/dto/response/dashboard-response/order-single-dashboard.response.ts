@@ -22,14 +22,14 @@ export class OrderSingleDashboardResponse {
   @Expose() delivery_day: string;
   @Expose() delivery_fee: number;
   @Expose() order_products: number;
+  @Expose() estimated_delivery_time: Date;
 
   @Expose() warehouse: any;
   @Expose() user: any;
   @Expose() address: any;
   @Expose() shipments: any;
   @Expose() promo_code_discount: number;
-  @Expose() products_price:number;
-  
+  @Expose() products_price: number;
 
   constructor(order: Order) {
     this.order_id = order.id;
@@ -43,8 +43,8 @@ export class OrderSingleDashboardResponse {
     this.order_created_at = order.created_at;
     this.order_number = order.number;
     this.transaction_number = order.transaction_number;
-    this.products_price=order.products_price;
-
+    this.products_price = order.products_price;
+    this.estimated_delivery_time = order.estimated_delivery_time;
     this.order_products = order.shipments[0].shipment_products.length;
     this.total_price = order.total_price;
     this.payment_method = order.payment_method;
@@ -90,7 +90,7 @@ export class OrderSingleDashboardResponse {
       order_shipped_at: order.shipments[0].order_shipped_at,
       order_delivered_at: order.shipments[0].order_delivered_at,
       order_canceled_at: order.shipments[0].order_canceled_at,
-      order_cancel_reason: order.shipments[0].cancelShipmentReason, 
+      order_cancel_reason: order.shipments[0].cancelShipmentReason,
       canceled_by: order.shipments[0]?.canceled_by,
       shipment_products: order.shipments[0].shipment_products.map(
         (shipment_product) => {
@@ -98,8 +98,9 @@ export class OrderSingleDashboardResponse {
             id: shipment_product.id,
             shipment_id: shipment_product.shipment_id,
             product_id: shipment_product.product_id,
-            barcode:  shipment_product.product_category_price.product_sub_category
-            .product.barcode,
+            barcode:
+              shipment_product.product_category_price.product_sub_category
+                .product.barcode,
             quantity: shipment_product.quantity,
             price: shipment_product.price,
             product_name_ar:
