@@ -39,7 +39,7 @@ export class SlotService {
       );
       
       
-      const delivery_date= new Date(new Date(delivery_day).setHours(Number(slots[i].start_time.split(":")[0]),Number( slots[i].start_time.split(":")[1]), 0, 0));
+      const delivery_date= new Date(new Date(delivery_day).setUTCHours(Number(slots[i].start_time.split(":")[0]),Number( slots[i].start_time.split(":")[1]), 0, 0));
       
       
       if (ordersDay.length < 10 && delivery_date>new Date() )  {
