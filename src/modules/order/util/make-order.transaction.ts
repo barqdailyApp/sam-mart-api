@@ -150,7 +150,7 @@ export class MakeOrderTransaction extends BaseTransaction<
           where: { id: req.slot_day.slot_id },
         });
         order.estimated_delivery_time = new Date(
-          req.slot_day.day + 'T' + slot.start_time,
+          req.slot_day.day + 'T' + slot.start_time +"Z",
         );
         order.estimated_delivery_time.setHours(order.estimated_delivery_time.getHours()-3);
       }
