@@ -577,6 +577,10 @@ export class ProductDashboardService {
       case 'new':
         productsSort = { 'product.created_at': 'DESC' };
         break;
+        case 'order_by':
+        productsSort = { 'product_sub_categories.order_by': 'ASC' };
+        break;
+
     }
     let query = this.productRepository
       .createQueryBuilder('product')
@@ -606,7 +610,7 @@ export class ProductDashboardService {
         'product_measurements.measurement_unit',
         'measurement_unit',
       )
-      .orderBy('product_sub_categories.order_by', 'ASC')
+      .orderBy(productsSort)
       // .orderBy('product.created_at', 'DESC')
       .skip(skip)
       .take(limit);
