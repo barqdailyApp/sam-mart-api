@@ -34,7 +34,8 @@ export class ProductsOffersNewResponse {
   @Expose() product_price_id: string;
   @Expose() product_price: number;
   @Expose() min_order_quantity: number;
-  @Expose() mix_order_quantity: number;
+  @Expose() max_order_quantity: number;
+  @Expose() offer_quantity: number;
   @Expose() product_measurement_id: string;
   @Expose() measurement_unit_id: string;
   @Expose() measurement_unit_ar: string;
@@ -71,6 +72,7 @@ export class ProductsOffersNewResponse {
       product.warehouses_products.reduce((acc, cur) => acc + cur.quantity, 0) /
       product_measurement.conversion_factor;
     this.product_id = product.id;
+    this.offer_quantity = product_offer.offer_quantity;
     this.product_name_ar = product.name_ar;
     this.product_name_en = product.name_en;
 
