@@ -82,7 +82,7 @@ export class ProductsOffersNewResponse {
     this.product_price_id = product_category_price.id;
     this.product_price = product_category_price.price;
     this.min_order_quantity = product_offer.min_offer_quantity;
-    this.mix_order_quantity = product_offer.max_offer_quantity;
+    this.max_order_quantity = product_offer.max_offer_quantity;
     this.product_measurement_id = product_measurement.id;
     this.measurement_unit_id = measurement_unit.id;
     this.measurement_unit_ar = measurement_unit.name_ar;
