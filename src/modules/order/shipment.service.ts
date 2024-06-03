@@ -645,7 +645,7 @@ export class ShipmentService extends BaseService<Shipment> {
     //   }),
     // );
 
-    if(shipment.order.paymentMethod.type != PaymentMethodEnum.CASH){
+    if(shipment.order.payment_method != PaymentMethodEnum.CASH){
       
     
     await this.transactionService.makeTransaction(
