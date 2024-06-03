@@ -25,7 +25,7 @@ export class ProductsNewResponse {
   @Expose() product_price_id: string;
   @Expose() product_price: number;
   @Expose() min_order_quantity: number;
-  @Expose() mix_order_quantity: number;
+  @Expose() max_order_quantity: number;
   @Expose() product_measurement_id: string;
   @Expose() measurement_unit_id: string;
   @Expose() measurement_unit_ar: string;
@@ -68,7 +68,7 @@ export class ProductsNewResponse {
     (this.min_order_quantity = product_offer
       ? product_offer.min_offer_quantity
       : product_category_price.min_order_quantity),
-      (this.mix_order_quantity = product_offer
+      (this.max_order_quantity = product_offer
         ? product_offer.max_offer_quantity
         : product_category_price.max_order_quantity),
       (this.product_measurement_id = product_measurement.id);
