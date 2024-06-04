@@ -31,6 +31,7 @@ export class ShipmentsResponse {
       total_price: shipments.order.total_price,
       is_paid: shipments.order.is_paid,
       payment_method: shipments.order.payment_method,
+      estimated_delivery_time: shipments.order.estimated_delivery_time,
       delivery_type: shipments.order.delivery_type,
       delivery_day: shipments.order.delivery_day,
       delivery_fee: shipments.order.delivery_fee,
