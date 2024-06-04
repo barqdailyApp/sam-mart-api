@@ -197,10 +197,10 @@ export class SubcategoryService extends BaseService<Subcategory> {
       throw new NotFoundException('Subcategory not found');
     }
     if(subcategory.product_sub_categories.length>0){
-      throw new NotFoundException('Subcategory has products');
+      throw new NotFoundException('message.subcategory_has_products');
     }
     if(subcategory.category_subCategory.length>0){
-      throw new NotFoundException("Subcategory is linked to categories");
+      throw new NotFoundException("message.subcategory_has_categories");
     }
     await this._fileService.delete(subcategory.logo);
     return await this.subcategory_repo.softDelete(id);

@@ -124,6 +124,6 @@ export class PaymentMethodController {
   }
   @Post('cash-out')
   async cashOut() {
-    // return await this.paymentService.kuraimiPay();
+    return await this.paymentService.jawalicashOut("123","213",1);
   }
 }

@@ -86,6 +86,7 @@ export class ShipmentService extends BaseService<Shipment> {
   }
 
   async getDriver(driver_id?: string) {
+    
     return await this.driverRepository.findOne({
       where: {
         user_id: driver_id ?? this.request.user.id,
@@ -504,10 +505,9 @@ export class ShipmentService extends BaseService<Shipment> {
 
   async assignDriver(shipment_id: string, driver_id: string) {
     return this.addDriverToShipment(
-      shipment_id,  
+      shipment_id,
       AddDriverShipmentOption.DRIVER_ASSIGN_SHIPMENT,
       driver_id,
-      
     );
   }
 
@@ -645,17 +645,16 @@ export class ShipmentService extends BaseService<Shipment> {
     //   }),
     // );
 
-    if(shipment.order.payment_method != PaymentMethodEnum.CASH){
-      
-    
-    await this.transactionService.makeTransaction(
-      new MakeTransactionRequest({
-        amount: shipment.order.total_price,
-        type: TransactionTypes.ORDER_RETURN,
-        order_id: shipment.order.id,
-        user_id: shipment.order.user_id,
-      }),
-    );}
+    if (shipment.order.payment_method != PaymentMethodEnum.CASH) {
+      await this.transactionService.makeTransaction(
+        new MakeTransactionRequest({
+          amount: shipment.order.total_price,
+          type: TransactionTypes.ORDER_RETURN,
+          order_id: shipment.order.id,
+          user_id: shipment.order.user_id,
+        }),
+      );
+    }
 
     if (shipment.driver) {
       await this.notificationService.create(
@@ -678,11 +677,108 @@ export class ShipmentService extends BaseService<Shipment> {
     return this.request.user;
   }
 
+   async assignDriverToShipment(
+    shipment_id: string,
+    driver_id?: string,
+  ): Promise<Shipment> {
+    const driver = await this.getDriver(driver_id);
+
+    if (!driver) {
+      throw new NotFoundException('message.driver_not_found');
+    }
+
+    driver.current_orders = driver.current_orders + 1;
+
+    const shipment = await this.shipmentRepository.findOne({
+      where: { id: shipment_id },
+      relations: ['order', 'warehouse', 'order.user', 'order.address', 'driver', 'driver.user'],
+    });
+
+    if (!shipment) {
+      throw new NotFoundException('message.shipment_not_found');
+    }
+
+    if (driver.warehouse_id !== shipment.warehouse_id) {
+      throw new BadRequestException('message.driver_not_in_the_same_warehouse');
+    }
+
+    if (
+      shipment.status == ShipmentStatusEnum.PENDING ||
+      shipment.status == ShipmentStatusEnum.CANCELED
+    ) {
+      throw new BadRequestException('message.shipment_already_confirmed');
+    }
+
+    shipment.order_confirmed_at = new Date();
+    const old_driver_id = shipment.driver.user_id;
+    shipment.driver_id = driver.id;
+
+   
+
+    await this.shipmentRepository.save(shipment);
+
+    const intialShipmentMessage =
+     'Shipment has been assigned to driver'
+
+
+    const intialShipmentChat = this.shipmentChatRepository.create({
+      message: `${intialShipmentMessage} ${driver.user.name}`,
+      user_id: this.currentUser.id,
+      shipment_id: shipment.id,
+    });
+    await this.driverRepository.save(driver);
+    await this.shipmentChatRepository.save(intialShipmentChat);
+
+    const gateway_action = 'ASSIGNED';
+    
+
+    const to_rooms = ['admin', shipment.order.user_id];
+   
+    
+        to_rooms.push(shipment.driver_id);
+      
+
+    await this.orderGateway.notifyOrderStatusChange({
+      action: gateway_action,
+      to_rooms,
+      body: {
+        shipment: shipment,
+        order: shipment.order,
+        warehouse: shipment.warehouse,
+        client: shipment.order.user,
+        driver: driver,
+      },
+    });
+
+    await this.notificationService.create(
+      new NotificationEntity({
+        user_id: old_driver_id,
+        url: old_driver_id,
+        type: NotificationTypes.ORDERS,
+        title_ar:"تم تعيين سائق اخر على الطلب",
+        title_en: 'order has been assigned to another driver',
+        text_ar: 'تم تعيين سائق اخر على الطلب',
+        text_en: 'order has been assigned to another driver',
+      }),
+    );
+
+    await this.notificationService.create(
+      new NotificationEntity({
+        user_id: driver.user_id,
+        url: shipment.order.id,
+        type: NotificationTypes.ORDERS,
+        title_ar: 'تحديث الطلب',
+        title_en: 'order updated',
+        text_ar: 'تم تعيين سائق للطلب',
+        text_en: 'A driver has been assigned to the request',
+      }),
+    );
+    return shipment;
+  }
   private async addDriverToShipment(
     shipment_id: string,
     action: AddDriverShipmentOption,
     driver_id?: string,
-   
   ): Promise<Shipment> {
     const driver = await this.getDriver(driver_id);
 
@@ -792,4 +888,5 @@ export class ShipmentService extends BaseService<Shipment> {
     );
     return shipment;
   }
+  
 }

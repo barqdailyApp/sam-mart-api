@@ -13,6 +13,7 @@
     "country_not_found": "Country not found",
     "payment_method_not_found":"Payment method not found",
     "wrong_voucher_number":"wrong voucher number",
+    "subcategory_has_categories":" Sub category has categories",
     "driver_not_found": "Driver not found",
     "product_not_found": "Product not found",
     "invalid_promo_code":"invalid promo code",

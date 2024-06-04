@@ -159,6 +159,20 @@ export class ShipmentController {
     );
   }
 
+  @Post('replace-assignd-driver/:shipment_id/:driver_id')
+  @Roles(Role.ADMIN)
+  async replaceDriver(
+    @Param('shipment_id') shipment_id: string,
+    @Param('driver_id') driver_id: string,
+  ) {
+    return new ActionResponse(
+      plainToInstance(
+        ShipmentResponse,
+        await this.shipmentService.assignDriverToShipment(shipment_id, driver_id),
+      ),
+    );
+  }
+
   @Post('cancel-shipment/:shipment_id')
   async cancelShipment(
     @Param('shipment_id') shipment_id: string,
