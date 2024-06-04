@@ -53,7 +53,7 @@ export class ShipmentSingleResponse {
       id: shipments.order.id,
       number: shipments.order.number,
       total_price: shipments.order.total_price,
-
+      estimated_delivery_time: shipments.order.estimated_delivery_time,
       products_price: shipments.order.products_price,
 
       is_paid: shipments.order.is_paid,
