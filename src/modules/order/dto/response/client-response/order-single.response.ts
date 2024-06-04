@@ -12,7 +12,7 @@ export class OrderSingleResponse {
 
   @Expose() total_price: number;
   @Expose() delivery_fee: number;
-
+@Expose()  estimated_delivery_time:Date
   @Expose() order_products: number;
   @Expose() promo_code_discount: number;
   @Expose() address: any;
@@ -22,6 +22,7 @@ export class OrderSingleResponse {
   constructor(order: Order) {
     this.order_id = order.id;
     this.created_at = order.created_at;
+    this.estimated_delivery_time = order.estimated_delivery_time;
     this.delivery_fee = order.delivery_fee;
     this.order_number = order.number;
     this.products_price=order.products_price;
