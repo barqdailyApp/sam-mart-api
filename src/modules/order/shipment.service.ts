@@ -784,7 +784,7 @@ export class ShipmentService extends BaseService<Shipment> {
     if (!driver) {
       throw new NotFoundException('message.driver_not_found');
     }
-    if (AddDriverShipmentOption.DRIVER_ACCEPT_SHIPMENT) {
+    if (action==AddDriverShipmentOption.DRIVER_ACCEPT_SHIPMENT) {
       const max_orders = await this.constantRepository.findOne({
         where: { type: ConstantType.ORDER_LIMIT },
       });
