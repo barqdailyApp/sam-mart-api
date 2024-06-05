@@ -709,9 +709,8 @@ export class ShipmentService extends BaseService<Shipment> {
       throw new BadRequestException('message.shipment_already_confirmed');
     }
 
-    shipment.order_confirmed_at = new Date();
     const old_driver_id = shipment.driver.user_id;
-    shipment.driver_id = driver.id;
+    shipment.driver = driver;
 
    
 
