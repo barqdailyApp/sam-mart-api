@@ -18,7 +18,7 @@ export class EditPaymentMethodRequest {
   @IsOptional()
   logo: Express.Multer.File;
   @ApiProperty({ required: false })
-  @Transform(({ value }) => Boolean(value))
+  @Transform(({ value }) => Boolean(value==='true'))
   @IsBoolean()
   @IsOptional()
   is_active: boolean;
