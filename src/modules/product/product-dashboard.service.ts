@@ -52,6 +52,7 @@ import { WarehouseProducts } from 'src/infrastructure/entities/warehouse/warehou
 import { Section } from 'src/infrastructure/entities/section/section.entity';
 import { Category } from 'src/infrastructure/entities/category/category.entity';
 import { DeleteProductTransaction } from './utils/delete-product.transaction';
+import { Role } from 'src/infrastructure/data/enums/role.enum';
 
 @Injectable()
 export class ProductDashboardService {
@@ -197,7 +198,7 @@ export class ProductDashboardService {
 
     const users = await this.userRepository
       .createQueryBuilder('user')
-      .where('user.fcm_token IS NOT NULL')
+      .where('user.fcm_token IS NOT NULL').andWhere('user.roles = :roles', { roles: Role.CLIENT })
       .getMany();
     const sendToUsersNotificationRequest: SendToUsersNotificationRequest = {
       users_id: users.map((user) => user.id),
