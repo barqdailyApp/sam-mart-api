@@ -40,6 +40,7 @@ import { reverseSentence } from 'src/core/helpers/cast.helper';
 const PdfDocumnet = require('pdfkit-table');
 import { Response } from 'express';
 import { Product } from 'src/infrastructure/entities/product/product.entity';
+import { options } from 'joi';
 @Injectable()
 export class OrderService extends BaseUserService<Order> {
   constructor(
@@ -315,20 +316,23 @@ export class OrderService extends BaseUserService<Order> {
     const order_details = new OrderSingleResponse(
       await this.getSingleOrder(id),
     );
+    const height = order_details.shipments.shipment_products.length * 23;
+    console.log(height);
     const doc = new PdfDocumnet({
-      size: [300, 620.29],
+      size: [300, 10000],
       layout: 'portrait',
       margins: { top: 15, bottom: 15, left: 15, right: 15 },
       bufferPages: true,
     });
-
+const product_names=[]
     const products_table = order_details.shipments.shipment_products.map(
       (item) => {
+        product_names.push(item.product_name_ar)
         return [
           item.total_price,
-          reverseSentence(item.product_name_ar),
+          "",
           item.product_price,
-          reverseSentence(item.measurement_unit_ar),
+          reverseSentence( item.measurement_unit_ar),
           item.quantity,
         ];
       },
@@ -369,7 +373,7 @@ export class OrderService extends BaseUserService<Order> {
       .text(
         reverseSentence(
           'تاريخ الطلب: ' +
-            reverseSentence(order_details.created_at.toLocaleString()),
+            reverseSentence( order_details.created_at.toLocaleString()),
         ),
         {
           align: 'right',
@@ -401,49 +405,82 @@ export class OrderService extends BaseUserService<Order> {
       headers: [
         {
           label: 'الاجمالى',
+          property: 'total_price',
 
           align: 'center',
           headerColor: 'white',
-          font: 'Arial',       width: 40
+          font: 'Arial',
+          width: 40,
         },
 
         {
           label: 'الاسم',
+          property: 'name',
 
           align: 'center',
           headerColor: 'white',
-          font: 'Arial',       width: 105
+          font: 'Arial',
+          width: 105,
         },
 
         {
           label: 'السعر',
+          property: 'price',
           align: 'center',
           headerColor: 'white',
-          color: 'blue',       width: 40
+          color: 'blue',
+          width: 40,
         },
 
         {
           label: 'الوحدة',
           align: 'center',
-          headerColor: 'white',       width: 50
+          property: 'unit',
+          headerColor: 'white',
+          width: 50,
         },
         {
           label: 'الكمية',
           align: 'center',
+          property: 'quantity',
           headerColor: 'white',
-          width: 55
+          width: 55,
         },
       ],
-      rows: [...products_table],
+      //   datas: [
+      //   ...products_table.map((e) => {
+      //     console.log(e);
+      //     return {
+         
+      //       name: {label: e[1], options: {features: ['rtla'], align: 'right'},features: ['rtla'], align: 'right',fontFamily: 'Amiri-Regular',},
+      //       price: e[2],
+      //       unit: e[3],
+      //       quantity: e[4],
+      //       total_price: e[0],
+      //     };
+      //   }),
+      // ],
+      rows:[...products_table]
+  
     };
 
     await doc.table(table, {
       prepareHeader: () => doc.fontSize(12),
       prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
-        doc.font(`Amiri-Regular`,{ features: ['rtla'], align: 'right' }).fillColor('black').fontSize(9);
-        doc.text('', ).fontSize(10);
+        // doc
+        //   .font(`Amiri-Regular`, { features: ['rtla'], align: 'right' })
+        //   .fillColor('black')
+        //   .fontSize(22);
+        doc.fontSize(10)
+        if (  indexColumn == 1) {
+          if(product_names[indexRow]?.length > 30){
+            
+          
+        doc.fontSize(8)}
 
-   
+          doc.text(product_names[indexRow], rectCell.x, rectCell.y, {width: rectCell.width,features: ['rtla'], align: 'center'  });
+        }
+        
         if (indexRow == table.rows.length - 1 && indexColumn == 4) {
           const centerX = doc.page.width / 2;
 
@@ -458,8 +495,9 @@ export class OrderService extends BaseUserService<Order> {
         }
       },
       divider: {
-        horizontal: { opacity: 1, color: 'white' },
+        horizontal: { opacity: 1, color: 'white', width: 1 },
       },
+     
 
       features: ['rtla'],
       cellPadding: [0, 0, 0, 0],
