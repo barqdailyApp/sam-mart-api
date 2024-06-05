@@ -23,7 +23,7 @@ import { CreateProductOfferRequest } from './dto/request/create-product-offer.re
 import { CategorySubCategory } from 'src/infrastructure/entities/category/category-subcategory.entity';
 import { Warehouse } from 'src/infrastructure/entities/warehouse/warehouse.entity';
 import { SingleProductRequest } from './dto/request/single-product.request';
-import { Console } from 'console';
+import { Console, count } from 'console';
 import { StorageManager } from 'src/integration/storage/storage.manager';
 import * as sharp from 'sharp';
 import { ImageManager } from 'src/integration/sharp/image.manager';
@@ -136,13 +136,11 @@ export class ProductDashboardService {
       );
     }
     if (order_by!=null) {
-      const highest_number = await this.productOffer_repo.findOne({where:{},
-        order: { order_by: 'DESC' },
-      });
+      const highest_number = await this.productOffer_repo.count();
 
-      if (order_by > highest_number.order_by + 1)
+      if (order_by > highest_number + 1)
         throw new BadRequestException(
-          'order_by must be smaller than ' + (highest_number.order_by + 1),
+          'order_by must be smaller than ' + (highest_number + 1),
         );
         else if(order_by < 1) throw new BadRequestException('order_by must be greater than 1');
       const if_exist = await this.productOffer_repo.findOne({
@@ -264,12 +262,10 @@ export class ProductDashboardService {
       const if_exist = await this.productOffer_repo.findOne({
         where: { order_by: order_by },
       });
-      const highest_number = await this.productOffer_repo.findOne({where:{},
-        order: { order_by: 'DESC' },
-      });
-      if (order_by > highest_number.order_by + 1)
+      const highest_number = await this.productOffer_repo.count();
+      if (order_by > highest_number + 1)
         throw new BadRequestException(
-          'order_by must be smaller than ' + (highest_number.order_by + 1),
+          'order_by must be smaller than ' + (count ),
         );
         else if(order_by < 1) throw new BadRequestException('order_by must be greater than 1');
       if(if_exist){
