@@ -324,15 +324,15 @@ export class OrderService extends BaseUserService<Order> {
       margins: { top: 15, bottom: 15, left: 15, right: 15 },
       bufferPages: true,
     });
-const product_names=[]
+    const product_names = [];
     const products_table = order_details.shipments.shipment_products.map(
       (item) => {
-        product_names.push(item.product_name_ar)
+        product_names.push(item.product_name_ar);
         return [
           item.total_price,
-          "",
+          '',
           item.product_price,
-          reverseSentence( item.measurement_unit_ar),
+          reverseSentence(item.measurement_unit_ar),
           item.quantity,
         ];
       },
@@ -365,7 +365,7 @@ const product_names=[]
     doc.registerFont(`Amiri-Regular`, customFont);
     doc.fontSize(15);
     doc.font(`Amiri-Regular`).fillColor('black');
-    doc.image('public/assets/images/logo.jpeg', { width: 70, height: 70 });
+    doc.image('public/assets/images/logo.png', { width: 70, height: 70 });
     doc.fontSize(20);
     doc.text('برق ديلى', { features: ['rtla'], align: 'right' }).fontSize(10);
 
@@ -373,7 +373,7 @@ const product_names=[]
       .text(
         reverseSentence(
           'تاريخ الطلب: ' +
-            reverseSentence( order_details.created_at.toLocaleString()),
+            reverseSentence(order_details.created_at.toLocaleString()),
         ),
         {
           align: 'right',
@@ -406,7 +406,7 @@ const product_names=[]
         {
           label: 'الاجمالى',
           property: 'total_price',
-
+          valign:"center",
           align: 'center',
           headerColor: 'white',
           font: 'Arial',
@@ -416,7 +416,7 @@ const product_names=[]
         {
           label: 'الاسم',
           property: 'name',
-
+          valign:"bottom",
           align: 'center',
           headerColor: 'white',
           font: 'Arial',
@@ -427,6 +427,7 @@ const product_names=[]
           label: 'السعر',
           property: 'price',
           align: 'center',
+          valign:"center",
           headerColor: 'white',
           color: 'blue',
           width: 40,
@@ -435,12 +436,14 @@ const product_names=[]
         {
           label: 'الوحدة',
           align: 'center',
+          valign:"center",
           property: 'unit',
           headerColor: 'white',
           width: 50,
         },
         {
           label: 'الكمية',
+          valign:"center",
           align: 'center',
           property: 'quantity',
           headerColor: 'white',
@@ -451,7 +454,7 @@ const product_names=[]
       //   ...products_table.map((e) => {
       //     console.log(e);
       //     return {
-         
+
       //       name: {label: e[1], options: {features: ['rtla'], align: 'right'},features: ['rtla'], align: 'right',fontFamily: 'Amiri-Regular',},
       //       price: e[2],
       //       unit: e[3],
@@ -460,28 +463,31 @@ const product_names=[]
       //     };
       //   }),
       // ],
-      rows:[...products_table]
-  
+      rows: [...products_table],
     };
 
     await doc.table(table, {
       prepareHeader: () => doc.fontSize(12),
       prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
-        // doc
-        //   .font(`Amiri-Regular`, { features: ['rtla'], align: 'right' })
-        //   .fillColor('black')
-        //   .fontSize(22);
-        doc.fontSize(10)
-        if (  indexColumn == 1) {
-          if(product_names[indexRow]?.length > 30){
-            
-          
-        doc.fontSize(8)}
 
-          doc.text(product_names[indexRow], rectCell.x, rectCell.y, {width: rectCell.width,features: ['rtla'], align: 'center'  });
-        }
+        doc.fontSize(10);
         
-        if (indexRow == table.rows.length - 1 && indexColumn == 4) {
+
+        if (indexColumn == 1) {
+
+
+          doc.text(product_names[indexRow], rectCell.x, rectCell.y, {
+            width: rectCell.width,
+            height: rectCell.height,
+            features: ['rtla'],
+           
+            align: 'center',
+
+          });
+         
+        }
+
+        if (indexRow == product_names.length+1  && indexColumn == 0) {
           const centerX = doc.page.width / 2;
 
           // Move to the starting position of the divider line (center position)
@@ -495,9 +501,10 @@ const product_names=[]
         }
       },
       divider: {
-        horizontal: { opacity: 1, color: 'white', width: 1 },
-      },
-     
+    header: { disabled: true, width: 1, opacity: 1, color: 'black' },
+    horizontal: { disabled: false, width: 1, opacity: 0, color: 'white' },
+
+  },
 
       features: ['rtla'],
       cellPadding: [0, 0, 0, 0],
