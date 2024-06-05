@@ -317,7 +317,13 @@ export class OrderService extends BaseUserService<Order> {
       await this.getSingleOrder(id),
     );
     const height = order_details.shipments.shipment_products.length * 23;
-    console.log(height);
+const date=
+      new Date(
+        order_details.created_at.setUTCHours(
+          3 + order_details.created_at.getUTCHours(),
+        ),
+      ).toLocaleString();
+    
     const doc = new PdfDocumnet({
       size: [300, 10000],
       layout: 'portrait',
@@ -332,14 +338,13 @@ export class OrderService extends BaseUserService<Order> {
           item.total_price,
           '',
           item.product_price,
-          reverseSentence(item.measurement_unit_ar),
           item.quantity,
         ];
       },
     );
     products_table.push([
       order_details.delivery_fee,
-      '',
+      
       '',
       '',
       'التوصيل سعر',
@@ -348,7 +353,7 @@ export class OrderService extends BaseUserService<Order> {
     if (order_details.promo_code_discount) {
       products_table.push([
         -order_details.promo_code_discount,
-        '',
+        
         '',
         '',
         'الخصم قيمة',
@@ -356,7 +361,7 @@ export class OrderService extends BaseUserService<Order> {
     }
     products_table.push([
       Number(order_details.total_price),
-      '',
+      
       '',
       '',
       'الاجمالى',
@@ -373,8 +378,8 @@ export class OrderService extends BaseUserService<Order> {
       .text(
         reverseSentence(
           'تاريخ الطلب: ' +
-            reverseSentence(order_details.created_at.toLocaleString()),
-        ),
+            reverseSentence(
+            date),),
         {
           align: 'right',
         },
@@ -406,7 +411,7 @@ export class OrderService extends BaseUserService<Order> {
         {
           label: 'الاجمالى',
           property: 'total_price',
-          valign:"center",
+          valign: 'top',
           align: 'center',
           headerColor: 'white',
           font: 'Arial',
@@ -416,34 +421,27 @@ export class OrderService extends BaseUserService<Order> {
         {
           label: 'الاسم',
           property: 'name',
-          valign:"bottom",
+          valign: 'bottom',
           align: 'center',
           headerColor: 'white',
           font: 'Arial',
-          width: 105,
+          width: 155,
         },
 
         {
           label: 'السعر',
           property: 'price',
           align: 'center',
-          valign:"center",
+          valign: 'top',
           headerColor: 'white',
           color: 'blue',
           width: 40,
         },
 
-        {
-          label: 'الوحدة',
-          align: 'center',
-          valign:"center",
-          property: 'unit',
-          headerColor: 'white',
-          width: 50,
-        },
+ 
         {
           label: 'الكمية',
-          valign:"center",
+          valign: 'top',
           align: 'center',
           property: 'quantity',
           headerColor: 'white',
@@ -469,25 +467,21 @@ export class OrderService extends BaseUserService<Order> {
     await doc.table(table, {
       prepareHeader: () => doc.fontSize(12),
       prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
-
+        console
         doc.fontSize(10);
-        
 
         if (indexColumn == 1) {
-
-
+        
           doc.text(product_names[indexRow], rectCell.x, rectCell.y, {
             width: rectCell.width,
-            height: rectCell.height,
+            height:  rectCell.height,
             features: ['rtla'],
-           
+            valign: 'bottom',
             align: 'center',
-
           });
-         
         }
 
-        if (indexRow == product_names.length+1  && indexColumn == 0) {
+        if (indexRow == product_names.length + 1 && indexColumn == 1) {
           const centerX = doc.page.width / 2;
 
           // Move to the starting position of the divider line (center position)
@@ -501,13 +495,14 @@ export class OrderService extends BaseUserService<Order> {
         }
       },
       divider: {
-    header: { disabled: true, width: 1, opacity: 1, color: 'black' },
-    horizontal: { disabled: false, width: 1, opacity: 0, color: 'white' },
+        header: { disabled: true, width: 1, opacity: 1, color: 'black' },
+        horizontal: { disabled: false, width: 1, opacity: 0, color: 'white' },
+      },
 
-  },
-
+  vlign: 'bottom',
+      minRowHeight: 35,
       features: ['rtla'],
-      cellPadding: [0, 0, 0, 0],
+      padding: [0, 0, 0],
     });
 
     // Calculate the center position
