@@ -372,7 +372,7 @@ const date=
     doc.font(`Amiri-Regular`).fillColor('black');
     doc.image('public/assets/images/logo.png', { width: 70, height: 70 });
     doc.fontSize(20);
-    doc.text('100 برق ديلى', { features: ['rtla'], align: 'right' }).fontSize(10);
+    doc.text(' برق ديلى', { features: ['rtla'], align: 'right' }).fontSize(10);
 
     doc
       .text(
