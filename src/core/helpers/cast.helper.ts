@@ -31,6 +31,13 @@ export function decodeUUID(encodedUUID) {
 export function toLowerCase(value: string): string {
   return value.toLowerCase() || '';
 }
+
+export function reverseNumbersInString(str) {
+  if(!str) return str
+  return str.replace(/\d+/g, (match) => {
+    return match.split('').reverse().join('');
+  });
+}
 export function reverseSentence(sentence) {
   // Split the sentence into an array of words
   const words = sentence.split(' ');

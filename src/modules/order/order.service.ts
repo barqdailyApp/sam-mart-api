@@ -36,7 +36,7 @@ import { Cart } from 'src/infrastructure/entities/cart/cart.entity';
 import * as fs from 'fs';
 import { OrderSingleResponse } from './dto/response/client-response/order-single.response';
 import { features } from 'process';
-import { reverseSentence } from 'src/core/helpers/cast.helper';
+import { reverseNumbersInString, reverseSentence } from 'src/core/helpers/cast.helper';
 const PdfDocumnet = require('pdfkit-table');
 import { Response } from 'express';
 import { Product } from 'src/infrastructure/entities/product/product.entity';
@@ -372,7 +372,7 @@ const date=
     doc.font(`Amiri-Regular`).fillColor('black');
     doc.image('public/assets/images/logo.png', { width: 70, height: 70 });
     doc.fontSize(20);
-    doc.text('برق ديلى', { features: ['rtla'], align: 'right' }).fontSize(10);
+    doc.text('100 برق ديلى', { features: ['rtla'], align: 'right' }).fontSize(10);
 
     doc
       .text(
@@ -472,7 +472,7 @@ const date=
 
         if (indexColumn == 1) {
         
-          doc.text(product_names[indexRow], rectCell.x, rectCell.y, {
+          doc.text ( reverseNumbersInString(product_names[indexRow]), rectCell.x, rectCell.y, {
             width: rectCell.width,
             height:  rectCell.height,
             features: ['rtla'],
