@@ -83,7 +83,7 @@ export class CartService extends BaseService<CartProduct> {
           e.quantity = e.product_category_price.min_order_quantity;
         }
         e.is_offer = is_offer;
-        if (!is_offer) {
+        if (is_offer==false) {
           delete e.product_category_price.product_offer;
         }
 
