@@ -67,9 +67,9 @@ export class CartController {
                   )
                 : 0),
             quantity: e.cart.quantity,
-            product: e.cart.product_category_price,
+            product: this._i18nResponse.entity( e.cart.product_category_price),
             warehouse_quantity: e.warehouses_product,
-            offer:this._i18nResponse.entity( e.cart.product_category_price.product_offer)
+            is_offer:e.cart.is_offer 
           }),
       ),
     );
