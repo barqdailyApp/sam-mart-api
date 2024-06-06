@@ -1,4 +1,5 @@
 import { Expose } from 'class-transformer';
+import { of } from 'rxjs';
 import { toUrl } from 'src/core/helpers/file.helper';
 import { Product } from 'src/infrastructure/entities/product/product.entity';
 
@@ -37,7 +38,7 @@ export class CartProductRespone {
         : data.product.max_order_quantity,
       warehouse_quantity: data.warehouse_quantity,
 
-      offer: data.is_offer?data.product.product_offer:null,
+      offer: data.is_offer?this.offer:null,
 
       additional_services: data.product.product_additional_services.filter(
         (e) => {

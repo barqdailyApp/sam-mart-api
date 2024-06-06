@@ -64,6 +64,8 @@ export class ProductsOffersNewResponse {
     this.category_sub_category_id =
       product_category_price.product_sub_category.category_sub_category_id;
     this.offer_id = product_offer.id;
+    this.offer_description_ar = product_offer.description_ar;
+    this.offer_description_en = product_offer.description_en;
     this.offer_price = product_offer.price;
     this.is_quantity_available =
       product.warehouses_products.reduce((acc, cur) => acc + cur.quantity, 0) ==
@@ -78,8 +80,7 @@ export class ProductsOffersNewResponse {
     this.product_name_ar = product.name_ar;
     this.product_name_en = product.name_en;
 
-    this.offer_description_ar = product_offer.description_ar;
-    this.offer_description_en = product_offer.description_en;
+
 
     this.product_logo = toUrl(
       product.product_images.find((x) => x.is_logo === true)?.url,
