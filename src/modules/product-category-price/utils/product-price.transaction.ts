@@ -115,11 +115,11 @@ export class ProductPriceTransaction extends BaseTransaction<
             offer.price =
               productCategoryPriceSaved.price - offer.discount_value;
           } else {
-            if (offer.discount_value >= 100) {
-              throw new BadRequestException(
-                'message.discount_value_must_be_less_than_100',
-              );
-            }
+            // if (offer.discount_value >= 100) {
+            //   throw new BadRequestException(
+            //     'message.discount_value_must_be_less_than_100',
+            //   );
+            // }
             const discountedPercentage =
               (productCategoryPriceSaved.price * offer.discount_value) / 100;
             offer.price =
