@@ -12,6 +12,11 @@ export class PaymentMethod extends BaseEntity {
   @Column({ nullable: true })
   logo: string;
 
+  @Column({ nullable: true })
+  order_by: number;
+
+
+
   @Column({ unique: true })
   name_ar: string;
   @Column({ unique: true })

@@ -36,7 +36,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 
 import { UploadValidator } from 'src/core/validators/upload.validator';
 import { EditPaymentMethodRequest } from './dto/requests/edit-payment-method.request';
-import { applyQueryFilters } from 'src/core/helpers/service-related.helper';
+import { applyQueryFilters, applyQuerySort } from 'src/core/helpers/service-related.helper';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
 import { Roles } from '../authentication/guards/roles.decorator';
@@ -59,6 +59,7 @@ export class PaymentMethodController {
   @Get()
   async getPaymentMethods(@Query() query: PaginatedRequest) {
     applyQueryFilters(query, `is_active=1`);
+    applyQuerySort(query, `order_by=asc`);
     return new ActionResponse(
       this._i18nResponse.entity(
         (await this.paymentService.findAll(query)).map((payment) => {
@@ -74,7 +75,7 @@ export class PaymentMethodController {
   @Roles(Role.ADMIN)
   @Get('/admin')
   async getPaymentMethodsAmin(@Query() query: PaginatedRequest) {
-    
+        applyQuerySort(query, `order_by=asc`);
     return new ActionResponse(
       (await this.paymentService.findAll(query)).map((payment) => {
         payment.logo = toUrl(payment.logo);

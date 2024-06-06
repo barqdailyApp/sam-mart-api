@@ -1,6 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsBoolean, IsOptional, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 
 export class EditPaymentMethodRequest {
   @ApiProperty()
@@ -13,12 +19,19 @@ export class EditPaymentMethodRequest {
   @IsString()
   @IsOptional()
   name_en: string;
+  @ApiProperty({ required: false })
+  @IsNumber()
+  @Transform(({ value }) => Number(value))
+  @Min(1)
+  @IsOptional()
+  order_by: number;
 
   @ApiProperty({ type: 'file', required: false })
   @IsOptional()
   logo: Express.Multer.File;
+
   @ApiProperty({ required: false })
-  @Transform(({ value }) => Boolean(value==='true'))
+  @Transform(({ value }) => Boolean(value === 'true'))
   @IsBoolean()
   @IsOptional()
   is_active: boolean;
