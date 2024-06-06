@@ -9,6 +9,7 @@ export class CartProductRespone {
   original_price: number;
   price: number;
   unit: string;
+
   product_id: string;
   warehouse_quantity: number;
   additional_services: any;
@@ -36,7 +37,7 @@ export class CartProductRespone {
         : data.product.max_order_quantity,
       warehouse_quantity: data.warehouse_quantity,
 
-      offer: data.product.product_offer,
+      offer: data.is_offer?data.product.product_offer:null,
 
       additional_services: data.product.product_additional_services.filter(
         (e) => {
