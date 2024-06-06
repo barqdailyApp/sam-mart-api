@@ -10,6 +10,7 @@
     "additional_service_unit_not_found": "الوحدة الخاصة بالمزود الاضافي غير موجودة",
     "city_not_found": "المدينة غير موجودة",
     "country_not_found": "الدولة غير موجودة",
+    "discount_value_must_be_less_than_1":"قيمة الخصم يجب ان تكون اقل من 1",
     "discount_value_must_be_less_than_product_price":"قيمة العرض يجب ان تكون اقل من سعر المنتج",
     "driver_not_found": "السائق غير موجود",
     "payment_method_not_found":"طريقة الدفع غير موجودة",
