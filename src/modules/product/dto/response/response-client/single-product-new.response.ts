@@ -39,6 +39,7 @@ export class SingleProductsNewResponse {
       product_id: product.id,
       product_name_ar: product.name_ar,
       product_name_en: product.name_en,
+      
       product_description_ar: product.description_ar,
       product_description_en: product.description_en,
       product_is_fav: product_is_fav,
@@ -85,6 +86,8 @@ export class SingleProductsNewResponse {
               product_category_price_id:
                 product_offer.product_category_price_id,
                 quantity: product_offer.offer_quantity,
+                description_ar: product_offer.description_ar,
+                description_en: product_offer.description_en,
 
               offer_id: product_offer.id,
               offer_price: product_offer.price,

@@ -12,6 +12,7 @@ export class CartProductRespone {
   product_id: string;
   warehouse_quantity: number;
   additional_services: any;
+  offer:any;
   constructor(data: any) {
     return {
       id: data.id,
@@ -34,6 +35,8 @@ export class CartProductRespone {
         ? data.product.product_offer.max_offer_quantity
         : data.product.max_order_quantity,
       warehouse_quantity: data.warehouse_quantity,
+
+      offer: data.product.product_offer,
 
       additional_services: data.product.product_additional_services.filter(
         (e) => {

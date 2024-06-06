@@ -15,7 +15,9 @@ export class ProductsNewResponse {
   @Expose() product_category_price_id: string;
   @Expose() is_quantity_available: boolean;
   @Expose() warehouse_quantity: number;
-@Expose() offer_quantity: number;
+  @Expose() offer_quantity: number;
+  @Expose() offer_description_ar: string;
+  @Expose() offer_description_en: string;
   @Expose() offer_id: string | null;
   @Expose() offer_price: number | null;
   @Expose() product_id: string;
@@ -44,11 +46,14 @@ export class ProductsNewResponse {
 
     // Manually setting the values based on the transformation logic
     this.section_id =
-    product_category_price.product_sub_category.category_subCategory.section_category.section_id;
+      product_category_price.product_sub_category.category_subCategory.section_category.section_id;
     this.product_category_price_id = product_category_price.id;
     this.offer_id = product_offer ? product_offer.id : null;
     this.offer_price = product_offer ? product_offer.price : null;
-    this.offer_quantity= product_offer ? product_offer.offer_quantity : null;
+    this.offer_quantity = product_offer ? product_offer.offer_quantity : null;
+    this.offer_description_ar =product_offer ? product_offer.description_ar : null;
+    this.offer_description_en =product_offer ? product_offer.description_en : null;
+
     this.is_quantity_available =
       product.warehouses_products.reduce((acc, cur) => acc + cur.quantity, 0) ==
       0
@@ -85,10 +90,10 @@ export class ProductsNewResponse {
         product_id: cart_products[0].product_id,
         quantity: cart_products[0].quantity,
         warehouse_quantity:
-                product.warehouses_products.reduce(
-                  (acc, cur) => acc + cur.quantity,
-                  0,
-                ) / cart_products[0].conversion_factor,
+          product.warehouses_products.reduce(
+            (acc, cur) => acc + cur.quantity,
+            0,
+          ) / cart_products[0].conversion_factor,
         min_order_quantity: product_offer
           ? product_offer.min_offer_quantity
           : product_category_price.min_order_quantity,

@@ -36,6 +36,8 @@ export class ProductsOffersNewResponse {
   @Expose() min_order_quantity: number;
   @Expose() max_order_quantity: number;
   @Expose() offer_quantity: number;
+  @Expose() offer_description_ar: string;
+  @Expose() offer_description_en: string;
   @Expose() product_measurement_id: string;
   @Expose() measurement_unit_id: string;
   @Expose() measurement_unit_ar: string;
@@ -75,6 +77,9 @@ export class ProductsOffersNewResponse {
     this.offer_quantity = product_offer.offer_quantity;
     this.product_name_ar = product.name_ar;
     this.product_name_en = product.name_en;
+
+    this.offer_description_ar = product_offer.description_ar;
+    this.offer_description_en = product_offer.description_en;
 
     this.product_logo = toUrl(
       product.product_images.find((x) => x.is_logo === true)?.url,

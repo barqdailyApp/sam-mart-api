@@ -69,6 +69,7 @@ export class CartController {
             quantity: e.cart.quantity,
             product: e.cart.product_category_price,
             warehouse_quantity: e.warehouses_product,
+            offer:e.cart.product_category_price.product_offer
           }),
       ),
     );
