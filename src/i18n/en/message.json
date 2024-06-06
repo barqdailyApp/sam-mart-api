@@ -14,6 +14,7 @@
     "discount_value_must_be_less_than_1":"Discount value must be less than 1",
     "payment_method_not_found":"Payment method not found",
     "wrong_voucher_number":"wrong voucher number",
+    "user_is_blocked":"User is blocked",
     "subcategory_has_categories":" Sub category has categories",
     "driver_not_found": "Driver not found",
     "product_not_found": "Product not found",

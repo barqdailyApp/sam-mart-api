@@ -40,7 +40,7 @@ export class RolesGuard implements CanActivate {
 
   
     if (user.user_status == UserStatus.BlockedClient)
-      throw new UnauthorizedException(`This account has been blocked`);
+      throw new UnauthorizedException(`message.user_is_blocked`);
 
     return requiredRoles.some((role) => user.roles?.includes(role));
   }
