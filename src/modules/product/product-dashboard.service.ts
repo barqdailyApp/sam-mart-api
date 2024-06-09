@@ -1255,7 +1255,7 @@ export class ProductDashboardService {
     const warehouse_products = await this.warehouse_products_repo.find({
       where : quantity? {warehouse_id,quantity:LessThanOrEqual(quantity)} :  { warehouse_id },
       relations: {
-        product: { product_images: true },
+      
         product_measurement: { measurement_unit: true },
       },
       order: { product: { name_ar: 'ASC' } },
