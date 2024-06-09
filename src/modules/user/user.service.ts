@@ -24,6 +24,7 @@ import { UserStatus } from 'src/infrastructure/data/enums/user-status.enum';
 import { UserStatusRequest } from './dto/requests/update-user-status.request';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { DeleteClientAccountTransaction } from './transactions/delete-client-account.transaction';
+import { Order } from 'src/infrastructure/entities/order/order.entity';
 
 @Injectable({ scope: Scope.REQUEST })
 export class UserService extends BaseService<User> {
@@ -34,6 +35,7 @@ export class UserService extends BaseService<User> {
     @Inject(REQUEST) readonly request: Request,
     @Inject(StorageManager) private readonly storageManager: StorageManager,
     @Inject(ImageManager) private readonly imageManager: ImageManager,
+    @InjectRepository(Order) private readonly orderRepo: Repository<Order>,
     @Inject(SendOtpTransaction)
     private readonly sendOtpTransaction: SendOtpTransaction,
     @Inject(DeleteClientAccountTransaction)
@@ -185,12 +187,10 @@ export class UserService extends BaseService<User> {
       },
     });
 
-    const clientsPurchased = await this.userRepo.count({
-      where: {
-        user_status: UserStatus.CustomerPurchase,
-        roles: Role.CLIENT,
-      },
-    });
+    const clientsPurchased = await this.orderRepo
+      .createQueryBuilder('order')
+      .select('COUNT(DISTINCT user_id)', 'count')
+      .getRawOne();
 
     const clientsBlocked = await this.userRepo.count({
       where: {
@@ -201,7 +201,7 @@ export class UserService extends BaseService<User> {
     return {
       total: clientsTotal,
       active: clientsActive,
-      purchased: clientsPurchased,
+      purchased: Number( clientsPurchased.count),
       blocked: clientsBlocked,
     };
   }
@@ -214,6 +214,5 @@ export class UserService extends BaseService<User> {
   }
   async deleteClientDashboard(user_id: string) {
     return await this.deleteAccountTransaction.run({ user_id });
-   
   }
 }
