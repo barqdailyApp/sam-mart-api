@@ -1277,10 +1277,7 @@ export class ProductDashboardService {
         description_ar: product.product?.description_ar,
         description_en: product.product?.description_en,
 
-        product_images: product.product.product_images.map((image) => ({
-          url: image.url,
-          is_logo: image.is_logo,
-        })),
+       
       };
     });
 
