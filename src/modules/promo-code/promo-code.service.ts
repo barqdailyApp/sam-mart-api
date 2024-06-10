@@ -24,6 +24,8 @@ export class PromoCodeService extends BaseService<PromoCode> {
         throw new  BadRequestException('message.invalid_promo_code');
 }
 if(valid_code.use_once){
+  if(valid_code.user_ids==null)
+  valid_code.user_ids=[]
   const used=valid_code.user_ids.filter((id)=>id==this.request.user.id)
   if(used.length>0){
     throw new  BadRequestException('message.promo_code_used');
