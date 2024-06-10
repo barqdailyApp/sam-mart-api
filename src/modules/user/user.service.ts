@@ -157,7 +157,9 @@ export class UserService extends BaseService<User> {
     }
 
     if (status) {
-      query = query.andWhere('user.user_status = :status', { status });
+      if (status == UserStatus.CustomerPurchase) {
+        query = query.innerJoin('user.orders', 'orders');
+      } else query = query.andWhere('user.user_status = :status', { status });
     }
 
     const [users, total] = await query.getManyAndCount();
@@ -201,7 +203,7 @@ export class UserService extends BaseService<User> {
     return {
       total: clientsTotal,
       active: clientsActive,
-      purchased: Number( clientsPurchased.count),
+      purchased: Number(clientsPurchased.count),
       blocked: clientsBlocked,
     };
   }
