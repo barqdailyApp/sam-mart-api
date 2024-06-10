@@ -16,6 +16,7 @@
     "payment_method_not_found":"طريقة الدفع غير موجودة",
     "product_not_found": "المنتج غير موجود",
     "product_image_not_found": "صورة المنتج غير موجودة",
+    "promo_code_used":"الكود مستخدم",
     "user_is_blocked": "المستخدم محظور",    
     "there_must_be_a_primary_unit": "يجب أن يكون وحدة رئيسية",
     "wrong_voucher_number":"رقم القسيمة غير صحيح",  

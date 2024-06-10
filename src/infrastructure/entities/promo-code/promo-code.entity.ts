@@ -24,6 +24,14 @@ export class PromoCode extends AuditableEntity {
   @Column()
   number_of_uses: number;
 
+  @Column({default:false})
+  use_once:boolean
+
+
+  @Column({type:'simple-array',nullable:true})
+  user_ids:string[]
+
+
   @Column({default:0})
   current_uses: number;
 
