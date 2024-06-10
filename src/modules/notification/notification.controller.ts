@@ -62,7 +62,8 @@ export class NotificationController {
   async sendToAll(
     @Body() sendToUsersNotificationRequest: SendToAllUsersNotificationRequest,
   ) {
-  return new ActionResponse(  await this.notificationService.sendToALl(sendToUsersNotificationRequest));
+    const users=await this.userRepository.find({where:{roles:Role.CLIENT}});
+  return new ActionResponse(  await this.notificationService.sendTousers(sendToUsersNotificationRequest,users));
   }
   @Get('all-My-Notifications')
   async allMyNotifications(@Query() notificationQuery: NotificationQuery) {
