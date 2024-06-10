@@ -23,7 +23,7 @@ import { User } from 'src/infrastructure/entities/user/user.entity';
 
 import { ActionResponse } from 'src/core/base/responses/action.response';
 
-import { Repository } from 'typeorm';
+import { IsNull, Not, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SendToAllUsersNotificationRequest, SendToUsersNotificationRequest } from './dto/requests/send-to-users-notification.request';
 import { NotificationQuery } from './dto/filters/notification.query';
@@ -62,7 +62,7 @@ export class NotificationController {
   async sendToAll(
     @Body() sendToUsersNotificationRequest: SendToAllUsersNotificationRequest,
   ) {
-    const users=await this.userRepository.find({where:{roles:Role.CLIENT}});
+    const users=await this.userRepository.find({where:{roles:Role.CLIENT,fcm_token:Not(IsNull())}});
   return new ActionResponse(  await this.notificationService.sendTousers(sendToUsersNotificationRequest,users));
   }
   @Get('all-My-Notifications')
