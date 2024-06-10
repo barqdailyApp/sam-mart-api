@@ -148,4 +148,35 @@ export class NotificationService extends BaseUserService<NotificationEntity> {
     });
     return "notification sent successfully";
   }
+  async sendTousers(data: SendToAllUsersNotificationRequest, users: User[]) {
+
+
+    this._fcmIntegrationService.sendToAll(
+     users.map((user) => user.fcm_token),
+     data.message_ar,
+     data.message_en,
+     {
+       action: NotificationTypes.USERS,
+       action_id: NotificationTypes.USERS,
+     },
+   );
+   const notifications = [];
+   for (let index = 0; index < users.length; index++) {
+     const user = users[index];
+     notifications.push(
+       new NotificationEntity({
+         user_id: users[index].id,
+         url: users[index].id,
+         type: NotificationTypes.USERS,
+         title_ar: data.title_ar,
+         title_en: data.title_en,
+         text_ar: data.message_ar,
+         text_en: data.message_en,
+       }),
+     );
+   }
+
+   await this._repo.save(notifications);
+   return true;
+ }
 }

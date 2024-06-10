@@ -23,4 +23,22 @@ export class FcmIntegrationService {
     const res = await this.fcmService.sendNotification([token], payload, false);
     console.log(res)
   }
+  async sendToAll(token: string[], title: string, body: string, data?: DataMessagePayload): Promise<void> {
+    const payload: MessagingPayload = {
+      notification: {
+        title,
+        body,
+        clickAction: "FLUTTER_NOTIFICATION_CLICK",
+        sound: "default"
+      },
+      data: {
+        "click_action": "FLUTTER_NOTIFICATION_CLICK",
+        ...data,
+      },
+
+    };
+   
+    const res = await this.fcmService.sendNotification(token, payload, false);
+    console.log(res)
+  }
 }
