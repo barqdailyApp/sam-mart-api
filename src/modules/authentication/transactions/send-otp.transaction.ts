@@ -38,10 +38,12 @@ export class SendOtpTransaction extends BaseTransaction<
 
       const appEnv = this._config.get('app.env');
       // generate code
-      const code = '1234' 
+      let code = '1234' 
+      // code= randNum(4);
+
       // map to otp entity
       const otp = plainToInstance(Otp, { ...req, code });
-      await this.smsProviderService.sendSms(req.username, code);
+      await this.smsProviderService.sendSms(req.username, `${code} للدخول إلى حسابك في ب⚡️ق 🌷 يرجى استخدام الرمز `);
       // delete old otp
       await context.delete(Otp, {
         type: req.type,
