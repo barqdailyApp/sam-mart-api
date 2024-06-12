@@ -155,7 +155,7 @@ export class DriverService {
       .createQueryBuilder('driver')
       .leftJoinAndSelect('driver.warehouse', 'warehouse')
 
-      .leftJoinAndSelect('driver.user', 'user')
+      .innerJoinAndSelect('driver.user', 'user')
 
       .leftJoinAndSelect('user.wallet', 'wallet')
 
