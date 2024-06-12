@@ -41,9 +41,9 @@ export class SendOtpTransaction extends BaseTransaction<
       let code = '1234' 
    
 
-      // if(appEnv=="production"||req.username!="+967777777777"){
-      //      code= randNum(4);
-      //   await this.smsProviderService.sendSms(req.username, `للدخول إلى حسابك في برق  يرجى استخدام الرمز ${code}`);}
+      if(appEnv=="production"||req.username!="+967777777777"){
+           code= randNum(4);
+        await this.smsProviderService.sendSms(req.username, `للدخول إلى حسابك في برق  يرجى استخدام الرمز ${code}`);}
       // map to otp entity
       const otp = plainToInstance(Otp, { ...req, code });
    
