@@ -367,7 +367,9 @@ const date=
       'الاجمالى',
     ]);
     const customFont = fs.readFileSync(`public/assets/fonts/Amiri-Regular.ttf`);
+    const boldFont=fs.readFileSync(`public/assets/fonts/Amiri-Bold.ttf`);
     doc.registerFont(`Amiri-Regular`, customFont);
+    doc.registerFont(`Amiri-Bold`, boldFont);
     doc.fontSize(15);
     doc.font(`Amiri-Regular`).fillColor('black');
     doc.image('public/assets/images/logo.png', { width: 70, height: 70 });
@@ -467,8 +469,8 @@ const date=
     await doc.table(table, {
       prepareHeader: () => doc.fontSize(12),
       prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
-        console
-        doc.fontSize(10);
+ 
+        doc.fontSize(10).font("Amiri-Bold").fillColor('black');
 
         if (indexColumn == 1) {
         
@@ -478,7 +480,7 @@ const date=
             features: ['rtla'],
             valign: 'bottom',
             align: 'center',
-          });
+          })
         }
 
         if (indexRow == product_names.length + 1 && indexColumn == 1) {
@@ -650,7 +652,7 @@ const date=
         'product_category_price.cart_products',
         'cart_products',
         'cart_products.cart_id = :cart_id',
-        { cart_id: cartUser.id },
+        { cart_id: cartUser?.id },
       )
       .leftJoinAndSelect('cart_products.cart', 'cart')
       .leftJoinAndSelect(
