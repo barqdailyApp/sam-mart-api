@@ -153,8 +153,8 @@ export class NotificationService extends BaseUserService<NotificationEntity> {
 
     this._fcmIntegrationService.sendToAll(
      users.map((user) => user.fcm_token),
+     data.title_ar,
      data.message_ar,
-     data.message_en,
      {
        action: NotificationTypes.USERS,
        action_id: NotificationTypes.USERS,
