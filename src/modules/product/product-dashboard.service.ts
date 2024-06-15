@@ -1002,7 +1002,7 @@ export class ProductDashboardService {
   async exportProducts() {
     const products = await this.productRepository.find({
       relations: {
-        product_images: true,
+    
         warehouses_products: true,
         product_measurements: { measurement_unit: true },
         product_sub_categories: {
@@ -1032,10 +1032,10 @@ export class ProductDashboardService {
         description_en: product.description_en,
         // is_active: product.is_active,
         // is_recovered: product.is_recovered,
-        product_images: product.product_images.map((image) => ({
-          url: image.url,
-          is_logo: image.is_logo,
-        })),
+        // product_images: product.product_images.map((image) => ({
+        //   url: image.url,
+        //   is_logo: image.is_logo,
+        // })),
         measurement_units_en: product.product_measurements.map(
           (measurement) => measurement.measurement_unit?.name_en,
         ),
