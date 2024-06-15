@@ -365,7 +365,7 @@ export class MakeOrderTransaction extends BaseTransaction<
 
       if (order.delivery_type == DeliveryType.FAST) {
         for (let index = 0; index < driversWarehouse.length; index++) {
-          if (driversWarehouse[index].user.fcm_token != null)
+          if (driversWarehouse[index].user?.fcm_token != null)
             await this.notificationService.create(
               new NotificationEntity({
                 user_id: driversWarehouse[index].user_id,
