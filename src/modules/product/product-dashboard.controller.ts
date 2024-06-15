@@ -299,7 +299,7 @@ export class ProductDashboardController {
   async exportProducts(@Res() res: Response) {
     const File = await this.productDashboardService.exportProducts();
     res.download(`${File}`);
-    global.gc();
+    
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -313,7 +313,7 @@ export class ProductDashboardController {
   async exportunAttchedProducts(@Res() res: Response) {
     const File = await this.productDashboardService.exportunLiknedProducts();
     res.download(`${File}`);
-    global.gc();
+  
   }
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
@@ -326,7 +326,7 @@ export class ProductDashboardController {
   async exportAttchedProducts(@Res() res: Response) {
     const File = await this.productDashboardService.exportLinkedProducts();
     res.download(`${File}`);
-    global.gc();
+
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -346,7 +346,7 @@ export class ProductDashboardController {
       warehouse_id,quantity
     );
     res.download(`${File}`);
-    global.gc();
+ 
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

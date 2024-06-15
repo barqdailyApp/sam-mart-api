@@ -512,7 +512,7 @@ const date=
 
     // Finalize the PDF
     doc.end();
-        global.gc();
+ 
     return order_details;
   }
 
