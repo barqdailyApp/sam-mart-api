@@ -112,8 +112,9 @@ export class MakeOrderTransaction extends BaseTransaction<
           is_active: true,
         },
       });
-      if(!payment_method){
-        throw new BadRequestException('message.payment_method_not_found');}
+      if (!payment_method) {
+        throw new BadRequestException('message.payment_method_not_found');
+      }
 
       const count = await context
         .createQueryBuilder(Order, 'order')
@@ -150,9 +151,11 @@ export class MakeOrderTransaction extends BaseTransaction<
           where: { id: req.slot_day.slot_id },
         });
         order.estimated_delivery_time = new Date(
-          req.slot_day.day + 'T' + slot.start_time +"Z",
+          req.slot_day.day + 'T' + slot.start_time + 'Z',
         );
-        order.estimated_delivery_time.setHours(order.estimated_delivery_time.getHours()-3);
+        order.estimated_delivery_time.setHours(
+          order.estimated_delivery_time.getHours() - 3,
+        );
       }
 
       const shipment = await context.save(Shipment, {
@@ -167,8 +170,8 @@ export class MakeOrderTransaction extends BaseTransaction<
             e.product_category_price.product_offer.offer_quantity > 0 &&
             e.product_category_price.product_offer.is_active &&
             e.product_category_price.product_offer.start_date < new Date() &&
-            new Date() < e.product_category_price.product_offer.end_date
-            && e.quantity <= e.product_category_price.product_offer.offer_quantity;
+            new Date() < e.product_category_price.product_offer.end_date &&
+            e.quantity <= e.product_category_price.product_offer.offer_quantity;
 
           if (is_offer) {
             e.product_category_price.min_order_quantity =
@@ -276,9 +279,12 @@ export class MakeOrderTransaction extends BaseTransaction<
           SCustID: encodeUUID(order.user_id),
           PINPASS: req.payment_method.transaction_number,
         });
-        if (make_payment["Code"]!=1) {
-          
-          throw new BadRequestException(this.request.headers['accept-language']=="en"?make_payment["Message"]:make_payment["MessageDesc"]);
+        if (make_payment['Code'] != 1) {
+          throw new BadRequestException(
+            this.request.headers['accept-language'] == 'en'
+              ? make_payment['Message']
+              : make_payment['MessageDesc'],
+          );
         }
       }
 
@@ -354,22 +360,25 @@ export class MakeOrderTransaction extends BaseTransaction<
         where: {
           warehouse_id: shipment.warehouse_id,
         },
+        relations: { user: true },
       });
 
-      if(order.delivery_type == DeliveryType.FAST){
-      for (let index = 0; index < driversWarehouse.length; index++) {
-        await this.notificationService.create(
-          new NotificationEntity({
-            user_id: driversWarehouse[index].user_id,
-            url: shipment.id,
-            type: NotificationTypes.ORDERS,
-            title_ar: 'طلب جديد',
-            title_en: 'new order',
-            text_ar: 'هل تريد اخذ هذا الطلب ؟',
-            text_en: 'Do you want to take this order?',
-          }),
-        );
-      }}
+      if (order.delivery_type == DeliveryType.FAST) {
+        for (let index = 0; index < driversWarehouse.length; index++) {
+          if (driversWarehouse[index].user.fcm_token != null)
+            await this.notificationService.create(
+              new NotificationEntity({
+                user_id: driversWarehouse[index].user_id,
+                url: shipment.id,
+                type: NotificationTypes.ORDERS,
+                title_ar: 'طلب جديد',
+                title_en: 'new order',
+                text_ar: 'هل تريد اخذ هذا الطلب ؟',
+                text_en: 'Do you want to take this order?',
+              }),
+            );
+        }
+      }
 
       return order;
     } catch (error) {
