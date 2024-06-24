@@ -198,14 +198,14 @@ export class ProductDashboardService {
       .createQueryBuilder('user')
       .where('user.fcm_token IS NOT NULL').andWhere('user.roles = :roles', { roles: Role.CLIENT })
       .getMany();
-    const sendToUsersNotificationRequest: SendToUsersNotificationRequest = {
-      users_id: users.map((user) => user.id),
-      title_ar: 'عروض',
-      title_en: 'offers',
-      message_ar: 'تم اضافة عرض جديد',
-      message_en: 'new offer added',
-    };
-    await this.notificationService.sendToUsers(sendToUsersNotificationRequest);
+    // const sendToUsersNotificationRequest: SendToUsersNotificationRequest = {
+    //   users_id: users.map((user) => user.id),
+    //   title_ar: 'عروض',
+    //   title_en: 'offers',
+    //   message_ar: 'تم اضافة عرض جديد',
+    //   message_en: 'new offer added',
+    // };
+    // await this.notificationService.sendToUsers(sendToUsersNotificationRequest);
     return newOffer;
   }
   async updateProductOffer(
