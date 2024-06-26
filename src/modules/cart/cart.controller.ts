@@ -49,8 +49,8 @@ export class CartController {
       await this.cartService.getCartProducts(cart.id),
     );
 
-    return new ActionResponse({
-      products:
+    return new ActionResponse(
+      
       cart_products.products.map(
         (e) =>
           new CartProductRespone({
@@ -73,11 +73,38 @@ export class CartController {
             warehouse_quantity: e.warehouses_product,
             is_offer:e.cart.is_offer 
           }),
-      ),
-    warehouse:plainToInstance(WarehouseResponse, cart_products.warehouse),
-    }
-    );
-  }
+      ),);}
+    
+    
+    // return new ActionResponse({
+    //   products:
+    //   cart_products.products.map(
+    //     (e) =>
+    //       new CartProductRespone({
+    //         id: e.cart.id,
+    //         additional_services: e.cart.additions,
+    //         original_price:e.cart.price,
+    //         price:
+    //           Number(e.cart.product_category_price.price) +
+    //           (e.cart.additions?.length > 0
+    //             ? Number(
+    //                 e.cart.product_category_price.product_additional_services.filter(
+    //                   (j) => {
+    //                     return e.cart.additions?.includes(j.id);
+    //                   },
+    //                 )[0].price,
+    //               )
+    //             : 0),
+    //         quantity: e.cart.quantity,
+    //         product: this._i18nResponse.entity( e.cart.product_category_price),
+    //         warehouse_quantity: e.warehouses_product,
+    //         is_offer:e.cart.is_offer 
+    //       }),
+    //   ),
+    // warehouse:plainToInstance(WarehouseResponse, cart_products.warehouse),
+    // }
+    // );
+  
 
   @Post('/add')
   async createCart(@Body() req: AddToCartRequest) {
