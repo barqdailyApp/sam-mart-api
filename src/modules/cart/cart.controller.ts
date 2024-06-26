@@ -16,7 +16,7 @@ import { CartProduct } from 'src/infrastructure/entities/cart/cart-products';
 import { ApiTags, ApiHeader, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
 import { RolesGuard } from '../authentication/guards/roles.guard';
-import { CartProductRespone } from './dto/respone/cart-product-repspone';
+import { CartProductRespone, CartProductWarehouseRespone } from './dto/respone/cart-product-repspone';
 import { I18nResponse } from 'src/core/helpers/i18n.helper';
 import { ActionResponse } from 'src/core/base/responses/action.response';
 import { UpdateCartProductRequest } from './dto/requests/update-cart-request';
@@ -24,6 +24,7 @@ import { AddRemoveCartProductServiceRequest } from './dto/requests/add-remove-se
 import { Warehouse } from 'src/infrastructure/entities/warehouse/warehouse.entity';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { Roles } from '../authentication/guards/roles.decorator';
+import { WarehouseResponse } from '../warehouse/dto/response/warehouse.response';
 
 @ApiTags('Cart')
 @ApiHeader({
@@ -48,8 +49,9 @@ export class CartController {
       await this.cartService.getCartProducts(cart.id),
     );
 
-    return new ActionResponse(
-      cart_products.map(
+    return new ActionResponse({
+      products:
+      cart_products.products.map(
         (e) =>
           new CartProductRespone({
             id: e.cart.id,
@@ -72,6 +74,8 @@ export class CartController {
             is_offer:e.cart.is_offer 
           }),
       ),
+    warehouse:plainToInstance(WarehouseResponse, cart_products.warehouse),
+    }
     );
   }
 

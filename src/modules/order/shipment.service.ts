@@ -86,7 +86,6 @@ export class ShipmentService extends BaseService<Shipment> {
   }
 
   async getDriver(driver_id?: string) {
-    
     return await this.driverRepository.findOne({
       where: {
         user_id: driver_id ?? this.request.user.id,
@@ -161,6 +160,58 @@ export class ShipmentService extends BaseService<Shipment> {
     );
     return shipment;
   }
+  async adminDeliverShipment(id: string) {
+    const shipment = await this.shipmentRepository.findOne({
+      where: {
+        id: id,
+      },
+      relations: ['order', 'warehouse', 'order.user', 'driver', 'driver.user'],
+    });
+
+    if (!shipment || shipment.status !== ShipmentStatusEnum.READY_FOR_PICKUP) {
+      throw new NotFoundException('message.shipment_not_found');
+    }
+
+    shipment.order_delivered_at = new Date();
+    shipment.order_shipped_at = new Date();
+    shipment.status = ShipmentStatusEnum.DELIVERED;
+
+    const order = await this.orderRepository.findOne({
+      where: {
+        id: shipment.order_id,
+      },
+      relations: ['address'],
+    });
+    order.is_paid = true;
+
+    await this.shipmentRepository.save(shipment);
+
+    await this.orderRepository.save(order);
+
+    await this.orderGateway.notifyOrderStatusChange({
+      action: ShipmentStatusEnum.DELIVERED,
+      to_rooms: ['admin', shipment.order.user_id],
+      body: {
+        shipment,
+        order,
+        warehouse: shipment.warehouse,
+        client: shipment.order.user,
+        driver: null,
+      },
+    });
+    await this.notificationService.create(
+      new NotificationEntity({
+        user_id: order.user_id,
+        url: order.id,
+        type: NotificationTypes.ORDERS,
+        title_ar: 'تحديث الطلب',
+        title_en: 'order updated',
+        text_ar: 'تم تسليم الطلب',
+        text_en: 'order delivered',
+      }),
+    );
+    return shipment;
+  }
   async pickupShipment(id: string) {
     const driver = await this.getDriver();
     if (!driver) {
@@ -222,13 +273,24 @@ export class ShipmentService extends BaseService<Shipment> {
       ],
     });
 
-    const driver = await this.getDriver(shipment.driver.user_id);
-    if (!driver) {
+    const driver = await this.getDriver(shipment?.driver?.user_id);
+    if (
+      !driver &&
+      shipment.order.delivery_type !== DeliveryType.WAREHOUSE_PICKUP
+    ) {
       throw new NotFoundException('message.driver_not_found');
     }
-    if (!shipment || shipment.status !== ShipmentStatusEnum.CONFIRMED) {
+    if (
+      !shipment ||
+      [ShipmentStatusEnum.CONFIRMED, ShipmentStatusEnum.ACTIVE].includes(
+        shipment.status,
+      )
+    ) {
       throw new NotFoundException('message.shipment_not_found');
     }
+    shipment.order_confirmed_at == null
+      ? (shipment.order_confirmed_at = new Date())
+      : null;
 
     shipment.order_on_processed_at = new Date();
     shipment.status = ShipmentStatusEnum.PROCESSING;
@@ -260,7 +322,7 @@ export class ShipmentService extends BaseService<Shipment> {
 
     await this.notificationService.create(
       new NotificationEntity({
-        user_id: shipment.driver.user_id,
+        user_id: shipment.driver?.user_id,
         url: shipment.order.id,
         type: NotificationTypes.ORDERS,
         title_ar: 'تحديث الطلب',
@@ -290,8 +352,11 @@ export class ShipmentService extends BaseService<Shipment> {
         'order.address',
       ],
     });
-    const driver = await this.getDriver(shipment.driver.user_id);
-    if (!driver) {
+    const driver = await this.getDriver(shipment.driver?.user_id);
+    if (
+      !driver &&
+      shipment.order.delivery_type !== DeliveryType.WAREHOUSE_PICKUP
+    ) {
       throw new NotFoundException('message.driver_not_found');
     }
     if (!shipment || shipment.status !== ShipmentStatusEnum.PROCESSING) {
@@ -328,7 +393,7 @@ export class ShipmentService extends BaseService<Shipment> {
 
     await this.notificationService.create(
       new NotificationEntity({
-        user_id: shipment.driver.user_id,
+        user_id: shipment.driver?.user_id,
         url: shipment.order.id,
         type: NotificationTypes.ORDERS,
         title_ar: 'تحديث الطلب',
@@ -677,7 +742,7 @@ export class ShipmentService extends BaseService<Shipment> {
     return this.request.user;
   }
 
-   async assignDriverToShipment(
+  async assignDriverToShipment(
     shipment_id: string,
     driver_id?: string,
   ): Promise<Shipment> {
@@ -691,7 +756,14 @@ export class ShipmentService extends BaseService<Shipment> {
 
     const shipment = await this.shipmentRepository.findOne({
       where: { id: shipment_id },
-      relations: ['order', 'warehouse', 'order.user', 'order.address', 'driver', 'driver.user'],
+      relations: [
+        'order',
+        'warehouse',
+        'order.user',
+        'order.address',
+        'driver',
+        'driver.user',
+      ],
     });
 
     if (!shipment) {
@@ -712,13 +784,9 @@ export class ShipmentService extends BaseService<Shipment> {
     const old_driver_id = shipment.driver.user_id;
     shipment.driver = driver;
 
-   
-
     await this.shipmentRepository.save(shipment);
 
-    const intialShipmentMessage =
-     'Shipment has been assigned to driver'
-
+    const intialShipmentMessage = 'Shipment has been assigned to driver';
 
     const intialShipmentChat = this.shipmentChatRepository.create({
       message: `${intialShipmentMessage} ${driver.user.name}`,
@@ -729,13 +797,10 @@ export class ShipmentService extends BaseService<Shipment> {
     await this.shipmentChatRepository.save(intialShipmentChat);
 
     const gateway_action = 'ASSIGNED';
-    
 
     const to_rooms = ['admin', shipment.order.user_id];
-   
-    
-        to_rooms.push(shipment.driver_id);
-      
+
+    to_rooms.push(shipment.driver_id);
 
     await this.orderGateway.notifyOrderStatusChange({
       action: gateway_action,
@@ -754,7 +819,7 @@ export class ShipmentService extends BaseService<Shipment> {
         user_id: old_driver_id,
         url: old_driver_id,
         type: NotificationTypes.ORDERS,
-        title_ar:"تم تعيين سائق اخر على الطلب",
+        title_ar: 'تم تعيين سائق اخر على الطلب',
         title_en: 'order has been assigned to another driver',
         text_ar: 'تم تعيين سائق اخر على الطلب',
         text_en: 'order has been assigned to another driver',
@@ -784,7 +849,7 @@ export class ShipmentService extends BaseService<Shipment> {
     if (!driver) {
       throw new NotFoundException('message.driver_not_found');
     }
-    if (action==AddDriverShipmentOption.DRIVER_ACCEPT_SHIPMENT) {
+    if (action == AddDriverShipmentOption.DRIVER_ACCEPT_SHIPMENT) {
       const max_orders = await this.constantRepository.findOne({
         where: { type: ConstantType.ORDER_LIMIT },
       });
@@ -887,5 +952,4 @@ export class ShipmentService extends BaseService<Shipment> {
     );
     return shipment;
   }
-  
 }

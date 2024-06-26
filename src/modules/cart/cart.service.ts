@@ -42,7 +42,7 @@ export class CartService extends BaseService<CartProduct> {
       where: { user_id: this.request.user.id },
     });
   }
-
+  
   async getCartProducts(cart_id: string) {
     const cart_products = await this.cartProductRepository.find({
       where: { cart_id: cart_id },
@@ -60,6 +60,10 @@ export class CartService extends BaseService<CartProduct> {
         },
       },
       withDeleted: true,
+    });
+    
+    const warehouse = cart_products[0]?.warehouse_id == null ? null : await this.warehouseRepository.findOne({
+     where: { id: cart_products[0]?.warehouse_id }, 
     });
     const cart_products_warehouse = await Promise.all(
       cart_products.map(async (e) => {
@@ -106,7 +110,7 @@ export class CartService extends BaseService<CartProduct> {
     );
 
     await this.cartProductRepository.save(cart_products);
-    return cart_products_warehouse;
+    return {products:cart_products_warehouse,warehouse:warehouse};
   }
   async getSingleCartProduct(id: string) {
     const cart_product = await this.cartProductRepository.findOne({
@@ -157,6 +161,7 @@ export class CartService extends BaseService<CartProduct> {
 
     return {
       cart: cart_product,
+      
       warehouse_quantity:
         cart_product.product_category_price.product_sub_category.product.warehouses_products.filter(
           (w) => w.warehouse_id == cart_product.warehouse_id,

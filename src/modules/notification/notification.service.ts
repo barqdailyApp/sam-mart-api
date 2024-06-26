@@ -43,6 +43,7 @@ export class NotificationService extends BaseUserService<NotificationEntity> {
   //get id and status from argument and update is read
 
   override async create(data: NotificationEntity) {
+    if(data.user_id == null) return;
     data.is_read = false;
     console.log(data);
     const notification = await super.create(data);

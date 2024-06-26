@@ -90,11 +90,20 @@ export class ShipmentController {
   }
 
   @Post('driver/deliver/:id')
-  async processhipment(@Param('id') id: string) {
+  async delivershipment(@Param('id') id: string) {
     return new ActionResponse(
       plainToInstance(
         ShipmentResponse,
         await this.shipmentService.deliverShipment(id),
+      ),
+    );
+  }
+  @Post('admin/deliver/:id')
+  async adminDelivershipment(@Param('id') id: string) {
+    return new ActionResponse(
+      plainToInstance(
+        ShipmentResponse,
+        await this.shipmentService.adminDeliverShipment(id),
       ),
     );
   }

@@ -87,7 +87,8 @@ export class SectionService extends BaseService<Section> {
 
   async updateSection(req: UpdateSectionRequest): Promise<Section> {
     const section = await this._repo.findOne({ where: { id: req.id } });
-
+console.log(req)
+console.log(typeof(req.delivery_type))
     if (req.logo) {
       await this._fileService.delete(section.logo);
       // resize image to 300x300

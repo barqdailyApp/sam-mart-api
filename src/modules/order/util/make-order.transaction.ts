@@ -137,26 +137,59 @@ export class MakeOrderTransaction extends BaseTransaction<
             : null,
       });
 
-      if (order.delivery_type == DeliveryType.FAST) {
-        const currentDate = new Date();
 
-        // Add 40 minutes
-        currentDate.setMinutes(currentDate.getMinutes() + 40);
-        order.delivery_day = currentDate.toISOString().slice(0, 10);
-        order.estimated_delivery_time = currentDate;
-      } else {
-        order.delivery_day = req.slot_day.day;
-        order.slot_id = req.slot_day.slot_id;
-        const slot = await context.findOne(Slot, {
-          where: { id: req.slot_day.slot_id },
-        });
-        order.estimated_delivery_time = new Date(
-          req.slot_day.day + 'T' + slot.start_time + 'Z',
-        );
-        order.estimated_delivery_time.setHours(
-          order.estimated_delivery_time.getHours() - 3,
-        );
+      switch (req.delivery_type) {
+        case DeliveryType.FAST:
+          {  const currentDate = new Date();
+
+            // Add 40 minutes
+            currentDate.setMinutes(currentDate.getMinutes() + 40);
+            order.delivery_day = currentDate.toISOString().slice(0, 10);
+            order.estimated_delivery_time = currentDate;}
+          break;
+        case DeliveryType.SCHEDULED:
+          {  order.delivery_day = req.slot_day.day;
+            order.slot_id = req.slot_day.slot_id;
+            const slot = await context.findOne(Slot, {
+              where: { id: req.slot_day.slot_id },
+            });
+            order.estimated_delivery_time = new Date(
+              req.slot_day.day + 'T' + slot.start_time + 'Z',
+            );
+            order.estimated_delivery_time.setHours(
+              order.estimated_delivery_time.getHours() - 3,
+            );}
+          break;
+        case DeliveryType.WAREHOUSE_PICKUP:
+          {  const currentDate = new Date();
+
+            // Add 40 minutes
+            currentDate.setMinutes(currentDate.getMinutes() + 20);
+            order.delivery_day = currentDate.toISOString().slice(0, 10);
+            order.estimated_delivery_time = currentDate;}
+          break;
       }
+
+      // if (order.delivery_type == DeliveryType.FAST) {
+      //   const currentDate = new Date();
+
+      //   // Add 40 minutes
+      //   currentDate.setMinutes(currentDate.getMinutes() + 40);
+      //   order.delivery_day = currentDate.toISOString().slice(0, 10);
+      //   order.estimated_delivery_time = currentDate;
+      // } else {
+      //   order.delivery_day = req.slot_day.day;
+      //   order.slot_id = req.slot_day.slot_id;
+      //   const slot = await context.findOne(Slot, {
+      //     where: { id: req.slot_day.slot_id },
+      //   });
+      //   order.estimated_delivery_time = new Date(
+      //     req.slot_day.day + 'T' + slot.start_time + 'Z',
+      //   );
+      //   order.estimated_delivery_time.setHours(
+      //     order.estimated_delivery_time.getHours() - 3,
+      //   );
+      // }
 
       const shipment = await context.save(Shipment, {
         order_id: order.id,

@@ -2,6 +2,18 @@ import { Expose } from 'class-transformer';
 import { of } from 'rxjs';
 import { toUrl } from 'src/core/helpers/file.helper';
 import { Product } from 'src/infrastructure/entities/product/product.entity';
+import { WarehouseResponse } from 'src/modules/warehouse/dto/response/warehouse.response';
+
+export class CartProductWarehouseRespone {
+ 
+
+  warehouse:WarehouseResponse;
+  products: CartProductRespone[];
+  constructor(data: CartProductRespone) {
+    Object.assign(this, data);
+  }
+
+}
 
 export class CartProductRespone {
   readonly product: any;

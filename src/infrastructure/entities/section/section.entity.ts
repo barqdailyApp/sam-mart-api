@@ -33,8 +33,13 @@ export class Section extends BaseEntity {
   @Column('decimal', { precision: 10, scale: 2 })
   delivery_price: number;
 
-  @Column({ enum: DeliveryType, type: 'enum' })
-  delivery_type: DeliveryType;
+  @Column({
+    type: 'simple-array',
+
+   
+    nullable:true
+  })
+  delivery_type: string;
 
   @OneToMany(() => Order, (order) => order.warehouse)
   orders: Order[];
