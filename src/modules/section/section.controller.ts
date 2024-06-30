@@ -171,7 +171,7 @@ export class SectionController {
     return new ActionResponse(
       (await this.sectionService.getSections(userId)).map((e) => {
         e.logo = toUrl(e.logo);
-        e.delivery_type= 'SCHEDULED&FAST' ;
+        // e.delivery_type= 'SCHEDULED&FAST' ;
         return e;
       }),
     );
