@@ -91,10 +91,15 @@ export class OrderController {
 
   @Get('invoice/:order_id')
   async getOrderInvoice(@Param('order_id') order_id: string, @Res() res: Response) {
-    res.setHeader('Content-Type', 'application/pdf');
+    // res.setHeader('Content-Type', 'application/pdf');
 
-    const invoice = await this.orderService.generateInvoice(order_id, res);
-    res.setHeader('Content-Disposition', `attachment; filename=${invoice.order_number}.pdf`);
+    const {order_details,buffer} = await this.orderService.generateInvoice(order_id, res);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=${order_details.order_number}.pdf`);
+    res.setHeader('Content-Length', buffer.length);
+
+    // Send the PDF buffer as the response
+    res.send(buffer);
 
 
   }

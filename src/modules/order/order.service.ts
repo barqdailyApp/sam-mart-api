@@ -450,19 +450,7 @@ const date=
           width: 55,
         },
       ],
-      //   datas: [
-      //   ...products_table.map((e) => {
-      //     console.log(e);
-      //     return {
-
-      //       name: {label: e[1], options: {features: ['rtla'], align: 'right'},features: ['rtla'], align: 'right',fontFamily: 'Amiri-Regular',},
-      //       price: e[2],
-      //       unit: e[3],
-      //       quantity: e[4],
-      //       total_price: e[0],
-      //     };
-      //   }),
-      // ],
+    
       rows: [...products_table],
     };
 
@@ -507,13 +495,24 @@ const date=
       padding: [0, 0, 0],
     });
 
-    // Calculate the center position
-    doc.pipe(res);
+ 
+    const buffer = await new Promise<Buffer>((resolve, reject) => {
+      const buffers = [];
+      doc.on('data', buffers.push.bind(buffers));
+      doc.on('end', () => {
+        const pdfData = Buffer.concat(buffers);
+        resolve(pdfData);
+      });
+      doc.on('error', reject);
+      doc.end();
+    });
+    // doc.pipe(res);
 
     // Finalize the PDF
     doc.end();
  
-    return order_details;
+    return {
+      buffer, order_details};
   }
 
   async getSingleOrderDashboard(order_id: string) {
