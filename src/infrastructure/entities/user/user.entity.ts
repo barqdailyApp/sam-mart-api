@@ -6,6 +6,8 @@ import {
   OneToMany,
   OneToOne,
   AfterInsert,
+  ManyToOne,
+  JoinColumn,
 
 } from 'typeorm';
 import { randNum } from 'src/core/helpers/cast.helper';
@@ -24,6 +26,7 @@ import { Wallet } from '../wallet/wallet.entity';
 import { NotificationEntity } from '../notification/notification.entity';
 import { UserStatus } from 'src/infrastructure/data/enums/user-status.enum';
 import { PromoCode } from '../promo-code/promo-code.entity';
+import { SamModules } from '../sam-modules/sam-modules.entity';
 
 @Entity()
 export class User extends AuditableEntity {
@@ -46,7 +49,7 @@ export class User extends AuditableEntity {
 
   @OneToOne(() => Wallet, (wallet) => wallet.user)
   wallet: Wallet;
-  @OneToMany(()=>Transaction, (transaction) => transaction.user)
+  @OneToMany(() => Transaction, (transaction) => transaction.user)
   transactions: Transaction[]
 
   @Column({ nullable: true, length: 100 })
@@ -61,10 +64,10 @@ export class User extends AuditableEntity {
   @Column({ nullable: true, type: 'enum', enum: Gender })
   gender: Gender;
 
-  @Column({ nullable: true, type: 'enum', enum: UserStatus,default: UserStatus.ActiveClient, })
+  @Column({ nullable: true, type: 'enum', enum: UserStatus, default: UserStatus.ActiveClient, })
   user_status: UserStatus;
 
-  
+
   @Column({ nullable: true })
   birth_date: string;
 
@@ -105,6 +108,17 @@ export class User extends AuditableEntity {
 
   @OneToMany(() => NotificationEntity, (notification) => notification.user)
   notifications: NotificationEntity[];
+
+  @ManyToOne(
+    () => SamModules,
+    (samModule) => samModule.users,
+    { onDelete: 'CASCADE' }
+  )
+  @JoinColumn({ name: 'sam_module_id' })
+  samModule: SamModules;
+
+  @Column({ nullable: true })
+  sam_module_id: string;
 
   @Column({ type: 'enum', enum: Language, default: Language.AR })
   language: Language;
