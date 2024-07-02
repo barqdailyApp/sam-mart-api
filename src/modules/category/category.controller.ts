@@ -191,7 +191,7 @@ export class CategoryController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
-  @Delete('/category-subcategory:id')
+  @Delete('/category-subcategory/:id')
   async deleteSectionCategory(@Param('id') id: string) {
     return new ActionResponse(
       await this.categoryService.deleteCategorySubcategory(id),

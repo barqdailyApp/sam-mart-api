@@ -27,6 +27,7 @@ import { NotificationEntity } from '../notification/notification.entity';
 import { UserStatus } from 'src/infrastructure/data/enums/user-status.enum';
 import { PromoCode } from '../promo-code/promo-code.entity';
 import { SamModules } from '../sam-modules/sam-modules.entity';
+import { UsersSamModules } from '../sam-modules/users-sam-modules.entity';
 
 @Entity()
 export class User extends AuditableEntity {
@@ -109,16 +110,12 @@ export class User extends AuditableEntity {
   @OneToMany(() => NotificationEntity, (notification) => notification.user)
   notifications: NotificationEntity[];
 
-  @ManyToOne(
-    () => SamModules,
-    (samModule) => samModule.users,
-    { onDelete: 'CASCADE' }
+  @OneToMany(
+    ()=> UsersSamModules,
+    user=> user.user,
+    {cascade: true}
   )
-  @JoinColumn({ name: 'sam_module_id' })
-  samModule: SamModules;
-
-  @Column({ nullable: true })
-  sam_module_id: string;
+  samModules: UsersSamModules[];
 
   @Column({ type: 'enum', enum: Language, default: Language.AR })
   language: Language;
