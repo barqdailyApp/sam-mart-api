@@ -782,6 +782,10 @@ export class ShipmentService extends BaseService<Shipment> {
     }
 
     const old_driver_id = shipment.driver.user_id;
+    const old_driver= await this.getDriver(old_driver_id);
+    old_driver.current_orders = old_driver.current_orders - 1;
+    await this.driverRepository.save(old_driver);    
+
     shipment.driver = driver;
 
     await this.shipmentRepository.save(shipment);
