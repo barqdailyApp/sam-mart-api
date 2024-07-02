@@ -24,6 +24,9 @@ export class FcmIntegrationService {
     console.log(res)
   }
   async sendToAll(token: string[], title: string, body: string, data?: DataMessagePayload): Promise<void> {
+    console.log(token)
+    console.log(title)
+    console.log(body)
     const payload: MessagingPayload = {
       notification: {
         title,
