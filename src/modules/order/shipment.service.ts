@@ -282,7 +282,7 @@ export class ShipmentService extends BaseService<Shipment> {
     }
     if (
       !shipment ||
-      [ShipmentStatusEnum.CONFIRMED, ShipmentStatusEnum.ACTIVE].includes(
+      ![ShipmentStatusEnum.CONFIRMED, ShipmentStatusEnum.ACTIVE].includes(
         shipment.status,
       )
     ) {
