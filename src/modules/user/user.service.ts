@@ -140,6 +140,7 @@ export class UserService extends BaseService<User> {
       .leftJoinAndSelect('user.wallet', 'wallet')
       .leftJoinAndSelect('user.addresses', 'addresses')
       .where('user.roles = :role', { role: Role.CLIENT })
+      .orderBy('user.created_at', 'DESC')
       .skip(skip)
       .take(limit);
 
