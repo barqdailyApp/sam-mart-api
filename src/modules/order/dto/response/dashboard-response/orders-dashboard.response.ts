@@ -10,7 +10,7 @@ export class OrdersDashboardResponse {
   @Expose() section_id: string;
   @Expose() order_created_at: Date;
   @Expose() canceled_by: string;
-  
+
   @Expose() order_number: string;
   @Expose() transaction_number: string;
 
@@ -87,6 +87,7 @@ export class OrdersDashboardResponse {
       order_delivered_at: order.shipments[0].order_delivered_at,
       order_canceled_at: order.shipments[0].order_canceled_at,
       canceled_by: order.shipments[0]?.canceled_by,
+      cancel_reason:order.shipments[0]?.cancelShipmentReason
     };
   }
 }
