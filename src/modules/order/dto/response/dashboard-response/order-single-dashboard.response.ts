@@ -30,11 +30,16 @@ export class OrderSingleDashboardResponse {
   @Expose() shipments: any;
   @Expose() promo_code_discount: number;
   @Expose() products_price: number;
+  @Expose() promo_code: any;
 
   constructor(order: Order) {
     this.order_id = order.id;
     this.slot_id = order.slot_id;
     this.promo_code_discount = order.promo_code_discount;
+    this.promo_code = order.promo_code!=null ? {
+      id: order.promo_code.id,
+      code: order.promo_code.code,
+    }:null;
     this.section = {
       id: order.section.id,
       name_ar: order.section.name_ar,

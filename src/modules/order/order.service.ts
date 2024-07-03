@@ -531,6 +531,7 @@ const date=
       .leftJoinAndSelect('order.warehouse', 'warehouse_order')
       .leftJoinAndSelect('order.address', 'address')
       .leftJoinAndSelect('order.shipments', 'shipments')
+      .leftJoinAndSelect('order.promo_code', 'order_promo_code')
 
       .leftJoinAndSelect('shipments.driver', 'driver')
       .leftJoinAndSelect(
