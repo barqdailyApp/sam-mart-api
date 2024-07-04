@@ -95,7 +95,7 @@ export class CartService extends BaseService<CartProduct> {
           await this.WarehouseProductsRepository.findOne({
             where: { warehouse_id: e.warehouse_id, product_id: e.product_id },
           });
-
+if(warehouses_product!=null){
         warehouses_product.quantity =
           warehouses_product.quantity / e.conversion_factor;
         const min_order_quantity = is_offer
@@ -104,8 +104,8 @@ export class CartService extends BaseService<CartProduct> {
         if (warehouses_product.quantity < e.quantity)
           e.quantity = Math.floor(
             warehouses_product.quantity / min_order_quantity,
-          );
-        return { cart: e, warehouses_product: warehouses_product.quantity };
+          );}
+        return { cart: e, warehouses_product: warehouses_product?.quantity??0 };
       }),
     );
 
