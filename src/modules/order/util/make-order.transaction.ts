@@ -262,7 +262,10 @@ export class MakeOrderTransaction extends BaseTransaction<
         );
       }
 
-      let total = Number(order.products_price) + order.delivery_type==DeliveryType.WAREHOUSE_PICKUP?0: Number(order.delivery_fee);
+      let total = Number(order.products_price);
+      const devliery_fee = order.delivery_type==DeliveryType.WAREHOUSE_PICKUP?0: Number(order.delivery_fee);
+      total+=devliery_fee;
+
       order.total_price = total;
       if (req.promo_code) {
         const promo_code = await this.promoCodeService.getValidPromoCodeByCode(
