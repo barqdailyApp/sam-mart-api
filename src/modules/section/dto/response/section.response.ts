@@ -12,6 +12,7 @@ export class SectionResponse {
   @Expose() readonly id: string;
 
   @Expose() readonly name_ar: string;
+  @Expose() readonly name: string;
 
   @Expose() readonly name_en: string;
 
