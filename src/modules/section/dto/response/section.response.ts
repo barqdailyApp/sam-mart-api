@@ -29,12 +29,12 @@ export class SectionResponse {
   @Expose() readonly delivery_price: number;
   @Transform(({ value }) => {
     if (
-      value.includes(DeliveryType.FAST) &&
-      value.includes(DeliveryType.SCHEDULED)
+      value?.includes(DeliveryType.FAST) &&
+      value?.includes(DeliveryType.SCHEDULED)
     )
       value = 'SCHEDULED&FAST';
-    else if (value.includes(DeliveryType.SCHEDULED)) value = 'SCHEDULED';
-    else if (value.includes(DeliveryType.FAST)) value = 'FAST';
+    else if (value?.includes(DeliveryType.SCHEDULED)) value = 'SCHEDULED';
+    else if (value?.includes(DeliveryType.FAST)) value = 'FAST';
 else value ='SCHEDULED&FAST';
     return value;
   })
