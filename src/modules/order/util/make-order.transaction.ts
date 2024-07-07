@@ -264,6 +264,7 @@ export class MakeOrderTransaction extends BaseTransaction<
 
       let total = Number(order.products_price);
       const devliery_fee = order.delivery_type==DeliveryType.WAREHOUSE_PICKUP?0: Number(order.delivery_fee);
+      order.delivery_fee=devliery_fee
       total+=devliery_fee;
 
       order.total_price = total;
@@ -275,7 +276,6 @@ export class MakeOrderTransaction extends BaseTransaction<
           order.promo_code_id=promo_code.id
           total -= promo_code.discount;
           order.total_price = total;
-          order.promo_code_id = promo_code.id;
           order.promo_code= promo_code;
           order.promo_code_discount = promo_code.discount;
           promo_code.current_uses++;

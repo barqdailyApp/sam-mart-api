@@ -44,6 +44,7 @@ import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { Roles } from '../authentication/guards/roles.decorator';
 import { ImportCategoryRequest } from '../category/dto/requests/import-category-request';
 import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
+import { SectionResponse } from './dto/response/section.response';
 
 @ApiHeader({
   name: 'Accept-Language',
@@ -168,12 +169,15 @@ export class SectionController {
   @Get()
   @ApiQuery({ name: 'user_id', type: String, required: false })
   async getSections(@Query('user_id') userId?: string) {
+    const sections=  (await this.sectionService.getSections(userId)).map((e) => {
+      e.logo = toUrl(e.logo);
+     
+      const data=plainToInstance(SectionResponse, {...e, delivery_type_list:e.delivery_type});
+      return data;
+    });
     return new ActionResponse(
-      (await this.sectionService.getSections(userId)).map((e) => {
-        e.logo = toUrl(e.logo);
-        e.delivery_type= 'SCHEDULED&FAST' ;
-        return e;
-      }),
+      sections
+    
     );
   }
 

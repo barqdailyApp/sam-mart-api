@@ -9,25 +9,36 @@ import { UserResponse } from 'src/modules/user/dto/responses/user.response';
 
 @Exclude()
 export class SectionResponse {
-    
   @Expose() readonly id: string;
 
-  @Expose() readonly  name_ar: string;
+  @Expose() readonly name_ar: string;
 
-  @Expose() readonly  name_en: string;
+  @Expose() readonly name_en: string;
 
   @Expose() readonly logo: string;
 
-  @Expose() readonly  order_by: number;
+  @Expose() readonly order_by: number;
 
-  @Expose() readonly  min_order_price: number;
+  @Expose() readonly min_order_price: number;
 
-  @Expose() readonly  allowed_roles: Role[];
+  @Expose() readonly allowed_roles: Role[];
 
-  @Expose() readonly  is_active: boolean;
+  @Expose() readonly is_active: boolean;
 
   @Expose() readonly delivery_price: number;
-
+  @Transform(({ value }) => {
+    if (
+      value.includes(DeliveryType.FAST) &&
+      value.includes(DeliveryType.SCHEDULED)
+    )
+      value = 'SCHEDULED&FAST';
+    else if (value.includes(DeliveryType.SCHEDULED)) value = 'SCHEDULED';
+    else if (value.includes(DeliveryType.FAST)) value = 'FAST';
+else value ='SCHEDULED&FAST';
+    return value;
+  })
   @Expose() readonly delivery_type: DeliveryType;
-
+ 
+  @Expose()
+  readonly delivery_type_list: DeliveryType;
 }
