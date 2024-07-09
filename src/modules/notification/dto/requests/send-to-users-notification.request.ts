@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsNotEmpty, IsString } from 'class-validator';
+import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class SendToUsersNotificationRequest {
   @ApiProperty()
@@ -50,4 +50,9 @@ export class SendToAllUsersNotificationRequest {
   @IsNotEmpty()
   @IsString()
   title_en: string;
+
+  @ApiProperty({required:false})
+  @IsOptional()
+  @IsString()
+  image_url: string;
 }

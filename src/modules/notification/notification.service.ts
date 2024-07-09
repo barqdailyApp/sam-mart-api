@@ -159,6 +159,7 @@ export class NotificationService extends BaseUserService<NotificationEntity> {
      {
        action: NotificationTypes.USERS,
        action_id: NotificationTypes.USERS,
+       image_url: data.image_url,
      },
    );
   //  const notifications = [];
