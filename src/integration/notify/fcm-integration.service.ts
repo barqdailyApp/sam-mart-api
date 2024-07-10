@@ -23,7 +23,7 @@ export class FcmIntegrationService {
     const res = await this.fcmService.sendNotification([token], payload, false);
     console.log(res)
   }
-  async sendToAll(token: string[], title: string, body: string, data?: DataMessagePayload): Promise<void> {
+  async sendToAll(token: string[], title: string, body: string, data?: DataMessagePayload,image_url?:string): Promise<void> {
    
     const payload: MessagingPayload = {
       notification: {
@@ -39,7 +39,7 @@ export class FcmIntegrationService {
 
     };
    
-    const res = await this.fcmService.sendNotification(token, payload, false);
+    const res = await this.fcmService.sendNotification(token, payload, false,image_url);
     console.log(res)
   }
 }

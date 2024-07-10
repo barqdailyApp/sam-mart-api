@@ -156,11 +156,13 @@ export class NotificationService extends BaseUserService<NotificationEntity> {
      users.map((user) => user.fcm_token),
      data.title_ar,
      data.message_ar,
+     
      {
        action: NotificationTypes.USERS,
        action_id: NotificationTypes.USERS,
-       image_url: data.image_url,
+       
      },
+     data?.image_url
    );
   //  const notifications = [];
   //  for (let index = 0; index < users.length; index++) {
