@@ -136,12 +136,12 @@ export class PaymentMethodService extends BaseService<PaymentMethod> {
 
     let access_token = this.tokens['access_token'];
     let wallet_token = this.tokens['wallet_token'];
-    // console.log(access_token, wallet_token);
-    // if (!access_token || !wallet_token) {
-    //   const tokens = await this.jawaliLogin();
-    //   access_token = tokens['access_token'];
-    //   wallet_token = tokens['wallet_token'];
-    // }
+    console.log(access_token, wallet_token);
+    if (!access_token || !wallet_token) {
+      const tokens = await this.jawaliLogin();
+      access_token = tokens['access_token'];
+      wallet_token = tokens['wallet_token'];
+    }
 
     try{
     const enquire_response = await axios.post(
@@ -226,12 +226,12 @@ export class PaymentMethodService extends BaseService<PaymentMethod> {
     }  else throw new BadRequestException('message.wrong_voucher_number');
   }
   catch(error){
-    console.log(error)
-    const { wallet_token, access_token } = await this.jawaliLogin();
-      this.tokens['wallet_token'] = wallet_token;
-      this.tokens['access_token'] = access_token;
-      await this.jawalicashOut(voucher, wallet_number, order_price);
-  }
+    if(error.response.status==401){
+      const { wallet_token, access_token } = await this.jawaliLogin();
+        this.tokens['wallet_token'] = wallet_token;
+        this.tokens['access_token'] = access_token;
+        await this.jawalicashOut(voucher, wallet_number, order_price);}
+    }
 }
 
   async checkUser(req: KuraimiUserCheckRequest) {
