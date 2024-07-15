@@ -136,13 +136,14 @@ export class PaymentMethodService extends BaseService<PaymentMethod> {
 
     let access_token = this.tokens['access_token'];
     let wallet_token = this.tokens['wallet_token'];
-    console.log(access_token, wallet_token);
-    if (!access_token || !wallet_token) {
-      const tokens = await this.jawaliLogin();
-      access_token = tokens['access_token'];
-      wallet_token = tokens['wallet_token'];
-    }
+    // console.log(access_token, wallet_token);
+    // if (!access_token || !wallet_token) {
+    //   const tokens = await this.jawaliLogin();
+    //   access_token = tokens['access_token'];
+    //   wallet_token = tokens['wallet_token'];
+    // }
 
+    try{
     const enquire_response = await axios.post(
       'https://app.wecash.com.ye:8493/paygate/v1/ws/callWS',
       {
@@ -176,7 +177,7 @@ export class PaymentMethodService extends BaseService<PaymentMethod> {
       },
       { headers: { Authorization: `Bearer ${access_token}` } },
     );
-    console.log(enquire_response.data);
+    
     if (
       enquire_response.data.responseStatus.systemStatusDesc === 'Success' &&
       Number(enquire_response.data.responseBody.txnamount) >= order_price
@@ -222,14 +223,16 @@ export class PaymentMethodService extends BaseService<PaymentMethod> {
       } catch (error) {
         console.log(error);
       }
-    } else if (enquire_response?.data?.error == 'invalid_token') {
-      console.log('xxxxxxxxxxx');
-      const { wallet_token, access_token } = await this.jawaliLogin();
+    }  else throw new BadRequestException('message.wrong_voucher_number');
+  }
+  catch(error){
+    console.log(error)
+    const { wallet_token, access_token } = await this.jawaliLogin();
       this.tokens['wallet_token'] = wallet_token;
       this.tokens['access_token'] = access_token;
       await this.jawalicashOut(voucher, wallet_number, order_price);
-    } else throw new BadRequestException('message.wrong_voucher_number');
   }
+}
 
   async checkUser(req: KuraimiUserCheckRequest) {
     const allowed_zones = ['YE0012003', 'YE0012004', 'YE0012005'];
