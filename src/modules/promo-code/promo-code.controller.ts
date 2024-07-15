@@ -25,9 +25,9 @@ import { PromoCodeResponse } from './dto/response/promo-code.response';
   required: false,
   description: 'Language header: en, ar',
 })
-@ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.ADMIN, Role.CLIENT,Role.DRIVER)
+// @ApiBearerAuth()
+// @UseGuards(JwtAuthGuard, RolesGuard)
+// @Roles(Role.ADMIN, Role.CLIENT,Role.DRIVER)
 @ApiTags('Promo Code')
 
 @Controller('promo-code')
@@ -65,11 +65,11 @@ export class PromoCodeController {
   }
 
   @Get('valid/:id')
-  async getValidPromoCode(@Query('code') code: string) {
+  async getValidPromoCode(@Query('code') code: string,@Query('payment_method_id') payment_method_id?: string) {
     return new ActionResponse(
       plainToInstance(
         PromoCodeResponse,
-        await this.promoCodeService.getValidPromoCodeByCode(code),
+        await this.promoCodeService.getValidPromoCodeByCode(code,payment_method_id),
         { excludeExtraneousValues: true },
       ),
     );

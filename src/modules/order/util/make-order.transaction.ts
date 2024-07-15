@@ -270,7 +270,7 @@ export class MakeOrderTransaction extends BaseTransaction<
       order.total_price = total;
       if (req.promo_code) {
         const promo_code = await this.promoCodeService.getValidPromoCodeByCode(
-          req.promo_code,
+          req.promo_code,req.payment_method.payment_method_id
         );
         if (promo_code) {
           order.promo_code_id=promo_code.id

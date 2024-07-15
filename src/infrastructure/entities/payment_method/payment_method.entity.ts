@@ -1,7 +1,8 @@
 import { BaseEntity } from 'src/infrastructure/base/base.entity';
 import { PaymentMethodEnum } from 'src/infrastructure/data/enums/payment-method';
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, ManyToMany, OneToMany } from 'typeorm';
 import { Order } from '../order/order.entity';
+import { PromoCode } from '../promo-code/promo-code.entity';
 
 @Entity()
 export class PaymentMethod extends BaseEntity {
@@ -15,7 +16,8 @@ export class PaymentMethod extends BaseEntity {
   @Column({ nullable: true })
   order_by: number;
 
-
+  @ManyToMany(() => PromoCode, (promo_code) => promo_code.payment_methods)
+  promo_codes: PromoCode[];
 
   @Column({ unique: true })
   name_ar: string;

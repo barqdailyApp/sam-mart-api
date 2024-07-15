@@ -16,9 +16,10 @@ export class PromoCodeService extends BaseService<PromoCode> {
     super(promoCodeRepository);
   }
 
- async getValidPromoCodeByCode(code: string) {
+ async getValidPromoCodeByCode(code: string,payment_method_id?:string) {
+  
     const valid_code = await this.promoCodeRepository.findOne({
-      where: { code, expire_at: MoreThan(new Date()), is_active: true },
+      where: { code, expire_at: MoreThan(new Date()), is_active: true ,payment_methods:{id:payment_method_id}},
     });
     if(!valid_code || valid_code.current_uses >= valid_code.number_of_uses){
         throw new  BadRequestException('message.invalid_promo_code');

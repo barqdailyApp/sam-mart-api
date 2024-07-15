@@ -1,7 +1,8 @@
 import { AuditableEntity } from 'src/infrastructure/base/auditable.entity';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
 import { Order } from '../order/order.entity';
 import { User } from '../user/user.entity';
+import { PaymentMethod } from '../payment_method/payment_method.entity';
 @Entity()
 export class PromoCode extends AuditableEntity {
   @Column({unique:true})
@@ -37,4 +38,9 @@ export class PromoCode extends AuditableEntity {
 
   @Column({nullable:true})
   note:string
+
+
+  @ManyToMany(() => PaymentMethod, (payment_method) => payment_method.promo_codes)
+  @JoinTable({name:"promo_code_payment_method"})
+  payment_methods: PaymentMethod[]; 
 }
