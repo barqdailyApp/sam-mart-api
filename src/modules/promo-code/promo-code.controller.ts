@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Post,
   Put,
@@ -20,14 +21,16 @@ import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 import { ActionResponse } from 'src/core/base/responses/action.response';
 import { PromoCodeResponse } from './dto/response/promo-code.response';
+import { applyQueryIncludes } from 'src/core/helpers/service-related.helper';
+import { where } from 'sequelize';
 @ApiHeader({
   name: 'Accept-Language',
   required: false,
   description: 'Language header: en, ar',
 })
-// @ApiBearerAuth()
-// @UseGuards(JwtAuthGuard, RolesGuard)
-// @Roles(Role.ADMIN, Role.CLIENT,Role.DRIVER)
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN, Role.CLIENT,Role.DRIVER)
 @ApiTags('Promo Code')
 
 @Controller('promo-code')
@@ -50,6 +53,7 @@ export class PromoCodeController {
   @Roles(Role.ADMIN)
   @Get()
   async getPromoCode(@Query() query: PaginatedRequest) {
+    applyQueryIncludes(query,"payment_methods");
     const promo_codes = await this.promoCodeService.findAll(query);
     if (query.limit && query.page) {
       const total = await this.promoCodeService.count(query);
@@ -61,7 +65,17 @@ export class PromoCodeController {
 
   @Get(':id')
   async getPromoCodeById(@Query('id') id: string) {
-    return new ActionResponse(await this.promoCodeService.findOne(id));
+    return new ActionResponse(await this.promoCodeService._repo.findOne({where:{id},relations:['payment_methods']}));
+  }
+
+  @Post("/:id/:payment_method_id")
+  async addPromoCodePaymentMethod(@Query('id') id: string,@Query('payment_method_id') payment_method_id: string) {
+    return new ActionResponse(await this.promoCodeService.addPaymentMethodToPromoCode(id,payment_method_id));
+  }
+
+  @Delete("/:id/:payment_method_id")
+  async deletePromoCodePaymentMethod(@Query('id') id: string,@Query('payment_method_id') payment_method_id: string) {
+    return new ActionResponse(await this.promoCodeService.removePaymentMethodFromPromoCode(id,payment_method_id));
   }
 
   @Get('valid/:id')

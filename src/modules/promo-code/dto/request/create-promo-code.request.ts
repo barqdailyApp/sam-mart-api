@@ -22,4 +22,21 @@ export class CreatePromoCodeRequest {
     @IsOptional()
     @IsString()
     note:string
+
+    
+}
+
+
+export class AddPromoCodePaymentMethodRequest {
+  @ApiProperty()
+  @IsString()
+  promo_code_id: string;
+
+  @ApiProperty()
+  @IsString()
+  payment_method_id: string;
+
+
+
+
 }
