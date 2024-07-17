@@ -31,6 +31,7 @@ export class PaymentMethodService extends BaseService<PaymentMethod> {
     super(payment_repo);
   }
   private tokens: Record<string, string> = {};
+  private jaibToken: Record<string, string> = {};
 
   private username = process.env.wepay_username;
   private password = process.env.wepay_password;
@@ -43,8 +44,18 @@ export class PaymentMethodService extends BaseService<PaymentMethod> {
   private agent_wallet_password = process.env.wepay_agent_wallet_password;
   private currency = process.env.wepay_currency;
 
+  async jaibLogin() {
+    const login_response = await axios.post(
+      'https://app.wecash.com.ye:8493/paygate/oauth/token',
+      {
+        userName: "",
+        password: "",
+       agentCode:""
+      },
+    );
+    
+  }
   async jawaliLogin() {
-    console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
     const {
       username,
       password,
@@ -136,103 +147,103 @@ export class PaymentMethodService extends BaseService<PaymentMethod> {
 
     let access_token = this.tokens['access_token'];
     let wallet_token = this.tokens['wallet_token'];
-    console.log(access_token, wallet_token);
+
     if (!access_token || !wallet_token) {
       const tokens = await this.jawaliLogin();
       access_token = tokens['access_token'];
       wallet_token = tokens['wallet_token'];
     }
 
-    try{
-    const enquire_response = await axios.post(
-      'https://app.wecash.com.ye:8493/paygate/v1/ws/callWS',
-      {
-        header: {
-          serviceDetail: {
-            corrID: '59ba381c-1f5f-4480-90cc-0660b9cc850e',
-            domainName: 'MerchantDomain',
-            serviceName: 'PAYAG.ECOMMERCEINQUIRY',
-          },
-          signonDetail: {
-            clientID: 'WeCash',
-            orgID: OrgID,
-            userID: username,
-            externalUser: 'user1',
-          },
-          messageContext: {
-            clientDate: '202211101156',
-            bodyType: 'Clear',
-          },
-        },
-        body: {
-          agentWallet: agent_wallet,
-          password: agent_wallet_password,
-          txncurrency: currency,
-          voucher: voucher,
-          receiverMobile: wallet_number,
-          accessToken: wallet_token,
-
-          purpose: 'test bill payment',
-        },
-      },
-      { headers: { Authorization: `Bearer ${access_token}` } },
-    );
-    
-    if (
-      enquire_response.data.responseStatus.systemStatusDesc === 'Success' &&
-      Number(enquire_response.data.responseBody.txnamount) >= order_price
-    ) {
-      try {
-        const response = await axios.post(
-          'https://app.wecash.com.ye:8493/paygate/v1/ws/callWS',
-          {
-            header: {
-              serviceDetail: {
-                corrID: '59ba381c-1f5f-4480-90cc-0660b9cc850e',
-                domainName: 'MerchantDomain',
-                serviceName: 'PAYAG.ECOMMCASHOUT',
-              },
-              signonDetail: {
-                clientID: 'WeCash',
-                orgID: OrgID,
-                userID: username,
-                externalUser: 'user1',
-              },
-              messageContext: {
-                clientDate: '202211101156',
-                bodyType: 'Clear',
-              },
+    try {
+      const enquire_response = await axios.post(
+        'https://app.wecash.com.ye:8493/paygate/v1/ws/callWS',
+        {
+          header: {
+            serviceDetail: {
+              corrID: '59ba381c-1f5f-4480-90cc-0660b9cc850e',
+              domainName: 'MerchantDomain',
+              serviceName: 'PAYAG.ECOMMERCEINQUIRY',
             },
-            body: {
-              agentWallet: agent_wallet,
-              password: agent_wallet_password,
-              txncurrency: currency,
-              voucher: voucher,
-              receiverMobile: wallet_number,
-              accessToken: wallet_token,
-
-              purpose: 'test bill payment',
+            signonDetail: {
+              clientID: 'WeCash',
+              orgID: OrgID,
+              userID: username,
+              externalUser: 'user1',
+            },
+            messageContext: {
+              clientDate: '202211101156',
+              bodyType: 'Clear',
             },
           },
-          { headers: { Authorization: `Bearer ${access_token}` } },
-        );
+          body: {
+            agentWallet: agent_wallet,
+            password: agent_wallet_password,
+            txncurrency: currency,
+            voucher: voucher,
+            receiverMobile: wallet_number,
+            accessToken: wallet_token,
 
-        return response.data.responseStatus.systemStatusDesc === 'Success'
-          ? true
-          : false;
-      } catch (error) {
-        console.log(error);
-      }
-    }  else throw new BadRequestException('message.wrong_voucher_number');
-  }
-  catch(error){
-    if(error.response.status==401){
-      const { wallet_token, access_token } = await this.jawaliLogin();
+            purpose: 'test bill payment',
+          },
+        },
+        { headers: { Authorization: `Bearer ${access_token}` } },
+      );
+
+      if (
+        enquire_response.data.responseStatus.systemStatusDesc === 'Success' &&
+        Number(enquire_response.data.responseBody.txnamount) >= order_price
+      ) {
+        try {
+          const response = await axios.post(
+            'https://app.wecash.com.ye:8493/paygate/v1/ws/callWS',
+            {
+              header: {
+                serviceDetail: {
+                  corrID: '59ba381c-1f5f-4480-90cc-0660b9cc850e',
+                  domainName: 'MerchantDomain',
+                  serviceName: 'PAYAG.ECOMMCASHOUT',
+                },
+                signonDetail: {
+                  clientID: 'WeCash',
+                  orgID: OrgID,
+                  userID: username,
+                  externalUser: 'user1',
+                },
+                messageContext: {
+                  clientDate: '202211101156',
+                  bodyType: 'Clear',
+                },
+              },
+              body: {
+                agentWallet: agent_wallet,
+                password: agent_wallet_password,
+                txncurrency: currency,
+                voucher: voucher,
+                receiverMobile: wallet_number,
+                accessToken: wallet_token,
+
+                purpose: 'test bill payment',
+              },
+            },
+            { headers: { Authorization: `Bearer ${access_token}` } },
+          );
+
+          return response.data.responseStatus.systemStatusDesc === 'Success'
+            ? true
+            : false;
+        } catch (error) {
+          console.log(error);
+        }
+      } else throw new BadRequestException('message.wrong_voucher_number');
+    } catch (error) {
+      if (error.response.status == 401) {
+        const { wallet_token, access_token } = await this.jawaliLogin();
         this.tokens['wallet_token'] = wallet_token;
         this.tokens['access_token'] = access_token;
-        await this.jawalicashOut(voucher, wallet_number, order_price);}
+        await this.jawalicashOut(voucher, wallet_number, order_price);
+      }
     }
-}
+  }
 
   async checkUser(req: KuraimiUserCheckRequest) {
     const allowed_zones = ['YE0012003', 'YE0012004', 'YE0012005'];

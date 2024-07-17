@@ -2,5 +2,6 @@ export enum PaymentMethodEnum {
     CASH = 'CASH',
     WALLET = 'WALLET',
     JAWALI='JAWALI',
-    KURAIMI="KURAIMI"
+    KURAIMI="KURAIMI",
+    JAIB="JAIB"
   }
