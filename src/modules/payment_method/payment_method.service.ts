@@ -45,15 +45,59 @@ export class PaymentMethodService extends BaseService<PaymentMethod> {
   private currency = process.env.wepay_currency;
 
   async jaibLogin() {
-    const login_response = await axios.post(
-      'https://app.wecash.com.ye:8493/paygate/oauth/token',
-      {
-        userName: "",
-        password: "",
-       agentCode:""
-      },
-    );
-    
+    try {
+      const login_response = await axios.post(
+        'https://www.api2.e-jaib.com:5088/api/v1/TokenAuth/LogAPI',
+        {
+          userName: 'Aps11AppTst',
+          password: '6W^a41nukRKA',
+          agentCode: '10004',
+        },
+      );
+      console.log(login_response.data);
+      this.jaibToken['access_token'] = login_response.data.result.accessToken;
+      this.jaibToken['pinApi'] = login_response.data.result.pinApi;
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  async jaibCashout(
+    code: string,
+    mobile: string,
+    amount: number,
+    order_number: string,
+  ) {
+    try {
+      console.log(this.jaibToken['pinApi']);
+      console.log(this.jaibToken['access_token']);
+      const response = await axios.post(
+        'https://www.api2.e-jaib.com:5088/api/v1/BuyOnline/ExeBuy',
+        {
+          pinApi: this.jaibToken['pinApi'],
+          requestID: order_number,
+          code: code,
+          amount: amount,
+          currencyCode: 'YER',
+          mobile: mobile,
+          notes: '',
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${this.jaibToken['access_token']}`,
+          },
+        },
+      );
+      return response;
+    } catch (err) {
+      console.log(err.response.status);
+      if (!err.response.data.error) {
+        await this.jaibLogin();
+        await this.jaibCashout(code, mobile, amount, order_number);
+      } else {
+        throw new BadRequestException(err.response.data.error.message);
+      }
+    }
   }
   async jawaliLogin() {
     const {
@@ -85,7 +129,6 @@ export class PaymentMethodService extends BaseService<PaymentMethod> {
     if (login_response.data.access_token) {
       const access_token = login_response.data.access_token;
       this.tokens['access_token'] = access_token;
-      console.log(access_token);
 
       const wallet_response = await axios.post(
         'https://app.wecash.com.ye:8493/paygate/v1/ws/callWS',

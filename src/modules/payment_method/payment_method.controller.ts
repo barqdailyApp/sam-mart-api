@@ -125,6 +125,8 @@ export class PaymentMethodController {
   }
   @Post('cash-out')
   async cashOut() {
-    return await this.paymentService.jawalicashOut("123","213",1);
+    const result =  await this.paymentService.jaibCashout("1","1",1,"1");
+    console.log(result);
+    return result
   }
 }

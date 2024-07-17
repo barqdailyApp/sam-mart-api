@@ -137,18 +137,20 @@ export class MakeOrderTransaction extends BaseTransaction<
             : null,
       });
 
-
       switch (req.delivery_type) {
         case DeliveryType.FAST:
-          {  const currentDate = new Date();
+          {
+            const currentDate = new Date();
 
             // Add 40 minutes
             currentDate.setMinutes(currentDate.getMinutes() + 40);
             order.delivery_day = currentDate.toISOString().slice(0, 10);
-            order.estimated_delivery_time = currentDate;}
+            order.estimated_delivery_time = currentDate;
+          }
           break;
         case DeliveryType.SCHEDULED:
-          {  order.delivery_day = req.slot_day.day;
+          {
+            order.delivery_day = req.slot_day.day;
             order.slot_id = req.slot_day.slot_id;
             const slot = await context.findOne(Slot, {
               where: { id: req.slot_day.slot_id },
@@ -158,15 +160,18 @@ export class MakeOrderTransaction extends BaseTransaction<
             );
             order.estimated_delivery_time.setHours(
               order.estimated_delivery_time.getHours() - 3,
-            );}
+            );
+          }
           break;
         case DeliveryType.WAREHOUSE_PICKUP:
-          {  const currentDate = new Date();
+          {
+            const currentDate = new Date();
 
             // Add 40 minutes
             currentDate.setMinutes(currentDate.getMinutes() + 20);
             order.delivery_day = currentDate.toISOString().slice(0, 10);
-            order.estimated_delivery_time = currentDate;}
+            order.estimated_delivery_time = currentDate;
+          }
           break;
       }
 
@@ -263,70 +268,136 @@ export class MakeOrderTransaction extends BaseTransaction<
       }
 
       let total = Number(order.products_price);
-      const devliery_fee = order.delivery_type==DeliveryType.WAREHOUSE_PICKUP?0: Number(order.delivery_fee);
-      order.delivery_fee=devliery_fee
-      total+=devliery_fee;
+      const devliery_fee =
+        order.delivery_type == DeliveryType.WAREHOUSE_PICKUP
+          ? 0
+          : Number(order.delivery_fee);
+      order.delivery_fee = devliery_fee;
+      total += devliery_fee;
 
       order.total_price = total;
       if (req.promo_code) {
         const promo_code = await this.promoCodeService.getValidPromoCodeByCode(
-          req.promo_code,req.payment_method.payment_method_id
+          req.promo_code,
+          req.payment_method.payment_method_id,
         );
         if (promo_code) {
-          order.promo_code_id=promo_code.id
+          order.promo_code_id = promo_code.id;
           total -= promo_code.discount;
           order.total_price = total;
-          order.promo_code= promo_code;
+          order.promo_code = promo_code;
           order.promo_code_discount = promo_code.discount;
           promo_code.current_uses++;
-          if(promo_code.user_ids==null)
-            promo_code.user_ids=[]
+          if (promo_code.user_ids == null) promo_code.user_ids = [];
           promo_code.user_ids.push(user.id);
           await context.save(promo_code);
         }
       }
       await context.save(Order, order);
-      if (payment_method.type == PaymentMethodEnum.JAWALI) {
-        const make_payment = await this.paymentService.jawalicashOut(
-          req.payment_method.transaction_number,
-          req.payment_method.wallet_number,
-          total,
-        );
-        if (!make_payment) {
-          throw new BadRequestException('payment failed');
-        }
-      } else if (payment_method.type == PaymentMethodEnum.WALLET) {
-        const wallet = await context.findOneBy(Wallet, { user_id: user.id });
 
-        wallet.balance = Number(wallet.balance) - Number(total);
-        if (wallet.balance < 0) {
-          throw new BadRequestException('message.insufficient_balance');
-        }
-        const transaction = plainToInstance(Transaction, {
-          amount: -total,
-          user_id: user.id,
-          type: TransactionTypes.ORDER_PAYMENT,
-          wallet_id: wallet.id,
-        });
-
-        await context.save(transaction);
-
-        await context.save(wallet);
-      } else if (payment_method.type == PaymentMethodEnum.KURAIMI) {
-        const make_payment = await this.paymentService.kuraimiPay({
-          AMOUNT: total,
-          REFNO: order.id,
-          SCustID: encodeUUID(order.user_id),
-          PINPASS: req.payment_method.transaction_number,
-        });
-        if (make_payment['Code'] != 1) {
-          throw new BadRequestException(
-            this.request.headers['accept-language'] == 'en'
-              ? make_payment['Message']
-              : make_payment['MessageDesc'],
+      switch (payment_method.type) {
+        case PaymentMethodEnum.JAWALI: {
+          const make_payment = await this.paymentService.jawalicashOut(
+            req.payment_method.transaction_number,
+            req.payment_method.wallet_number,
+            total,
           );
+          if (!make_payment) {
+            throw new BadRequestException('message.payment_failed');
+          }
+          break;
         }
+        case PaymentMethodEnum.WALLET: {
+          const wallet = await context.findOneBy(Wallet, { user_id: user.id });
+
+          wallet.balance = Number(wallet.balance) - Number(total);
+          if (wallet.balance < 0) {
+            throw new BadRequestException('message.insufficient_balance');
+          }
+          const transaction = plainToInstance(Transaction, {
+            amount: -total,
+            user_id: user.id,
+            type: TransactionTypes.ORDER_PAYMENT,
+            wallet_id: wallet.id,
+          });
+
+          await context.save(transaction);
+
+          await context.save(wallet);
+          break;
+        }
+        case PaymentMethodEnum.KURAIMI: {
+          const make_payment = await this.paymentService.kuraimiPay({
+            AMOUNT: total,
+            REFNO: order.id,
+            SCustID: encodeUUID(order.user_id),
+            PINPASS: req.payment_method.transaction_number,
+          });
+          if (make_payment['Code'] != 1) {
+            throw new BadRequestException(
+              this.request.headers['accept-language'] == 'en'
+                ? make_payment['Message']
+                : make_payment['MessageDesc'],
+            );
+            break;
+          }
+        }
+        case PaymentMethodEnum.JAIB: {
+        await this.paymentService.jaibCashout(
+            req.payment_method.transaction_number,
+            req.payment_method.wallet_number,
+            total,
+            order.number.toString(),
+          );
+          break;
+        }
+        default:
+          break;
       }
+
+      // if (payment_method.type == PaymentMethodEnum.JAWALI) {
+      //   const make_payment = await this.paymentService.jawalicashOut(
+      //     req.payment_method.transaction_number,
+      //     req.payment_method.wallet_number,
+      //     total,
+      //   );
+      //   if (!make_payment) {
+      //     throw new BadRequestException('payment failed');
+      //   }
+      // }
+      //  else if (payment_method.type == PaymentMethodEnum.WALLET) {
+      //   const wallet = await context.findOneBy(Wallet, { user_id: user.id });
+
+      //   wallet.balance = Number(wallet.balance) - Number(total);
+      //   if (wallet.balance < 0) {
+      //     throw new BadRequestException('message.insufficient_balance');
+      //   }
+      //   const transaction = plainToInstance(Transaction, {
+      //     amount: -total,
+      //     user_id: user.id,
+      //     type: TransactionTypes.ORDER_PAYMENT,
+      //     wallet_id: wallet.id,
+      //   });
+
+      //   await context.save(transaction);
+
+      //   await context.save(wallet);
+      // }
+      // else if (payment_method.type == PaymentMethodEnum.KURAIMI) {
+      //   const make_payment = await this.paymentService.kuraimiPay({
+      //     AMOUNT: total,
+      //     REFNO: order.id,
+      //     SCustID: encodeUUID(order.user_id),
+      //     PINPASS: req.payment_method.transaction_number,
+      //   });
+      //   if (make_payment['Code'] != 1) {
+      //     throw new BadRequestException(
+      //       this.request.headers['accept-language'] == 'en'
+      //         ? make_payment['Message']
+      //         : make_payment['MessageDesc'],
+      //     );
+      //   }
+      // }
 
       await context.delete(CartProduct, cart_products);
 
