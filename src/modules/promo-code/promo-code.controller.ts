@@ -70,7 +70,7 @@ export class PromoCodeController {
 
   @Post("payment-method")
   async addPromoCodePaymentMethod(@Body() request: AddPromoCodePaymentMethodRequest) {
-    return new ActionResponse(await this.promoCodeService.addPaymentMethodToPromoCode(request);
+    return new ActionResponse(await this.promoCodeService.addPaymentMethodToPromoCode(request));
   }
 
   @Delete("/:id/:payment_method_id")
