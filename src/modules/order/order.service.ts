@@ -202,7 +202,7 @@ export class OrderService extends BaseUserService<Order> {
     }
     if (order_date) {
       //*using database functions to truncate the time part of the order.created_at timestamp to compare only the date components
-      query = query.where('DATE(order.created_at) = :order_date', {
+      query = query.andWhere('DATE(order.created_at) = :order_date', {
         order_date,
       });
     }
