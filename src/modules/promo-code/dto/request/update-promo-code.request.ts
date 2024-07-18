@@ -33,6 +33,11 @@ export class UpdatePromoCodeRequest {
 
     @ApiProperty({required:false})
     @IsOptional()
+    @Transform(({ value }) => Boolean(value))
+    use_once: boolean;
+
+    @ApiProperty({required:false})
+    @IsOptional()
     @IsString()
     note:string
 

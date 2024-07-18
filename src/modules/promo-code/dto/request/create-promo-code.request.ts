@@ -17,6 +17,10 @@ export class CreatePromoCodeRequest {
     @ApiProperty()
     @IsNumber()
     number_of_uses: number;
+    @ApiProperty({required:false})
+    @IsOptional()
+    @Transform(({ value }) => Boolean(value))
+    use_once: boolean;
 
     @ApiProperty({required:false})
     @IsOptional()
