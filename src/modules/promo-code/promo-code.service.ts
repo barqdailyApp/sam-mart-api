@@ -3,9 +3,10 @@ import { REQUEST } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/core/base/service/service.base';
 import { PromoCode } from 'src/infrastructure/entities/promo-code/promo-code.entity';
-import { MoreThan, Repository } from 'typeorm';
+import { In, MoreThan, Repository } from 'typeorm';
 import { Request } from 'express';
 import { PaymentMethod } from 'src/infrastructure/entities/payment_method/payment_method.entity';
+import { AddPromoCodePaymentMethodRequest } from './dto/request/create-promo-code.request';
 
 @Injectable()
 export class PromoCodeService extends BaseService<PromoCode> {
@@ -19,12 +20,9 @@ export class PromoCodeService extends BaseService<PromoCode> {
     super(promoCodeRepository);
   }
 
-  async addPaymentMethodToPromoCode(
-    promo_code_id: string,
-    payment_method_id: string,
-  ) {
+  async addPaymentMethodToPromoCode(request:AddPromoCodePaymentMethodRequest) {
     const promo_code = await this.promoCodeRepository.findOne({
-      where: { id: promo_code_id },
+      where: { id: request.promo_code_id },
       relations: ['payment_methods'],
     });
 
@@ -32,25 +30,16 @@ export class PromoCodeService extends BaseService<PromoCode> {
       throw new BadRequestException('message.promo_code_not_found');
     }
 
-    const payment_method = await this.paymentMethodRepository.findOne({
-      where: { id: payment_method_id },
+    const payment_method = await this.paymentMethodRepository.find({
+      where: { id: In(request.payment_method_ids) },
     });
 
-    if (!payment_method) {
+    if (payment_method.length!=request.payment_method_ids.length) {
       throw new BadRequestException('message.payment_method_not_found');
     }
-    const is_exists = promo_code.payment_methods.filter(
-      (payment_method) => payment_method.id == payment_method_id,
-    );
-    if (is_exists.length > 0) {
-      throw new BadRequestException(
-        'message.promo_code_already_has_this_payment_method',
-      );
-    }
-    promo_code.payment_methods = [
-      ...promo_code.payment_methods,
-      payment_method,
-    ];
+  
+    
+    promo_code.payment_methods = payment_method;
     return await this.promoCodeRepository.save(promo_code);
   }
 

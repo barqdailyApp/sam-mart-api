@@ -8,7 +8,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { CreatePromoCodeRequest } from './dto/request/create-promo-code.request';
+import { AddPromoCodePaymentMethodRequest, CreatePromoCodeRequest } from './dto/request/create-promo-code.request';
 import { PromoCodeService } from './promo-code.service';
 import { plainToInstance } from 'class-transformer';
 import { PromoCode } from 'src/infrastructure/entities/promo-code/promo-code.entity';
@@ -68,9 +68,9 @@ export class PromoCodeController {
     return new ActionResponse(await this.promoCodeService._repo.findOne({where:{id},relations:['payment_methods']}));
   }
 
-  @Post("/:id/:payment_method_id")
-  async addPromoCodePaymentMethod(@Query('id') id: string,@Query('payment_method_id') payment_method_id: string) {
-    return new ActionResponse(await this.promoCodeService.addPaymentMethodToPromoCode(id,payment_method_id));
+  @Post("payment-method")
+  async addPromoCodePaymentMethod(@Body() request: AddPromoCodePaymentMethodRequest) {
+    return new ActionResponse(await this.promoCodeService.addPaymentMethodToPromoCode(request);
   }
 
   @Delete("/:id/:payment_method_id")

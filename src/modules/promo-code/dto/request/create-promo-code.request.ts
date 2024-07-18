@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
-import { IsDate, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsArray, IsDate, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreatePromoCodeRequest {
     @ApiProperty()
@@ -33,8 +33,9 @@ export class AddPromoCodePaymentMethodRequest {
   promo_code_id: string;
 
   @ApiProperty()
-  @IsString()
-  payment_method_id: string;
+  @IsArray()
+  @IsString({ each: true })
+  payment_method_ids: string[];
 
 
 
