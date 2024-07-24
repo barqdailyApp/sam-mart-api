@@ -4,6 +4,7 @@ import {
   Controller,
   Delete,
   Get,
+  Inject,
   Param,
   Patch,
   Post,
@@ -35,6 +36,7 @@ import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 import { UpdateEmployeeRequest } from './dto/request/update-employee.request';
 import { AssignEmployeeRequest } from './dto/request/assign-employee.request';
+import { I18nResponse } from 'src/core/helpers/i18n.helper';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -47,7 +49,10 @@ import { AssignEmployeeRequest } from './dto/request/assign-employee.request';
 @Roles(Role.ADMIN)
 @Controller('employee')
 export class EmployeeController {
-  constructor(private readonly employeeService: EmployeeService) {}
+  constructor(
+    private readonly employeeService: EmployeeService,
+    @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
+  ) {}
 
   @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('avatar_file'))
   @ApiConsumes('multipart/form-data')
@@ -90,9 +95,11 @@ export class EmployeeController {
   async singleEmployee(@Param('employee_id') employee_id: string) {
     const employee = await this.employeeService.singleEmployees(employee_id);
 
-    const response = plainToClass(EmployeeResponse, employee, {
+    const result = plainToClass(EmployeeResponse, employee, {
       excludeExtraneousValues: true,
     });
+
+    const response = this._i18nResponse.entity(result);
     return new ActionResponse<EmployeeResponse>(response);
   }
 
@@ -134,4 +141,5 @@ export class EmployeeController {
     await this.employeeService.assignModule(employee_id, body);
     return new ActionResponse<boolean>(true);
   }
+
 }

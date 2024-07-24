@@ -136,8 +136,30 @@ export class EmployeeService extends BaseService<Employee> {
     async singleEmployees(id_employee: string) {
         const employee = await this.employeeRepository.findOne({
             where: { id: id_employee },
-            relations: ['user']
+            relations: {
+                user: {
+                    samModules: {
+                        samModule: true
+                    }
+                }
+            }
         });
+
+        if (employee && employee.user && Array.isArray(employee.user.samModules)) {
+            const transformedSamModules = employee.user.samModules.map(samModuleRelation => {
+                const { samModule } = samModuleRelation;
+                return samModule ? {
+                    id: samModule.id,
+                    name_en: samModule.name_en,
+                    name_ar: samModule.name_ar
+                    
+                } as unknown as UsersSamModules : null;
+            }).filter(samModule => samModule !== null);
+        
+            // Assign the transformed data to a new property
+            employee.user.samModules = transformedSamModules;
+        }
+
         if (!employee) {
             throw new BadRequestException('message.employee_not_found');
         }
@@ -220,7 +242,7 @@ export class EmployeeService extends BaseService<Employee> {
         }
 
         const uniqueModuleIds = Array.from(new Set(module_ids));
-        
+
         let samModules = await this.samModuleRepository.find({
             where: {
                 id: In(uniqueModuleIds)
