@@ -13,6 +13,10 @@ import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
 import { Repository } from 'typeorm';
 import { DriverStatus } from 'src/infrastructure/data/enums/driver-status.enum';
 import { UserStatus } from 'src/infrastructure/data/enums/user-status.enum';
+import { User } from 'src/infrastructure/entities/user/user.entity';
+import { Employee } from 'src/infrastructure/entities/employee/employee.entity';
+import { UsersSamModules } from 'src/infrastructure/entities/sam-modules/users-sam-modules.entity';
+import { Request } from 'express';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -20,7 +24,11 @@ export class RolesGuard implements CanActivate {
     private reflector: Reflector,
     @InjectRepository(Driver)
     private readonly driverRepository: Repository<Driver>,
-  ) {}
+    @InjectRepository(Employee)
+    private readonly employeeRepository: Repository<Employee>,
+    @InjectRepository(UsersSamModules)
+    private readonly userSamModulesRepository: Repository<UsersSamModules>,
+  ) { }
 
   async canActivate(context: ExecutionContext) {
     const requiredRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
@@ -38,7 +46,17 @@ export class RolesGuard implements CanActivate {
       await this.checkDriverStatus(user, requiredRoles);
     }
 
-  
+    if (user.roles?.includes(Role.EMPLOYEE)) {
+      const isAuthorizedEmployee =
+        await this.checkEmployeeModulePermissions(user, request.url, request.method);
+
+      if (!isAuthorizedEmployee) {
+        throw new UnauthorizedException('Unauthorized employee');
+      } else {
+        return true;
+      }
+    }
+
     if (user.user_status == UserStatus.BlockedClient)
       throw new UnauthorizedException(`message.user_is_blocked`);
 
@@ -54,10 +72,39 @@ export class RolesGuard implements CanActivate {
 
     if (driver.status !== DriverStatus.VERIFIED) {
       throw new UnauthorizedException(
-        `You're not verified driver, your account is ${
-          driver.status
+        `You're not verified driver, your account is ${driver.status
         } now reason: ${driver.status_reason ?? 'no reason specified'}`,
       );
     }
+  }
+
+  async checkEmployeeModulePermissions(
+    user: User,
+    path: string,
+    method: string
+  ): Promise<boolean> {
+
+    const employee = await this.employeeRepository.findOne({
+      where: { user_id: user.id },
+    });
+
+    if (!employee) throw new UnauthorizedException('invalid_employee');
+
+    const userSamModule = await this.userSamModulesRepository.findOne({
+      where: { user_id: user.id },
+      relations: {
+        samModule: {
+          samModuleEndpoints: true
+        }
+      }
+    })
+
+    for (const endpoint of userSamModule?.samModule?.samModuleEndpoints) {
+      if (endpoint.method === method && endpoint.endpoint === path) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }
