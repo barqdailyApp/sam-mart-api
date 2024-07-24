@@ -236,12 +236,10 @@ export class EmployeeService extends BaseService<Employee> {
         const userSamModule = await this.userSamModulesRepository.find({
             where: {
                 user_id: employee.user?.id,
-                sam_module_id: In(uniqueModuleIds)
             }
         })
-        samModules = samModules.filter(module => {
-            return !userSamModule.some(userModule => userModule.sam_module_id === module.id)
-        })
+
+        await this.userSamModulesRepository.remove(userSamModule);
 
         const mappedUserSamModules = samModules.map(module => {
             return this.userSamModulesRepository.create({
