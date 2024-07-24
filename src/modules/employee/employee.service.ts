@@ -2,7 +2,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { BaseService } from 'src/core/base/service/service.base';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Employee } from 'src/infrastructure/entities/employee/employee.entity';
 import { CreateEmployeeRequest } from './dto/request/create-employee.request';
 import { User } from 'src/infrastructure/entities/user/user.entity';
@@ -21,6 +21,9 @@ import { Request } from 'express';
 import { BaseUserService } from 'src/core/base/service/user-service.base';
 import { applyQueryFilters, applyQueryIncludes } from 'src/core/helpers/service-related.helper';
 import { UpdateEmployeeRequest } from './dto/request/update-employee.request';
+import { AssignEmployeeRequest } from './dto/request/assign-employee.request';
+import { SamModules } from 'src/infrastructure/entities/sam-modules/sam-modules.entity';
+import { UsersSamModules } from 'src/infrastructure/entities/sam-modules/users-sam-modules.entity';
 
 
 @Injectable()
@@ -28,11 +31,14 @@ export class EmployeeService extends BaseService<Employee> {
     constructor(
         @InjectRepository(Employee) private readonly employeeRepository: Repository<Employee>,
         @InjectRepository(User) private readonly userRepository: Repository<User>,
+        @InjectRepository(SamModules) private readonly samModuleRepository: Repository<SamModules>,
+        @InjectRepository(UsersSamModules) private readonly userSamModulesRepository: Repository<UsersSamModules>,
         @Inject(CountryService) private readonly countryService: CountryService,
         @Inject(CityService) private readonly cityService: CityService,
         @Inject(ConfigService) private readonly _config: ConfigService,
         @Inject(StorageManager) private readonly storageManager: StorageManager,
         @Inject(ImageManager) private readonly imageManager: ImageManager,
+
         @Inject(REQUEST) request: Request,
     ) {
         super(employeeRepository);
@@ -129,13 +135,13 @@ export class EmployeeService extends BaseService<Employee> {
         applyQueryIncludes(query, 'user');
         return await this.findAll(query);
     }
-    async singleEmployees(id_employee:string){
+    async singleEmployees(id_employee: string) {
         const employee = await this.employeeRepository.findOne({
             where: { id: id_employee },
             relations: ['user']
         });
         if (!employee) {
-        throw new BadRequestException('message.employee_not_found');
+            throw new BadRequestException('message.employee_not_found');
         }
         return employee
     }
@@ -205,4 +211,44 @@ export class EmployeeService extends BaseService<Employee> {
         await this.userRepository.save(employee.user);
     }
 
+    async assignModule(employee_id: string, body: AssignEmployeeRequest) {
+        const { module_ids } = body;
+        const employee = await this.employeeRepository.findOne({
+            where: { id: employee_id },
+            relations: ['user']
+        });
+        if (!employee) {
+            throw new BadRequestException('employee with provided Id not found');
+        }
+
+        const uniqueModuleIds = Array.from(new Set(module_ids));
+        
+        let samModules = await this.samModuleRepository.find({
+            where: {
+                id: In(uniqueModuleIds)
+            }
+        })
+
+        if (samModules.length !== module_ids.length) {
+            throw new BadRequestException(`Provided modules id isn't valid`);
+        }
+
+        const userSamModule = await this.userSamModulesRepository.find({
+            where: {
+                user_id: employee.user?.id,
+                sam_module_id: In(uniqueModuleIds)
+            }
+        })
+        samModules = samModules.filter(module => {
+            return !userSamModule.some(userModule => userModule.sam_module_id === module.id)
+        })
+
+        const mappedUserSamModules = samModules.map(module => {
+            return this.userSamModulesRepository.create({
+                user: employee.user,
+                samModule: module
+            })
+        })
+        await this.userSamModulesRepository.save(mappedUserSamModules);
+    }
 }
