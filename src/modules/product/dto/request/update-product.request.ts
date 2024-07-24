@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsOptional, IsString, IsBoolean, IsNotEmpty } from 'class-validator';
+import { IsOptional, IsString, IsBoolean, IsNotEmpty, IsArray } from 'class-validator';
 
 export class UpdateProductRequest {
 
@@ -13,6 +13,12 @@ export class UpdateProductRequest {
   @IsOptional()
   @IsString()
   name_en: string;
+
+  @ApiProperty({ required: false })
+  
+  @IsOptional()
+  @IsArray()
+  keywords: string[];
 
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()

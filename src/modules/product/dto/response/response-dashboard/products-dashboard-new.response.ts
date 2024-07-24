@@ -39,6 +39,7 @@ export class ProductsDashboardNewResponse {
   @Expose() readonly measurement_unit_ar: string;
 
   @Expose() readonly measurement_unit_en: string;
+  @Expose() readonly keywords: string[];
 
   constructor(product: Product) {
     const product_measurement = product.product_measurements.find(
@@ -50,6 +51,7 @@ export class ProductsDashboardNewResponse {
     this.product_id = product.id;
     this.name_ar = product.name_ar;
     this.name_en = product.name_en;
+    this.keywords=product.keywords;
     this.barcode = product.barcode;
     this.product_logo = toUrl(
       product.product_images.find((x) => x.is_logo === true)?.url,

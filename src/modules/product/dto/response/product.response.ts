@@ -63,6 +63,8 @@ export class ProductResponse {
     return false;
   })
   is_fav: boolean;
+  @Expose()
+  keywords: string[];
 
   @Transform(({ value }) => plainToClass(ProductMeasurementResponse, value))
   @Expose()

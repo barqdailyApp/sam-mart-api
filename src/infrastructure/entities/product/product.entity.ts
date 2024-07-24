@@ -33,6 +33,10 @@ export class Product extends AuditableEntity {
   @Column({ nullable: true })
   barcode: string
 
+
+  @Column({nullable:true,type:'simple-array'})
+  keywords: string[]
+
   @OneToMany(() => ProductImage, (productImage) => productImage.product)
   product_images: ProductImage[];
 

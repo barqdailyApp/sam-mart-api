@@ -6,7 +6,14 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from 'src/infrastructure/entities/product/product.entity';
-import { DeleteResult, IsNull, LessThan, LessThanOrEqual, Not, Repository } from 'typeorm';
+import {
+  DeleteResult,
+  IsNull,
+  LessThan,
+  LessThanOrEqual,
+  Not,
+  Repository,
+} from 'typeorm';
 import { CreateProductRequest } from './dto/request/create-product.request';
 import { CreateProductTransaction } from './utils/create-product.transaction';
 import { UpdateProductRequest } from './dto/request/update-product.request';
@@ -53,6 +60,7 @@ import { Section } from 'src/infrastructure/entities/section/section.entity';
 import { Category } from 'src/infrastructure/entities/category/category.entity';
 import { DeleteProductTransaction } from './utils/delete-product.transaction';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
+import { ShipmentProduct } from 'src/infrastructure/entities/order/shipment-product.entity';
 
 @Injectable()
 export class ProductDashboardService {
@@ -76,6 +84,9 @@ export class ProductDashboardService {
 
     @InjectRepository(ProductSubCategory)
     private readonly productSubCategory_repo: Repository<ProductSubCategory>,
+
+    @InjectRepository(ShipmentProduct)
+    private readonly shipmentProduct_repo: Repository<ShipmentProduct>,
 
     @InjectRepository(ProductCategoryPrice)
     private readonly productCategoryPrice_repo: Repository<ProductCategoryPrice>,
@@ -135,20 +146,22 @@ export class ProductDashboardService {
         'message.end_date_must_be_greater_than_start_date',
       );
     }
-    if (order_by!=null) {
+    if (order_by != null) {
       const highest_number = await this.productOffer_repo.count();
 
       if (order_by > highest_number + 1)
         throw new BadRequestException(
           'order_by must be smaller than ' + (highest_number + 1),
         );
-        else if(order_by < 1) throw new BadRequestException('order_by must be greater than 1');
+      else if (order_by < 1)
+        throw new BadRequestException('order_by must be greater than 1');
       const if_exist = await this.productOffer_repo.findOne({
         where: { order_by: order_by },
       });
-      if(if_exist){
-      if_exist.order_by = order_by;
-      await this.productOffer_repo.save(if_exist);}
+      if (if_exist) {
+        if_exist.order_by = order_by;
+        await this.productOffer_repo.save(if_exist);
+      }
     }
 
     const productCategoryPrice = await this.productCategoryPrice_repo.findOne({
@@ -196,7 +209,8 @@ export class ProductDashboardService {
 
     const users = await this.userRepository
       .createQueryBuilder('user')
-      .where('user.fcm_token IS NOT NULL').andWhere('user.roles = :roles', { roles: Role.CLIENT })
+      .where('user.fcm_token IS NOT NULL')
+      .andWhere('user.roles = :roles', { roles: Role.CLIENT })
       .getMany();
     // const sendToUsersNotificationRequest: SendToUsersNotificationRequest = {
     //   users_id: users.map((user) => user.id),
@@ -256,21 +270,20 @@ export class ProductDashboardService {
           productOffer.product_category_price.price - discountedPercentage;
       }
     }
-  
-    if (order_by!=null) {
-    
+
+    if (order_by != null) {
       const if_exist = await this.productOffer_repo.findOne({
         where: { order_by: order_by },
       });
       const highest_number = await this.productOffer_repo.count();
       if (order_by > highest_number + 1)
-        throw new BadRequestException(
-          'order_by must be smaller than ' + (count ),
-        );
-        else if(order_by < 1) throw new BadRequestException('order_by must be greater than 1');
-      if(if_exist){
-      if_exist.order_by = order_by;
-      await this.productOffer_repo.save(if_exist);}
+        throw new BadRequestException('order_by must be smaller than ' + count);
+      else if (order_by < 1)
+        throw new BadRequestException('order_by must be greater than 1');
+      if (if_exist) {
+        if_exist.order_by = order_by;
+        await this.productOffer_repo.save(if_exist);
+      }
     }
 
     await this.productOffer_repo.update(
@@ -397,6 +410,7 @@ export class ProductDashboardService {
       name_ar,
       name_en,
       barcode,
+      keywords,
     } = updateProductRequest;
 
     //* Check if product exist
@@ -410,7 +424,7 @@ export class ProductDashboardService {
     const productBarcode = await this.productRepository.findOne({
       where: { barcode },
     });
-    if (productBarcode && product.barcode != barcode) {
+    if (productBarcode?.barcode  == barcode) {
       throw new BadRequestException('message.product_barcode_exist');
     }
 
@@ -424,6 +438,7 @@ export class ProductDashboardService {
         description_ar,
         description_en,
         barcode,
+        keywords,
       },
     );
     return await this.productRepository.findOne({
@@ -574,10 +589,9 @@ export class ProductDashboardService {
       case 'new':
         productsSort = { 'product.created_at': 'DESC' };
         break;
-        case 'order_by':
+      case 'order_by':
         productsSort = { 'product_sub_categories.order_by': 'ASC' };
         break;
-
     }
     let query = this.productRepository
       .createQueryBuilder('product')
@@ -618,13 +632,21 @@ export class ProductDashboardService {
 
       // Build the query conditionally based on the language of product_name
       if (isProductNameArabic) {
-        query = query.andWhere('product.name_ar LIKE :product_name', {
-          product_name: `%${product_name}%`,
-        });
+        query = query
+          .andWhere('product.name_ar LIKE :product_name', {
+            product_name: `%${product_name}%`,
+          })
+          .orWhere('product.keywords LIKE :product_name', {
+            product_name: `%${product_name}%`,
+          });
       } else {
-        query = query.andWhere('product.name_en LIKE :product_name', {
-          product_name: `%${product_name}%`,
-        });
+        query = query
+          .andWhere('product.name_en LIKE :product_name', {
+            product_name: `%${product_name}%`,
+          })
+          .orWhere('product.keywords LIKE :product_name', {
+            product_name: `%${product_name}%`,
+          });
       }
     }
 
@@ -730,18 +752,29 @@ export class ProductDashboardService {
 
     // Add search term condition if provided
     if (product_name) {
+      query = query.where('product.keywords LIKE :product_name', {
+        product_name: `%${product_name}%`,
+      });
       // Determine if the product_name is Arabic
       const isProductNameArabic = this.isArabic(product_name); // Implement or use a library to check if the text is Arabic
 
       // Build the query conditionally based on the language of product_name
       if (isProductNameArabic) {
-        query = query.andWhere('product.name_ar LIKE :product_name', {
-          product_name: `%${product_name}%`,
-        });
+        query = query
+          .andWhere('product.name_ar LIKE :product_name', {
+            product_name: `%${product_name}%`,
+          })
+          .orWhere('product.keywords LIKE :product_name', {
+            product_name: `%${product_name}%`,
+          });
       } else {
-        query = query.andWhere('product.name_en LIKE :product_name', {
-          product_name: `%${product_name}%`,
-        });
+        query = query
+          .andWhere('product.name_en LIKE :product_name', {
+            product_name: `%${product_name}%`,
+          })
+          .orWhere('product.keywords LIKE :product_name', {
+            product_name: `%${product_name}%`,
+          });
       }
     }
 
@@ -1002,7 +1035,6 @@ export class ProductDashboardService {
   async exportProducts() {
     const products = await this.productRepository.find({
       relations: {
-    
         warehouses_products: true,
         product_measurements: { measurement_unit: true },
         product_sub_categories: {
@@ -1251,11 +1283,13 @@ export class ProductDashboardService {
     );
   }
 
-  async exportWarehouseProducts(warehouse_id: string,quantity?) {
+  async exportWarehouseProducts(warehouse_id: string, quantity?) {
     const warehouse_products = await this.warehouse_products_repo.find({
-      where : quantity? {warehouse_id,quantity:LessThanOrEqual(quantity)} :  { warehouse_id },
+      where: quantity
+        ? { warehouse_id, quantity: LessThanOrEqual(quantity) }
+        : { warehouse_id },
       relations: {
-        product:true,
+        product: true,
         product_measurement: { measurement_unit: true },
       },
       order: { product: { name_ar: 'ASC' } },
@@ -1276,7 +1310,6 @@ export class ProductDashboardService {
 
         description_ar: product.product?.description_ar,
         description_en: product.product?.description_en,
-
       };
     });
 
@@ -1343,5 +1376,19 @@ export class ProductDashboardService {
       throw new NotFoundException('message.product_measurement_not_found');
     }
     return productMeasurement;
+  }
+
+  async getMostSelling(limit? : number) {
+    const result = await this.shipmentProduct_repo
+      .createQueryBuilder('shipment_product')
+      .select('shipment_product.product_id', 'productId')
+      .leftJoinAndSelect('shipment_product.product', 'product')
+      .addSelect('SUM(shipment_product.quantity)', 'totalQuantity')
+      .groupBy('shipment_product.product_id')
+      .orderBy('totalQuantity', 'DESC')
+      .limit(limit??20)
+      .getRawMany();
+
+    return result;
   }
 }

@@ -101,6 +101,7 @@ export class OrderController {
     // Send the PDF buffer as the response
     res.send(buffer);
 
+    res.end();
 
   }
   @Get('single-order/:order_id')

@@ -68,7 +68,9 @@ import { UpdateProductOfferRequest } from './dto/request/update-product-offer.re
   description: 'Language header: en, ar',
 })
 @ApiTags('Product')
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('product')
+@Roles(Role.ADMIN)
 export class ProductDashboardController {
   constructor(
     private readonly productDashboardService: ProductDashboardService,
@@ -258,6 +260,12 @@ export class ProductDashboardController {
 
     return new ActionResponse(productResponse);
   }
+  @Get('most-selling')
+  async getMostSelling(@Query('limit') limit: number) {
+    return new ActionResponse(
+       await this.productDashboardService.getMostSelling(limit),
+    );
+  }
 
   @Delete('delete-Product/:product_id')
   async deleteProduct(@Param('product_id') id: string) {
@@ -299,7 +307,6 @@ export class ProductDashboardController {
   async exportProducts(@Res() res: Response) {
     const File = await this.productDashboardService.exportProducts();
     res.download(`${File}`);
-    
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -313,7 +320,6 @@ export class ProductDashboardController {
   async exportunAttchedProducts(@Res() res: Response) {
     const File = await this.productDashboardService.exportunLiknedProducts();
     res.download(`${File}`);
-  
   }
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
@@ -326,7 +332,6 @@ export class ProductDashboardController {
   async exportAttchedProducts(@Res() res: Response) {
     const File = await this.productDashboardService.exportLinkedProducts();
     res.download(`${File}`);
-
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -343,10 +348,10 @@ export class ProductDashboardController {
     @Query('quantity') quantity: number,
   ) {
     const File = await this.productDashboardService.exportWarehouseProducts(
-      warehouse_id,quantity
+      warehouse_id,
+      quantity,
     );
     res.download(`${File}`);
- 
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

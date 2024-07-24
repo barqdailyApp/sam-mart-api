@@ -35,6 +35,7 @@ export class SingleProductDashboardNewResponse {
       product_is_active: product.is_active,
       product_is_recovered: product.is_recovered,
       product_barcode: product.barcode,
+      product_keywords: product.keywords,
       quantity_available: product.warehouses_products.reduce(
         (acc, cur) => acc + cur.quantity,
         0,

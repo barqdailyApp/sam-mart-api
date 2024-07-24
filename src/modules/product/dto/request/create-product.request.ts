@@ -37,6 +37,12 @@ export class CreateProductRequest {
   @IsString()
   description_en: string;
 
+  @ApiProperty({ required: false })
+  
+  @IsOptional()
+  @IsArray()
+  keywords: string[];
+
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
