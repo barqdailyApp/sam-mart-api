@@ -34,6 +34,7 @@ import { query } from 'express';
 import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 import { UpdateEmployeeRequest } from './dto/request/update-employee.request';
+import { AssignEmployeeRequest } from './dto/request/assign-employee.request';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -122,6 +123,15 @@ export class EmployeeController {
     @Param('employee_id') employee_id: string,
   ): Promise<ActionResponse<boolean>> {
     await this.employeeService.deleteEmployee(employee_id);
+    return new ActionResponse<boolean>(true);
+  }
+
+  @Post('/assign-module/:employee_id')
+  async assignModule(
+    @Param('employee_id') employee_id: string,
+    @Body() body: AssignEmployeeRequest,
+  ): Promise<ActionResponse<boolean>> {
+    await this.employeeService.assignModule(employee_id, body);
     return new ActionResponse<boolean>(true);
   }
 }
