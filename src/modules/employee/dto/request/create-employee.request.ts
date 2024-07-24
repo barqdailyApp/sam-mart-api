@@ -61,14 +61,4 @@ export class CreateEmployeeRequest {
     })
     @IsBoolean()
     is_active: boolean;
-
-    @ApiProperty({ enum: EmployeeDepartement, isArray: true })
-    @Transform(({ value }) => JSON.parse(value))
-    @IsArray()
-    @Type(() => String)
-    @IsEnumArray(Object.values(EmployeeDepartement), {
-        message: `departements must be an array of enum values ${Object.values(EmployeeDepartement)}`
-    })
-    departements: EmployeeDepartement[];
-
 }

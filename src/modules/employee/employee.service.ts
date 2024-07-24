@@ -110,7 +110,6 @@ export class EmployeeService extends BaseService<Employee> {
             city_id,
             country_id,
             qualification,
-            departements,
             is_active,
         } = req;
         await this.countryService.single(country_id);
@@ -124,7 +123,6 @@ export class EmployeeService extends BaseService<Employee> {
             city_id,
             country_id,
             qualification,
-            departements,
             is_active
         })
 
