@@ -126,7 +126,9 @@ export class EmployeeService extends BaseService<Employee> {
             is_active
         })
 
-        return await this.employeeRepository.save(newEmployee);
+        const createdEmployee = await this.employeeRepository.save(newEmployee);
+        await this.assignModule(createdEmployee.id, { module_ids: req.module_ids });
+        return createdEmployee;
     }
 
     async findAllEmployees(query: PaginatedRequest) {
@@ -152,10 +154,10 @@ export class EmployeeService extends BaseService<Employee> {
                     id: samModule.id,
                     name_en: samModule.name_en,
                     name_ar: samModule.name_ar
-                    
+
                 } as unknown as UsersSamModules : null;
             }).filter(samModule => samModule !== null);
-        
+
             // Assign the transformed data to a new property
             employee.user.samModules = transformedSamModules;
         }
@@ -242,7 +244,6 @@ export class EmployeeService extends BaseService<Employee> {
         }
 
         const uniqueModuleIds = Array.from(new Set(module_ids));
-
         let samModules = await this.samModuleRepository.find({
             where: {
                 id: In(uniqueModuleIds)

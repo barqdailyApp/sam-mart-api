@@ -61,4 +61,13 @@ export class CreateEmployeeRequest {
     })
     @IsBoolean()
     is_active: boolean;
+
+    @ApiProperty({
+        required: false,
+        type: 'array',
+        items: { type: 'string' }
+    })
+    @IsOptional()
+    @IsArray()
+    module_ids: string[];
 }
