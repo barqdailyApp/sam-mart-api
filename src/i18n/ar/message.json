@@ -14,6 +14,7 @@
     "discount_value_must_be_less_than_product_price":"قيمة العرض يجب ان تكون اقل من سعر المنتج",
     "driver_not_found": "السائق غير موجود",
     "payment_method_not_found":"طريقة الدفع غير موجودة",
+    "payment_failed":"خطأ فى عملية الدفع",
     "product_not_found": "المنتج غير موجود",
     "product_image_not_found": "صورة المنتج غير موجودة",
     "promo_code_used":"الكود مستخدم",

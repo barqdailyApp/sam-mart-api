@@ -30,10 +30,14 @@ export class FileService {
   async upload(req: Express.Multer.File, dir = 'tmp') {
     try {
       const baseUrl = this.config.get('storage.local.root');
-      const ext = req.originalname.split('.').pop();
+      let ext = req.originalname.split('.').pop();
+      ext = ext.replace(/\s+/g, ''); // Remove any spaces from the extension
+  
       const randName =
         req.originalname.split('.').shift() + '-' + new Date().getTime();
-      const fileLocation = `${baseUrl}/${dir}/${randName}.${ext}`;
+      let fileLocation = `${baseUrl}/${dir}/${randName}.${ext}`;
+      fileLocation = fileLocation.replace(/\s+/g, '%20'); // Replace any spaces with '%20'
+  
       // use sharp to resize image
       const resizedImage = await sharp(req.buffer).toBuffer();
       await this.storage.getDisk().put(fileLocation, resizedImage);
@@ -42,6 +46,7 @@ export class FileService {
       throw error;
     }
   }
+  
   async delete(fileLocation: string) {
     try {
       await this.storage.getDisk().delete(fileLocation);
