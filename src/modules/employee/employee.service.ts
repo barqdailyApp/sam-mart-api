@@ -250,7 +250,7 @@ export class EmployeeService extends BaseService<Employee> {
             }
         })
 
-        if (samModules.length !== module_ids.length) {
+        if (module_ids && samModules?.length !== module_ids?.length) {
             throw new BadRequestException(`Provided modules id isn't valid`);
         }
 
