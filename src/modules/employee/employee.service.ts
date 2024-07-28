@@ -270,4 +270,8 @@ export class EmployeeService extends BaseService<Employee> {
         })
         await this.userSamModulesRepository.save(mappedUserSamModules);
     }
+
+    async listModules(){
+        return await this.samModuleRepository.find();
+    }
 }
