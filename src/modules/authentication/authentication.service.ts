@@ -20,6 +20,9 @@ import { UpdateDriverStatusRequest } from './dto/requests/update-driver-status.r
 import { InjectRepository } from '@nestjs/typeorm';
 import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
 import { Repository } from 'typeorm';
+import { Role } from 'src/infrastructure/data/enums/role.enum';
+import { SamModules } from 'src/infrastructure/entities/sam-modules/sam-modules.entity';
+import { UsersSamModules } from 'src/infrastructure/entities/sam-modules/users-sam-modules.entity';
 
 @Injectable()
 export class AuthenticationService {
@@ -28,6 +31,9 @@ export class AuthenticationService {
     @Inject(RegisterUserTransaction) private readonly registerUserTransaction: RegisterUserTransaction,
     @Inject(RegisterDriverTransaction) private readonly registerDriverTransaction: RegisterDriverTransaction,
     @InjectRepository(Driver) private readonly driverRepository: Repository<Driver>,
+    @InjectRepository(SamModules) private readonly samModuleRepository: Repository<SamModules>,
+    @InjectRepository(UsersSamModules) private readonly userSamModulesRepository: Repository<UsersSamModules>,
+
 
     @Inject(SendOtpTransaction) private readonly sendOtpTransaction: SendOtpTransaction,
     @Inject(VerifyOtpTransaction) private readonly verifyOtpTransaction: VerifyOtpTransaction,
@@ -49,6 +55,23 @@ export class AuthenticationService {
         req.password + this._config.get('app.key'),
         user.password,
       );
+    }
+    if (user.roles.includes(Role.EMPLOYEE)) {
+      const userSamModule = await this.userSamModulesRepository.find({
+        where: { user_id: user.id },
+        relations: ['samModule'],
+      });
+      const transformedSamModules = userSamModule.map(samModuleRelation => {
+        const { samModule } = samModuleRelation;
+        return samModule ? {
+          id: samModule.id,
+          name_en: samModule.name_en,
+          name_ar: samModule.name_ar
+
+        } as unknown as UsersSamModules : null;
+      }).filter(samModule => samModule !== null);
+      // Assign the transformed data to a new property
+      user.samModules = transformedSamModules;
     }
     if (user && isMatch) {
       return user;
