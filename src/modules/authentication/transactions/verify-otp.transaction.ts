@@ -26,6 +26,7 @@ import { UserStatus } from 'src/infrastructure/data/enums/user-status.enum';
 import { Address } from 'src/infrastructure/entities/user/address.entity';
 import { plainToInstance } from 'class-transformer';
 import { AddressResponse } from 'src/modules/address/dto/responses/address.respone';
+import { SamModuleResponse } from 'src/modules/employee/dto/response/sam-modules.response';
 @Injectable()
 export class VerifyOtpTransaction extends BaseTransaction<
   VerifyOtpRequest,
@@ -114,6 +115,7 @@ export class VerifyOtpTransaction extends BaseTransaction<
         return {
           ...user,
           address,
+          samModules: [] as SamModuleResponse[], // Add empty array of SamModuleResponse
 
           access_token: this.jwtService.sign(
             payload,
@@ -123,6 +125,7 @@ export class VerifyOtpTransaction extends BaseTransaction<
       }
       return {
         ...user,
+        samModules: [] as SamModuleResponse[], // Add empty array of SamModuleResponse
 
         access_token: this.jwtService.sign(
           payload,

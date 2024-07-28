@@ -53,6 +53,9 @@ import { Constant } from '../entities/constant/constant.entity';
 import { PaymentMethod } from '../entities/payment_method/payment_method.entity';
 import { Reason } from '../entities/reason/reason.entity';
 import { PromoCode } from '../entities/promo-code/promo-code.entity';
+import { SamModules } from '../entities/sam-modules/sam-modules.entity';
+import { SamModulesEndpoints } from '../entities/sam-modules/sam-modules-endpoints.entity';
+import { UsersSamModules } from '../entities/sam-modules/users-sam-modules.entity';
 
 export const DB_ENTITIES = [
   User,
@@ -110,7 +113,10 @@ export const DB_ENTITIES = [
   Constant,
   PaymentMethod,
   Reason,
-  PromoCode
+  PromoCode,
+  SamModules,
+  SamModulesEndpoints,
+  UsersSamModules
 ];
 
 export const DB_VIEWS = [];
