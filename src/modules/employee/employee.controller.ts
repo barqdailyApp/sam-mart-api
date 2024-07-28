@@ -37,6 +37,7 @@ import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 import { UpdateEmployeeRequest } from './dto/request/update-employee.request';
 import { AssignEmployeeRequest } from './dto/request/assign-employee.request';
 import { I18nResponse } from 'src/core/helpers/i18n.helper';
+import { SamModuleResponse } from './dto/response/sam-modules.response';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -52,7 +53,7 @@ export class EmployeeController {
   constructor(
     private readonly employeeService: EmployeeService,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
-  ) {}
+  ) { }
 
   @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('avatar_file'))
   @ApiConsumes('multipart/form-data')
@@ -140,6 +141,17 @@ export class EmployeeController {
   ): Promise<ActionResponse<boolean>> {
     await this.employeeService.assignModule(employee_id, body);
     return new ActionResponse<boolean>(true);
+  }
+
+  @Get('/list-modules')
+  async listModules(): Promise<ActionResponse<SamModuleResponse>> {
+    const modules = await this.employeeService.listModules();
+    const result = plainToInstance(SamModuleResponse, modules, {
+      excludeExtraneousValues: true,
+    });
+
+    const response = this._i18nResponse.entity(result);
+    return new ActionResponse<SamModuleResponse>(response);
   }
 
 }
