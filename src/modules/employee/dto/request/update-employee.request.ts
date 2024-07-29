@@ -24,7 +24,4 @@ export class UpdateEmployeeRequest extends CreateEmployeeRequest{
 
     @IsOptional()
     gender: Gender;
-
-    @IsOptional()
-    departements: EmployeeDepartement[];
 }

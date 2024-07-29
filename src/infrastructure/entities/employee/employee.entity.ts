@@ -14,14 +14,11 @@ export class Employee extends AuditableEntity {
     @Column()
     name_en: string;
 
-    @Column()
+    @Column({nullable: true})
     qualification: string;
 
     @Column()
     is_active: boolean;
-
-    @Column({ type: 'set', enum: EmployeeDepartement })
-    departements: EmployeeDepartement[]
 
     @OneToOne(() => User, {
         onDelete: 'CASCADE',
