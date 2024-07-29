@@ -147,6 +147,7 @@ export class OrderService extends BaseUserService<Order> {
       delivery_type,
       status,
       order_search,
+      order_delivery_date
     } = orderClientQuery;
     const skip = (page - 1) * limit;
 
@@ -202,9 +203,17 @@ export class OrderService extends BaseUserService<Order> {
     }
     if (order_date) {
       //*using database functions to truncate the time part of the order.created_at timestamp to compare only the date components
-      query = query.andWhere('DATE(order.created_at) = :order_date', {
-        order_date,
-      });
+      query.andWhere(
+        '((DATE(order.created_at) = :orderDate AND TIME(order.created_at) < "21:00:00") OR (DATE(order.created_at) = DATE_SUB(:orderDate, INTERVAL 1 DAY) AND TIME(order.created_at) >= "21:00:00"))',
+        { orderDate: order_date },
+      );
+    }
+    if (order_delivery_date) {
+      //*using database functions to truncate the time part of the order.created_at timestamp to compare only the date components
+      query.andWhere(
+        '((DATE(order.estimated_delivery_time) = :orderDate AND TIME(order.estimated_delivery_time) < "21:00:00") OR (DATE(order.estimated_delivery_time) = DATE_SUB(:orderDate, INTERVAL 1 DAY) AND TIME(order.estimated_delivery_time) >= "21:00:00"))',
+        { orderDate: order_date },
+      );
     }
 
     if (is_paid !== undefined) {

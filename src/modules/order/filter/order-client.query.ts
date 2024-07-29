@@ -31,6 +31,11 @@ export class OrderClientQuery {
   @IsString()
   order_date: string;
 
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  order_delivery_date: string;
+
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()
   @Transform(({ value }) => {
