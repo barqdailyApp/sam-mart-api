@@ -36,7 +36,10 @@ import { Cart } from 'src/infrastructure/entities/cart/cart.entity';
 import * as fs from 'fs';
 import { OrderSingleResponse } from './dto/response/client-response/order-single.response';
 import { features } from 'process';
-import { reverseNumbersInString, reverseSentence } from 'src/core/helpers/cast.helper';
+import {
+  reverseNumbersInString,
+  reverseSentence,
+} from 'src/core/helpers/cast.helper';
 const PdfDocumnet = require('pdfkit-table');
 import { Response } from 'express';
 import { Product } from 'src/infrastructure/entities/product/product.entity';
@@ -147,7 +150,7 @@ export class OrderService extends BaseUserService<Order> {
       delivery_type,
       status,
       order_search,
-      order_delivery_date
+      order_delivery_date,
     } = orderClientQuery;
     const skip = (page - 1) * limit;
 
@@ -211,7 +214,7 @@ export class OrderService extends BaseUserService<Order> {
     if (order_delivery_date) {
       //*using database functions to truncate the time part of the order.created_at timestamp to compare only the date components
       query.andWhere(
-        '((DATE(order.shipments.order_delivered_at) = :orderDate AND TIME(order.shipments.order_delivered_at) < "21:00:00") OR (DATE(order.shipments.order_delivered_at) = DATE_SUB(:orderDate, INTERVAL 1 DAY) AND TIME(order.shipments.order_delivered_at) >= "21:00:00"))',
+        '((DATE(shipments.order_delivered_at) = :orderDate AND TIME(shipments.order_delivered_at) < "21:00:00") OR (DATE(shipments.order_delivered_at) = DATE_SUB(:orderDate, INTERVAL 1 DAY) AND TIME(shipments.order_delivered_at) >= "21:00:00"))',
         { orderDate: order_delivery_date },
       );
     }
@@ -330,13 +333,12 @@ export class OrderService extends BaseUserService<Order> {
       await this.getSingleOrder(id),
     );
     const height = order_details.shipments.shipment_products.length * 23;
-const date=
-      new Date(
-        order_details.created_at.setUTCHours(
-          3 + order_details.created_at.getUTCHours(),
-        ),
-      ).toLocaleString();
-    
+    const date = new Date(
+      order_details.created_at.setUTCHours(
+        3 + order_details.created_at.getUTCHours(),
+      ),
+    ).toLocaleString();
+
     const doc = new PdfDocumnet({
       size: [300, 10000],
       layout: 'portrait',
@@ -347,26 +349,15 @@ const date=
     const products_table = order_details.shipments.shipment_products.map(
       (item) => {
         product_names.push(item.product_name_ar);
-        return [
-          item.total_price,
-          '',
-          item.product_price,
-          item.quantity,
-        ];
+        return [item.total_price, '', item.product_price, item.quantity];
       },
     );
-    products_table.push([
-      order_details.delivery_fee,
-      
-      '',
-      '',
-      'التوصيل سعر',
-    ]);
+    products_table.push([order_details.delivery_fee, '', '', 'التوصيل سعر']);
 
     if (order_details.promo_code_discount) {
       products_table.push([
         -order_details.promo_code_discount,
-        
+
         '',
         '',
         'الخصم قيمة',
@@ -374,13 +365,13 @@ const date=
     }
     products_table.push([
       Number(order_details.total_price),
-      
+
       '',
       '',
       'الاجمالى',
     ]);
     const customFont = fs.readFileSync(`public/assets/fonts/Amiri-Regular.ttf`);
-    const boldFont=fs.readFileSync(`public/assets/fonts/Amiri-Bold.ttf`);
+    const boldFont = fs.readFileSync(`public/assets/fonts/Amiri-Bold.ttf`);
     doc.registerFont(`Amiri-Regular`, customFont);
     doc.registerFont(`Amiri-Bold`, boldFont);
     doc.fontSize(15);
@@ -390,15 +381,9 @@ const date=
     doc.text(' برق ديلى', { features: ['rtla'], align: 'right' }).fontSize(10);
 
     doc
-      .text(
-        reverseSentence(
-          'تاريخ الطلب: ' +
-            reverseSentence(
-            date),),
-        {
-          align: 'right',
-        },
-      )
+      .text(reverseSentence('تاريخ الطلب: ' + reverseSentence(date)), {
+        align: 'right',
+      })
       .fontSize(10);
 
     doc.text(reverseSentence('رقم الطلب: ' + order_details.order_number), {
@@ -453,7 +438,6 @@ const date=
           width: 40,
         },
 
- 
         {
           label: 'الكمية',
           valign: 'top',
@@ -463,25 +447,28 @@ const date=
           width: 55,
         },
       ],
-    
+
       rows: [...products_table],
     };
 
     await doc.table(table, {
       prepareHeader: () => doc.fontSize(12),
       prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
- 
-        doc.fontSize(10).font("Amiri-Bold").fillColor('black');
+        doc.fontSize(10).font('Amiri-Bold').fillColor('black');
 
         if (indexColumn == 1) {
-        
-          doc.text ( reverseNumbersInString(product_names[indexRow]), rectCell.x, rectCell.y, {
-            width: rectCell.width,
-            height:  rectCell.height,
-            features: ['rtla'],
-            valign: 'bottom',
-            align: 'center',
-          })
+          doc.text(
+            reverseNumbersInString(product_names[indexRow]),
+            rectCell.x,
+            rectCell.y,
+            {
+              width: rectCell.width,
+              height: rectCell.height,
+              features: ['rtla'],
+              valign: 'bottom',
+              align: 'center',
+            },
+          );
         }
 
         if (indexRow == product_names.length + 1 && indexColumn == 1) {
@@ -502,13 +489,12 @@ const date=
         horizontal: { disabled: false, width: 1, opacity: 0, color: 'white' },
       },
 
-  vlign: 'bottom',
+      vlign: 'bottom',
       minRowHeight: 35,
       features: ['rtla'],
       padding: [0, 0, 0],
     });
 
- 
     const buffer = await new Promise<Buffer>((resolve, reject) => {
       const buffers = [];
       doc.on('data', buffers.push.bind(buffers));
@@ -523,9 +509,11 @@ const date=
 
     // Finalize the PDF
     doc.end();
- 
+
     return {
-      buffer, order_details};
+      buffer,
+      order_details,
+    };
   }
 
   async getSingleOrderDashboard(order_id: string) {
