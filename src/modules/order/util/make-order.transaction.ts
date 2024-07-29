@@ -339,8 +339,9 @@ export class MakeOrderTransaction extends BaseTransaction<
                 ? make_payment['Message']
                 : make_payment['MessageDesc'],
             );
-            break;
+
           }
+          break;
         }
         case PaymentMethodEnum.JAIB: {
         await this.paymentService.jaibCashout(
