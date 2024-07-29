@@ -211,7 +211,7 @@ export class OrderService extends BaseUserService<Order> {
     if (order_delivery_date) {
       //*using database functions to truncate the time part of the order.created_at timestamp to compare only the date components
       query.andWhere(
-        '((DATE(order.shipments.order_derliverd_at) = :orderDate AND TIME(order.shipments.order_derliverd_at) < "21:00:00") OR (DATE(order.shipments.order_derliverd_at) = DATE_SUB(:orderDate, INTERVAL 1 DAY) AND TIME(order.shipments.order_derliverd_at) >= "21:00:00"))',
+        '((DATE(order.shipments.order_delivered_at) = :orderDate AND TIME(order.shipments.order_delivered_at) < "21:00:00") OR (DATE(order.shipments.order_delivered_at) = DATE_SUB(:orderDate, INTERVAL 1 DAY) AND TIME(order.shipments.order_delivered_at) >= "21:00:00"))',
         { orderDate: order_delivery_date },
       );
     }
