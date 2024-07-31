@@ -13,6 +13,7 @@ import { SupportTicketSubjectSeeder } from './suppot-ticket-subjects.seeder';
 
 import { ConstantSeeder } from './constant-seeder';
 import { PaymentSeeder } from './payment.seeder';
+import { SamModulesSeeder } from './sam-modules.seeder';
 
 export const DB_SEEDERS = [
   // UsersSeeder,
@@ -27,6 +28,8 @@ export const DB_SEEDERS = [
   // WareHouseSeeder,
   // WareHouseProductsSeeder,
   // SupportTicketSubjectSeeder,
-  // ConstantSeeder
-  PaymentSeeder
+  // ConstantSeeder,
+  // PaymentSeeder,
+  SamModulesSeeder
+
 ];

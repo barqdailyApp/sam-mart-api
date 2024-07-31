@@ -17,6 +17,7 @@ import { User } from 'src/infrastructure/entities/user/user.entity';
 import { Employee } from 'src/infrastructure/entities/employee/employee.entity';
 import { UsersSamModules } from 'src/infrastructure/entities/sam-modules/users-sam-modules.entity';
 import { Request } from 'express';
+import { replaceUUIDInURL } from 'src/core/helpers/replace-url-uuid.helper';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -83,7 +84,7 @@ export class RolesGuard implements CanActivate {
     path: string,
     method: string
   ): Promise<boolean> {
-
+    path = replaceUUIDInURL(path);
     const employee = await this.employeeRepository.findOne({
       where: { user_id: user.id },
     });
