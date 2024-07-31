@@ -52,7 +52,11 @@ export class UserService extends BaseService<User> {
   }
 
   async updateProfile(updatdReq: UpdateProfileRequest) {
-    if (updatdReq.user_id && !this.currentUser.roles.includes(Role.ADMIN)) {
+    if (
+      updatdReq.user_id &&
+      !this.currentUser.roles.includes(Role.ADMIN) &&
+      !this.currentUser.roles.includes(Role.EMPLOYEE)
+    ) {
       throw new UnauthorizedException(
         'You are not allowed to update other users',
       );
@@ -103,7 +107,10 @@ export class UserService extends BaseService<User> {
         throw new BadRequestException('Phone number already exists');
       }
 
-      if (!this.currentUser.roles.includes(Role.ADMIN)) {
+      if (
+        !this.currentUser.roles.includes(Role.ADMIN) &&
+        !this.currentUser.roles.includes(Role.EMPLOYEE)
+      ) {
         await this.sendOtpTransaction.run({
           type: 'phone',
           username: updatdReq.phone,

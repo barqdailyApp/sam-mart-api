@@ -27,7 +27,11 @@ export const SupportTicketPrivacyMiddleware = (
                 throw new Error('User not found');
             }
 
-            if (!user.roles.includes(Role.ADMIN) && supportTicket.user_id != user.id) {
+            if (
+                !user.roles.includes(Role.ADMIN) &&
+                supportTicket.user_id != user.id &&
+                !user.roles.includes(Role.EMPLOYEE)
+            ) {
                 throw new Error('You are not allowed to access this ticket');
             }
 

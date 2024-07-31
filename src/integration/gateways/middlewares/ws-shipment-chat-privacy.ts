@@ -34,7 +34,8 @@ export const ShipmentPrivacyMiddleware = (
             if (
                 shipment.driver.user_id !== user.id &&
                 shipment.order.user_id !== user.id &&
-                !user.roles.includes(Role.ADMIN)
+                !user.roles.includes(Role.ADMIN) && 
+                !user.roles.includes(Role.EMPLOYEE)
             ) {
                 throw new UnauthorizedException('You are not allowed to add chat message to this shipment');
             }

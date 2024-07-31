@@ -48,7 +48,10 @@ export class OrderGateway
     if (client.user?.roles.includes(Role.DRIVER)) {
       client.join(client.driver.warehouse_id)
       client.join(client.driver.id)
-    } else if (client.user?.roles.includes(Role.ADMIN)) {
+    } else if (
+      client.user?.roles.includes(Role.ADMIN) ||
+      client.user?.roles.includes(Role.EMPLOYEE)
+    ) {
       client.join("admin")
     } else if (client.user?.roles.includes(Role.CLIENT)) {
       client.join(client.user.id)
@@ -60,7 +63,10 @@ export class OrderGateway
     if (client.user?.roles.includes(Role.DRIVER)) {
       client.leave(client.driver.warehouse_id)
       client.leave(client.driver.id)
-    } else if (client.user?.roles.includes(Role.ADMIN)) {
+    } else if (
+      client.user?.roles.includes(Role.ADMIN) ||
+      client.user?.roles.includes(Role.EMPLOYEE)
+    ) {
       client.leave("admin")
     } else if (client.user?.roles.includes(Role.CLIENT)) {
       client.leave(client.user.id)
@@ -75,15 +81,15 @@ export class OrderGateway
         action: action,
         client: body.client,
         driver: body.driver ? {
-         ... body.driver,
-         
-         user:{
-          username: body.driver.user.username,
-          name:body.driver.user.name,
-          avatar: body.driver.user.avatar,
-          phone: body.driver.user.phone
-         }
-      
+          ...body.driver,
+
+          user: {
+            username: body.driver.user.username,
+            name: body.driver.user.name,
+            avatar: body.driver.user.avatar,
+            phone: body.driver.user.phone
+          }
+
         } : null,
         warehouse: { ...i18nEntity(body.warehouse, 'en') },
         order: {

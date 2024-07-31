@@ -67,6 +67,7 @@ export class TicketCommentService extends BaseService<TicketComment> {
 
     if (
       !this.currentUser.roles.includes(Role.ADMIN) &&
+      ! this.currentUser.roles.includes(Role.EMPLOYEE) &&
       ticket.user_id !== this.currentUser.id
     ) {
       throw new UnauthorizedException(
@@ -83,7 +84,8 @@ export class TicketCommentService extends BaseService<TicketComment> {
 
     if (
       ticket.is_counter_active &&
-      !this.currentUser.roles.includes(Role.ADMIN)
+      !this.currentUser.roles.includes(Role.ADMIN) &&
+      !this.currentUser.roles.includes(Role.EMPLOYEE)
     ) {
       ticket.new_messages_count++;
       await this.supportTicketRepository.save(ticket);
@@ -132,6 +134,7 @@ export class TicketCommentService extends BaseService<TicketComment> {
 
     if (
       !this.currentUser.roles.includes(Role.ADMIN) &&
+      !this.currentUser.roles.includes(Role.EMPLOYEE) &&
       supportTicket.user_id !== this.currentUser.id
     ) {
       throw new UnauthorizedException(
@@ -140,7 +143,7 @@ export class TicketCommentService extends BaseService<TicketComment> {
     }
 
     // if the user is admin, then we will reset the new messages count
-    if (this.currentUser.roles.includes(Role.ADMIN)) {
+    if (this.currentUser.roles.includes(Role.ADMIN) || this.currentUser.roles.includes(Role.EMPLOYEE)) {
       supportTicket.is_counter_active = false;
       supportTicket.new_messages_count = 0;
       await this.supportTicketRepository.save(supportTicket);
