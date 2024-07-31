@@ -422,7 +422,7 @@ export class ProductDashboardService {
     }
     //* Check if product barcode exist
     const productBarcode = await this.productRepository.findOne({
-      where: { barcode },
+      where: { barcode ,id:Not(product_id) },
     });
     if (productBarcode?.barcode  == barcode) {
       throw new BadRequestException('message.product_barcode_exist');
