@@ -199,15 +199,24 @@ export class ProductClientService {
 
       // Build the query conditionally based on the language of product_name
       if (isProductNameArabic) {
-        query = query.andWhere('product.name_ar LIKE :product_name', {
-          product_name: `%${product_name}%`,
-        });
+        query = query
+          .andWhere('product.name_ar LIKE :product_name', {
+            product_name: `%${product_name}%`,
+          })
+          .orWhere('product.keywords LIKE :product_name', {
+            product_name: `%${product_name}%`,
+          });
       } else {
-        query = query.andWhere('product.name_en LIKE :product_name', {
-          product_name: `%${product_name}%`,
-        });
+        query = query
+          .andWhere('product.name_en LIKE :product_name', {
+            product_name: `%${product_name}%`,
+          })
+          .orWhere('product.keywords LIKE :product_name', {
+            product_name: `%${product_name}%`,
+          });
       }
     }
+
 
     // Conditional where clause based on sub category
     if (category_sub_category_id) {
@@ -421,13 +430,21 @@ export class ProductClientService {
 
       // Build the query conditionally based on the language of product_name
       if (isProductNameArabic) {
-        query = query.andWhere('product.name_ar LIKE :product_name', {
-          product_name: `%${product_name}%`,
-        });
+        query = query
+          .andWhere('product.name_ar LIKE :product_name', {
+            product_name: `%${product_name}%`,
+          })
+          .orWhere('product.keywords LIKE :product_name', {
+            product_name: `%${product_name}%`,
+          });
       } else {
-        query = query.andWhere('product.name_en LIKE :product_name', {
-          product_name: `%${product_name}%`,
-        });
+        query = query
+          .andWhere('product.name_en LIKE :product_name', {
+            product_name: `%${product_name}%`,
+          })
+          .orWhere('product.keywords LIKE :product_name', {
+            product_name: `%${product_name}%`,
+          });
       }
     }
 
