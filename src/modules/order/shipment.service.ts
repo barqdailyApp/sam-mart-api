@@ -426,7 +426,8 @@ export class ShipmentService extends BaseService<Shipment> {
     if (
       shipment.driver.user_id !== this.currentUser.id &&
       shipment.order.user_id !== this.currentUser.id &&
-      !this.currentUser.roles.includes(Role.ADMIN)
+      !this.currentUser.roles.includes(Role.ADMIN) &&
+      !this.currentUser.roles.includes(Role.EMPLOYEE)
     ) {
       throw new UnauthorizedException('message.not_allowed_to_add_chat');
     }
@@ -511,7 +512,8 @@ export class ShipmentService extends BaseService<Shipment> {
     if (
       shipment.driver.user_id !== this.currentUser.id &&
       shipment.order.user_id !== this.currentUser.id &&
-      !this.currentUser.roles.includes(Role.ADMIN)
+      !this.currentUser.roles.includes(Role.ADMIN) &&
+      !this.currentUser.roles.includes(Role.EMPLOYEE)
     ) {
       throw new UnauthorizedException('message_not_allowed_to_view_chat');
     }
@@ -611,7 +613,8 @@ export class ShipmentService extends BaseService<Shipment> {
         shipment.order.user_id !== this.currentUser.id) ||
       (currentUserRole.includes(Role.DRIVER) &&
         shipment.driver_id !== driver.id &&
-        !currentUserRole.includes(Role.ADMIN))
+        !currentUserRole.includes(Role.ADMIN)&&
+        !currentUserRole.includes(Role.EMPLOYEE))
     ) {
       throw new UnauthorizedException('message.not_allowed_to_cancel');
     }

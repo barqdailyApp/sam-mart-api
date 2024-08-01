@@ -1,0 +1,722 @@
+[
+    {
+      "path": "/v1/product/most-selling",
+      "method": "GET",
+      "modules": ["MOST_SELLING"]
+    },
+    {
+      "path": "/v1/users/all-clients-dashboard",
+      "method": "GET",
+      "modules": ["CLIENTS", "NOTIFICATIONS"]
+    },
+    {
+      "path": "/v1/users/single-client-dashboard/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "GET",
+      "modules": ["CLIENTS"]
+    },
+    {
+      "path": "/v1/users/total-clients-dashboard",
+      "method": "GET",
+      "modules": ["CLIENTS"]
+    },
+    {
+      "path": "/v1/users/update-client-status",
+      "method": "PUT",
+      "modules": ["CLIENTS"]
+    },
+    {
+      "path": "/v1/users/delete-client/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "DELETE",
+      "modules": ["CLIENTS"]
+    },
+    {
+      "path": "/v1/auth/update-driver-status",
+      "method": "POST",
+      "modules": ["DRIVERS"]
+    },
+    {
+      "path": "/v1/country/create-country",
+      "method": "POST",
+      "modules": ["MAIN_DATA_MANAGEMENT"]
+    },
+    {
+      "path": "/v1/country/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})/single-country-dashboard",
+      "method": "GET",
+      "modules": ["MAIN_DATA_MANAGEMENT"]
+    },
+    {
+      "path": "/v1/country/all-countries-dashboard",
+      "method": "GET",
+      "modules": ["MAIN_DATA_MANAGEMENT", "DRIVERS", "EMPLOYEES", "WAREHOUSES"]
+    },
+    {
+      "path": "/v1/country/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})/update-country",
+      "method": "PUT",
+      "modules": ["MAIN_DATA_MANAGEMENT"]
+    },
+    {
+      "path": "/v1/country/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})/delete-country",
+      "method": "DELETE",
+      "modules": ["MAIN_DATA_MANAGEMENT"]
+    },
+    {
+      "path": "/v1/region/create-region",
+      "method": "POST",
+      "modules": ["MAIN_DATA_MANAGEMENT"]
+    },
+    {
+      "path": "/v1/region/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})/single-region-dashboard",
+      "method": "GET",
+      "modules": ["MAIN_DATA_MANAGEMENT"]
+    },
+    {
+      "path": "/v1/region/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})/all-regions-dashboard",
+      "method": "GET",
+      "modules": ["MAIN_DATA_MANAGEMENT", "WAREHOUSES"]
+    },
+    {
+      "path": "/v1/region/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})/update-region",
+      "method": "PUT",
+      "modules": ["MAIN_DATA_MANAGEMENT"]
+    },
+    {
+      "path": "/v1/region/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})/delete-region",
+      "method": "DELETE",
+      "modules": ["MAIN_DATA_MANAGEMENT"]
+    },
+    {
+      "path": "/v1/city/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})/create-city",
+      "method": "POST",
+      "modules": ["MAIN_DATA_MANAGEMENT"]
+    },
+    {
+      "path": "/v1/city/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})/all-cities-dashboard",
+      "method": "GET",
+      "modules": ["MAIN_DATA_MANAGEMENT", "WAREHOUSES"]
+    },
+    {
+      "path": "/v1/city/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})/single-city-dashboard",
+      "method": "GET",
+      "modules": ["MAIN_DATA_MANAGEMENT", "WORKING_AREAS", "EMPLOYEES"]
+    },
+    {
+      "path": "/v1/city/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})/update-city",
+      "method": "PUT",
+      "modules": ["MAIN_DATA_MANAGEMENT"]
+    },
+    {
+      "path": "/v1/city/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})/delete-city",
+      "method": "DELETE",
+      "modules": ["MAIN_DATA_MANAGEMENT"]
+    },
+    {
+      "path": "/v1/driver/all-drivers",
+      "method": "GET",
+      "modules": ["ORDERS", "CLIENTS"]
+    },
+    {
+      "path": "/v1/driver/all-drivers-dashboard",
+      "method": "GET",
+      "modules": ["DRIVERS", "RETURN_ORDERS", "NOTIFICATIONS"]
+    },
+    {
+      "path": "/v1/driver/single-driver-dashboard/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "GET",
+      "modules": ["DRIVERS"]
+    },
+    {
+      "path": "/v1/driver/total-driver-dashboard",
+      "method": "GET",
+      "modules": ["DRIVERS"]
+    },
+    {
+      "path": "/v1/driver/delete-driver/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "DELETE",
+      "modules": ["DRIVERS"]
+    },
+    {
+      "path": "/v1/driver/update-profile-driver",
+      "method": "PUT",
+      "modules": ["DRIVERS"]
+    },
+    {
+      "path": "/v1/product/create-product",
+      "method": "POST",
+      "modules": ["PRODUCTS"]
+    },
+    {
+      "path": "/v1/product/create-product-offer/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "POST",
+      "modules": ["OFFERS"]
+    },
+    {
+      "path": "/v1/product/update-product-offer/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "PUT",
+      "modules": ["OFFERS"]
+    },
+    {
+      "path": "/v1/product/delete-product-offer/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "DELETE",
+      "modules": ["OFFERS"]
+    },
+    {
+      "path": "/v1/product/add-image-to-product/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "POST",
+      "modules": ["PRODUCTS"]
+    },
+    {
+      "path": "/v1/product/add-measurement-to-product/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "POST",
+      "modules": ["PRODUCTS"]
+    },
+    {
+      "path": "/v1/product/update-product/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "PUT",
+      "modules": ["PRODUCTS"]
+    },
+    {
+      "path": "/v1/product/update-product-measurement/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "PUT",
+      "modules": ["PRODUCTS"]
+    },
+    {
+      "path": "/v1/product/update-product-image/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "PUT",
+      "modules": ["PRODUCTS"]
+    },
+    {
+      "path": "/v1/product/all-products-for-dashboard",
+      "method": "GET",
+      "modules": ["OFFERS", "SUB_CATEGORIES", "WAREHOUSES"]
+    },
+    {
+      "path": "/v1/product/all-products-offers-for-dashboard",
+      "method": "GET",
+      "modules": ["OFFERS"]
+    },
+    {
+      "path": "/v1/product/single-product-offer-dashboard/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "GET",
+      "modules": ["OFFERS"]
+    },
+    {
+      "path": "/v1/product/single-product-dashboard",
+      "method": "GET",
+      "modules": ["OFFERS", "PRODUCTS", "SUB_CATEGORIES", "WAREHOUSES"]
+    },
+    {
+      "path": "/v1/product/delete-Product/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "DELETE",
+      "modules": ["PRODUCTS"]
+    },
+    {
+      "path": "/v1/product/delete-Product-image/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "DELETE",
+      "modules": ["PRODUCTS"]
+    },
+    {
+      "path": "/v1/product/delete-Product-measurement/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "DELETE",
+      "modules": ["PRODUCTS"]
+    },
+    {
+      "path": "/v1/product/export",
+      "method": "GET",
+      "modules": ["PRODUCTS"]
+    },
+    {
+      "path": "/v1/product/unattched/export",
+      "method": "GET",
+      "modules": ["PRODUCTS"]
+    },
+    {
+      "path": "/v1/product/attached/export",
+      "method": "GET",
+      "modules": ["PRODUCTS"]
+    },
+    {
+      "path": "/v1/product/warehouse/export",
+      "method": "GET",
+      "modules": ["WAREHOUSES"]
+    },
+    {
+      "path": "/v1/measurement-unit/all-measurement-units",
+      "method": "GET",
+      "modules": ["MAIN_DATA_MANAGEMENT", "PRODUCTS"]
+    },
+    {
+      "path": "/v1/measurement-unit/create-measurement-unit",
+      "method": "POST",
+      "modules": ["MAIN_DATA_MANAGEMENT"]
+    },
+    {
+      "path": "/v1/measurement-unit/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})/update-measurement-unit",
+      "method": "PUT",
+      "modules": ["MAIN_DATA_MANAGEMENT"]
+    },
+    {
+      "path": "/v1/measurement-unit/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})/delete-measurement-unit",
+      "method": "DELETE",
+      "modules": ["MAIN_DATA_MANAGEMENT"]
+    },
+    {
+      "path": "/v1/notification/send-to-users",
+      "method": "POST",
+      "modules": ["NOTIFICATIONS"]
+    },
+    {
+      "path": "/v1/notification/send-to-all",
+      "method": "POST",
+      "modules": ["NOTIFICATIONS"]
+    },
+    {
+      "path": "/v1/additional-service/all-additionalServices-units",
+      "method": "GET",
+      "modules": ["MAIN_DATA_MANAGEMENT", "SUB_CATEGORIES"]
+    },
+    {
+      "path": "/v1/additional-service/create-additional-service-unit",
+      "method": "POST",
+      "modules": ["MAIN_DATA_MANAGEMENT"]
+    },
+    {
+      "path": "/v1/additional-service/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})/update-additional-service-unit",
+      "method": "PUT",
+      "modules": ["MAIN_DATA_MANAGEMENT"]
+    },
+    {
+      "path": "/v1/additional-service/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})/delete-additional-service-unit",
+      "method": "DELETE",
+      "modules": ["MAIN_DATA_MANAGEMENT"]
+    },
+    {
+      "path": "/v1/section",
+      "method": "POST",
+      "modules": ["SECTIONS"]
+    },
+    {
+      "path": "/v1/section/export",
+      "method": "GET",
+      "modules": ["ORDERS", "SECTIONS", "REASONS"]
+    },
+    {
+      "path": "/v1/section/import",
+      "method": "POST",
+      "modules": ["ORDERS", "SECTIONS", "REASONS"]
+    },
+    {
+      "path": "/v1/section/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "GET",
+      "modules": ["SECTIONS"]
+    },
+    {
+      "path": "/v1/section",
+      "method": "PUT",
+      "modules": ["SECTIONS"]
+    },
+    {
+      "path": "/v1/section/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "DELETE",
+      "modules": ["SECTIONS"]
+    },
+    {
+      "path": "/v1/section/add-category",
+      "method": "POST",
+      "modules": ["SECTIONS"]
+    },
+    {
+      "path": "/v1/section/section-category",
+      "method": "PUT",
+      "modules": ["SECTIONS"]
+    },
+    {
+      "path": "/v1/section/section-category/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "DELETE",
+      "modules": ["SECTIONS"]
+    },
+    {
+      "path": "/v1/section",
+      "method": "GET",
+      "modules": ["SECTIONS", "PRODUCTS"]
+    },
+    {
+      "path": "/v1/section/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})/categories",
+      "method": "GET",
+      "modules": ["SECTIONS", "PRODUCTS", "SUB_CATEGORIES"]
+    },
+    {
+      "path": "/v1/category",
+      "method": "POST",
+      "modules": ["CATEGORIES"]
+    },
+    {
+      "path": "/v1/category",
+      "method": "PUT",
+      "modules": ["CATEGORIES"]
+    },
+    {
+      "path": "/v1/category",
+      "method": "GET",
+      "modules": ["CATEGORIES", "SECTIONS"]
+    },
+    {
+      "path": "/v1/category/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "GET",
+      "modules": ["CATEGORIES"]
+    },
+    {
+      "path": "/v1/category/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})/subcategories",
+      "method": "GET",
+      "modules": ["CATEGORIES", "SUB_CATEGORIES", "PRODUCTS"]
+    },
+    {
+      "path": "/v1/category/add-subcategory",
+      "method": "POST",
+      "modules": ["CATEGORIES"]
+    },
+    {
+      "path": "/v1/category/category-subcategory",
+      "method": "PUT",
+      "modules": ["CATEGORIES"]
+    },
+    {
+      "path": "/v1/category/category-subcategory/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "DELETE",
+      "modules": ["CATEGORIES", "SECTIONS"]
+    },
+    {
+      "path": "/v1/subcategory",
+      "method": "POST",
+      "modules": ["SUB_CATEGORIES"]
+    },
+    {
+      "path": "/v1/subcategory",
+      "method": "GET",
+      "modules": ["SUB_CATEGORIES", "CATEGORIES"]
+    },
+    {
+      "path": "/v1/subcategory/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "GET",
+      "modules": ["SUB_CATEGORIES"]
+    },
+    {
+      "path": "/v1/subcategory/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "GET",
+      "modules": ["SUB_CATEGORIES"]
+    },
+    {
+      "path": "/v1/subcategory",
+      "method": "PUT",
+      "modules": ["SUB_CATEGORIES"]
+    },
+    {
+      "path": "/v1/subcategory/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "DELETE",
+      "modules": ["SUB_CATEGORIES"]
+    },
+    {
+      "path": "/v1/product-category-price/create-link-product-subcategory/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "POST",
+      "modules": ["SUB_CATEGORIES"]
+    },
+    {
+      "path": "/v1/product-category-price/delete-link-product-subcategory/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "DELETE",
+      "modules": ["SUB_CATEGORIES"]
+    },
+    {
+      "path": "/v1/product-category-price/unit-prices-product/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "POST",
+      "modules": ["SUB_CATEGORIES"]
+    },
+    {
+      "path": "/v1/product-category-price/product-additional-service/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "POST",
+      "modules": ["SUB_CATEGORIES"]
+    },
+    {
+      "path": "/v1/product-category-price/product-additional-service/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "DELETE",
+      "modules": ["SUB_CATEGORIES"]
+    },
+    {
+      "path": "/v1/banar",
+      "method": "POST",
+      "modules": ["BANARS"]
+    },
+    {
+      "path": "/v1/banar",
+      "method": "GET",
+      "modules": ["BANARS"]
+    },
+    {
+      "path": "/v1/banar/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "GET",
+      "modules": ["BANARS"]
+    },
+    {
+      "path": "/v1/banar/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "PATCH",
+      "modules": ["BANARS"]
+    },
+    {
+      "path": "/v1/banar/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "DELETE",
+      "modules": ["BANARS"]
+    },
+    {
+      "path": "/v1/warehouse",
+      "method": "GET",
+      "modules": ["WAREHOUSES", "CLIENTS", "ORDERS"]
+    },
+    {
+      "path": "/v1/warehouse",
+      "method": "POST",
+      "modules": ["WAREHOUSES"]
+    },
+    {
+      "path": "/v1/warehouse/products",
+      "method": "GET",
+      "modules": ["WAREHOUSES"]
+    },
+    {
+      "path": "/v1/warehouse/operation",
+      "method": "POST",
+      "modules": ["WAREHOUSES"]
+    },
+    {
+      "path": "/v1/warehouse/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "PATCH",
+      "modules": ["WAREHOUSES"]
+    },
+    {
+      "path": "/v1/warehouse/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "DELETE",
+      "modules": ["WAREHOUSES"]
+    },
+    {
+      "path": "/v1/warehouse/attach-driver/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "POST",
+      "modules": ["DRIVERS"]
+    },
+    {
+      "path": "/v1/support-ticket",
+      "method": "GET",
+      "modules": ["SUPPORT"]
+    },
+    {
+      "path": "/v1/support-ticket/comment/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "POST",
+      "modules": ["SUPPORT"]
+    },
+    {
+      "path": "/v1/support-ticket/comments/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "GET",
+      "modules": ["SUPPORT"]
+    },
+    {
+      "path": "/v1/support-ticket/ticket-status/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "PUT",
+      "modules": ["SUPPORT"]
+    },
+    {
+      "path": "/v1/support-ticket/re-active-counter/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "PATCH",
+      "modules": ["SUPPORT"]
+    },
+    {
+      "path": "/v1/static-page/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "GET",
+      "modules": ["TERMS", "PRIVACY_POLICY", "RETURN_POLICY", "ABOUT_US"]
+    },
+    {
+      "path": "/v1/order/invoice/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "GET",
+      "modules": ["ORDERS"]
+    },
+    {
+      "path": "/v1/order/dashboard-orders",
+      "method": "GET",
+      "modules": ["ORDERS", "CLIENTS"]
+    },
+    {
+      "path": "/v1/order/single-order-dashboard/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "GET",
+      "modules": ["ORDERS"]
+    },
+    {
+      "path": "/v1/order/dashboard-orders-total",
+      "method": "GET",
+      "modules": ["ORDERS", "PRODUCTS", "MOST_SELLING"]
+    },
+    {
+      "path": "/v1/order/dashboard-shipments",
+      "method": "GET",
+      "modules": ["DRIVERS"]
+    },
+    {
+      "path": "/v1/order/update-return-order-status/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "PATCH",
+      "modules": ["RETURN_ORDERS"]
+    },
+    {
+      "path": "/v1/order/return-orders",
+      "method": "GET",
+      "modules": ["RETURN_ORDERS"]
+    },
+    {
+      "path": "/v1/order/broadcast-order-drivers/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "POST",
+      "modules": ["ORDERS"]
+    },
+    {
+      "path": "/v1/shipment/admin/process/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "POST",
+      "modules": ["ORDERS"]
+    },
+    {
+      "path": "/v1/shipment/admin/ready-for-pickup/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "POST",
+      "modules": ["ORDERS"]
+    },
+    {
+      "path": "/v1/shipment/assign-driver/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "POST",
+      "modules": ["ORDERS"]
+    },
+    {
+      "path": "/v1/shipment/replace-assignd-driver/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "POST",
+      "modules": ["ORDERS"]
+    },
+    {
+      "path": "/v1/shipment/cancel-shipment/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "POST",
+      "modules": ["ORDERS"]
+    },
+    {
+      "path": "/v1/employee/create",
+      "method": "POST",
+      "modules": ["EMPLOYEES"]
+    },
+    {
+      "path": "/v1/employee/all",
+      "method": "GET",
+      "modules": ["EMPLOYEES"]
+    },
+    {
+      "path": "/v1/employee/single/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "GET",
+      "modules": ["EMPLOYEES"]
+    },
+    {
+      "path": "/v1/employee/update/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "PATCH",
+      "modules": ["EMPLOYEES"]
+    },
+    {
+      "path": "/v1/employee/delete/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "DELETE",
+      "modules": ["EMPLOYEES"]
+    },
+    {
+      "path": "/v1/working-area",
+      "method": "GET",
+      "modules": ["WORKING_AREAS"]
+    },
+    {
+      "path": "/v1/working-area/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "GET",
+      "modules": ["WORKING_AREAS"]
+    },
+    {
+      "path": "/v1/working-area",
+      "method": "POST",
+      "modules": ["WORKING_AREAS"]
+    },
+    {
+      "path": "/v1/working-area",
+      "method": "PUT",
+      "modules": ["WORKING_AREAS"]
+    },
+    {
+      "path": "/v1/working-area/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "DELETE",
+      "modules": ["WORKING_AREAS"]
+    },
+    {
+      "path": "/v1/transaction",
+      "method": "GET",
+      "modules": ["CLIENTS", "DRIVERS"]
+    },
+    {
+      "path": "/v1/transaction/wallet",
+      "method": "GET",
+      "modules": ["CLIENTS", "DRIVERS"]
+    },
+    {
+      "path": "/v1/transaction",
+      "method": "POST",
+      "modules": ["CLIENTS", "DRIVERS"]
+    },
+    {
+      "path": "/v1/payment-method/admin",
+      "method": "GET",
+      "modules": ["PAYMENT", "ORDERS", "PROMOCODES"]
+    },
+    {
+      "path": "/v1/payment-method",
+      "method": "PUT",
+      "modules": ["PAYMENT"]
+    },
+    {
+      "path": "/v1/reason/create",
+      "method": "POST",
+      "modules": ["REASONS"]
+    },
+    {
+      "path": "/v1/reason/signle-reason/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "GET",
+      "modules": ["REASONS"]
+    },
+    {
+      "path": "/v1/reason/get-reasons-by-name",
+      "method": "GET",
+      "modules": ["REASONS"]
+    },
+    {
+      "path": "/v1/reason/update/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "PATCH",
+      "modules": ["REASONS"]
+    },
+    {
+      "path": "/v1/reason/delete/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "DELETE",
+      "modules": ["REASONS"]
+    },
+    {
+      "path": "/v1/promo-code",
+      "method": "POST",
+      "modules": ["PROMOCODES"]
+    },
+    {
+      "path": "/v1/promo-code",
+      "method": "PUT",
+      "modules": ["PROMOCODES"]
+    },
+    {
+      "path": "/v1/promo-code",
+      "method": "GET",
+      "modules": ["PROMOCODES"]
+    },
+    {
+      "path": "/v1/promo-code/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "GET",
+      "modules": ["PROMOCODES"]
+    },
+    {
+      "path": "/v1/storage",
+      "method": "POST",
+      "modules": ["NOTIFICATIONS", "PRODUCTS"]
+    }
+  ]

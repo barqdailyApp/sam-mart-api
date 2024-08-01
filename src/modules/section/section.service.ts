@@ -62,7 +62,7 @@ export class SectionService extends BaseService<Section> {
           section.allowed_roles.includes(Role.CLIENT),
         ),
       );
-    if (user.roles.includes(Role.ADMIN))
+    if (user.roles.includes(Role.ADMIN) || user.roles.includes(Role.EMPLOYEE))
       return await this.section_repo.find({ order: { order_by: 'ASC' } });
 
     return this._i18nResponse.entity(

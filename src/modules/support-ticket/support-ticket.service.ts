@@ -100,7 +100,7 @@ export class SupportTicketService extends BaseService<SupportTicket> {
     options.includes.push('subject');
     options.includes.push('attachment');
 
-    if (this.currentUser.roles.includes(Role.ADMIN)) {
+    if (this.currentUser.roles.includes(Role.ADMIN) || this.currentUser.roles.includes(Role.EMPLOYEE)) {
       options.includes.push('user');
     } else {
       options.filters.push(`user_id=${this.currentUser.id}`);
