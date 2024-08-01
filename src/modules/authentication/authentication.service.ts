@@ -19,29 +19,41 @@ import { DriverRegisterRequest } from './dto/requests/driver-register.dto';
 import { UpdateDriverStatusRequest } from './dto/requests/update-driver-status.request';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { SamModules } from 'src/infrastructure/entities/sam-modules/sam-modules.entity';
 import { UsersSamModules } from 'src/infrastructure/entities/sam-modules/users-sam-modules.entity';
+import { Otp } from 'src/infrastructure/entities/auth/otp.entity';
+import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 
 @Injectable()
 export class AuthenticationService {
   constructor(
     @Inject(UserService) private readonly userService: UserService,
-    @Inject(RegisterUserTransaction) private readonly registerUserTransaction: RegisterUserTransaction,
-    @Inject(RegisterDriverTransaction) private readonly registerDriverTransaction: RegisterDriverTransaction,
-    @InjectRepository(Driver) private readonly driverRepository: Repository<Driver>,
-    @InjectRepository(SamModules) private readonly samModuleRepository: Repository<SamModules>,
-    @InjectRepository(UsersSamModules) private readonly userSamModulesRepository: Repository<UsersSamModules>,
+    @Inject(RegisterUserTransaction)
+    private readonly registerUserTransaction: RegisterUserTransaction,
+    @Inject(RegisterDriverTransaction)
+    private readonly registerDriverTransaction: RegisterDriverTransaction,
+    @InjectRepository(Driver)
+    private readonly driverRepository: Repository<Driver>,
 
+    @InjectRepository(Otp) private readonly otpRepository: Repository<Otp>,
+    @InjectRepository(SamModules)
+    private readonly samModuleRepository: Repository<SamModules>,
+    @InjectRepository(UsersSamModules)
+    private readonly userSamModulesRepository: Repository<UsersSamModules>,
 
-    @Inject(SendOtpTransaction) private readonly sendOtpTransaction: SendOtpTransaction,
-    @Inject(VerifyOtpTransaction) private readonly verifyOtpTransaction: VerifyOtpTransaction,
-    @Inject(VerifyPhoneTransaction) private readonly verifyPhoneTransaction: VerifyPhoneTransaction,
-    @Inject(DeleteAccountTransaction) private readonly deleteAccountTransaction: DeleteAccountTransaction,
+    @Inject(SendOtpTransaction)
+    private readonly sendOtpTransaction: SendOtpTransaction,
+    @Inject(VerifyOtpTransaction)
+    private readonly verifyOtpTransaction: VerifyOtpTransaction,
+    @Inject(VerifyPhoneTransaction)
+    private readonly verifyPhoneTransaction: VerifyPhoneTransaction,
+    @Inject(DeleteAccountTransaction)
+    private readonly deleteAccountTransaction: DeleteAccountTransaction,
     @Inject(JwtService) private readonly jwtService: JwtService,
     @Inject(ConfigService) private readonly _config: ConfigService,
-  ) { }
+  ) {}
 
   async validateUser(req: LoginRequest): Promise<any> {
     const user = await this.userService.findOne([
@@ -61,15 +73,18 @@ export class AuthenticationService {
         where: { user_id: user.id },
         relations: ['samModule'],
       });
-      const transformedSamModules = userSamModule.map(samModuleRelation => {
-        const { samModule } = samModuleRelation;
-        return samModule ? {
-          id: samModule.id,
-          name_en: samModule.name_en,
-          name_ar: samModule.name_ar
-
-        } as unknown as UsersSamModules : null;
-      }).filter(samModule => samModule !== null);
+      const transformedSamModules = userSamModule
+        .map((samModuleRelation) => {
+          const { samModule } = samModuleRelation;
+          return samModule
+            ? ({
+                id: samModule.id,
+                name_en: samModule.name_en,
+                name_ar: samModule.name_ar,
+              } as unknown as UsersSamModules)
+            : null;
+        })
+        .filter((samModule) => samModule !== null);
       // Assign the transformed data to a new property
       user.samModules = transformedSamModules;
     }
@@ -116,6 +131,15 @@ export class AuthenticationService {
 
   async sendOtp(req: SendOtpRequest) {
     return await this.sendOtpTransaction.run(req);
+  }
+
+  async getOtps(query: PaginatedRequest) {
+    const otps = await this.otpRepository.findAndCount({
+      where:{username: Like(`%${query.filters??''}%`)},
+      take: query.limit??20,
+      skip: query.limit??20 * (query.page??1 - 1),
+    });
+    return otps;
   }
 
   async verifyOtp(req: VerifyOtpRequest) {

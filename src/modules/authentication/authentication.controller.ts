@@ -2,9 +2,11 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
+  Get,
   HttpStatus,
   Inject,
   Post,
+  Query,
   UploadedFile,
   UploadedFiles,
   UseGuards,
@@ -33,6 +35,8 @@ import { DriverRegisterRequest } from './dto/requests/driver-register.dto';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { Roles } from './guards/roles.decorator';
 import { UpdateDriverStatusRequest } from './dto/requests/update-driver-status.request';
+import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
+import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 
 @ApiTags(Router.Auth.ApiTag)
 @Controller(Router.Auth.Base)
@@ -40,7 +44,7 @@ export class AuthenticationController {
   constructor(
     @Inject(AuthenticationService)
     private readonly authService: AuthenticationService,
-  ) { }
+  ) {}
 
   @Post(Router.Auth.Signin)
   async signin(
@@ -100,14 +104,12 @@ export class AuthenticationController {
     req.id_card_image = files.id_card_image[0];
     req.license_image = files.license_image[0];
 
-
     const user = await this.authService.driverRegister(req);
     const result = plainToInstance(RegisterResponse, user, {
       excludeExtraneousValues: true,
     });
-    return new ActionResponse<RegisterResponse>(result)
+    return new ActionResponse<RegisterResponse>(result);
   }
-
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -157,4 +159,17 @@ export class AuthenticationController {
     return new ActionResponse(data);
   }
 
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Get("get-otps")
+  async getOtps(@Query() query: PaginatedRequest) {
+    const data = await this.authService.getOtps(query);
+    
+    data[0]=(data[0] as any) .map((otp)=>{
+      return {phone:otp.username,created_at:otp.created_at,code:otp.code,id:otp.id,isExpired:otp.isExpired()}
+    })
+    return new PaginatedResponse(data[0], {
+      meta: { total: data[1], page: query.page, limit: query.limit },
+    });
+  }
 }
