@@ -134,10 +134,13 @@ export class AuthenticationService {
   }
 
   async getOtps(query: PaginatedRequest) {
+   
+   const page = (query.page??1) -1
+   const limit = query.limit??20
     const otps = await this.otpRepository.findAndCount({
       where:{username: Like(`%${query.filters??''}%`)},
-      take: query.limit??20,
-      skip: query.limit??20 * (query.page??1 - 1),
+      take: limit,
+      skip: page *limit,
     });
     return otps;
   }

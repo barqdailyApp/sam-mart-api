@@ -161,6 +161,7 @@ export class AuthenticationController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @Get("get-otps")
   async getOtps(@Query() query: PaginatedRequest) {
     const data = await this.authService.getOtps(query);
