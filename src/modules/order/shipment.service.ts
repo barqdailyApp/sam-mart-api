@@ -570,6 +570,7 @@ export class ShipmentService extends BaseService<Shipment> {
     return this.orderFeedBackRepository.save(shipmentFeedBackCreated);
   }
 
+
   async assignDriver(shipment_id: string, driver_id: string) {
     return this.addDriverToShipment(
       shipment_id,
@@ -787,6 +788,9 @@ export class ShipmentService extends BaseService<Shipment> {
     const old_driver_id = shipment.driver.user_id;
     const old_driver= await this.getDriver(old_driver_id);
     old_driver.current_orders = old_driver.current_orders - 1;
+    if(old_driver.id==driver_id){
+     throw new BadRequestException('message.driver_already_assigned'); 
+    }
     await this.driverRepository.save(old_driver);    
 
     shipment.driver = driver;
