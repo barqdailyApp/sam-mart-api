@@ -45,11 +45,12 @@ export class BanarService extends BaseService<Banar> {
             where: {
                 is_active: true,
                 started_at: LessThanOrEqual(new Date()),
-                ended_at: MoreThanOrEqual(new Date())
+                ended_at: MoreThanOrEqual(new Date()),
+                is_popup:false
             }
         });
     }
-    async getGuestPopup(query: PaginatedRequest) {
+    async getGuestPopup() {
         return await this.banarRepository.findOne({
             where: {
                 is_active: true,

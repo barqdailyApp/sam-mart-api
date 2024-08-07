@@ -88,19 +88,12 @@ export class BanarController {
     }
     @Get("/Popup/guest")
     async getGuestPopup(
-        @Query() query: PaginatedRequest
+       
     ): Promise<ActionResponse<BannerResponse>> {
-        const banners = await this.banarService.getGuestPopup(query);
-        const count = await this.banarService.count(query);
+        const banners = await this.banarService.getGuestPopup();
+    
         const result = plainToInstance(BannerResponse, banners, { excludeExtraneousValues: true })
-        if (Object.keys(query).length) {
-            return new PaginatedResponse<BannerResponse>(result, {
-                meta: {
-                    total: count,
-                    ...query
-                }
-            });
-        }
+  
         return new ActionResponse<BannerResponse>(result);
     }
 
