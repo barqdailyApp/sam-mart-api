@@ -49,6 +49,16 @@ export class BanarService extends BaseService<Banar> {
             }
         });
     }
+    async getGuestPopup(query: PaginatedRequest) {
+        return await this.banarRepository.findOne({
+            where: {
+                is_active: true,
+                started_at: LessThanOrEqual(new Date()),
+                ended_at: MoreThanOrEqual(new Date()),
+                is_popup:true
+            }
+        });
+    }
 
     async updateBanar(id: string, banar: UpdateBannerRequest) {
         let tempImage = null;
