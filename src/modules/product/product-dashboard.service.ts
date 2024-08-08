@@ -1416,7 +1416,7 @@ export class ProductDashboardService {
         name_en: product.product_name_en,
         barcode: product.product_barcode,
         quatntity: product.totalQuantity,
-        avg_price: product.totalPrice / product.totalQuantity,
+        avgPrice: Math.round(product.totalPrice / product.totalQuantity),
       };
     });
 
