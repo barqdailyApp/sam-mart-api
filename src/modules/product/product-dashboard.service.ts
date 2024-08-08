@@ -1391,7 +1391,7 @@ export class ProductDashboardService {
 
     return result;
   }
-  async getSellingStats( start_date?: Date, to_date?: Date) {
+  async getSellingStats(start_date?: Date, to_date?: Date) {
     const result = await this.shipmentProduct_repo
       .createQueryBuilder('shipment_product')
       .select('shipment_product.product_id', 'productId')
@@ -1409,17 +1409,20 @@ export class ProductDashboardService {
         },
       )
 
-     
       .getRawMany();
-const sellingReport=result.map((product)=>{
-  return {...product,avg_price:product.totalPrice/product.totalQuantity}
-})
+    const sellingReport = result.map((product) => {
+      return {
+        name_ar: product.product_name_ar,
+        name_en: product.product_name_en,
+        barcode: product.product_barcode,
+        avg_price: product.totalPrice / product.totalQuantity,
+      };
+    });
 
-      return await this._fileService.exportExcel(
-        sellingReport,
-        'sellingReport',
-        'sellingReport',
-      );
-
+    return await this._fileService.exportExcel(
+      sellingReport,
+      'sellingReport',
+      'sellingReport',
+    );
   }
 }
