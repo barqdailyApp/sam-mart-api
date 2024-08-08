@@ -263,8 +263,24 @@ export class ProductDashboardController {
   @Get('most-selling')
   async getMostSelling(@Query('limit') limit: number) {
     return new ActionResponse(
-       await this.productDashboardService.getMostSelling(limit),
+      await this.productDashboardService.getMostSelling(limit),
     );
+  }
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @Header(
+    'Content-type',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  )
+  @Get('selling-report')
+  async getSellingReport(
+    @Res() res: Response,
+    @Query('start_date') start_date: Date,
+    @Query('to_date') to_date: Date,
+  ) {
+  
+    const File = await this.productDashboardService.getSellingStats( start_date,to_date);
+    res.download(`${File}`);
   }
 
   @Delete('delete-Product/:product_id')

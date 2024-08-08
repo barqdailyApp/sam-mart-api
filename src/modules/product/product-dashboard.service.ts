@@ -422,9 +422,9 @@ export class ProductDashboardService {
     }
     //* Check if product barcode exist
     const productBarcode = await this.productRepository.findOne({
-      where: { barcode ,id:Not(product_id) },
+      where: { barcode, id: Not(product_id) },
     });
-    if (productBarcode?.barcode  == barcode) {
+    if (productBarcode?.barcode == barcode) {
       throw new BadRequestException('message.product_barcode_exist');
     }
 
@@ -1378,7 +1378,7 @@ export class ProductDashboardService {
     return productMeasurement;
   }
 
-  async getMostSelling(limit? : number) {
+  async getMostSelling(limit?: number) {
     const result = await this.shipmentProduct_repo
       .createQueryBuilder('shipment_product')
       .select('shipment_product.product_id', 'productId')
@@ -1386,9 +1386,40 @@ export class ProductDashboardService {
       .addSelect('SUM(shipment_product.quantity)', 'totalQuantity')
       .groupBy('shipment_product.product_id')
       .orderBy('totalQuantity', 'DESC')
-      .limit(limit??20)
+      .limit(limit ?? 20)
       .getRawMany();
 
     return result;
+  }
+  async getSellingStats( start_date?: Date, to_date?: Date) {
+    const result = await this.shipmentProduct_repo
+      .createQueryBuilder('shipment_product')
+      .select('shipment_product.product_id', 'productId')
+
+      .leftJoinAndSelect('shipment_product.product', 'product')
+      .addSelect('SUM(shipment_product.quantity)', 'totalQuantity')
+      .addSelect('SUM(shipment_product.price)', 'totalPrice')
+      .groupBy('shipment_product.product_id')
+      .orderBy('totalQuantity', 'DESC')
+      .where(
+        'shipment_product.created_at > :start_date AND shipment_product.created_at < :to_date',
+        {
+          start_date: start_date ?? null,
+          to_date: to_date ?? null,
+        },
+      )
+
+     
+      .getRawMany();
+const sellingReport=result.map((product)=>{
+  return {...product,avg_price:product.totalPrice/product.totalQuantity}
+})
+
+      return await this._fileService.exportExcel(
+        sellingReport,
+        'sellingReport',
+        'sellingReport',
+      );
+
   }
 }
