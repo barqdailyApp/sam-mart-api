@@ -20,9 +20,14 @@ export class CreateBanarRequest {
     @IsBoolean()
     is_active: boolean;
     
-    @ApiProperty({ nullable: true, required: false, default: true })
+    @ApiProperty({ nullable: true, required: false, default: false })
     @IsOptional()
-    @Transform((value) => Boolean(value))
+    @Transform(({ value }) => {
+        if (typeof value === 'string') {
+            return value.toLowerCase() === 'true';
+        }
+        return Boolean(value);
+    })
     @IsBoolean()
     is_popup: boolean;
 
