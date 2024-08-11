@@ -1421,7 +1421,10 @@ export class ProductDashboardService {
         avgPrice: Math.round((product.totalPrice / product.totalQuantity)*100) / 100,
       };
     });
+    
 
+    if(sellingReport.length<1)
+      throw new NotFoundException('message.no_selling_report_found');
     return await this._fileService.exportExcel(
       sellingReport,
       'sellingReport',
