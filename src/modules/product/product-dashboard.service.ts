@@ -1400,13 +1400,14 @@ export class ProductDashboardService {
       .addSelect('SUM(shipment_product.quantity)', 'totalQuantity')
       .addSelect('SUM(shipment_product.price)', 'totalPrice')
       .groupBy('shipment_product.product_id')
-      .orderBy('totalQuantity', 'DESC')
+      .orderBy('totalQuantity', 'DESC').withDeleted()
       .where(
         'shipment_product.created_at > :start_date AND shipment_product.created_at < :to_date',
         {
           start_date: start_date ?? null,
           to_date: to_date ?? null,
         },
+        
       )
 
       .getRawMany();
