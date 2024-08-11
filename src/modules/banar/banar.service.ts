@@ -35,6 +35,7 @@ export class BanarService extends BaseService<Banar> {
             started_at: banar.started_at,
             ended_at: banar.ended_at,
             is_active: banar.is_active,
+            is_popup:banar?.is_popup
         });
 
         return await this.banarRepository.save(createdBanar);
