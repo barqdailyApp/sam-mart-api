@@ -46,6 +46,7 @@ export class CartService extends BaseService<CartProduct> {
   async getCartProducts(cart_id: string) {
     const cart_products = await this.cartProductRepository.find({
       where: { cart_id: cart_id },
+      order:{product_category_price:{product_sub_category:{category_subCategory:{section_category:{category:{name_ar:"DESC"}}}}}},
       relations: {
         product_category_price: {
           product_additional_services: { additional_service: true },
@@ -58,6 +59,7 @@ export class CartService extends BaseService<CartProduct> {
             category_subCategory: { section_category: true },
           },
         },
+        
       },
       withDeleted: true,
     });
