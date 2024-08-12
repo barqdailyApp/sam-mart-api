@@ -66,25 +66,25 @@ export class ProductCategoryPriceService {
       throw new NotFoundException('message.product_not_found');
     }
     //* Check if product  there is a section
-    const sectionSubcategory = categorySubcategory.section_category.section_id;
-    const productSection = await this.product_repo.findOne({
-      where: {
-        id: product_id,
-        product_sub_categories: {
-          category_subCategory: {
-            section_category: {
-              section_id: sectionSubcategory,
-            },
-          },
-        },
-      },
-    });
+    // const sectionSubcategory = categorySubcategory.section_category.section_id;
+    // const productSection = await this.product_repo.findOne({
+    //   where: {
+    //     id: product_id,
+    //     product_sub_categories: {
+    //       category_subCategory: {
+    //         section_category: {
+    //           section_id: sectionSubcategory,
+    //         },
+    //       },
+    //     },
+    //   },
+    // });
 
-    if (productSection) {
-      throw new BadRequestException(
-        'message.this_product_cannot_be_added_in_the_same_section',
-      );
-    }
+    // if (productSection) {
+    //   throw new BadRequestException(
+    //     'message.this_product_cannot_be_added_in_the_same_section',
+    //   );
+    // }
 
     //* -------------------------- Create product sub category if Not Exist --------------------------*/
     const productSubCategoryCreate = this.productSubCategory_repo.create({
