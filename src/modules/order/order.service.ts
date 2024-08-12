@@ -664,7 +664,7 @@ export class OrderService extends BaseUserService<Order> {
       .leftJoinAndSelect(
         'cart_product_category_price.product_offer',
         'cart_product_offer',
-      );
+      ).orderBy('category.name_ar', 'DESC');
 
     //  single order
     query = query.where('order.id = :id', { id: order_id });
