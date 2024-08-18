@@ -101,7 +101,7 @@ export class EmployeeController {
     });
 
     const response = this._i18nResponse.entity(result);
-    return new ActionResponse<EmployeeResponse>(response);
+    return new ActionResponse<EmployeeResponse>(result);
   }
 
   @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('avatar_file'))
