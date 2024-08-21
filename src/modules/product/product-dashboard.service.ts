@@ -1336,7 +1336,7 @@ export class ProductDashboardService {
     const flattenedProducts = warehouse_products.map((product) => {
       return {
         الكود: product.product?.barcode,
-        الاسم: product.product.name_ar,
+        الاسم: product.product?.name_ar,
         السعر: product.product.product_sub_categories[0].product_prices[0].price,
         الكمية: product.quantity,
         الوحدة:"قطعة",
