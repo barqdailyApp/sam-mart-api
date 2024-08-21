@@ -1337,7 +1337,7 @@ export class ProductDashboardService {
       return {
         الكود: product.product?.barcode,
         الاسم: product.product?.name_ar,
-        السعر: product.product.product_sub_categories[0].product_prices[0].price,
+        السعر: product.product?.product_sub_categories[0]?.product_prices[0]?.price,
         الكمية: product.quantity,
         الوحدة:"قطعة",
         المجموعة: "عام"
