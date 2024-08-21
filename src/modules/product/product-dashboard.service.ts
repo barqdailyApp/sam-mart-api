@@ -411,7 +411,7 @@ export class ProductDashboardService {
       name_en,
       barcode,
       keywords,
-      row_number
+      row_number,
     } = updateProductRequest;
 
     //* Check if product exist
@@ -440,7 +440,7 @@ export class ProductDashboardService {
         description_en,
         barcode,
         keywords,
-        row_number
+        row_number,
       },
     );
     return await this.productRepository.findOne({
@@ -1312,7 +1312,36 @@ export class ProductDashboardService {
 
         description_ar: product.product?.description_ar,
         description_en: product.product?.description_en,
+      };
+    });
+
+    return await this._fileService.exportExcel(
+      flattenedProducts,
+      'products',
+      'products',
+    );
+  }
+  async exportWarehouseProductsPricing() {
+    const warehouse_products = await this.warehouse_products_repo.find({
+    
+      relations: {
+        product: {product_sub_categories:{product_prices:true}},
+        product_measurement: { measurement_unit: true },
         
+      },
+      order: { product: { name_ar: 'ASC' } },
+    });
+
+    // Create a flat structure for products
+    const flattenedProducts = warehouse_products.map((product) => {
+      return {
+        الكود: product.product.barcode,
+        الاسم: product.product.name_ar,
+        السعر: product.product.product_sub_categories[0].product_prices[0].price,
+        الكمية: product.quantity,
+        الوحدة:"قطعة",
+        المجموعة: "عام"
+
       };
     });
 
@@ -1403,14 +1432,14 @@ export class ProductDashboardService {
       .addSelect('SUM(shipment_product.quantity)', 'totalQuantity')
       .addSelect('SUM(shipment_product.price)', 'totalPrice')
       .groupBy('shipment_product.product_id')
-      .orderBy('totalQuantity', 'DESC').withDeleted()
+      .orderBy('totalQuantity', 'DESC')
+      .withDeleted()
       .where(
         'shipment_product.created_at > :start_date AND shipment_product.created_at < :to_date',
         {
           start_date: start_date ?? null,
           to_date: to_date ?? null,
         },
-        
       )
 
       .getRawMany();
@@ -1421,12 +1450,12 @@ export class ProductDashboardService {
         barcode: product.product_barcode,
         totalPrice: product.totalPrice,
         totalQuantity: product.totalQuantity,
-        avgPrice: Math.round((product.totalPrice / product.totalQuantity)*100) / 100,
+        avgPrice:
+          Math.round((product.totalPrice / product.totalQuantity) * 100) / 100,
       };
     });
-    
 
-    if(sellingReport.length<1)
+    if (sellingReport.length < 1)
       throw new NotFoundException('message.no_selling_report_found');
     return await this._fileService.exportExcel(
       sellingReport,

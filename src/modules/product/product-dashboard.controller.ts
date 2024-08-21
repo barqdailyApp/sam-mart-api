@@ -369,6 +369,13 @@ export class ProductDashboardController {
     );
     res.download(`${File}`);
   }
+  async exportWarehouseProductsPricing(
+    @Res() res: Response,
+   
+  ) {
+    const File = await this.productDashboardService.exportWarehouseProductsPricing();
+    res.download(`${File}`);
+  }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
