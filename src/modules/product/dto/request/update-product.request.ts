@@ -24,6 +24,11 @@ export class UpdateProductRequest {
   @IsOptional()
   @IsString()
   barcode: string;
+
+  @ApiProperty({ nullable: true, required: false })
+  @IsOptional()
+  @IsString()
+  row_number: number;
   
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()
