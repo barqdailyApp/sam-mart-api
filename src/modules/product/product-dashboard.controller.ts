@@ -369,6 +369,14 @@ export class ProductDashboardController {
     );
     res.download(`${File}`);
   }
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @Get('warehouse-pricing/export')
+  @Header(
+    'Content-type',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  )
   async exportWarehouseProductsPricing(
     @Res() res: Response,
    
