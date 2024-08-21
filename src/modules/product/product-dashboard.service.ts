@@ -1323,11 +1323,9 @@ export class ProductDashboardService {
   }
   async exportWarehouseProductsPricing() {
     const warehouse_products = await this.warehouse_products_repo.find({
-    
       relations: {
-        product: {product_sub_categories:{product_prices:true}},
+        product: { product_sub_categories: { product_prices: true } },
         product_measurement: { measurement_unit: true },
-        
       },
       order: { product: { name_ar: 'ASC' } },
     });
@@ -1335,13 +1333,15 @@ export class ProductDashboardService {
     // Create a flat structure for products
     const flattenedProducts = warehouse_products.map((product) => {
       return {
-        الكود: product.product?.barcode,
-        الاسم: product.product?.name_ar,
-        السعر: product.product?.product_sub_categories[0]?.product_prices[0]?.price,
-        الكمية: product.quantity,
-        الوحدة:"قطعة",
-        المجموعة: "عام"
+        المجموعة: 'عام',
+        الوحدة: 'قطعة',
 
+        الكمية: product.quantity,
+        السعر:
+          product.product?.product_sub_categories[0]?.product_prices[0]?.price,
+
+        الاسم: product.product?.name_ar,
+        الكود: product.product?.barcode,
       };
     });
 
