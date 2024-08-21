@@ -31,15 +31,19 @@ export class OrderSingleDashboardResponse {
   @Expose() promo_code_discount: number;
   @Expose() products_price: number;
   @Expose() promo_code: any;
+  @Expose() note: string;
 
   constructor(order: Order) {
     this.order_id = order.id;
     this.slot_id = order.slot_id;
     this.promo_code_discount = order.promo_code_discount;
-    this.promo_code = order.promo_code!=null ? {
-      id: order.promo_code.id,
-      code: order.promo_code.code,
-    }:null;
+    this.promo_code =
+      order.promo_code != null
+        ? {
+            id: order.promo_code.id,
+            code: order.promo_code.code,
+          }
+        : null;
     this.section = {
       id: order.section.id,
       name_ar: order.section.name_ar,
@@ -57,6 +61,7 @@ export class OrderSingleDashboardResponse {
     this.delivery_day = order.delivery_day;
     this.delivery_type = order.delivery_type;
     this.delivery_fee = order.delivery_fee;
+    this.note = order.note;
 
     this.warehouse = {
       id: order.warehouse.id,
@@ -81,6 +86,7 @@ export class OrderSingleDashboardResponse {
     this.shipments = {
       id: order.shipments[0].id,
       order_id: order.shipments[0].order_id,
+
       driver: order.shipments[0].driver_id
         ? {
             id: order.shipments[0].driver.user.id,
@@ -97,6 +103,7 @@ export class OrderSingleDashboardResponse {
       order_canceled_at: order.shipments[0].order_canceled_at,
       order_cancel_reason: order.shipments[0].cancelShipmentReason,
       canceled_by: order.shipments[0]?.canceled_by,
+
       shipment_products: order.shipments[0].shipment_products.map(
         (shipment_product) => {
           return {
@@ -108,6 +115,10 @@ export class OrderSingleDashboardResponse {
                 .product.barcode,
             quantity: shipment_product.quantity,
             price: shipment_product.price,
+
+            row_number:
+              shipment_product.product_category_price.product_sub_category
+                .product.row_number,
             product_name_ar:
               shipment_product.product_category_price.product_sub_category
                 .product.name_ar,

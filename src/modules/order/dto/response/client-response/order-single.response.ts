@@ -97,7 +97,7 @@ export class OrderSingleResponse {
               product.product_images.find((x) => x.is_logo === true).url,
             ),
             total_price: shipment_product.quantity * shipment_product.price,
-
+            row_number:shipment_product.product_category_price.product_sub_category.product.row_number,
             min_order_quantity:
               product_offer != null
                 ? product_offer.min_offer_quantity

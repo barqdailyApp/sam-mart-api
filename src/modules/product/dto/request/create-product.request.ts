@@ -13,8 +13,10 @@ import {
 } from 'class-validator';
 import { CreateProductMeasurementRequest } from './create-product-measurement.request';
 import { CreateProductImageRequest } from './product-images/create-product-image.request';
-import { Unique } from 'src/core/validators/unique-constraints.validator';
-
+import {
+  IsUnique,
+  Unique,
+} from 'src/core/validators/unique-constraints.validator';
 
 export class CreateProductRequest {
   @ApiProperty()
@@ -38,17 +40,20 @@ export class CreateProductRequest {
   description_en: string;
 
   @ApiProperty({ required: false })
-  
   @IsOptional()
   @IsArray()
   keywords: string[];
 
   @ApiProperty()
   @IsNotEmpty()
+  @Unique('Product')
   @IsString()
   barcode: string;
-
-
+  @ApiProperty({ nullable: true, required: false })
+  @IsOptional()
+  @Unique('Product')
+  @IsString()
+  row_number: number;
 
   @ApiProperty({ default: true })
   @IsNotEmpty()

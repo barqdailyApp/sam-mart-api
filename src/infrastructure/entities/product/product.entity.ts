@@ -33,6 +33,10 @@ export class Product extends AuditableEntity {
   @Column({ nullable: true })
   barcode: string
 
+  @Index()
+  @Column({ nullable: true })
+  row_number: number
+
 
   @Column({nullable:true,type:'simple-array'})
   keywords: string[]

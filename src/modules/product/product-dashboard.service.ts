@@ -411,6 +411,7 @@ export class ProductDashboardService {
       name_en,
       barcode,
       keywords,
+      row_number
     } = updateProductRequest;
 
     //* Check if product exist
@@ -439,6 +440,7 @@ export class ProductDashboardService {
         description_en,
         barcode,
         keywords,
+        row_number
       },
     );
     return await this.productRepository.findOne({
@@ -1310,6 +1312,7 @@ export class ProductDashboardService {
 
         description_ar: product.product?.description_ar,
         description_en: product.product?.description_en,
+        
       };
     });
 

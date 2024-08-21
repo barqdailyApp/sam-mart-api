@@ -36,6 +36,8 @@ export class Order extends OwnedEntity {
   @JoinColumn()
   address: Address;
 
+
+
   @ManyToOne(() => PromoCode, (promoCode) => promoCode.orders)
   @JoinColumn()
   promo_code: PromoCode;
@@ -93,6 +95,9 @@ export class Order extends OwnedEntity {
 
   @Column({ nullable: true })
   delivery_day: string;
+
+  @Column({ nullable: true })
+  note: string;
 
   @Column({ nullable: true })
   slot_id: string;

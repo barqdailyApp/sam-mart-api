@@ -15,6 +15,8 @@ export class PaymentMethodRequest {
   @ValidateIf((obj) => obj. payment_method_id !=null)
   transaction_number: string;
 
+
+
   @ApiProperty()
   @IsOptional()
   @IsString()
@@ -45,6 +47,11 @@ export class MakeOrderRequest {
   @IsString()
   promo_code: string;
 
+
+  @ApiProperty({required:false})
+  @IsOptional()
+  @IsString()
+  note: string;
   @ApiProperty()
   @IsNotEmpty()
   payment_method: PaymentMethodRequest;
