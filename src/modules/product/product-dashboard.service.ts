@@ -7,6 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from 'src/infrastructure/entities/product/product.entity';
 import {
+  Between,
   DeleteResult,
   IsNull,
   LessThan,
@@ -1350,6 +1351,46 @@ export class ProductDashboardService {
       'products',
       'products',
     );
+  }
+
+  async exportSellingReport(day:string){
+  // Calculate the time range
+  const date = new Date(day);
+const startTime = new Date(date.getTime() - 3 * 60 * 60 * 1000);
+const endTime = new Date(date.getTime() + 3 * 60 * 60 * 1000); // Add 3 hours
+
+// Query using Between
+const result  = await this.shipmentProduct_repo.find({
+  where: {
+    created_at: Between(startTime, endTime),
+  },relations:{shipment:{order:{paymentMethod:true}},product:true}
+});
+
+if (result.length < 1)
+  throw new NotFoundException('message.no_selling_report_found');
+
+const sellingReport = result.map((product) => {
+  return {
+
+    "المحفظة":product.shipment.order.paymentMethod.name_ar,
+    "رقم الطلب":product.shipment.order.number,
+    "التاريخ":day,
+    "رقم الصنف":product.product?.barcode,
+    "اسم الصنف":product.product?.name_ar,
+    "الوحدة":"قطعة",
+    "الكمية":product.quantity,
+    "السعر":product.price,
+    "الاجمالي":product.price*product.quantity
+
+  }
+})
+
+return await this._fileService.exportExcel(
+  sellingReport,
+  'sellingReport',
+  'sellingReport',
+);
+
   }
 
   async importProducts(req: any) {

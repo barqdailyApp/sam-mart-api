@@ -282,6 +282,21 @@ export class ProductDashboardController {
     const File = await this.productDashboardService.getSellingStats( start_date,to_date);
     res.download(`${File}`);
   }
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @Header(
+    'Content-type',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  )
+  @Get('daily-selling-report')
+  async getDailySellingReport(
+    @Res() res: Response,
+    @Query("day") day:string
+  ) {
+  
+    const File = await this.productDashboardService.exportSellingReport( day);
+    res.download(`${File}`);
+  }
 
   @Delete('delete-Product/:product_id')
   async deleteProduct(@Param('product_id') id: string) {
