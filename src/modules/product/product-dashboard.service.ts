@@ -1360,11 +1360,14 @@ const startTime = new Date(date.getTime() - 3 * 60 * 60 * 1000);
 const endTime = new Date(date.getTime() + 3 * 60 * 60 * 1000); // Add 3 hours
 
 // Query using Between
-const result  = await this.shipmentProduct_repo.find({
-  where: {
-    created_at: Between(startTime, endTime),
-  },relations:{shipment:{order:{paymentMethod:true}},product:true}
-});
+const result = await this.shipmentProduct_repo.createQueryBuilder('shipmentProduct')
+  .where('shipmentProduct.created_at BETWEEN :startTime AND :endTime', { startTime, endTime })
+  .leftJoinAndSelect('shipmentProduct.shipment', 'shipment')
+  .leftJoinAndSelect('shipment.order', 'order')
+  .leftJoinAndSelect('order.paymentMethod', 'paymentMethod')
+  .leftJoinAndSelect('shipmentProduct.product', 'product')
+  .getMany();
+
 
 if (result.length < 1)
   throw new NotFoundException('message.no_selling_report_found');
