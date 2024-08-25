@@ -718,5 +718,17 @@
       "path": "/v1/storage",
       "method": "POST",
       "modules": ["NOTIFICATIONS", "PRODUCTS"]
+    },
+    {
+      "path": "/v1/product/daily-selling-report/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "GET",
+      "modules": ["FINANCIAL_REPORTS"]
+    },
+    
+    {
+      "path": "/v1/product/selling-report/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "GET",
+      "modules": ["FINANCIAL_REPORTS"]
     }
+
   ]
