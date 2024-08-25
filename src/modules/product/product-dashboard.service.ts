@@ -1353,52 +1353,47 @@ export class ProductDashboardService {
     );
   }
 
-  async exportSellingReport(day:string){
-  // Calculate the time range
-  const date = new Date(day);
-const startTime = new Date(date.getTime() - 3 * 60 * 60 * 1000);
-const endTime = new Date(date.getTime() + 3 * 60 * 60 * 1000); // Add 3 hours
+  async exportSellingReport(day: string) {
+    // Calculate the time range
+    const date = new Date(day);
+    const startTime = new Date(date.getTime() - 3 * 60 * 60 * 1000);
+    const endTime = new Date(date.getTime() + 3 * 60 * 60 * 1000); // Add 3 hours
 
-// Query using Between
-const result = await this.shipmentProduct_repo.createQueryBuilder('shipment_product')
-.where(
-  'shipment_product.created_at > :start_date AND shipment_product.created_at < :to_date',
-  {
-    start_date:startTime,
-    to_date:endTime,
-  },)
-  .leftJoinAndSelect('shipment_product.shipment', 'shipment')
-  .leftJoinAndSelect('shipment.order', 'order')
-  .leftJoinAndSelect('order.paymentMethod', 'paymentMethod')
-  .leftJoinAndSelect('shipment_product.product', 'product')
-  .getMany();
+    // Query using Between
+    const result = await this.shipmentProduct_repo
+      .createQueryBuilder('shipment_product')
+      .where(
+        '((DATE(order.created_at) = :orderDate AND TIME(order.created_at) < "21:00:00") OR (DATE(order.created_at) = DATE_SUB(:orderDate, INTERVAL 1 DAY) AND TIME(order.created_at) >= "21:00:00"))',
+        { orderDate: day },
+      )
+      .leftJoinAndSelect('shipment_product.shipment', 'shipment')
+      .leftJoinAndSelect('shipment.order', 'order')
+      .leftJoinAndSelect('order.paymentMethod', 'paymentMethod')
+      .leftJoinAndSelect('shipment_product.product', 'product')
+      .getMany();
 
+    if (result.length < 1)
+      throw new NotFoundException('message.no_selling_report_found');
 
-if (result.length < 1)
-  throw new NotFoundException('message.no_selling_report_found');
+    const sellingReport = result.map((product) => {
+      return {
+        المحفظة: product.shipment.order.paymentMethod.name_ar,
+        'رقم الطلب': product.shipment.order.number,
+        التاريخ: day,
+        'رقم الصنف': product.product?.barcode,
+        'اسم الصنف': product.product?.name_ar,
+        الوحدة: 'قطعة',
+        الكمية: product.quantity,
+        السعر: product.price,
+        الاجمالي: product.price * product.quantity,
+      };
+    });
 
-const sellingReport = result.map((product) => {
-  return {
-
-    "المحفظة":product.shipment.order.paymentMethod.name_ar,
-    "رقم الطلب":product.shipment.order.number,
-    "التاريخ":day,
-    "رقم الصنف":product.product?.barcode,
-    "اسم الصنف":product.product?.name_ar,
-    "الوحدة":"قطعة",
-    "الكمية":product.quantity,
-    "السعر":product.price,
-    "الاجمالي":product.price*product.quantity
-
-  }
-})
-
-return await this._fileService.exportExcel(
-  sellingReport,
-  'sellingReport',
-  'sellingReport',
-);
-
+    return await this._fileService.exportExcel(
+      sellingReport,
+      'sellingReport',
+      'sellingReport',
+    );
   }
 
   async importProducts(req: any) {
