@@ -1,5 +1,5 @@
 import {  ApiProperty } from "@nestjs/swagger";
-import { IsString } from "class-validator";
+import { IsOptional, IsString } from "class-validator";
 
 export class CreateBrandRequest {
     @ApiProperty()
@@ -14,3 +14,19 @@ export class CreateBrandRequest {
     logo: Express.Multer.File;
 }
     
+
+export class UpdateBrandRequest {
+    @ApiProperty({required:false})
+    @IsOptional()
+    @IsString()
+    name_en: string;
+
+    @ApiProperty({required:false})
+    @IsOptional()
+    @IsString()
+    name_ar: string;
+
+    @ApiProperty({ type: 'file', required: false })
+    @IsOptional()
+    logo: Express.Multer.File;
+}

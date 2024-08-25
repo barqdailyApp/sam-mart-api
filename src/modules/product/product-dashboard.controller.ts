@@ -63,6 +63,7 @@ import { ProductsOffersDashboardNewResponse } from './dto/response/response-dash
 import { UpdateProductOfferRequest } from './dto/request/update-product-offer.request';
 import { CreateBanarRequest } from '../banar/dto/request/create-banar.request';
 import { CreateBrandRequest } from './dto/request/create-brand.request';
+import { BrandService } from './brand.service';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -77,6 +78,7 @@ export class ProductDashboardController {
   constructor(
     private readonly productDashboardService: ProductDashboardService,
     private readonly productClientService: ProductClientService,
+    private readonly brandService: BrandService,
 
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
   ) {}
@@ -280,8 +282,10 @@ export class ProductDashboardController {
     @Query('start_date') start_date: Date,
     @Query('to_date') to_date: Date,
   ) {
-  
-    const File = await this.productDashboardService.getSellingStats( start_date,to_date);
+    const File = await this.productDashboardService.getSellingStats(
+      start_date,
+      to_date,
+    );
     res.download(`${File}`);
   }
   @Roles(Role.ADMIN)
@@ -291,12 +295,8 @@ export class ProductDashboardController {
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   )
   @Get('daily-selling-report')
-  async getDailySellingReport(
-    @Res() res: Response,
-    @Query("day") day:string
-  ) {
-  
-    const File = await this.productDashboardService.exportSellingReport( day);
+  async getDailySellingReport(@Res() res: Response, @Query('day') day: string) {
+    const File = await this.productDashboardService.exportSellingReport(day);
     res.download(`${File}`);
   }
 
@@ -394,11 +394,9 @@ export class ProductDashboardController {
     'Content-type',
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   )
-  async exportWarehouseProductsPricing(
-    @Res() res: Response,
-   
-  ) {
-    const File = await this.productDashboardService.exportWarehouseProductsPricing();
+  async exportWarehouseProductsPricing(@Res() res: Response) {
+    const File =
+      await this.productDashboardService.exportWarehouseProductsPricing();
     res.download(`${File}`);
   }
 
@@ -431,6 +429,39 @@ export class ProductDashboardController {
   ) {
     req.logo = logo;
     const products = await this.productDashboardService.CreateBrand(req);
+    return new ActionResponse(products);
+  }
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('logo'))
+  @ApiConsumes('multipart/form-data')
+  @Put('update-brands')
+  async updateBrand(
+    @Body() req: CreateBrandRequest,
+    @UploadedFile(new UploadValidator().build())
+    logo: Express.Multer.File,
+  ) {
+    req.logo = logo;
+    const products = await this.productDashboardService.CreateBrand(req);
+    return new ActionResponse(products);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @Delete('delete-brands/:id')
+  async deleteBrand(@Param('id') id: string) {
+    const products = await this.brandService.delete(id);
+    return new ActionResponse(products);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @Delete('link-brand-proudct/:product_id/:brand_id')
+  async linkBrand(@Param('product_id') product_id: string,@Param('brand_id') brand_id: string) {
+    const products = await this.brandService.linkBrandToProduct(brand_id,product_id);
     return new ActionResponse(products);
   }
 }
