@@ -75,6 +75,7 @@ export class ShipmentSingleResponse {
         address: shipments.order.address.address,
         latitude: shipments.order.address.latitude,
         longitude: shipments.order.address.longitude,
+        phone:shipments.order.address?.phone
       },
     };
     this.shipment_feedback = shipments.order_feedback

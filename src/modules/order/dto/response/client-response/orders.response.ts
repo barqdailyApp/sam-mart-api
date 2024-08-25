@@ -1,4 +1,5 @@
 import { Exclude, Expose } from 'class-transformer';
+import { or } from 'sequelize';
 import { toUrl } from 'src/core/helpers/file.helper';
 import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
 import { PaymentMethodEnum } from 'src/infrastructure/data/enums/payment-method';
@@ -44,6 +45,8 @@ export class OrdersResponse {
       address: order.address.address,
       latitude: order.address.latitude,
       longitude: order.address.longitude,
+      phone:order.address?.phone
+
     };
     this.shipments = {
       id: order.shipments[0].id,

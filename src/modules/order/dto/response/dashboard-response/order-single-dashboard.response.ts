@@ -82,6 +82,7 @@ export class OrderSingleDashboardResponse {
       address: order.address.address,
       latitude: order.address.latitude,
       longitude: order.address.longitude,
+      phone:order.address?.phone
     };
     this.shipments = {
       id: order.shipments[0].id,

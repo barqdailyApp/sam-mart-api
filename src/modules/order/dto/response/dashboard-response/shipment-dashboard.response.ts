@@ -43,6 +43,7 @@ export class ShipmentDashboardResponse {
         address: shipments.order.address.address,
         latitude: shipments.order.address.latitude,
         longitude: shipments.order.address.longitude,
+        phone:shipments.order.address?.phone
       },
       
     };
