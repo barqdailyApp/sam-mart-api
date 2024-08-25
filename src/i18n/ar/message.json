@@ -16,6 +16,7 @@
     "payment_method_not_found":"طريقة الدفع غير موجودة",
     "payment_failed":"خطأ فى عملية الدفع",
     "product_not_found": "المنتج غير موجود",
+    "no_selling_report_found":"لا توجد تقارير البيع",
     "product_image_not_found": "صورة المنتج غير موجودة",
     "promo_code_used":"الكود مستخدم",
     "user_is_blocked": "المستخدم محظور",    
