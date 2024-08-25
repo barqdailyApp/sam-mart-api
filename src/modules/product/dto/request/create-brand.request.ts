@@ -16,6 +16,10 @@ export class CreateBrandRequest {
     
 
 export class UpdateBrandRequest {
+
+    @ApiProperty()
+    @IsString()
+    id: string;
     @ApiProperty({required:false})
     @IsOptional()
     @IsString()

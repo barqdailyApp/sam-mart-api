@@ -52,7 +52,7 @@ import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
 import { RolesGuard } from '../authentication/guards/roles.guard';
 import { Roles } from '../authentication/guards/roles.decorator';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
-import { Response } from 'express';
+import { query, Response } from 'express';
 import { ImportCategoryRequest } from '../category/dto/requests/import-category-request';
 import { UploadValidator } from 'src/core/validators/upload.validator';
 import { ProductClientService } from './product-client.service';
@@ -64,6 +64,9 @@ import { UpdateProductOfferRequest } from './dto/request/update-product-offer.re
 import { CreateBanarRequest } from '../banar/dto/request/create-banar.request';
 import { CreateBrandRequest } from './dto/request/create-brand.request';
 import { BrandService } from './brand.service';
+import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
+import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
+import { toUrl } from 'src/core/helpers/file.helper';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -460,8 +463,29 @@ export class ProductDashboardController {
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
   @Delete('link-brand-proudct/:product_id/:brand_id')
-  async linkBrand(@Param('product_id') product_id: string,@Param('brand_id') brand_id: string) {
-    const products = await this.brandService.linkBrandToProduct(brand_id,product_id);
+  async linkBrand(
+    @Param('product_id') product_id: string,
+    @Param('brand_id') brand_id: string,
+  ) {
+    const products = await this.brandService.linkBrandToProduct(
+      brand_id,
+      product_id,
+    );
     return new ActionResponse(products);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @Delete('get-brands')
+  async getBrands(@Query() query: PaginatedRequest) {
+    const brands = await this.brandService.findAll(query);
+    brands.map((brand) => {
+      brand.logo = toUrl(brand.logo);
+    });
+    const total = await this.brandService.count(query);
+    return new PaginatedResponse(brands, {
+      meta: { total, page: query.page, limit: query.limit },
+    });
   }
 }
