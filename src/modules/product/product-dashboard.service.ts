@@ -1361,7 +1361,12 @@ const endTime = new Date(date.getTime() + 3 * 60 * 60 * 1000); // Add 3 hours
 
 // Query using Between
 const result = await this.shipmentProduct_repo.createQueryBuilder('shipmentProduct')
-  .where('shipmentProduct.created_at BETWEEN :startTime AND :endTime', { startTime, endTime })
+.where(
+  'shipment_product.created_at > :start_date AND shipment_product.created_at < :to_date',
+  {
+    start_date:startTime,
+    to_date:endTime,
+  },)
   .leftJoinAndSelect('shipmentProduct.shipment', 'shipment')
   .leftJoinAndSelect('shipment.order', 'order')
   .leftJoinAndSelect('order.paymentMethod', 'paymentMethod')
