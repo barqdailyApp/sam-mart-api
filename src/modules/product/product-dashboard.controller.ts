@@ -462,7 +462,7 @@ export class ProductDashboardController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
-  @Delete('link-brand-proudct/:product_id/:brand_id')
+  @Post('link-brand-proudct/:product_id/:brand_id')
   async linkBrand(
     @Param('product_id') product_id: string,
     @Param('brand_id') brand_id: string,
@@ -477,7 +477,7 @@ export class ProductDashboardController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
-  @Delete('get-brands')
+  @Get('get-brands')
   async getBrands(@Query() query: PaginatedRequest) {
     const brands = await this.brandService.findAll(query);
     brands.map((brand) => {
