@@ -139,6 +139,7 @@ export class AuthenticationService {
    const limit = query.limit??20
     const otps = await this.otpRepository.findAndCount({
       where:{username: Like(`%${query.filters??''}%`)},
+      order:{created_at:'DESC'},
       take: limit,
       skip: page *limit,
     });
