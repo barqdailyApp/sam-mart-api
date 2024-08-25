@@ -61,6 +61,8 @@ import { ProductsDashboardNewResponse } from './dto/response/response-dashboard/
 import { SingleProductDashboardNewResponse } from './dto/response/response-dashboard/single-product-dashboard-new.response';
 import { ProductsOffersDashboardNewResponse } from './dto/response/response-dashboard/products-offers-dashboard-new.response';
 import { UpdateProductOfferRequest } from './dto/request/update-product-offer.request';
+import { CreateBanarRequest } from '../banar/dto/request/create-banar.request';
+import { CreateBrandRequest } from './dto/request/create-brand.request';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -413,6 +415,22 @@ export class ProductDashboardController {
   ) {
     req.file = file;
     const products = await this.productDashboardService.importProducts(req);
+    return new ActionResponse(products);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @Post('insert-brands')
+  async insertBrand(
+    @Body() req: CreateBrandRequest,
+    @UploadedFile(new UploadValidator().build())
+    logo: Express.Multer.File,
+  ) {
+    req.logo = logo;
+    const products = await this.productDashboardService.CreateBrand(logo,req);
     return new ActionResponse(products);
   }
 }

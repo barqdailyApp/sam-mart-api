@@ -1,5 +1,5 @@
 import { AuditableEntity } from 'src/infrastructure/base/auditable.entity';
-import { Column, Entity, Index, OneToMany } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { ProductImage } from './product-image.entity';
 import { ProductMeasurement } from './product-measurement.entity';
 import { ProductSubCategory } from './product-sub-category.entity';
@@ -7,6 +7,7 @@ import { WarehouseOperations } from '../warehouse/warehouse-opreations.entity';
 import { WarehouseProducts } from '../warehouse/warehouse-products.entity';
 import { ProductFavorite } from './product-favorite.entity';
 import { ShipmentProduct } from '../order/shipment-product.entity';
+import { Brand } from '../brand/brand';
 
 @Entity()
 
@@ -16,6 +17,12 @@ export class Product extends AuditableEntity {
 
   @Column()
   name_en: string;
+
+  @ManyToOne(()=>Brand,brand=>brand.products)
+  @JoinColumn({name:'brand_id'})
+  brand:Brand
+  @Column({nullable:true})
+  brand_id:string
 
   @Column({ type: 'longtext',nullable: true })
   description_ar: string;

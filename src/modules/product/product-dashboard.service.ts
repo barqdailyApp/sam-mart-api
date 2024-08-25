@@ -62,6 +62,8 @@ import { Category } from 'src/infrastructure/entities/category/category.entity';
 import { DeleteProductTransaction } from './utils/delete-product.transaction';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { ShipmentProduct } from 'src/infrastructure/entities/order/shipment-product.entity';
+import { Brand } from 'src/infrastructure/entities/brand/brand';
+import { CreateBrandRequest } from './dto/request/create-brand.request';
 
 @Injectable()
 export class ProductDashboardService {
@@ -91,6 +93,10 @@ export class ProductDashboardService {
 
     @InjectRepository(ProductCategoryPrice)
     private readonly productCategoryPrice_repo: Repository<ProductCategoryPrice>,
+
+    
+    @InjectRepository(Brand)
+    private readonly brand_repo: Repository<Brand>,
 
     @InjectRepository(ProductOffer)
     private productOffer_repo: Repository<ProductOffer>,
@@ -1507,4 +1513,15 @@ export class ProductDashboardService {
       'sellingReport',
     );
   }
+
+  async CreateBrand(logo: Express.Multer.File,req: CreateBrandRequest) {
+
+    const path=  await this._fileService.upload(logo,"brands");
+    const brand = plainToClass(Brand, {...req,logo:path});
+
+
+
+    return await this.brand_repo.save(brand);
+
+  }    
 }
