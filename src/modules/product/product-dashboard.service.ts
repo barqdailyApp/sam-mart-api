@@ -1514,9 +1514,9 @@ export class ProductDashboardService {
     );
   }
 
-  async CreateBrand(logo: Express.Multer.File,req: CreateBrandRequest) {
+  async CreateBrand(req: CreateBrandRequest) {
 
-    const path=  await this._fileService.upload(logo,"brands");
+    const path=  await this._fileService.upload(req.logo,"brands");
     const brand = plainToClass(Brand, {...req,logo:path});
 
 

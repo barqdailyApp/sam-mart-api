@@ -421,7 +421,7 @@ export class ProductDashboardController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
-  @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('file'))
+  @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('logo'))
   @ApiConsumes('multipart/form-data')
   @Post('insert-brands')
   async insertBrand(
@@ -430,7 +430,7 @@ export class ProductDashboardController {
     logo: Express.Multer.File,
   ) {
     req.logo = logo;
-    const products = await this.productDashboardService.CreateBrand(logo,req);
+    const products = await this.productDashboardService.CreateBrand(req);
     return new ActionResponse(products);
   }
 }
