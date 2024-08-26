@@ -25,6 +25,10 @@ import { ProductFavQuery } from './dto/filter/product-fav.query';
 import { ProductsOffersNewResponse } from './dto/response/response-client/products-offers-new.response';
 import { ProductsNewResponse } from './dto/response/response-client/products-new.response';
 import { SingleProductsNewResponse } from './dto/response/response-client/single-product-new.response';
+import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
+import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
+import { toUrl } from 'src/core/helpers/file.helper';
+import { BrandService } from './brand.service';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -37,7 +41,7 @@ import { SingleProductsNewResponse } from './dto/response/response-client/single
 export class ProductClientController {
   constructor(
     private readonly productClientService: ProductClientService,
-
+    private readonly brandService: BrandService,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
   ) {}
   @Get('all-products-for-client')
@@ -129,5 +133,16 @@ export class ProductClientController {
     );
 
     return new ActionResponse(product);
+  }
+  @Get('get-brands')
+  async getBrands(@Query() query: PaginatedRequest) {
+    const brands = await this.brandService.findAll(query);
+    brands.map((brand) => {
+      brand.logo = toUrl(brand.logo);
+    });
+    const total = await this.brandService.count(query);
+    return new PaginatedResponse(brands, {
+      meta: { total, page: query.page, limit: query.limit },
+    });
   }
 }
