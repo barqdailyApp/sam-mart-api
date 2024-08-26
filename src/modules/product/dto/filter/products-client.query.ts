@@ -31,6 +31,10 @@ export class ProductClientQuery {
   @IsOptional()
   @IsString()
   section_id: string;
+  @ApiProperty({ nullable: true, required: false })
+  @IsOptional()
+  @IsString()
+  brand_id: string;
 
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()

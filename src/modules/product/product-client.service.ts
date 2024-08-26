@@ -61,7 +61,7 @@ export class ProductClientService {
       category_sub_category_id,
       product_name,
       sort,
-      user_id,
+      user_id,brand_id
     } = productClientQuery;
     const skip = (page - 1) * limit;
 
@@ -105,6 +105,8 @@ export class ProductClientService {
       // .leftJoinAndSelect('product.products_favorite', 'products_favorite')
 
       .innerJoinAndSelect('product.product_images', 'product_images')
+
+      .leftJoinAndSelect('proudct.brand', 'brand')
       // .innerJoinAndSelect(
       //   'product.product_sub_categories',
       //   'product_sub_categories',
@@ -189,6 +191,12 @@ export class ProductClientService {
     if (warehouse) {
       query = query.andWhere('warehousesProduct.warehouse_id = :warehouseId', {
         warehouseId: warehouse.id,
+      });
+    }
+
+    if (brand_id) {
+      query = query.andWhere('brand.id = :brandId', {
+        brandId: brand_id,
       });
     }
 

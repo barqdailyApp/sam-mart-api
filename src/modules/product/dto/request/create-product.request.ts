@@ -49,6 +49,13 @@ export class CreateProductRequest {
   @Unique('Product')
   @IsString()
   barcode: string;
+
+  @ApiProperty({required:false})
+  @IsOptional()
+  @IsString()
+  brand_id: string;
+
+
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()
   @Unique('Product')

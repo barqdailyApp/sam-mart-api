@@ -58,7 +58,7 @@ export class CreateProductTransaction extends BaseTransaction<
         name_en,
         product_images,
         barcode,
-        keywords,  row_number
+        keywords,  row_number,brand_id
       } = query;
       //* -------------------- Create Product ----------------------------
       //* Check if product barcode exist
@@ -78,7 +78,8 @@ export class CreateProductTransaction extends BaseTransaction<
         name_en,
         barcode,
         keywords,
-        row_number
+        row_number,
+        brand_id
       });
 
       // const moveLogoImage = moveTmpFile(logo, '/product-images/');

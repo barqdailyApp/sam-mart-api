@@ -421,6 +421,7 @@ export class ProductDashboardService {
       barcode,
       keywords,
       row_number,
+      brand_id,
     } = updateProductRequest;
 
     //* Check if product exist
@@ -450,6 +451,7 @@ export class ProductDashboardService {
         barcode,
         keywords,
         row_number,
+        brand_id,
       },
     );
     return await this.productRepository.findOne({
@@ -592,6 +594,7 @@ export class ProductDashboardService {
       section_category_id,
       sort,
       product_barcode,
+      brand_id
     } = productsDashboardQuery;
     const skip = (page - 1) * limit;
     let productsSort = {};
@@ -607,7 +610,7 @@ export class ProductDashboardService {
     let query = this.productRepository
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.product_images', 'product_images')
-
+      .leftJoinAndSelect('product.brand', 'brand')
       .leftJoinAndSelect(
         'product.product_sub_categories',
         'product_sub_categories',
@@ -637,6 +640,7 @@ export class ProductDashboardService {
       .skip(skip)
       .take(limit);
     // Add search term condition if provided
+      
     if (product_name) {
       // Determine if the product_name is Arabic
       const isProductNameArabic = this.isArabic(product_name); // Implement or use a library to check if the text is Arabic
@@ -659,6 +663,11 @@ export class ProductDashboardService {
             product_name: `%${product_name}%`,
           });
       }
+    }
+    if (brand_id) {
+      query = query.andWhere('brand.id = :brandId', {
+        brandId: brand_id,
+      });
     }
 
     // Conditional where clause based on sub category

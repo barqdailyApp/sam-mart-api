@@ -62,7 +62,7 @@ import { SingleProductDashboardNewResponse } from './dto/response/response-dashb
 import { ProductsOffersDashboardNewResponse } from './dto/response/response-dashboard/products-offers-dashboard-new.response';
 import { UpdateProductOfferRequest } from './dto/request/update-product-offer.request';
 import { CreateBanarRequest } from '../banar/dto/request/create-banar.request';
-import { CreateBrandRequest } from './dto/request/create-brand.request';
+import { CreateBrandRequest, LinkBrandProuductRequest } from './dto/request/create-brand.request';
 import { BrandService } from './brand.service';
 import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
@@ -464,12 +464,10 @@ export class ProductDashboardController {
   @ApiBearerAuth()
   @Post('link-brand-proudct/:product_id/:brand_id')
   async linkBrand(
-    @Param('product_id') product_id: string,
-    @Param('brand_id') brand_id: string,
+    @Body() req: LinkBrandProuductRequest,
   ) {
     const products = await this.brandService.linkBrandToProduct(
-      brand_id,
-      product_id,
+     req
     );
     return new ActionResponse(products);
   }

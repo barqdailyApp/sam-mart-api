@@ -25,6 +25,11 @@ export class ProductsDashboardQuery {
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()
   @IsString()
+  brand_id: string;
+
+  @ApiProperty({ nullable: true, required: false })
+  @IsOptional()
+  @IsString()
   section_category_id: string;
 
   @ApiProperty({ nullable: true, required: false })

@@ -1,5 +1,5 @@
 import {  ApiProperty } from "@nestjs/swagger";
-import { IsOptional, IsString } from "class-validator";
+import { IsArray, IsOptional, IsString } from "class-validator";
 
 export class CreateBrandRequest {
     @ApiProperty()
@@ -33,4 +33,16 @@ export class UpdateBrandRequest {
     @ApiProperty({ type: 'file', required: false })
     @IsOptional()
     logo: Express.Multer.File;
+}
+
+export class LinkBrandProuductRequest {
+
+    @ApiProperty()
+    @IsString()
+    brand_id: string;
+    @ApiProperty({required:false,isArray:true})
+    @IsArray()
+    product_ids: string[];
+
+   
 }
