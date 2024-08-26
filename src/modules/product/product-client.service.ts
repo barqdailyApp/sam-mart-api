@@ -106,7 +106,7 @@ export class ProductClientService {
 
       .innerJoinAndSelect('product.product_images', 'product_images')
 
-      .leftJoinAndSelect('proudct.brand', 'brand')
+      .leftJoinAndSelect('product.brand', 'brand')
       // .innerJoinAndSelect(
       //   'product.product_sub_categories',
       //   'product_sub_categories',

@@ -462,7 +462,7 @@ export class ProductDashboardController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
-  @Post('link-brand-proudct/:product_id/:brand_id')
+  @Post('link-brand-proudct')
   async linkBrand(
     @Body() req: LinkBrandProuductRequest,
   ) {
@@ -472,9 +472,7 @@ export class ProductDashboardController {
     return new ActionResponse(products);
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  @ApiBearerAuth()
+ 
   @Get('get-brands')
   async getBrands(@Query() query: PaginatedRequest) {
     const brands = await this.brandService.findAll(query);
