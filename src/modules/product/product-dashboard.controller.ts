@@ -473,15 +473,5 @@ export class ProductDashboardController {
   }
 
  
-  @Get('get-brands')
-  async getBrands(@Query() query: PaginatedRequest) {
-    const brands = await this.brandService.findAll(query);
-    brands.map((brand) => {
-      brand.logo = toUrl(brand.logo);
-    });
-    const total = await this.brandService.count(query);
-    return new PaginatedResponse(brands, {
-      meta: { total, page: query.page, limit: query.limit },
-    });
-  }
+
 }
