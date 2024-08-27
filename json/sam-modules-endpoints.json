@@ -729,6 +729,22 @@
       "path": "/v1/product/selling-report/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
       "method": "GET",
       "modules": ["FINANCIAL_REPORTS"]
+    },
+    {
+      "path": "/v1/product/insert-brand",
+      "method": "POST",
+      "modules": ["BRANDS"]
+    },
+    {
+      "path": "/v1/product/link-brand-product",
+      "method": "POST",
+      "modules": ["BRANDS"]
+    },
+    
+    {
+      "path": "/v1/product/delete-brands/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "method": "DELETE",
+      "modules": ["BRANDS"]
     }
 
   ]
