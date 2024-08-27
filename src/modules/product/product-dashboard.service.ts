@@ -1545,7 +1545,7 @@ export class ProductDashboardService {
     const brand =
       req?.logo?.path == null
         ? plainToClass(Brand, req)
-        : plainToClass(Brand, { ...req, logo: path }, { excludeExtraneousValues: true });
+        : plainToClass(Brand, { name_ar: req.name_ar, logo: path }, { excludeExtraneousValues: true });
 
     return await this.brand_repo.save(brand);
   }
