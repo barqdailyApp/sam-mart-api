@@ -1537,13 +1537,14 @@ export class ProductDashboardService {
   }
 
   async updateBrand(req: UpdateBrandRequest) {
+    let path;
     if (req?.logo != null) {
-      await this._fileService.upload(req.logo, 'brands');
+       path=await this._fileService.upload(req.logo, 'brands');
     }
     const brand =
       req?.logo?.path == null
         ? plainToClass(Brand, req)
-        : plainToClass(Brand, { ...req, logo: req?.logo?.path });
+        : plainToClass(Brand, { ...req, logo: path });
 
     return await this.brand_repo.save(brand);
   }
