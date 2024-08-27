@@ -62,7 +62,7 @@ import { SingleProductDashboardNewResponse } from './dto/response/response-dashb
 import { ProductsOffersDashboardNewResponse } from './dto/response/response-dashboard/products-offers-dashboard-new.response';
 import { UpdateProductOfferRequest } from './dto/request/update-product-offer.request';
 import { CreateBanarRequest } from '../banar/dto/request/create-banar.request';
-import { CreateBrandRequest, LinkBrandProuductRequest } from './dto/request/create-brand.request';
+import { CreateBrandRequest, LinkBrandProuductRequest, UpdateBrandRequest } from './dto/request/create-brand.request';
 import { BrandService } from './brand.service';
 import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
@@ -441,12 +441,12 @@ export class ProductDashboardController {
   @ApiConsumes('multipart/form-data')
   @Put('update-brands')
   async updateBrand(
-    @Body() req: CreateBrandRequest,
+    @Body() req: UpdateBrandRequest,
     @UploadedFile(new UploadValidator().build())
     logo: Express.Multer.File,
   ) {
     req.logo = logo;
-    const products = await this.productDashboardService.CreateBrand(req);
+    const products = await this.productDashboardService.updateBrand(req);
     return new ActionResponse(products);
   }
 
@@ -455,7 +455,7 @@ export class ProductDashboardController {
   @ApiBearerAuth()
   @Delete('delete-brands/:id')
   async deleteBrand(@Param('id') id: string) {
-    const products = await this.brandService.delete(id);
+    const products = await this.brandService.softDelete(id);
     return new ActionResponse(products);
   }
 

@@ -134,6 +134,7 @@ export class ProductClientController {
 
     return new ActionResponse(product);
   }
+  
   @Get('get-brands')
   async getBrands(@Query() query: PaginatedRequest) {
     const brands = await this.brandService.findAll(query);
