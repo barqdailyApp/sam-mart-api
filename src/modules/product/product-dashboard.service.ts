@@ -67,6 +67,7 @@ import {
   CreateBrandRequest,
   UpdateBrandRequest,
 } from './dto/request/create-brand.request';
+import { ShipmentStatusEnum } from 'src/infrastructure/data/enums/shipment_status.enum';
 
 @Injectable()
 export class ProductDashboardService {
@@ -1385,7 +1386,7 @@ export class ProductDashboardService {
       )
       .leftJoinAndSelect('shipment_product.shipment', 'shipment')
       .leftJoinAndSelect('shipment.order', 'order')
-      .andWhere('order.status = :status', { status: 'delivered' })
+      .andWhere('shipment.status = :status', { status: ShipmentStatusEnum.DELIVERED })
       .leftJoinAndSelect('order.paymentMethod', 'paymentMethod')
       .leftJoinAndSelect('shipment_product.product', 'product')
       .getMany();
@@ -1478,8 +1479,7 @@ export class ProductDashboardService {
       .select('shipment_product.product_id', 'productId')
       .leftJoinAndSelect('shipment_product.product', 'product')
       .leftJoinAndSelect('shipment_product.shipment', 'shipment')
-      .leftJoinAndSelect('shipment.order', 'order')
-      .where('order.status = :status', { status: 'delivered' })
+      .where('shipment.status = :status', { status: ShipmentStatusEnum.DELIVERED })
       .addSelect('SUM(shipment_product.quantity)', 'totalQuantity')
       .groupBy('shipment_product.product_id')
       .orderBy('totalQuantity', 'DESC')
