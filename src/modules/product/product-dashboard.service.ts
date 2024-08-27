@@ -1385,6 +1385,7 @@ export class ProductDashboardService {
       )
       .leftJoinAndSelect('shipment_product.shipment', 'shipment')
       .leftJoinAndSelect('shipment.order', 'order')
+      .andWhere('order.status = :status', { status: 'delivered' })
       .leftJoinAndSelect('order.paymentMethod', 'paymentMethod')
       .leftJoinAndSelect('shipment_product.product', 'product')
       .getMany();
@@ -1476,6 +1477,9 @@ export class ProductDashboardService {
       .createQueryBuilder('shipment_product')
       .select('shipment_product.product_id', 'productId')
       .leftJoinAndSelect('shipment_product.product', 'product')
+      .leftJoinAndSelect('shipment_product.shipment', 'shipment')
+      .leftJoinAndSelect('shipment.order', 'order')
+      .where('order.status = :status', { status: 'delivered' })
       .addSelect('SUM(shipment_product.quantity)', 'totalQuantity')
       .groupBy('shipment_product.product_id')
       .orderBy('totalQuantity', 'DESC')
