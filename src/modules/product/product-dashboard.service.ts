@@ -1547,6 +1547,6 @@ export class ProductDashboardService {
         ? plainToClass(Brand, req)
         : plainToClass(Brand, { ...req, logo: path }, { excludeExtraneousValues: true });
 
-    return await this.brand_repo.update(brand.id,{...brand});
+    return await this.brand_repo.save(brand);
   }
 }
