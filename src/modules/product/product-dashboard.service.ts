@@ -1537,7 +1537,7 @@ export class ProductDashboardService {
   }
 
   async updateBrand(req: UpdateBrandRequest) {
-    if (req?.logo !== null) {
+    if (req?.logo != null) {
       await this._fileService.upload(req.logo, 'brands');
     }
     const brand =
