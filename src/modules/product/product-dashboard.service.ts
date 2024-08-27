@@ -1541,6 +1541,7 @@ export class ProductDashboardService {
     if (req?.logo != null) {
        path=await this._fileService.upload(req.logo, 'brands');
     }
+    console.log(path);
     const brand =
       req?.logo?.path == null
         ? plainToClass(Brand, req)
