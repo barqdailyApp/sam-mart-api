@@ -3,7 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { BaseService } from "src/core/base/service/service.base";
 import { Brand } from "src/infrastructure/entities/brand/brand";
 import { Product } from "src/infrastructure/entities/product/product.entity";
-import { In, Repository } from "typeorm";
+import { In, Not, Repository } from "typeorm";
 import { LinkBrandProuductRequest } from "./dto/request/create-brand.request";
 
 export class BrandService extends BaseService<Brand>{
@@ -19,7 +19,7 @@ async linkBrandToProduct(req:LinkBrandProuductRequest){
         throw new NotFoundException("brand not found");
     }
 
-    let products = await this.product_repo.find({where:{id: In(req.product_ids)}})
+    let products = await this.product_repo.find({where:{id: In(req.product_ids),brand_id:Not(brand.id)}})
     if (!products) {
         throw new NotFoundException("product not found");
     }
