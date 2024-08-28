@@ -1478,10 +1478,11 @@ export class ProductDashboardService {
       .createQueryBuilder('shipment_product')
       .select('shipment_product.product_id', 'productId')
       .leftJoinAndSelect('shipment_product.product', 'product')
-      .leftJoinAndSelect('shipment_product.shipment', 'shipment')
+      .leftJoin('shipment_product.shipment', 'shipment')
       .where('shipment.status = :status', { status: ShipmentStatusEnum.DELIVERED })
       .addSelect('SUM(shipment_product.quantity)', 'totalQuantity')
       .groupBy('shipment_product.product_id')
+      .addGroupBy('product.id')
       .orderBy('totalQuantity', 'DESC')
       .limit(limit ?? 20)
       .getRawMany();
