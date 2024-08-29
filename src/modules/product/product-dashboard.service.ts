@@ -1381,7 +1381,7 @@ export class ProductDashboardService {
     const result = await this.shipmentProduct_repo
       .createQueryBuilder('shipment_product')
       .where(
-        '((DATE(shipment_product.created_at) = :orderDate AND TIME(shipment_product.created_at) < "21:00:00") OR (DATE(shipment_product.created_at) = DATE_SUB(:orderDate, INTERVAL 1 DAY) AND TIME(shipment_product.created_at) >= "21:00:00"))',
+        '((DATE(shipment_product.delivered_at) = :orderDate AND TIME(shipment_product.delivered_at) < "21:00:00") OR (DATE(shipment_product.delivered_at) = DATE_SUB(:orderDate, INTERVAL 1 DAY) AND TIME(shipment_product.delivered_at) >= "21:00:00"))',
         { orderDate: day },
       )
       .leftJoinAndSelect('shipment_product.shipment', 'shipment')

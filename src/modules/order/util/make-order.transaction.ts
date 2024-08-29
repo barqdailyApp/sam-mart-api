@@ -121,12 +121,16 @@ export class MakeOrderTransaction extends BaseTransaction<
         .where('DATE(order.created_at) = CURDATE()')
         .getCount();
 
+        const date = new Date();
+        date.setHours(date.getHours() + 3);
+        const isoDate = date.toISOString().slice(0, 10);
+
       const order = await context.save(Order, {
         ...plainToInstance(Order, req),
         user_id: user.id,
         warehouse_id: cart_products[0].warehouse_id,
         delivery_fee: section.delivery_price,
-        number: generateOrderNumber(count),
+        number: generateOrderNumber(count,isoDate),
         address_id: address.id,
         is_paid: payment_method.type != PaymentMethodEnum.CASH ? true : false,
         payment_method: payment_method.type,
@@ -169,7 +173,8 @@ export class MakeOrderTransaction extends BaseTransaction<
 
             // Add 40 minutes
             currentDate.setMinutes(currentDate.getMinutes() + 20);
-            order.delivery_day = currentDate.toISOString().slice(0, 10);
+          
+            order.delivery_day = isoDate;
             order.estimated_delivery_time = currentDate;
           }
           break;
@@ -339,12 +344,11 @@ export class MakeOrderTransaction extends BaseTransaction<
                 ? make_payment['Message']
                 : make_payment['MessageDesc'],
             );
-
           }
           break;
         }
         case PaymentMethodEnum.JAIB: {
-        await this.paymentService.jaibCashout(
+          await this.paymentService.jaibCashout(
             req.payment_method.transaction_number,
             req.payment_method.wallet_number,
             total,
@@ -499,9 +503,9 @@ export class MakeOrderTransaction extends BaseTransaction<
     }
   }
 }
-export const generateOrderNumber = (count: number) => {
+export function generateOrderNumber(count: number, order_day: string) {
   // number of digits matches ##-**-@@-&&&&, where ## is 100 - the year last 2 digits, ** is 100 - the month, @@ is 100 - the day, &&&& is the number of the order in that day
-  const date = new Date();
+  const date = new Date(order_day);
   const year = date.getFullYear().toString().substr(-2);
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
   const day = date.getDate().toString().padStart(2, '0');
@@ -510,4 +514,4 @@ export const generateOrderNumber = (count: number) => {
   return `${100 - parseInt(year)}${100 - parseInt(month)}${
     100 - parseInt(day)
   }${orderNumber}`;
-};
+}
