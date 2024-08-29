@@ -506,6 +506,7 @@ export class MakeOrderTransaction extends BaseTransaction<
 export function generateOrderNumber(count: number, order_day: string) {
   // number of digits matches ##-**-@@-&&&&, where ## is 100 - the year last 2 digits, ** is 100 - the month, @@ is 100 - the day, &&&& is the number of the order in that day
   const date = new Date(order_day);
+  console.log(date);
   const year = date.getFullYear().toString().substr(-2);
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
   const day = date.getDate().toString().padStart(2, '0');

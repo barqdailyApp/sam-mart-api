@@ -211,7 +211,7 @@ export class ProductClientService {
           .andWhere('product.name_ar LIKE :product_name', {
             product_name: `%${product_name}%`,
           })
-          .orWhere('product.keywords LIKE :product_name', {
+          .andWhere('product.keywords LIKE :product_name', {
             product_name: `%${product_name}%`,
           });
       } else {
