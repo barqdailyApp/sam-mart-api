@@ -10,11 +10,12 @@ import {
 export class KuraimiUserCheckRequest {
   @ApiProperty({ required: false })
   @IsString()
-  @IsNotEmpty()
-  @ValidateIf((object, value) => {
-    // Validate if both SCustID and MobileNumber are null
-    return object.Email == null && object.MobileNumber == null;
-  })
+  @IsOptional()
+  // @IsNotEmpty()
+  // @ValidateIf((object, value) => {
+  //   // Validate if both SCustID and MobileNumber are null
+  //   return object.Email == null && object.MobileNumber == null;
+  // })
   SCustID: string;
 
   @ApiProperty({ required: false })
@@ -27,11 +28,12 @@ export class KuraimiUserCheckRequest {
   MobileNo: string;
 
   @ApiProperty({ required: false })
-  @ValidateIf((object, value) => {
-    // Validate if both SCustID and MobileNumber are null
-    return object.SCustID === null && object.MobileNumber === null;
-  })
-  @IsEmail()
+  @IsOptional()
+  // @ValidateIf((object, value) => {
+  //   // Validate if both SCustID and MobileNumber are null
+  //   return object.SCustID === null && object.MobileNumber === null;
+  // })
+  // @IsEmail()
   Email: string;
 
   @IsNotEmpty()
