@@ -666,7 +666,7 @@ export class ProductDashboardService {
       }
     }
     if (brand_id) {
-      query = query.andWhere('brand.id = :brandId', {
+      query = query.where('brand.id = :brandId', {
         brandId: brand_id,
       });
     }
