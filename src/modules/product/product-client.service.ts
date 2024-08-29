@@ -226,6 +226,8 @@ export class ProductClientService {
     }
 
 
+    query = query.andWhere('product.is_active = true');
+    query = query.andWhere('product_sub_category.is_active = true');
     // Conditional where clause based on sub category
     if (category_sub_category_id) {
       query = query.andWhere(
@@ -234,8 +236,7 @@ export class ProductClientService {
           category_sub_category_id,
         },
       );
-      query = query.andWhere('product.is_active = true');
-      query = query.andWhere('product_sub_category.is_active = true');
+     
       // query = query.andWhere(
       //   'product_sub_categories.category_sub_category_id = :category_sub_category_id',
       //   {
