@@ -678,7 +678,8 @@ export class ProductDashboardService {
         {
           category_sub_category_id,
         },
-      );
+      )
+      .andWhere("product_sub_categories.is_active = true");
     }
 
     if (section_category_id) {
@@ -687,7 +688,7 @@ export class ProductDashboardService {
         {
           section_category_id,
         },
-      );
+      ) .andWhere("product_sub_categories.is_active = true");
     }
     if (section_id) {
       query = query.andWhere('section_category.section_id = :section_id', {
