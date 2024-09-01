@@ -123,7 +123,7 @@ export class MakeOrderTransaction extends BaseTransaction<
       const isoDate = date.toISOString().slice(0, 10);
       const count = await context
         .createQueryBuilder(Order, 'order')
-        .where('DATE(order.created_at) = :specificDate', { specificDate: isoDate })
+        .where('order.delivery_day = :specificDate', { specificDate: isoDate })
         .getCount();
 
       const order = await context.save(Order, {
