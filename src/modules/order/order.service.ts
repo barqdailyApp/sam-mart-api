@@ -100,6 +100,10 @@ export class OrderService extends BaseUserService<Order> {
       .leftJoinAndSelect('shipments.order_feedback', 'order_feedback')
 
       .leftJoinAndSelect('shipments.driver', 'driver')
+      .leftJoinAndSelect(
+        'shipments.cancelShipmentReason',
+        'cancelShipmentReason',
+      )
       .leftJoinAndSelect('driver.user', 'shipment_user_driver')
 
       .leftJoinAndSelect('shipments.warehouse', 'warehouse_shipment')
