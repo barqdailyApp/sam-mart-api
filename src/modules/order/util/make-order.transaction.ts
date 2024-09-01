@@ -161,6 +161,8 @@ export class MakeOrderTransaction extends BaseTransaction<
             order.estimated_delivery_time = new Date(
               req.slot_day.day + 'T' + slot.start_time + 'Z',
             );
+            if(order.estimated_delivery_time>new Date())
+              throw new BadRequestException('هذا الوقت منتهي');
             order.estimated_delivery_time.setHours(
               order.estimated_delivery_time.getHours() - 3,
             );
