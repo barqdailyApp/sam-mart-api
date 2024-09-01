@@ -8,6 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from 'src/infrastructure/entities/product/product.entity';
 import {
   Between,
+  Brackets,
   DeleteResult,
   IsNull,
   LessThan,
@@ -595,7 +596,7 @@ export class ProductDashboardService {
       section_category_id,
       sort,
       product_barcode,
-      brand_id
+      brand_id,
     } = productsDashboardQuery;
     const skip = (page - 1) * limit;
     let productsSort = {};
@@ -641,32 +642,44 @@ export class ProductDashboardService {
       .skip(skip)
       .take(limit);
     // Add search term condition if provided
-      
+
     if (product_name) {
       // Determine if the product_name is Arabic
       const isProductNameArabic = this.isArabic(product_name); // Implement or use a library to check if the text is Arabic
 
       // Build the query conditionally based on the language of product_name
       if (isProductNameArabic) {
-        query = query
-          .andWhere('product.name_ar LIKE :product_name', {
-            product_name: `%${product_name}%`,
-          })
-          .orWhere('product.keywords LIKE :product_name', {
-            product_name: `%${product_name}%`,
-          });
+        query = query.andWhere(
+          new Brackets((qb) => {
+            qb.where('product.name_ar LIKE :product_name', {
+              product_name: `%${product_name}%`,
+            })
+              .orWhere('product.keywords LIKE :product_name', {
+                product_name: `%${product_name}%`,
+              })
+              .orWhere('product.barcode LIKE :product_barcode', {
+                product_barcode: `%${product_barcode}%`,
+              });
+          }),
+        );
       } else {
-        query = query
-          .andWhere('product.name_en LIKE :product_name', {
-            product_name: `%${product_name}%`,
-          })
-          .orWhere('product.keywords LIKE :product_name', {
-            product_name: `%${product_name}%`,
-          });
+        query = query.andWhere(
+          new Brackets((qb) => {
+            qb.where('product.name_en LIKE :product_name', {
+              product_name: `%${product_name}%`,
+            })
+              .orWhere('product.keywords LIKE :product_name', {
+                product_name: `%${product_name}%`,
+              })
+              .orWhere('product.barcode LIKE :product_barcode', {
+                product_barcode: `%${product_barcode}%`,
+              });
+          }),
+        );
       }
     }
     if (brand_id) {
-      query = query.where('brand.id = :brandId', {
+      query = query.andWhere('brand.id = :brandId', {
         brandId: brand_id,
       });
     }
@@ -695,11 +708,11 @@ export class ProductDashboardService {
       });
     }
 
-    if (product_barcode) {
-      query = query.orWhere('product.barcode LIKE :product_barcode', {
-        product_barcode: `%${product_barcode}%`,
-      });
-    }
+    // if (product_barcode) {
+    //   query = query.orWhere('product.barcode LIKE :product_barcode', {
+    //     product_barcode: `%${product_barcode}%`,
+    //   });
+    // }
     const [products, total] = await query.getManyAndCount();
     return { products, total };
   }
@@ -1386,7 +1399,9 @@ export class ProductDashboardService {
       )
       .leftJoinAndSelect('shipment_product.shipment', 'shipment')
       .leftJoinAndSelect('shipment.order', 'order')
-      .andWhere('shipment.status = :status', { status: ShipmentStatusEnum.DELIVERED })
+      .andWhere('shipment.status = :status', {
+        status: ShipmentStatusEnum.DELIVERED,
+      })
       .leftJoinAndSelect('order.paymentMethod', 'paymentMethod')
       .leftJoinAndSelect('shipment_product.product', 'product')
       .getMany();
@@ -1479,7 +1494,9 @@ export class ProductDashboardService {
       .select('shipment_product.product_id', 'productId')
       .leftJoinAndSelect('shipment_product.product', 'product')
       .leftJoin('shipment_product.shipment', 'shipment')
-      .where('shipment.status = :status', { status: ShipmentStatusEnum.DELIVERED })
+      .where('shipment.status = :status', {
+        status: ShipmentStatusEnum.DELIVERED,
+      })
       .addSelect('SUM(shipment_product.quantity)', 'totalQuantity')
       .groupBy('shipment_product.product_id')
       .addGroupBy('product.id')
@@ -1540,14 +1557,14 @@ export class ProductDashboardService {
   async updateBrand(req: UpdateBrandRequest) {
     let path;
     if (req?.logo != null) {
-       path=await this._fileService.upload(req.logo, 'brands');
+      path = await this._fileService.upload(req.logo, 'brands');
     }
 
     const brand =
       path == null
         ? plainToClass(Brand, req)
-        : plainToClass(Brand, { ...req, logo: path },);
-console.log(brand)
-    return await this.brand_repo.update(brand.id,brand);
+        : plainToClass(Brand, { ...req, logo: path });
+    console.log(brand);
+    return await this.brand_repo.update(brand.id, brand);
   }
 }

@@ -115,22 +115,23 @@ export class MakeOrderTransaction extends BaseTransaction<
       if (!payment_method) {
         throw new BadRequestException('message.payment_method_not_found');
       }
-
+      const date =
+        req.delivery_type == DeliveryType.FAST
+          ? new Date()
+          : new Date(req.slot_day.day);
+      date.setHours(date.getHours() + 3);
+      const isoDate = date.toISOString().slice(0, 10);
       const count = await context
         .createQueryBuilder(Order, 'order')
-        .where('DATE(order.created_at) = CURDATE()')
+        .where('DATE(order.created_at) = :specificDate', { isoDate })
         .getCount();
-
-        const date = new Date();
-        date.setHours(date.getHours() + 3);
-        const isoDate = date.toISOString().slice(0, 10);
 
       const order = await context.save(Order, {
         ...plainToInstance(Order, req),
         user_id: user.id,
         warehouse_id: cart_products[0].warehouse_id,
         delivery_fee: section.delivery_price,
-        number: generateOrderNumber(count,isoDate),
+        number: generateOrderNumber(count, isoDate),
         address_id: address.id,
         is_paid: payment_method.type != PaymentMethodEnum.CASH ? true : false,
         payment_method: payment_method.type,
@@ -144,12 +145,10 @@ export class MakeOrderTransaction extends BaseTransaction<
       switch (req.delivery_type) {
         case DeliveryType.FAST:
           {
-            const currentDate = new Date();
-
             // Add 40 minutes
-            currentDate.setMinutes(currentDate.getMinutes() + 40);
-            order.delivery_day = currentDate.toISOString().slice(0, 10);
-            order.estimated_delivery_time = currentDate;
+            date.setMinutes(date.getMinutes() + 40);
+            order.delivery_day = isoDate;
+            order.estimated_delivery_time = date;
           }
           break;
         case DeliveryType.SCHEDULED:
@@ -173,7 +172,7 @@ export class MakeOrderTransaction extends BaseTransaction<
 
             // Add 40 minutes
             currentDate.setMinutes(currentDate.getMinutes() + 20);
-          
+
             order.delivery_day = isoDate;
             order.estimated_delivery_time = currentDate;
           }
@@ -506,7 +505,7 @@ export class MakeOrderTransaction extends BaseTransaction<
 export function generateOrderNumber(count: number, order_day: string) {
   // number of digits matches ##-**-@@-&&&&, where ## is 100 - the year last 2 digits, ** is 100 - the month, @@ is 100 - the day, &&&& is the number of the order in that day
   const date = new Date(order_day);
-  console.log(date);
+
   const year = date.getFullYear().toString().substr(-2);
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
   const day = date.getDate().toString().padStart(2, '0');

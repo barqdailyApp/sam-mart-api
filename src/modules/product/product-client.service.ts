@@ -7,7 +7,7 @@ import { Warehouse } from 'src/infrastructure/entities/warehouse/warehouse.entit
 
 import { ProductClientQuery } from './dto/filter/products-client.query';
 import { SingleProductClientQuery } from './dto/filter/single-product-client.query';
-import { Repository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 import { SubcategoryService } from '../subcategory/subcategory.service';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
@@ -207,23 +207,20 @@ export class ProductClientService {
 
       // Build the query conditionally based on the language of product_name
       if (isProductNameArabic) {
-        query = query
-          .andWhere('product.name_ar LIKE :product_name', {
-            product_name: `%${product_name}%`,
+        query = query.andWhere(
+          new Brackets((qb) => {
+            qb.where('product.name_ar LIKE :product_name', { product_name: `%${product_name}%` })
+              .orWhere('product.keywords LIKE :product_name', { product_name: `%${product_name}%` });
           })
-          .orWhere('product.keywords LIKE :product_name', {
-            product_name: `%${product_name}%`,
-          });
+        );
       } else {
-        query = query
-          .andWhere('product.name_en LIKE :product_name', {
-            product_name: `%${product_name}%`,
+        query = query.andWhere(
+          new Brackets((qb) => {
+            qb.where('product.name_en LIKE :product_name', { product_name: `%${product_name}%` })
+              .orWhere('product.keywords LIKE :product_name', { product_name: `%${product_name}%` });
           })
-          .orWhere('product.keywords LIKE :product_name', {
-            product_name: `%${product_name}%`,
-          });
-      }
-    }
+        );
+    }}
 
     query = query.andWhere('product.is_active = true');
     query = query.andWhere('product_sub_category.is_active = true');
