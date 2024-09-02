@@ -185,4 +185,4 @@ export class NotificationService extends BaseUserService<NotificationEntity> {
   //  await this._repo.save(notifications);
    return true;
  }
-}
+  }}
