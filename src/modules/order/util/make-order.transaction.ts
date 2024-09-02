@@ -119,7 +119,7 @@ export class MakeOrderTransaction extends BaseTransaction<
         req.delivery_type == DeliveryType.SCHEDULED
           ? new Date(req.slot_day?.day)
           : new Date()
-      date.setHours(date.getHours() + 3);
+      // date.setHours(date.getHours() + 3);
       const isoDate = date.toISOString().slice(0, 10);
       const count = await context
         .createQueryBuilder(Order, 'order')
@@ -161,11 +161,12 @@ export class MakeOrderTransaction extends BaseTransaction<
             order.estimated_delivery_time = new Date(
               req.slot_day.day + 'T' + slot.start_time + 'Z',
             );
-            if(order.estimated_delivery_time<new Date())
-              throw new BadRequestException('هذا الوقت منتهي');
             order.estimated_delivery_time.setHours(
               order.estimated_delivery_time.getHours() - 3,
             );
+            if(order.estimated_delivery_time<new Date())
+              throw new BadRequestException('هذا الوقت منتهي');
+         
           }
           break;
         case DeliveryType.WAREHOUSE_PICKUP:
