@@ -39,6 +39,11 @@ export class StaticPageController {
         const result = await this.staticPageService.updateStaticPageByType(req);
         return new ActionResponse<StaticPage>(result);
     }
+    @Get("whats-app")
+    async  getWhatsAppStaticPage() {
+        return new ActionResponse({support:"00967734220888",shein:"+967730619566"});
+        
+    }
 
     @Get("/:static_page_type")
     async getStaticPage(@Param() param: GetStaticPage): Promise<ActionResponse<StaticPageResponse>> {
@@ -52,9 +57,5 @@ export class StaticPageController {
     }
 
     
-    @Get("/whats-app")
-    async  getWhatsAppStaticPage() {
-        return new ActionResponse({support:"00967734220888",shein:"+967730619566"});
-        
-    }
+
 }
