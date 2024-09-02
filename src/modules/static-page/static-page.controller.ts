@@ -54,7 +54,7 @@ export class StaticPageController {
     
     @Get("/whats-app")
     async  getWhatsAppStaticPage() {
-        return {support:"00967734220888",shein:"+967730619566"}
+        return new ActionResponse({support:"00967734220888",shein:"+967730619566"});
         
     }
 }
