@@ -116,9 +116,9 @@ export class MakeOrderTransaction extends BaseTransaction<
         throw new BadRequestException('message.payment_method_not_found');
       }
       const date =
-        req.delivery_type == DeliveryType.FAST
-          ? new Date()
-          : new Date(req.slot_day.day);
+        req.delivery_type == DeliveryType.SCHEDULED
+          ? new Date(req.slot_day?.day)
+          : new Date()
       date.setHours(date.getHours() + 3);
       const isoDate = date.toISOString().slice(0, 10);
       const count = await context
