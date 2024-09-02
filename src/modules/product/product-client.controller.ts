@@ -65,7 +65,6 @@ export class ProductClientController {
     return new ActionResponse(pageDto);
   }
 
-
   @Get('all-products-offers-for-client')
   async allProductsOffersForClient(
     @Query() productClientFilter: ProductClientQuery,
@@ -96,10 +95,8 @@ export class ProductClientController {
       id,
       singleProductClientQuery,
     );
-    const productResponse =new SingleProductsNewResponse(product);
-   // const productResponse = plainToClass(ProductResponse, product);
-
- 
+    const productResponse = new SingleProductsNewResponse(product);
+    // const productResponse = plainToClass(ProductResponse, product);
 
     return new ActionResponse(this._i18nResponse.entity(productResponse));
   }
@@ -111,7 +108,7 @@ export class ProductClientController {
     const { products_favorite, total } =
       await this.productClientService.getAllProductsFavorite(productFavQuery);
     const productsResponse = products_favorite.map((product_fav) => {
-      const productResponse =new ProductsNewResponse(product_fav.product);
+      const productResponse = new ProductsNewResponse(product_fav.product);
 
       return productResponse;
     });
@@ -134,10 +131,22 @@ export class ProductClientController {
 
     return new ActionResponse(product);
   }
-  
+
   @Get('get-brands')
   async getBrands(@Query() query: PaginatedRequest) {
     const brands = await this.brandService.findAll(query);
+    brands.map((brand) => {
+      brand.logo = toUrl(brand.logo);
+    });
+    const total = await this.brandService.count(query);
+    return new PaginatedResponse(brands, {
+      meta: { total, page: query.page, limit: query.limit },
+    });
+  }
+
+  @Get('get-brands-client')
+  async getBrandsClient(@Query() query: PaginatedRequest) {
+    const brands = this._i18nResponse.entity( await this.brandService.findAll(query));
     brands.map((brand) => {
       brand.logo = toUrl(brand.logo);
     });
