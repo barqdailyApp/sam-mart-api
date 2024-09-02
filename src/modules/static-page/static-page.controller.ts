@@ -50,4 +50,11 @@ export class StaticPageController {
         });
         return new ActionResponse<StaticPageResponse>(result);
     }
+
+    
+    @Get("/whats-app")
+    async  getWhatsAppStaticPage() {
+        return {support:"00967734220888",shein:"+967730619566"}
+        
+    }
 }
