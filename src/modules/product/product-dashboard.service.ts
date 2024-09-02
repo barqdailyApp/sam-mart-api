@@ -1396,7 +1396,7 @@ export class ProductDashboardService {
 
       .leftJoinAndSelect('shipment_product.shipment', 'shipment')
       .where(
-        '((DATE(shipment.delivered_at) = :orderDate AND TIME(shipment.delivered_at) < "21:00:00") OR (DATE(shipment.delivered_at) = DATE_SUB(:orderDate, INTERVAL 1 DAY) AND TIME(shipment.delivered_at) >= "21:00:00"))',
+        '((DATE(shipment.order_delivered_at) = :orderDate AND TIME(shipment.order_delivered_at) < "21:00:00") OR (DATE(shipment.order_delivered_at) = DATE_SUB(:orderDate, INTERVAL 1 DAY) AND TIME(shipment.order_delivered_at) >= "21:00:00"))',
         { orderDate: day },
       )
       .leftJoinAndSelect('shipment.order', 'order')
