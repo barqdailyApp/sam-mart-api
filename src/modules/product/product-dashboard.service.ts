@@ -1393,11 +1393,12 @@ export class ProductDashboardService {
     // Query using Between
     const result = await this.shipmentProduct_repo
       .createQueryBuilder('shipment_product')
+
+      .leftJoinAndSelect('shipment_product.shipment', 'shipment')
       .where(
-        '((DATE(shipment_product.shipment.delivered_at) = :orderDate AND TIME(shipment_product.shipment.delivered_at) < "21:00:00") OR (DATE(shipment_product.shipment.delivered_at) = DATE_SUB(:orderDate, INTERVAL 1 DAY) AND TIME(shipment_product.shipment.delivered_at) >= "21:00:00"))',
+        '((DATE(shipment.delivered_at) = :orderDate AND TIME(shipment.delivered_at) < "21:00:00") OR (DATE(shipment.delivered_at) = DATE_SUB(:orderDate, INTERVAL 1 DAY) AND TIME(shipment.delivered_at) >= "21:00:00"))',
         { orderDate: day },
       )
-      .leftJoinAndSelect('shipment_product.shipment', 'shipment')
       .leftJoinAndSelect('shipment.order', 'order')
       .andWhere('shipment.status = :status', {
         status: ShipmentStatusEnum.DELIVERED,
