@@ -71,7 +71,7 @@ export class Order extends OwnedEntity {
   @Column({ default: false })
   is_paid: boolean;
 
-  @Column({ length: 10, unique: true })
+  @Column({ length: 10})
   number: string;
 
   @Column()
