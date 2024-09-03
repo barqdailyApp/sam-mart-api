@@ -149,24 +149,24 @@ export class NotificationService extends BaseUserService<NotificationEntity> {
     });
     return "notification sent successfully";
   }
-  async sendTousers(data: SendToAllUsersNotificationRequest, users: User[]) {
- console.log(users.length)
-    const BATCH_SIZE = 10; 
-    for (let i = 0; i < users.length; i += BATCH_SIZE) {
-      const userBatch = users.slice(i, i + BATCH_SIZE);
-    this._fcmIntegrationService.sendToAll(
-      userBatch.map((user) => user.fcm_token),
-     data.title_ar,
-     data.message_ar,
-     
-     {
-       action: NotificationTypes.USERS,
-       action_id: NotificationTypes.USERS,
-       
-     },
-     data?.image_url
-   );
 
-   return true;
- }
-  }}
+  async sendTousers(data: SendToAllUsersNotificationRequest, users: User[]) {
+  console.log(users.length);
+  const BATCH_SIZE = 10; 
+  for (let i = 0; i < users.length; i += BATCH_SIZE) {
+    const userBatch = users.slice(i, i + BATCH_SIZE);
+    await this._fcmIntegrationService.sendToAll(
+      userBatch.map((user) => user.fcm_token),
+      data.title_ar,
+      data.message_ar,
+      {
+        action: NotificationTypes.USERS,
+        action_id: NotificationTypes.USERS,
+      },
+      data?.image_url
+    );
+  }
+
+  return true;
+}
+  }
