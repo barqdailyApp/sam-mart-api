@@ -150,8 +150,8 @@ export class NotificationService extends BaseUserService<NotificationEntity> {
     return "notification sent successfully";
   }
   async sendTousers(data: SendToAllUsersNotificationRequest, users: User[]) {
-
-    const BATCH_SIZE = 2000; 
+ console.log(users.length)
+    const BATCH_SIZE = 10; 
     for (let i = 0; i < users.length; i += BATCH_SIZE) {
       const userBatch = users.slice(i, i + BATCH_SIZE);
     this._fcmIntegrationService.sendToAll(
@@ -166,23 +166,7 @@ export class NotificationService extends BaseUserService<NotificationEntity> {
      },
      data?.image_url
    );
-  //  const notifications = [];
-  //  for (let index = 0; index < users.length; index++) {
-  //    const user = users[index];
-  //    notifications.push(
-  //      new NotificationEntity({
-  //        user_id: users[index].id,
-  //        url: users[index].id,
-  //        type: NotificationTypes.USERS,
-  //        title_ar: data.title_ar,
-  //        title_en: data.title_en,
-  //        text_ar: data.message_ar,
-  //        text_en: data.message_en,
-  //      }),
-  //    );
-  //  }
 
-  //  await this._repo.save(notifications);
    return true;
  }
   }}
