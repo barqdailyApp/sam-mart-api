@@ -152,7 +152,7 @@ export class NotificationService extends BaseUserService<NotificationEntity> {
 
   async sendTousers(data: SendToAllUsersNotificationRequest, users: User[]) {
   console.log(users.length);
-  const BATCH_SIZE = 10; 
+  const BATCH_SIZE = 2000; 
   for (let i = 0; i < users.length; i += BATCH_SIZE) {
     const userBatch = users.slice(i, i + BATCH_SIZE);
     await this._fcmIntegrationService.sendToAll(
