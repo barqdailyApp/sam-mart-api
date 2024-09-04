@@ -52,6 +52,7 @@ export class OrdersResponse {
       id: order.shipments[0].id,
       order_id: order.shipments[0].order_id,
       cancel_reason: order.shipments[0]?.cancelShipmentReason,
+      canceled_by: order.shipments[0]?.canceled_by,
       driver: order.shipments[0].driver
         ? {
             id: order.shipments[0].driver.user.id,

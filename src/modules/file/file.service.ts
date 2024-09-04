@@ -34,7 +34,7 @@ export class FileService {
       ext = ext.replace(/\s+/g, ''); // Remove any spaces from the extension
   
       const randName =
-        req.originalname.split('.').shift() + '-' + new Date().getTime();
+        ext.split('.').shift() + '-' + new Date().getTime();
       let fileLocation = `${baseUrl}/${dir}/${randName}.${ext}`;
       fileLocation = fileLocation.replace(/\s+/g, '%20'); // Replace any spaces with '%20'
   
