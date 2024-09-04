@@ -1,4 +1,5 @@
 import {  ApiProperty } from "@nestjs/swagger";
+import { Transform } from "class-transformer";
 import { IsArray, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreateBrandRequest {
@@ -12,6 +13,8 @@ export class CreateBrandRequest {
 
     @ApiProperty({required:false})
     @IsOptional()
+    
+    @Transform(({ value }) => Number(value))
     @IsNumber()
     order:number
 
@@ -38,6 +41,8 @@ export class UpdateBrandRequest {
     @ApiProperty({required:false})
     @IsOptional()
     @IsNumber()
+    
+    @Transform(({ value }) => Number(value))
     order:number
 
     @ApiProperty({ type: 'file', required: false })
