@@ -1552,7 +1552,9 @@ export class ProductDashboardService {
     const path = await this._fileService.upload(req.logo, 'brands');
     const brand = plainToClass(Brand, { ...req, logo: path });
 
-    return await this.brand_repo.save(brand);
+    const saved= await this.brand_repo.save(brand);
+     await  this.orderItems(true);
+     return saved;
   }
 
   async updateBrand(req: UpdateBrandRequest) {
@@ -1560,12 +1562,35 @@ export class ProductDashboardService {
     if (req?.logo != null) {
       path = await this._fileService.upload(req.logo, 'brands');
     }
+    const savedBrand=await this.brand_repo.findOne({where:{id:req.id}});
+    if (!savedBrand) {throw new NotFoundException("brand not found");}
 
+    await  this.orderItems(savedBrand.order>req.order?false:true);
     const brand =
       path == null
         ? plainToClass(Brand, req)
         : plainToClass(Brand, { ...req, logo: path });
-    console.log(brand);
+
     return await this.brand_repo.update(brand.id, brand);
+  }
+
+  async orderItems(asc: boolean) {
+    try {
+      const brands = await this.brand_repo.find({
+        order: {
+          order: 'ASC',
+          updated_at: asc ? 'ASC' : 'DESC',
+        },
+      });
+
+      let order = 1;
+      for (const item of brands) {
+        item.order = order++;
+      }
+
+      await this.brand_repo.save(brands);
+    } catch (error) {
+      console.error('Error occurred:', error.message);
+    }
   }
 }
