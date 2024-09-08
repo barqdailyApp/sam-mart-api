@@ -37,10 +37,10 @@ export class FileService {
         ext.split('.').shift() + '-' + new Date().getTime();
       let fileLocation = `${baseUrl}/${dir}/${randName}.${ext}`;
       fileLocation = fileLocation.replace(/\s+/g, '%20'); // Replace any spaces with '%20'
-  
+      if (ext.toLowerCase() !== 'gif') {  
       // use sharp to resize image
       const resizedImage = await sharp(req.buffer).toBuffer();
-      await this.storage.getDisk().put(fileLocation, resizedImage);
+      await this.storage.getDisk().put(fileLocation, resizedImage);}
       return fileLocation;
     } catch (error) {
       throw error;
