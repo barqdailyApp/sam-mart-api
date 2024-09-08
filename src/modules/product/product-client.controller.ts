@@ -29,7 +29,7 @@ import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 import { toUrl } from 'src/core/helpers/file.helper';
 import { BrandService } from './brand.service';
-import { applyQuerySort } from 'src/core/helpers/service-related.helper';
+import { applyQueryFilters, applyQuerySort } from 'src/core/helpers/service-related.helper';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -133,22 +133,12 @@ export class ProductClientController {
     return new ActionResponse(product);
   }
 
-  @Get('get-brands')
-  async getBrands(@Query() query: PaginatedRequest) {
-    applyQuerySort(query,"order=ASC");
-    const brands = await this.brandService.findAll(query);
-    brands.map((brand) => {
-      brand.logo = toUrl(brand.logo);
-    });
-    const total = await this.brandService.count(query);
-    return new PaginatedResponse(brands, {
-      meta: { total, page: query.page, limit: query.limit },
-    });
-  }
+
 
   @Get('get-brands-client')
   async getBrandsClient(@Query() query: PaginatedRequest) {
     applyQuerySort(query,"order=ASC");
+    applyQueryFilters(query,"is_active=true");
     const brands = this._i18nResponse.entity( await this.brandService.findAll(query));
     brands.map((brand) => {
       brand.logo = toUrl(brand.logo);

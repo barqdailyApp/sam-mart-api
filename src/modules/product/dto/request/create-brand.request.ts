@@ -1,6 +1,6 @@
 import {  ApiProperty } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
-import { IsArray, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsArray, IsBoolean, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreateBrandRequest {
     @ApiProperty()
@@ -10,6 +10,14 @@ export class CreateBrandRequest {
     @ApiProperty()
     @IsString()
     name_ar: string;
+
+    @ApiProperty({ nullable: true, required: false })
+    @IsOptional()
+    @Transform(({ value }) => {
+      return value === 'true'  || value === true;
+    })
+    @IsBoolean()
+    is_active: boolean;
 
     @ApiProperty({required:false})
     @IsOptional()
@@ -45,6 +53,14 @@ export class UpdateBrandRequest {
     @Transform(({ value }) => Number(value))
     order:number
 
+    @ApiProperty({ nullable: true, required: false })
+    @IsOptional()
+    @Transform(({ value }) => {
+      return value === 'true'  || value === true;
+    })
+    @IsBoolean()
+    is_active: boolean;
+    
     @ApiProperty({ type: 'file', required: false })
     @IsOptional()
     logo: Express.Multer.File;

@@ -15,6 +15,10 @@ export class Brand extends AuditableEntity{
     @Column({nullable:true})
     order:number
 
+    @Column({default:true})
+    is_active:boolean
+
+
     
     @OneToMany(()=>Product, product => product.brand)
     products: Product[]
