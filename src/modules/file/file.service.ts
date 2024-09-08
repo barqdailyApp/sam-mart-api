@@ -32,20 +32,26 @@ export class FileService {
       const baseUrl = this.config.get('storage.local.root');
       let ext = req.originalname.split('.').pop();
       ext = ext.replace(/\s+/g, ''); // Remove any spaces from the extension
-  
-      const randName =
-        ext.split('.').shift() + '-' + new Date().getTime();
+    
+      const randName = ext.split('.').shift() + '-' + new Date().getTime();
       let fileLocation = `${baseUrl}/${dir}/${randName}.${ext}`;
       fileLocation = fileLocation.replace(/\s+/g, '%20'); // Replace any spaces with '%20'
-      if (ext.toLowerCase() !== 'gif') {  
-      // use sharp to resize image
-      const resizedImage = await sharp(req.buffer).toBuffer();
-      await this.storage.getDisk().put(fileLocation, resizedImage);}
+    
+      let fileBuffer = req.buffer;
+      
+      // Skip resizing if the file is a GIF
+      if (ext.toLowerCase() !== 'gif') {
+        // Use sharp to resize image if it's not a GIF
+        fileBuffer = await sharp(req.buffer).toBuffer();
+      }
+      
+      await this.storage.getDisk().put(fileLocation, fileBuffer);
       return fileLocation;
     } catch (error) {
       throw error;
     }
   }
+  
   
   async delete(fileLocation: string) {
     try {
