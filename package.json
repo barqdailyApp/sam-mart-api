@@ -50,7 +50,7 @@
     "decimal.js": "^10.4.3",
     "dotenv": "^16.0.3",
     "exceljs": "^4.4.0",
-    "firebase-admin": "^11.10.1",
+    "firebase-admin": "^12.5.0",
     "joi": "^17.8.3",
     "mysql2": "^3.1.2",
     "nestjs-fcm": "^0.2.0",

@@ -26,6 +26,7 @@ import { NotificationTypes } from 'src/infrastructure/data/enums/notification-ty
 import { NotificationQuery } from './dto/filters/notification.query';
 import { Roles } from '../authentication/guards/roles.decorator';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
+import { FirebaseAdminService } from './firebase-admin-service';
 
 @Injectable()
 export class NotificationService extends BaseUserService<NotificationEntity> {
@@ -35,6 +36,7 @@ export class NotificationService extends BaseUserService<NotificationEntity> {
     @Inject(REQUEST) request: Request,
     private readonly _userService: UserService,
     private readonly _fcmIntegrationService: FcmIntegrationService,
+  private readonly firebaseAdminService: FirebaseAdminService,
     @InjectRepository(User)
     public userRepository: Repository<User>,
   ) {
@@ -51,14 +53,11 @@ export class NotificationService extends BaseUserService<NotificationEntity> {
       id: notification.user_id,
     });
     if (recipient.fcm_token) {
-      await this._fcmIntegrationService.send(
+      await this.firebaseAdminService.sendNotification(
         recipient.fcm_token,
         notification['title_' + recipient.language],
         notification['text_' + recipient.language],
-        {
-          action: notification.type,
-          action_id: notification.url,
-        },
+       
       );
     }
     if (!notification)
@@ -155,14 +154,10 @@ export class NotificationService extends BaseUserService<NotificationEntity> {
   const BATCH_SIZE = 10; 
   for (let i = 0; i < users.length; i += BATCH_SIZE) {
     const userBatch = users.slice(i, i + BATCH_SIZE);
-     this._fcmIntegrationService.sendToAll(
+     this.firebaseAdminService.sendNotificationForAll(
       userBatch.map((user) => user.fcm_token),
       data.title_ar,
       data.message_ar,
-      {
-        action: NotificationTypes.USERS,
-        action_id: NotificationTypes.USERS,
-      },
       data?.image_url
     );
   }

@@ -31,6 +31,7 @@ import { PageMetaDto } from 'src/core/helpers/pagination/page-meta.dto';
 import { PageDto } from 'src/core/helpers/pagination/page.dto';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { Roles } from '../authentication/guards/roles.decorator';
+import { FirebaseAdminService } from './firebase-admin-service';
 
 @ApiBearerAuth()
 @ApiTags('Notifications')
@@ -45,6 +46,7 @@ import { Roles } from '../authentication/guards/roles.decorator';
 export class NotificationController {
   constructor(
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
+    private readonly firebaseAdminService: FirebaseAdminService,
     private readonly notificationService: NotificationService,
     @InjectRepository(User)
     public userRepository: Repository<User>,
@@ -82,4 +84,6 @@ export class NotificationController {
 
     return new ActionResponse(pageDto);
   }
+
+
 }
