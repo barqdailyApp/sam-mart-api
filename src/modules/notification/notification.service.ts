@@ -151,7 +151,7 @@ export class NotificationService extends BaseUserService<NotificationEntity> {
 
   async sendTousers(data: SendToAllUsersNotificationRequest, users: User[]) {
   console.log(users.length);
-  const BATCH_SIZE = 10; 
+  const BATCH_SIZE = 500; 
   for (let i = 0; i < users.length; i += BATCH_SIZE) {
     const userBatch = users.slice(i, i + BATCH_SIZE);
      this.firebaseAdminService.sendNotificationForAll(
