@@ -15,11 +15,13 @@ export class BrandService extends BaseService<Brand>{
 }
 async linkBrandToProduct(req:LinkBrandProuductRequest){
     const brand = await this.brand_repo.findOne({where:{id:req.brand_id}})
+
     if (!brand) {
         throw new NotFoundException("brand not found");
     }
 
-    let products = await this.product_repo.find({where:{id: In(req.product_ids),brand_id:Not(brand.id)}})
+    let products = await this.product_repo.find({where:{id: In(req.product_ids)}})
+    
     if (!products) {
         throw new NotFoundException("product not found");
     }
@@ -28,6 +30,7 @@ async linkBrandToProduct(req:LinkBrandProuductRequest){
         product.brand_id = brand.id
         return product
     })
+    
  return    await this.product_repo.save(products)
 
 }

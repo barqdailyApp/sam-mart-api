@@ -138,7 +138,7 @@ export class ProductClientController {
   @Get('get-brands-client')
   async getBrandsClient(@Query() query: PaginatedRequest) {
     applyQuerySort(query,"order=ASC");
-    applyQueryFilters(query,"is_active=true");
+    applyQueryFilters(query,"is_active=1");
     const brands = this._i18nResponse.entity( await this.brandService.findAll(query));
     brands.map((brand) => {
       brand.logo = toUrl(brand.logo);

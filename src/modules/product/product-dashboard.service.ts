@@ -786,31 +786,26 @@ export class ProductDashboardService {
 
     // Add search term condition if provided
     if (product_name) {
-      query = query.where('product.keywords LIKE :product_name', {
-        product_name: `%${product_name}%`,
-      });
       // Determine if the product_name is Arabic
       const isProductNameArabic = this.isArabic(product_name); // Implement or use a library to check if the text is Arabic
 
       // Build the query conditionally based on the language of product_name
       if (isProductNameArabic) {
-        query = query
-          .andWhere('product.name_ar LIKE :product_name', {
-            product_name: `%${product_name}%`,
+        query = query.andWhere(
+          new Brackets((qb) => {
+            qb.where('product.name_ar LIKE :product_name', { product_name: `%${product_name}%` })
+              .orWhere('product.keywords LIKE :product_name', { product_name: `%${product_name}%` });
           })
-          .orWhere('product.keywords LIKE :product_name', {
-            product_name: `%${product_name}%`,
-          });
+        );
       } else {
-        query = query
-          .andWhere('product.name_en LIKE :product_name', {
-            product_name: `%${product_name}%`,
+        query = query.andWhere(
+          new Brackets((qb) => {
+            qb.where('product.name_en LIKE :product_name', { product_name: `%${product_name}%` })
+              .orWhere('product.keywords LIKE :product_name', { product_name: `%${product_name}%` });
           })
-          .orWhere('product.keywords LIKE :product_name', {
-            product_name: `%${product_name}%`,
-          });
-      }
-    }
+        );
+    }}
+
 
     // Conditional where clause based on sub category
     if (category_sub_category_id) {
