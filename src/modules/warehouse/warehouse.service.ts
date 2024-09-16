@@ -194,11 +194,13 @@ export class WarehouseService extends BaseService<Warehouse> {
     // Create a flat structure for products
     const flattenedProducts = operations.map((operation) => {
       return {
+      date: operation.operation.created_at,  
     product_name: operation.product.name_ar,
     product_barcode: operation.product.barcode,
     quantity: operation.quantity,
     operation_type: operation.operation.type,
     current_balance: operation.operation.warehouse.products[0].quantity
+
    
    
       };
