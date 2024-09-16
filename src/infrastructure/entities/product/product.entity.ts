@@ -8,6 +8,7 @@ import { WarehouseProducts } from '../warehouse/warehouse-products.entity';
 import { ProductFavorite } from './product-favorite.entity';
 import { ShipmentProduct } from '../order/shipment-product.entity';
 import { Brand } from '../brand/brand';
+import { WarehouseOpreationProducts } from '../warehouse/wahouse-opreation-products.entity';
 
 @Entity()
 
@@ -17,6 +18,9 @@ export class Product extends AuditableEntity {
 
   @Column()
   name_en: string;
+
+  @OneToMany(()=>WarehouseOpreationProducts,warehouseOperationsProducts=>warehouseOperationsProducts.product)
+  warehouse_operations_products:WarehouseOpreationProducts[]
 
   @ManyToOne(()=>Brand,brand=>brand.products)
   @JoinColumn({name:'brand_id'})

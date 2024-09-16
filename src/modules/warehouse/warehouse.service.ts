@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/core/base/service/service.base';
 import { BaseUserService } from 'src/core/base/service/user-service.base';
 import { Warehouse } from 'src/infrastructure/entities/warehouse/warehouse.entity';
-import { In, Repository, Like, LessThan, LessThanOrEqual } from 'typeorm';
+import { In, Repository, Like, LessThan, LessThanOrEqual, Between } from 'typeorm';
 import { WarehouseOperationTransaction } from './util/warehouse-opreation.transaction';
 import { WarehouseOperationRequest } from './dto/requests/warehouse-operation.request';
 import { UpdateWarehouseRequest } from './dto/requests/update-warehouse.request';
@@ -21,14 +21,21 @@ import { WarehouseProducts } from 'src/infrastructure/entities/warehouse/warehou
 import { operationType } from 'src/infrastructure/data/enums/operation-type.enum';
 import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
 import { WarehouseProductsQuery } from './dto/requests/warehouse-products-query';
+import { FileService } from '../file/file.service';
+import { WarehouseOperations } from 'src/infrastructure/entities/warehouse/warehouse-opreations.entity';
+import { Product } from 'src/infrastructure/entities/product/product.entity';
+import { WarehouseOpreationProducts } from 'src/infrastructure/entities/warehouse/wahouse-opreation-products.entity';
 
 @Injectable()
 export class WarehouseService extends BaseService<Warehouse> {
   constructor(
     @InjectRepository(Warehouse)
     private readonly warehouse_repo: Repository<Warehouse>,
+    @InjectRepository(WarehouseOpreationProducts)
+    private readonly warehouse_operation_products_repo: Repository<WarehouseOpreationProducts>,
     private readonly warehouseOperationTransaction: WarehouseOperationTransaction,
     @Inject(RegionService) private readonly regionService: RegionService,
+   private readonly _fileService: FileService, 
     @InjectRepository(Driver) private readonly driver_repo: Repository<Driver>,
     @InjectRepository(WarehouseProducts)
     private readonly warehouseProducts_repo: Repository<WarehouseProducts>,
@@ -169,5 +176,39 @@ export class WarehouseService extends BaseService<Warehouse> {
 
     warehouse.drivers.push(driver);
     return await this.warehouse_repo.save(warehouse);
+  }
+  async warehouseOperationExport(start_date: Date, end_date: Date) {
+    start_date.setHours(start_date.getHours() - 3);
+    end_date.setHours(end_date.getHours() - 3);
+    const operations = await this.warehouse_operation_products_repo.find({
+      where: {
+    operation:{
+      created_at: Between(start_date, end_date),}
+       
+      },
+      relations: {
+        product: true,operation:{warehouse:{products:true}}}
+
+    })
+
+    // Create a flat structure for products
+    const flattenedProducts = operations.map((operation) => {
+      return {
+    product_name: operation.product.name_ar,
+    product_barcode: operation.product.barcode,
+    quantity: operation.quantity,
+    operation_type: operation.operation.type,
+    current_balance: operation.operation.warehouse.products[0].quantity
+   
+   
+      };
+    });
+   
+
+    return await this._fileService.exportExcel(
+      flattenedProducts,
+      'operations',
+      'operations',
+    );
   }
 }

@@ -3,10 +3,12 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   Param,
   Patch,
   Post,
   Query,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { WarehouseService } from './warehouse.service';
@@ -24,10 +26,13 @@ import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 import { applyQueryIncludes } from 'src/core/helpers/service-related.helper';
 import { Region } from 'src/infrastructure/entities/region/region.entity';
 import { UpdateWarehouseRequest } from './dto/requests/update-warehouse.request';
-import { WarehouseTransferProductRequest, WarehouseTransferProductsRequest } from './dto/requests/warehouse-transfer-product.request';
+import {
+  WarehouseTransferProductRequest,
+  WarehouseTransferProductsRequest,
+} from './dto/requests/warehouse-transfer-product.request';
 import { Roles } from '../authentication/guards/roles.decorator';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
-import { query } from 'express';
+import { query , Response} from 'express';
 import { WarehouseProductsQuery } from './dto/requests/warehouse-products-query';
 import { PageMetaDto } from 'src/core/helpers/pagination/page-meta.dto';
 import { PageDto } from 'src/core/helpers/pagination/page.dto';
@@ -80,12 +85,11 @@ export class WarehouseController {
     const { page, limit } = query;
 
     const products = await this.warehouseService.getWarehouseProduct(query);
-  
 
     const product_response = products[0].map((product) => {
       return new WarehouseProductRespone(product);
-    })
-    
+    });
+
     const total = products[1];
     const pageMetaDto = new PageMetaDto(page, limit, total);
     // const data = this._i18nResponse.entity(productsResponse);
@@ -112,23 +116,22 @@ export class WarehouseController {
 
   @Roles(Role.ADMIN)
   @Delete('/:id')
-  async delete(
-
-    @Query('id') id: string,
-  ) {
-    return new ActionResponse(
-      await this.warehouseService.softDelete(id)
-    );
+  async delete(@Query('id') id: string) {
+    return new ActionResponse(await this.warehouseService.softDelete(id));
   }
 
-  @Patch("/:from_warehouse_id/transfer/:to_warehouse_id")
+  @Patch('/:from_warehouse_id/transfer/:to_warehouse_id')
   async transferWarehouseProducts(
-    @Param("from_warehouse_id") from_warehouse_id: string,
-    @Param("to_warehouse_id") to_warehouse_id: string,
-    @Body() body: WarehouseTransferProductsRequest
+    @Param('from_warehouse_id') from_warehouse_id: string,
+    @Param('to_warehouse_id') to_warehouse_id: string,
+    @Body() body: WarehouseTransferProductsRequest,
   ) {
     return new ActionResponse(
-      await this.warehouseService.transferWarehouseProducts(from_warehouse_id, to_warehouse_id, body),
+      await this.warehouseService.transferWarehouseProducts(
+        from_warehouse_id,
+        to_warehouse_id,
+        body,
+      ),
     );
   }
 
@@ -144,5 +147,22 @@ export class WarehouseController {
         warehouse_id,
       ),
     );
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @Post('warehouse-operation/export')
+  @Header(
+    'Content-type',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  )
+  async exportWarehouseProductsPricing(
+    @Res() res: Response,
+    @Query('start_date') start_date: Date,
+    @Query('to_date') to_date: Date,
+  ) {
+    const File = await this.warehouseService.warehouseOperationExport(start_date, to_date);
+    res.download(`${File}`);
   }
 }
