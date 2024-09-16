@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/core/base/service/service.base';
 import { BaseUserService } from 'src/core/base/service/user-service.base';
 import { Warehouse } from 'src/infrastructure/entities/warehouse/warehouse.entity';
-import { In, Repository, Like, LessThan, LessThanOrEqual, Between } from 'typeorm';
+import { In, Repository, Like, LessThan, LessThanOrEqual, Between, Not } from 'typeorm';
 import { WarehouseOperationTransaction } from './util/warehouse-opreation.transaction';
 import { WarehouseOperationRequest } from './dto/requests/warehouse-operation.request';
 import { UpdateWarehouseRequest } from './dto/requests/update-warehouse.request';
@@ -183,7 +183,9 @@ export class WarehouseService extends BaseService<Warehouse> {
     const operations = await this.warehouse_operation_products_repo.find({
       where: {
     operation:{
-      created_at: Between(start_date, end_date),}
+      created_at: Between(start_date, end_date),
+      type:Not(operationType.SELL)
+    }
        
       },
       order: { operation: { created_at: 'ASC' } },
