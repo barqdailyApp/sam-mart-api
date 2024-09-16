@@ -186,6 +186,7 @@ export class WarehouseService extends BaseService<Warehouse> {
       created_at: Between(start_date, end_date),}
        
       },
+      order: { operation: { created_at: 'ASC' } },
       relations: {
         product: true,operation:{warehouse:{products:true}}}
 
