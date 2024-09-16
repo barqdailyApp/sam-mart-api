@@ -199,7 +199,7 @@ export class WarehouseService extends BaseService<Warehouse> {
     product_barcode: operation.product.barcode,
     quantity: operation.quantity,
     operation_type: operation.operation.type,
-    current_balance: operation.operation.warehouse.products[0].quantity
+    current_balance: operation.operation.warehouse.products.filter((p)=>p.product_id===operation.product_id).map((p)=>p.quantity)[0]
 
    
    
