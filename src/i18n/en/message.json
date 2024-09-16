@@ -11,6 +11,7 @@
     "city_not_found": "City not found",
     "discount_value_must_be_less_than_product_price":"Discount value must be less than product price",
     "country_not_found": "Country not found",
+    "product_not_checked":"Product not checked",
     "payment_failed":"Payment process failure",
     "discount_value_must_be_less_than_1":"Discount value must be less than 1",
     "promo_code_used":"Promo code used",

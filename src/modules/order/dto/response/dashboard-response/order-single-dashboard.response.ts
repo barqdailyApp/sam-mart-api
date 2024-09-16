@@ -115,6 +115,7 @@ export class OrderSingleDashboardResponse {
               shipment_product.product_category_price.product_sub_category
                 .product.barcode,
             quantity: shipment_product.quantity,
+            is_checked: shipment_product.is_checked,
             price: shipment_product.price,
 
             row_number:

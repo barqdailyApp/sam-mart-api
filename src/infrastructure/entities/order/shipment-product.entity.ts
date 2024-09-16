@@ -79,6 +79,10 @@ export class ShipmentProduct extends AuditableEntity {
   @Column({ type: 'simple-array', nullable: true })
   additions: string[];
 
+  @Column({ default: false })
+  is_checked: boolean;
+
+
   constructor(partial?: Partial<ShipmentProduct>) {
     super();
     Object.assign(this, partial);

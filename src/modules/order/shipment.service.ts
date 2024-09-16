@@ -47,6 +47,7 @@ import { WarehouseOperationTransaction } from '../warehouse/util/warehouse-oprea
 import { operationType } from 'src/infrastructure/data/enums/operation-type.enum';
 import { ProductMeasurement } from 'src/infrastructure/entities/product/product-measurement.entity';
 import { PaymentMethodEnum } from 'src/infrastructure/data/enums/payment-method';
+import { ShipmentProduct } from 'src/infrastructure/entities/order/shipment-product.entity';
 @Injectable()
 export class ShipmentService extends BaseService<Shipment> {
   constructor(
@@ -56,6 +57,8 @@ export class ShipmentService extends BaseService<Shipment> {
     private orderRepository: Repository<Order>,
     @InjectRepository(Shipment)
     private shipmentRepository: Repository<Shipment>,
+    @InjectRepository(ShipmentProduct)
+    private shipmentProductRepository: Repository<ShipmentProduct>,
     @InjectRepository(ShipmentChat)
     private shipmentChatRepository: Repository<ShipmentChat>,
     @InjectRepository(Constant)
@@ -350,6 +353,7 @@ export class ShipmentService extends BaseService<Shipment> {
         'driver',
         'driver.user',
         'order.address',
+        'shipment_products',
       ],
     });
     const driver = await this.getDriver(shipment.driver?.user_id);
@@ -363,9 +367,13 @@ export class ShipmentService extends BaseService<Shipment> {
       throw new NotFoundException('message.shipment_not_found');
     }
 
+
     shipment.order_ready_for_pickup_at = new Date();
     shipment.status = ShipmentStatusEnum.READY_FOR_PICKUP;
 
+    shipment.shipment_products.forEach((product) => {
+      if(!product.is_checked) throw new BadRequestException('message.product_not_checked')
+    })
     await this.shipmentRepository.save(shipment);
 
     await this.orderGateway.notifyOrderStatusChange({
@@ -962,5 +970,15 @@ export class ShipmentService extends BaseService<Shipment> {
       }),
     );
     return shipment;
+  }
+
+  async checkShipmentProduct(id:string){
+    const product = await this.shipmentProductRepository.findOne({where:{id}})
+    if(!product){
+      throw new NotFoundException('message.shipment_not_found')
+    }
+    product.is_checked=!product.is_checked
+    await this.shipmentProductRepository.save(product)
+    return product;
   }
 }

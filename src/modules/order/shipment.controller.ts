@@ -195,5 +195,19 @@ export class ShipmentController {
     );
   }
 
+  @Post('product-checked/:shipment_product_id')
+  @Roles(Role.ADMIN)
+  async checkProduct(
+    @Param('shipment_product_id') shipment_product_id: string,
+   
+  ) {
+    return new ActionResponse(
+      plainToInstance(
+        ShipmentResponse,
+        await this.shipmentService.checkShipmentProduct(shipment_product_id),
+      ),
+    );
+  }
+
   // admin convert order from scheduled to fast delivery [Order Controller]
 }
