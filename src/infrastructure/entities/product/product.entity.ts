@@ -19,8 +19,8 @@ export class Product extends AuditableEntity {
   @Column()
   name_en: string;
 
-  @OneToMany(()=>WarehouseOpreationProducts,warehouseOperationsProducts=>warehouseOperationsProducts.product)
-  warehouse_operations_products:WarehouseOpreationProducts[]
+  // @OneToMany(()=>WarehouseOpreationProducts,warehouseOperationsProducts=>warehouseOperationsProducts.product)
+  // warehouse_operations_products:WarehouseOpreationProducts[]
 
   @ManyToOne(()=>Brand,brand=>brand.products)
   @JoinColumn({name:'brand_id'})
@@ -67,11 +67,11 @@ export class Product extends AuditableEntity {
   )
   product_measurements: ProductMeasurement[];
 
-  // @OneToMany(
-  //   () => WarehouseProducts,
-  //   (warehouseProducts) => warehouseProducts.product,
-  // )
-  // warehouses_products: WarehouseProducts[];
+  @OneToMany(
+    () => WarehouseProducts,
+    (warehouseProducts) => warehouseProducts.product,
+  )
+  warehouses_products: WarehouseProducts[];
 
   @OneToMany(
     () => ProductFavorite,

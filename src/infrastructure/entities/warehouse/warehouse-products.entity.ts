@@ -15,11 +15,11 @@ export class WarehouseProducts extends AuditableEntity {
   @Column()
   warehouse_id: string;
 
-  // @ManyToOne(() => Product, (product) => product.warehouses_products, {
-  //   onDelete: 'CASCADE',
-  // })
-  // @JoinColumn()
-  // product: Product;
+  @ManyToOne(() => Product, (product) => product.warehouses_products, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn()
+  product: Product;
 
   @Column()
   product_id: string;

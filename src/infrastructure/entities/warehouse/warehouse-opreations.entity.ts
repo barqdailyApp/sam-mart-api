@@ -18,10 +18,10 @@ export class WarehouseOperations extends OwnedEntity {
 @Column()
 warehouse_id: string;
 
-@OneToMany(() => WarehouseOpreationProducts, (product) => product.operation, {
-    cascade: true,
-})
-products: WarehouseOpreationProducts[]
+// @OneToMany(() => WarehouseOpreationProducts, (product) => product.operation, {
+//     cascade: true,
+// })
+// products: WarehouseOpreationProducts[]
 
 @Column({type:'enum',enum:operationType})
 type:operationType
