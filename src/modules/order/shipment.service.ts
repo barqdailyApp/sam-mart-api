@@ -371,9 +371,9 @@ export class ShipmentService extends BaseService<Shipment> {
     shipment.order_ready_for_pickup_at = new Date();
     shipment.status = ShipmentStatusEnum.READY_FOR_PICKUP;
 
-    shipment.shipment_products.forEach((product) => {
-      if(!product.is_checked) throw new BadRequestException('message.product_not_checked')
-    })
+    // shipment.shipment_products.forEach((product) => {
+    //   if(!product.is_checked) throw new BadRequestException('message.product_not_checked')
+    // })
     await this.shipmentRepository.save(shipment);
 
     await this.orderGateway.notifyOrderStatusChange({
