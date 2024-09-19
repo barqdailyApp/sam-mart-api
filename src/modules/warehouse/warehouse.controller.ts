@@ -149,14 +149,14 @@ export class WarehouseController {
     );
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  @ApiBearerAuth()
-  @Post('warehouse-operation/export')
-  @Header(
-    'Content-type',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  )
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @Roles(Role.ADMIN)
+  // @ApiBearerAuth()
+  // @Post('warehouse-operation/export')
+  // @Header(
+  //   'Content-type',
+  //   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  // )
   // async exportWarehouseProductsPricing(
   //   @Res() res: Response,
   //   @Query('start_date') start_date: Date,
