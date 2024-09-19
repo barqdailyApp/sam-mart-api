@@ -5,11 +5,11 @@ import { Product } from "../product/product.entity";
 
 @Entity()
 export class WarehouseOpreationProducts extends BaseEntity {
-    @ManyToOne(() => Product, (product) => product.warehouse_operations_products, {
-        onDelete: 'CASCADE',
-    })
-    @JoinColumn()
-    product: Product;
+    // @ManyToOne(() => Product, (product) => product.warehouse_operations_products, {
+    //     onDelete: 'CASCADE',
+    // })
+    // @JoinColumn()
+    // product: Product;
     @Column({ nullable: true })
     product_id: string;
     @Column()
