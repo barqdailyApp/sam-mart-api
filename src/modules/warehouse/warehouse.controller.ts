@@ -157,12 +157,12 @@ export class WarehouseController {
     'Content-type',
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   )
-  async exportWarehouseProductsPricing(
-    @Res() res: Response,
-    @Query('start_date') start_date: Date,
-    @Query('to_date') to_date: Date,
-  ) {
-    const File = await this.warehouseService.warehouseOperationExport(start_date, to_date);
-    res.download(`${File}`);
-  }
+  // async exportWarehouseProductsPricing(
+  //   @Res() res: Response,
+  //   @Query('start_date') start_date: Date,
+  //   @Query('to_date') to_date: Date,
+  // ) {
+  //   const File = await this.warehouseService.warehouseOperationExport(start_date, to_date);
+  //   res.download(`${File}`);
+  // }
 }
