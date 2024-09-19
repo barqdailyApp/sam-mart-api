@@ -67,11 +67,11 @@ export class Product extends AuditableEntity {
   )
   product_measurements: ProductMeasurement[];
 
-  @OneToMany(
-    () => WarehouseProducts,
-    (warehouseProducts) => warehouseProducts.product,
-  )
-  warehouses_products: WarehouseProducts[];
+  // @OneToMany(
+  //   () => WarehouseProducts,
+  //   (warehouseProducts) => warehouseProducts.product,
+  // )
+  // warehouses_products: WarehouseProducts[];
 
   @OneToMany(
     () => ProductFavorite,
