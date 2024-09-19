@@ -591,7 +591,7 @@ export class OrderService extends BaseUserService<Order> {
   async getSingleOrder(order_id: string) {
     const user = this.currentUser;
     const cartUser = await this.cart_repo.findOne({
-      where: { user_id: user.id },
+      where: { user_id: user.id },withDeleted:true
     });
 
     let query = this.orderRepository
