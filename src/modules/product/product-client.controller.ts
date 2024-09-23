@@ -147,5 +147,16 @@ export class ProductClientController {
     return new PaginatedResponse(brands, {
       meta: { total, page: query.page, limit: query.limit },
     });
+    
   }
+  
+  
+  @Get('get-brands-categories')
+  async getBrandsCategories(@Query("brand_id") brand_id:string)  {
+ 
+    const categories = await this.productClientService.getBrandCategories(brand_id);
+
+ return new ActionResponse(categories);   
+  }
+  
 }

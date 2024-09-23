@@ -61,7 +61,8 @@ export class ProductClientService {
       category_sub_category_id,
       product_name,
       sort,
-      user_id,brand_id
+      user_id,
+      brand_id,
     } = productClientQuery;
     const skip = (page - 1) * limit;
 
@@ -151,7 +152,10 @@ export class ProductClientService {
         'product_sub_category.category_subCategory',
         'category_subCategory',
       )
-      .innerJoinAndSelect('category_subCategory.section_category', 'section_category')
+      .innerJoinAndSelect(
+        'category_subCategory.section_category',
+        'section_category',
+      )
       .orderBy(productsSort)
 
       .skip(skip)
@@ -209,18 +213,25 @@ export class ProductClientService {
       if (isProductNameArabic) {
         query = query.andWhere(
           new Brackets((qb) => {
-            qb.where('product.name_ar LIKE :product_name', { product_name: `%${product_name}%` })
-              .orWhere('product.keywords LIKE :product_name', { product_name: `%${product_name}%` });
-          })
+            qb.where('product.name_ar LIKE :product_name', {
+              product_name: `%${product_name}%`,
+            }).orWhere('product.keywords LIKE :product_name', {
+              product_name: `%${product_name}%`,
+            });
+          }),
         );
       } else {
         query = query.andWhere(
           new Brackets((qb) => {
-            qb.where('product.name_en LIKE :product_name', { product_name: `%${product_name}%` })
-              .orWhere('product.keywords LIKE :product_name', { product_name: `%${product_name}%` });
-          })
+            qb.where('product.name_en LIKE :product_name', {
+              product_name: `%${product_name}%`,
+            }).orWhere('product.keywords LIKE :product_name', {
+              product_name: `%${product_name}%`,
+            });
+          }),
         );
-    }}
+      }
+    }
 
     query = query.andWhere('product.is_active = true');
     query = query.andWhere('product_sub_category.is_active = true');
@@ -774,7 +785,10 @@ export class ProductClientService {
         'product_sub_category.category_subCategory',
         'category_subCategory',
       )
-      .innerJoinAndSelect('category_subCategory.section_category', 'section_category')
+      .innerJoinAndSelect(
+        'category_subCategory.section_category',
+        'section_category',
+      )
 
       .orderBy('productSubCategory.order_by', 'ASC')
       .orderBy(productsSort)
@@ -838,5 +852,37 @@ export class ProductClientService {
     });
     const [products_favorite, total] = await query.getManyAndCount();
     return { products_favorite, total };
+  }
+
+  async getBrandCategories(brand_id: string) {
+    const products = await this.productRepository
+      .createQueryBuilder('product')
+      .where('product.brand_id = :brand_id', { brand_id })
+      .leftJoinAndSelect('product.product_sub_categories', 'product_sub_categories')
+      .leftJoinAndSelect('product_sub_categories.category_subCategory', 'category_subCategory')
+      .leftJoinAndSelect('category_subCategory.section_category', 'section_category')
+      .leftJoinAndSelect('section_category.category', 'category')
+      .leftJoinAndSelect('product.product_images', 'product_images')
+      .leftJoinAndSelect('product_sub_categories.product_prices', 'product_category_prices')
+      .leftJoinAndSelect('product_category_prices.cart_products', 'cart_products')
+      .leftJoinAndSelect('product_category_prices.product_offer', 'product_offer')
+
+      .getMany();
+
+      const categoriesGroupedById = products.reduce((acc, product) => {
+        product.product_sub_categories.forEach((subCategory) => {
+          const category = subCategory.category_subCategory.section_category.category;
+          if (!acc[category.id]) {
+            acc[category.id] = {
+              ...category,
+              products: [],
+            };
+          }
+          acc[category.id].products.push(product);
+        });
+        return acc;
+      }, {});
+      
+     return categoriesGroupedById
   }
 }
