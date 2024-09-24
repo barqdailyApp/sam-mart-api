@@ -945,6 +945,21 @@ export class OrderService extends BaseUserService<Order> {
         'product_category_price.product_sub_category',
         'product_sub_category',
       )
+      
+      
+      .leftJoinAndSelect(
+        'product_sub_category.category_subCategory',
+        'category_subCategory',
+      )
+
+      .leftJoinAndSelect('category_subCategory.subcategory', 'subcategory')
+
+      .leftJoinAndSelect(
+        'category_subCategory.section_category',
+        'section_category',
+      )
+      .leftJoinAndSelect('section_category.category', 'category')
+
 
       .leftJoinAndSelect(
         'product_category_price.product_measurement',
@@ -956,7 +971,8 @@ export class OrderService extends BaseUserService<Order> {
       )
 
       .leftJoinAndSelect('product_sub_category.product', 'product')
-      .leftJoinAndSelect('product.product_images', 'product_images');
+      .leftJoinAndSelect('product.product_images', 'product_images')
+      .orderBy('category.name_ar', 'DESC');
 
     //  single order
     query = query.where('shipments.id = :id', { id: shipment_id });
