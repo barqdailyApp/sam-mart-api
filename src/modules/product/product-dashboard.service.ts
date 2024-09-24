@@ -726,6 +726,7 @@ export class ProductDashboardService {
       section_category_id,
       section_id,
       category_sub_category_id,
+      product_barcode,
       product_name,
       sort,
     } = productsDashboardQuery;
@@ -794,14 +795,17 @@ export class ProductDashboardService {
         query = query.andWhere(
           new Brackets((qb) => {
             qb.where('product.name_ar LIKE :product_name', { product_name: `%${product_name}%` })
-              .orWhere('product.keywords LIKE :product_name', { product_name: `%${product_name}%` });
+              .orWhere('product.keywords LIKE :product_name', { product_name: `%${product_name}%` })
+              .orWhere('product.barcode LIKE :product_barcode', { product_barcode: `%${product_barcode}%` });
           })
         );
       } else {
         query = query.andWhere(
           new Brackets((qb) => {
             qb.where('product.name_en LIKE :product_name', { product_name: `%${product_name}%` })
-              .orWhere('product.keywords LIKE :product_name', { product_name: `%${product_name}%` });
+              .orWhere('product.keywords LIKE :product_name', { product_name: `%${product_name}%` }
+                
+              ).orWhere('product.barcode LIKE :product_barcode', { product_barcode: `%${product_barcode}%` });
           })
         );
     }}
@@ -1378,6 +1382,7 @@ export class ProductDashboardService {
       'products',
     );
   }
+
 
   async exportSellingReport(day: string) {
     // Calculate the time range

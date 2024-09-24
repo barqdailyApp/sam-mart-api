@@ -45,6 +45,8 @@ export class OrderDriverResponse {
 
   @Expose() readonly number: string;
 
+  @Expose() readonly note: string;
+
   @Expose() readonly delivery_fee: number;
   
 }

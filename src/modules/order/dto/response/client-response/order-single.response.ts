@@ -18,6 +18,7 @@ export class OrderSingleResponse {
   @Expose() address: any;
   @Expose() shipments: any;
   @Expose() products_price:number
+  @Expose() note: string;
 
   constructor(order: Order) {
     this.order_id = order.id;
