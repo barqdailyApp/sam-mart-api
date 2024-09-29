@@ -7,6 +7,7 @@ import { In, MoreThan, Repository } from 'typeorm';
 import { Request } from 'express';
 import { PaymentMethod } from 'src/infrastructure/entities/payment_method/payment_method.entity';
 import { AddPromoCodePaymentMethodRequest } from './dto/request/create-promo-code.request';
+import { Order } from 'src/infrastructure/entities/order/order.entity';
 
 @Injectable()
 export class PromoCodeService extends BaseService<PromoCode> {
@@ -16,6 +17,7 @@ export class PromoCodeService extends BaseService<PromoCode> {
     @InjectRepository(PaymentMethod)
     public readonly paymentMethodRepository: Repository<PaymentMethod>,
     @Inject(REQUEST) private readonly request: Request,
+    @InjectRepository(Order) private readonly orderRepository: Repository<Order>,
   ) {
     super(promoCodeRepository);
   }
@@ -96,6 +98,13 @@ export class PromoCodeService extends BaseService<PromoCode> {
       if (used.length > 0) {
         throw new BadRequestException('message.promo_code_used');
       }
+      const new_user=await this.orderRepository.findOne({
+        where:{user_id:this.request.user.id,promo_code_id:valid_code.id},
+      })
+      if(new_user){
+        throw new BadRequestException('message.promo_code_new_user');
+      }
+      valid_code.user_ids.push(this.request.user.id);
     }
 
     return valid_code;

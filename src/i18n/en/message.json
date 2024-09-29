@@ -13,6 +13,7 @@
     "country_not_found": "Country not found",
     "product_not_checked":"Product not checked",
     "payment_failed":"Payment process failure",
+    "promo_code_new_user":"This Promo code for new users",
     "discount_value_must_be_less_than_1":"Discount value must be less than 1",
     "promo_code_used":"Promo code used",
     "no_selling_report_found":"No selling report found",

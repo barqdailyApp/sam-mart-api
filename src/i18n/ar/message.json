@@ -17,6 +17,7 @@
     "payment_failed":"خطأ فى عملية الدفع",
     "product_not_found": "المنتج غير موجود",
     "product_not_checked":"لم يتم تأكيد المنتج",
+    "promo_code_new_user":"هذا الكود للمستخدمين الجدد",
     "no_selling_report_found":"لا توجد تقارير البيع",
     "product_image_not_found": "صورة المنتج غير موجودة",
     "promo_code_used":"الكود مستخدم",
