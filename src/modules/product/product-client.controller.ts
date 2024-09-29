@@ -152,9 +152,9 @@ export class ProductClientController {
   
   
   @Get('get-brands-categories')
-  async getBrandsCategories(@Query("brand_id") brand_id:string)  {
+  async getBrandsCategories(@Query("brand_id") brand_id:string,@Query("section_id") section_id:string)  {
  
-    const categories = await this.productClientService.getBrandCategories(brand_id);
+    const categories = this._i18nResponse.entity( await this.productClientService.getBrandCategories(brand_id,section_id));
 
  return new ActionResponse(categories);   
   }

@@ -16,6 +16,9 @@ import { Section } from 'src/infrastructure/entities/section/section.entity';
 import { ProductFavQuery } from './dto/filter/product-fav.query';
 import { Cart } from 'src/infrastructure/entities/cart/cart.entity';
 import { ProductOffer } from 'src/infrastructure/entities/product/product-offer.entity';
+import { plainToInstance } from 'class-transformer';
+import { ProductResponse } from './dto/response/product.response';
+import { ProductsNewResponse } from './dto/response/response-client/products-new.response';
 
 @Injectable()
 export class ProductClientService {
@@ -103,24 +106,11 @@ export class ProductClientService {
     // Start building the query
     let query = this.productRepository
       .createQueryBuilder('product')
-      // .leftJoinAndSelect('product.products_favorite', 'products_favorite')
 
       .innerJoinAndSelect('product.product_images', 'product_images')
 
       .leftJoinAndSelect('product.brand', 'brand')
-      // .innerJoinAndSelect(
-      //   'product.product_sub_categories',
-      //   'product_sub_categories',
-      // )
-      // .innerJoinAndSelect(
-      //   'product_sub_categories.category_subCategory',
-      //   'product_category_subCategory',
-      // )
-      // .innerJoinAndSelect(
-      //   'product_category_subCategory.section_category',
-      //   'product_section_category',
-      // )
-      // .innerJoinAndSelect('product_section_category.section', 'product_section')
+
       .innerJoinAndSelect('product.warehouses_products', 'warehousesProduct')
       .innerJoinAndSelect(
         'product.product_measurements',
@@ -155,7 +145,11 @@ export class ProductClientService {
       .innerJoinAndSelect(
         'category_subCategory.section_category',
         'section_category',
+      ).leftJoinAndSelect(
+        'section_category.category',
+        'category',
       )
+
       .orderBy(productsSort)
 
       .skip(skip)
@@ -854,35 +848,26 @@ export class ProductClientService {
     return { products_favorite, total };
   }
 
-  async getBrandCategories(brand_id: string) {
-    const products = await this.productRepository
-      .createQueryBuilder('product')
-      .where('product.brand_id = :brand_id', { brand_id })
-      .leftJoinAndSelect('product.product_sub_categories', 'product_sub_categories')
-      .leftJoinAndSelect('product_sub_categories.category_subCategory', 'category_subCategory')
-      .leftJoinAndSelect('category_subCategory.section_category', 'section_category')
-      .leftJoinAndSelect('section_category.category', 'category')
-      .leftJoinAndSelect('product.product_images', 'product_images')
-      .leftJoinAndSelect('product_sub_categories.product_prices', 'product_category_prices')
-      .leftJoinAndSelect('product_category_prices.cart_products', 'cart_products')
-      .leftJoinAndSelect('product_category_prices.product_offer', 'product_offer')
-
-      .getMany();
-
-      const categoriesGroupedById = products.reduce((acc, product) => {
-        product.product_sub_categories.forEach((subCategory) => {
-          const category = subCategory.category_subCategory.section_category.category;
-          if (!acc[category.id]) {
-            acc[category.id] = {
-              ...category,
-              products: [],
-            };
-          }
-          acc[category.id].products.push(product);
-        });
-        return acc;
-      }, {});
+  async getBrandCategories(brand_id: string,section_id: string) {
+    const products = await this.getAllProductsForClient(new ProductClientQuery({brand_id, limit: 1000, page: 1, section_id, }));
+ 
+// return products;
+    const categoriesGroupedById = products['products'].reduce((acc:any, product) => {
+      console.log("ssss");
+      product.product_measurements.forEach((subCategory) => {
+        const category =
+          subCategory.product_category_prices[0].product_sub_category.category_subCategory.section_category.category;
+   
+        if (!acc.includes(category)) {
+        acc.push({...category, products: []});}
       
-     return categoriesGroupedById
+        const productResponse = new ProductsNewResponse(product);
+        acc.filter((category) => category.id === category.id)[0].products.push(productResponse);
+      });
+    
+      return acc;
+    }, []);
+
+    return categoriesGroupedById;
   }
 }

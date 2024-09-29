@@ -55,4 +55,8 @@ export class ProductClientQuery {
   @IsOptional()
   @IsString()
   user_id: string;
+
+  constructor(query:  Partial<ProductClientQuery>) {
+    Object.assign(this, query);
+  }
 }
