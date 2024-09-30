@@ -99,7 +99,7 @@ export class PromoCodeService extends BaseService<PromoCode> {
         throw new BadRequestException('message.promo_code_used');
       }
       const new_user=await this.orderRepository.findOne({
-        where:{user_id:this.request.user.id,promo_code_id:valid_code.id},
+        where:{user_id:this.request.user.id},
       })
       if(new_user){
         throw new BadRequestException('message.promo_code_new_user');
