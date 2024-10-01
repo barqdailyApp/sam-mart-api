@@ -25,6 +25,17 @@ export class FirebaseAdminService {
         title,
         body,
         imageUrl
+      },    android: {
+        notification: {
+          sound: 'default', // Allow sound on Android
+        },
+      },
+      apns: {
+        payload: {
+          aps: {
+            sound: 'default', // Allow sound on iOS
+          },
+        },
       },
     };
 
