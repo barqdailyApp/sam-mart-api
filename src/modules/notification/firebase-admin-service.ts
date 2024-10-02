@@ -25,7 +25,8 @@ export class FirebaseAdminService {
         title,
         body,
         imageUrl
-      },    android: {
+      }, 
+      android: {
         notification: {
           sound: 'default', // Allow sound on Android
         },
@@ -37,6 +38,9 @@ export class FirebaseAdminService {
           },
         },
       },
+    };  
+
+     
     };
 
     try {
@@ -55,6 +59,20 @@ export class FirebaseAdminService {
         body,
         imageUrl
       },
+      android: {
+        notification: {
+          sound: 'default', // Allow sound on Android
+        },
+      },
+      apns: {
+        payload: {
+          aps: {
+            sound: 'default', // Allow sound on iOS
+          },
+        },
+      },
+    };  
+
     }))
 
     try {
