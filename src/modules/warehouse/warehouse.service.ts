@@ -179,7 +179,7 @@ export class WarehouseService extends BaseService<Warehouse> {
   }
   async warehouseOperationExport(start_date: Date, end_date: Date,warehouse_id:string) {
     start_date.setHours(start_date.getHours() - 3);
-    end_date.setHours(end_date.getHours() - 3);
+    end_date.setHours(21);
     const operations = await this.warehouse_operation_products_repo.find({
       where: {
         
