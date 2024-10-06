@@ -34,6 +34,11 @@ export class UpdateProductRequest {
   @IsOptional()
   @IsString()
   row_number: number;
+
+  @ApiProperty({ nullable: true, required: false })
+  @IsOptional()
+  @IsString()
+  order_by_brand:number;
   
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()

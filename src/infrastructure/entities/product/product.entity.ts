@@ -19,6 +19,9 @@ export class Product extends AuditableEntity {
   @Column()
   name_en: string;
 
+  @Column({nullable:true})
+  order_by_brand:number
+
   @OneToMany(()=>WarehouseOpreationProducts,warehouseOperationsProducts=>warehouseOperationsProducts.product)
   warehouse_operations_products:WarehouseOpreationProducts[]
 

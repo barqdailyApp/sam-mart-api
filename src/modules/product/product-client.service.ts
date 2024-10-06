@@ -84,6 +84,8 @@ export class ProductClientService {
       case 'new':
         productsSort = { 'product_sub_category.order_by': 'ASC' };
 
+        case 'brand':
+          productsSort = { 'product.order_by_brand': 'ASC' };
         break;
       // handle other sort cases if needed
     }
@@ -849,7 +851,7 @@ export class ProductClientService {
   }
 
   async getBrandCategories(brand_id: string,section_id: string) {
-    const products = await this.getAllProductsForClient(new ProductClientQuery({brand_id, limit: 1000, page: 1, section_id, }));
+    const products = await this.getAllProductsForClient(new ProductClientQuery({brand_id, limit: 1000, page: 1, section_id,sort:'brand' }));
  
 // return products;
     const categoriesGroupedById = products['products'].reduce((acc:any, product) => {

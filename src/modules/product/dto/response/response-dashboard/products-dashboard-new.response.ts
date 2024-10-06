@@ -34,7 +34,8 @@ export class ProductsDashboardNewResponse {
   @Expose() readonly product_sub_category_order_by: number;
 
   @Expose() readonly product_sub_category_is_active: boolean;
-
+ 
+  @Expose() readonly order_by_brand:number;
 
   @Expose() readonly measurement_unit_id: string;
 
@@ -55,6 +56,7 @@ export class ProductsDashboardNewResponse {
     this.name_en = product.name_en;
     this.keywords=product.keywords;
     this.barcode = product.barcode;
+    this.order_by_brand=product.order_by_brand;
     this.row_number=product.row_number;
     this.product_logo = toUrl(
       product.product_images.find((x) => x.is_logo === true)?.url,
