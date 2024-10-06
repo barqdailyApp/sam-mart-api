@@ -1513,8 +1513,8 @@ export class ProductDashboardService {
       .select('shipment_product.product_id', 'productId')
      
       .leftJoinAndSelect('shipment_product.product', 'product')
-      .leftJoinAndSelect('product.warehouse_opreation_products', 'warehouse_opreation_products')
-      .leftJoinAndSelect('warehouse_opreation_products.warehouse_operations', 'warehouse_operation')
+      .leftJoinAndSelect('product.warehouse_operations_products', 'warehouse_operations_products')
+      .leftJoinAndSelect('warehouse_operations_products.operation', 'warehouse_operation')
       .where('warehouse_operation.warehouse_id = :warehouse_id', {
         warehouse_id:warehouse_id
       })
