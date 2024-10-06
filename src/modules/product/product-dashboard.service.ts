@@ -1510,7 +1510,7 @@ export class ProductDashboardService {
   async getSellingStats(start_date?: Date, to_date?: Date,warehouse_id?:string) {
     const result = await this.shipmentProduct_repo
       .createQueryBuilder('shipment_product')
-      .leftJoinAndSelect('shipment_product.product_id', 'productId')
+
      
       .leftJoinAndSelect('shipment_product.product', 'product')
       .leftJoinAndSelect('product.warehouse_operations_products', 'warehouse_operations_products')
@@ -1518,9 +1518,10 @@ export class ProductDashboardService {
       .where('warehouse_operation.warehouse_id = :warehouse_id', {
         warehouse_id:warehouse_id
       })
+      .leftJoinAndSelect('shipment_product.product_id', 'productId')
       .addSelect('SUM(shipment_product.quantity)', 'totalQuantity')
       .addSelect('SUM(shipment_product.price)', 'totalPrice')
-      .groupBy('shipment_product.product_id')
+      .groupBy('productId')
       .orderBy('totalQuantity', 'DESC')
       .withDeleted()
       .where(
