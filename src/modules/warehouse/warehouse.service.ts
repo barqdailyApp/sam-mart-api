@@ -177,43 +177,45 @@ export class WarehouseService extends BaseService<Warehouse> {
     warehouse.drivers.push(driver);
     return await this.warehouse_repo.save(warehouse);
   }
-  // async warehouseOperationExport(start_date: Date, end_date: Date) {
-  //   start_date.setHours(start_date.getHours() - 3);
-  //   end_date.setHours(end_date.getHours() - 3);
-  //   const operations = await this.warehouse_operation_products_repo.find({
-  //     where: {
-  //   operation:{
-  //     created_at: Between(start_date, end_date),
-  //     type:Not(operationType.SELL)
-  //   }
+  async warehouseOperationExport(start_date: Date, end_date: Date,warehouse_id:string) {
+    start_date.setHours(start_date.getHours() - 3);
+    end_date.setHours(end_date.getHours() - 3);
+    const operations = await this.warehouse_operation_products_repo.find({
+      where: {
+        
+    operation:{
+      created_at: Between(start_date, end_date),
+      type:Not(operationType.SELL),
+      warehouse_id:warehouse_id
+    }
        
-  //     },
-  //     order: { operation: { created_at: 'ASC' } },
-  //     relations: {
-  //       product: true,operation:{warehouse:{products:true}}}
+      },
+      order: { operation: { created_at: 'ASC' } },
+      relations: {
+        product: true,operation:{warehouse:{products:true}}}
 
-  //   })
+    })
 
-  //   // Create a flat structure for products
-  //   const flattenedProducts = operations.map((operation) => {
-  //     return {
-  //     date: operation.operation.created_at,  
-  //   product_name: operation.product.name_ar,
-  //   product_barcode: operation.product.barcode,
-  //   quantity: operation.quantity,
-  //   operation_type: operation.operation.type,
-  //   current_balance: operation.operation.warehouse.products.filter((p)=>p.product_id===operation.product_id).map((p)=>p.quantity)[0]
-
+    // Create a flat structure for products
+    const flattenedProducts = operations.map((operation) => {
+      return {
+      date: operation.operation.created_at,  
+    product_name: operation.product.name_ar,
+    product_barcode: operation.product.barcode,
+    quantity: operation.quantity,
+    operation_type: operation.operation.type,
+    current_balance: operation.operation.warehouse.products.filter((p)=>p.product_id===operation.product_id).map((p)=>p.quantity)[0],
+    warehouse:operation.operation.warehouse.name_ar
    
    
-  //     };
-  //   });
+      };
+    });
    
 
-  //   return await this._fileService.exportExcel(
-  //     flattenedProducts,
-  //     'operations',
-  //     'operations',
-  //   );
-  // }
+    return await this._fileService.exportExcel(
+      flattenedProducts,
+      'operations',
+      'operations',
+    );
+  }
 }

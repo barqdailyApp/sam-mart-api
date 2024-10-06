@@ -149,20 +149,21 @@ export class WarehouseController {
     );
   }
 
-  // @UseGuards(JwtAuthGuard, RolesGuard)
-  // @Roles(Role.ADMIN)
-  // @ApiBearerAuth()
-  // @Post('warehouse-operation/export')
-  // @Header(
-  //   'Content-type',
-  //   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  // )
-  // async exportWarehouseProductsPricing(
-  //   @Res() res: Response,
-  //   @Query('start_date') start_date: Date,
-  //   @Query('to_date') to_date: Date,
-  // ) {
-  //   const File = await this.warehouseService.warehouseOperationExport(start_date, to_date);
-  //   res.download(`${File}`);
-  // }
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @Post('warehouse-operation/export')
+  @Header(
+    'Content-type',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  )
+  async exportWarehouseProductsPricing(
+    @Res() res: Response,
+    @Query('start_date') start_date: Date,
+    @Query('to_date') to_date: Date,
+    @Query('warehouse_id') warehouse_id: string,
+  ) {
+    const File = await this.warehouseService.warehouseOperationExport(start_date, to_date,warehouse_id);
+    res.download(`${File}`);
+  }
 }

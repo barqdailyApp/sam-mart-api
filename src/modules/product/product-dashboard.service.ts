@@ -1507,21 +1507,15 @@ export class ProductDashboardService {
 
     return result;
   }
-  async getSellingStats(start_date?: Date, to_date?: Date,warehouse_id?:string) {
+  async getSellingStats(start_date?: Date, to_date?: Date) {
     const result = await this.shipmentProduct_repo
       .createQueryBuilder('shipment_product')
+      .select('shipment_product.product_id', 'productId')
 
-     
       .leftJoinAndSelect('shipment_product.product', 'product')
-      .leftJoinAndSelect('product.warehouse_operations_products', 'warehouse_operations_products')
-      .leftJoinAndSelect('warehouse_operations_products.operation', 'warehouse_operation')
-      .where('warehouse_operation.warehouse_id = :warehouse_id', {
-        warehouse_id:warehouse_id
-      })
-      .leftJoinAndSelect('shipment_product.product_id', 'productId')
       .addSelect('SUM(shipment_product.quantity)', 'totalQuantity')
       .addSelect('SUM(shipment_product.price)', 'totalPrice')
-      .groupBy('productId')
+      .groupBy('shipment_product.product_id')
       .orderBy('totalQuantity', 'DESC')
       .withDeleted()
       .where(
@@ -1542,7 +1536,6 @@ export class ProductDashboardService {
         totalQuantity: product.totalQuantity,
         avgPrice:
           Math.round((product.totalPrice / product.totalQuantity) * 100) / 100,
-          warehouse:product.warehouse_operation.warehouse.name_ar
       };
     });
 
