@@ -628,7 +628,7 @@ export class ProductDashboardService {
         'section_category',
       )
       .leftJoinAndSelect('section_category.section', 'section')
-
+      .leftJoinAndSelect('section_category.category', 'category')
       .leftJoinAndSelect('product.warehouses_products', 'warehousesProduct')
       .leftJoinAndSelect(
         'product.product_measurements',
@@ -1617,32 +1617,27 @@ export class ProductDashboardService {
         sort: 'brand',
       }),
     );
-    console.log(products[0]);
 
     // return products;
     const categoriesGroupedById = products['products'].reduce(
-     
       (acc: any, product) => {
-        product.product_measurements.forEach((subCategory) => {
+        product.product_sub_categories.forEach((subCategory) => {
           const category =
-            subCategory.product_category_prices[0]?.product_sub_category
-              .category_subCategory?.section_category.category;
+            subCategory.category_subCategory.section_category.category;
 
-          if (!acc.find((item) => item.id == category.id)) {
+          if (!acc.find((item) => item.id == category?.id)) {
             acc.push({
               ...category,
-              order:
-                subCategory.product_category_prices[0].product_sub_category
-                  .category_subCategory.section_category.order_by,
+              order: subCategory.category_subCategory.section_category.order_by,
             });
           }
-
-          return acc;
-        }, []);
-
-        categoriesGroupedById.sort((a, b) => a.order - b.order);
-        return categoriesGroupedById;
+        });
+        return acc;
       },
+      [],
     );
+
+    categoriesGroupedById.sort((a, b) => a.order - b.order);
+    return categoriesGroupedById;
   }
 }
