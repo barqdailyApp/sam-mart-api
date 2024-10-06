@@ -47,8 +47,15 @@ export class ProductsDashboardQuery {
   @IsString()
   product_barcode: string;
 
+
+
   @ApiProperty({ required: false, enum: ['new','order_by'], default: 'order_by' })
   @IsOptional()
   @IsString()
   sort: 'new' | 'order_by' | 'brand';
+
+
+  constructor(data: Partial<ProductsDashboardQuery>) {
+    Object.assign(this, data);
+  }
 }

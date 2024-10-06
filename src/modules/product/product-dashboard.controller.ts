@@ -487,4 +487,11 @@ export class ProductDashboardController {
   }
  
 
+  @Get('admin-brands-categories')
+  async getBrandsCategories(@Query("brand_id") brand_id:string,@Query("section_id") section_id:string)  {
+ 
+    const categories = this._i18nResponse.entity( await this.productDashboardService.getBrandCategories(brand_id,section_id));
+
+ return new ActionResponse(categories);   
+  }
 }

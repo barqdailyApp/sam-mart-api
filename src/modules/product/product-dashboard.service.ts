@@ -424,6 +424,7 @@ export class ProductDashboardService {
       keywords,
       row_number,
       brand_id,
+      order_by_brand,
     } = updateProductRequest;
 
     //* Check if product exist
@@ -454,6 +455,7 @@ export class ProductDashboardService {
         keywords,
         row_number,
         brand_id,
+        order_by_brand,
       },
     );
     return await this.productRepository.findOne({
@@ -794,22 +796,33 @@ export class ProductDashboardService {
       if (isProductNameArabic) {
         query = query.andWhere(
           new Brackets((qb) => {
-            qb.where('product.name_ar LIKE :product_name', { product_name: `%${product_name}%` })
-              .orWhere('product.keywords LIKE :product_name', { product_name: `%${product_name}%` })
-              .orWhere('product.barcode LIKE :product_barcode', { product_barcode: `%${product_barcode}%` });
-          })
+            qb.where('product.name_ar LIKE :product_name', {
+              product_name: `%${product_name}%`,
+            })
+              .orWhere('product.keywords LIKE :product_name', {
+                product_name: `%${product_name}%`,
+              })
+              .orWhere('product.barcode LIKE :product_barcode', {
+                product_barcode: `%${product_barcode}%`,
+              });
+          }),
         );
       } else {
         query = query.andWhere(
           new Brackets((qb) => {
-            qb.where('product.name_en LIKE :product_name', { product_name: `%${product_name}%` })
-              .orWhere('product.keywords LIKE :product_name', { product_name: `%${product_name}%` }
-                
-              ).orWhere('product.barcode LIKE :product_barcode', { product_barcode: `%${product_barcode}%` });
-          })
+            qb.where('product.name_en LIKE :product_name', {
+              product_name: `%${product_name}%`,
+            })
+              .orWhere('product.keywords LIKE :product_name', {
+                product_name: `%${product_name}%`,
+              })
+              .orWhere('product.barcode LIKE :product_barcode', {
+                product_barcode: `%${product_barcode}%`,
+              });
+          }),
         );
-    }}
-
+      }
+    }
 
     // Conditional where clause based on sub category
     if (category_sub_category_id) {
@@ -1383,7 +1396,6 @@ export class ProductDashboardService {
     );
   }
 
-
   async exportSellingReport(day: string) {
     // Calculate the time range
     const date = new Date(day);
@@ -1552,9 +1564,9 @@ export class ProductDashboardService {
     const path = await this._fileService.upload(req.logo, 'brands');
     const brand = plainToClass(Brand, { ...req, logo: path });
 
-    const saved= await this.brand_repo.save(brand);
-     await  this.orderItems(true);
-     return saved;
+    const saved = await this.brand_repo.save(brand);
+    await this.orderItems(true);
+    return saved;
   }
 
   async updateBrand(req: UpdateBrandRequest) {
@@ -1562,10 +1574,12 @@ export class ProductDashboardService {
     if (req?.logo != null) {
       path = await this._fileService.upload(req.logo, 'brands');
     }
-    const savedBrand=await this.brand_repo.findOne({where:{id:req.id}});
-    if (!savedBrand) {throw new NotFoundException("brand not found");}
+    const savedBrand = await this.brand_repo.findOne({ where: { id: req.id } });
+    if (!savedBrand) {
+      throw new NotFoundException('brand not found');
+    }
 
-    await  this.orderItems(savedBrand.order>req.order?false:true);
+    await this.orderItems(savedBrand.order > req.order ? false : true);
     const brand =
       path == null
         ? plainToClass(Brand, req)
@@ -1592,5 +1606,43 @@ export class ProductDashboardService {
     } catch (error) {
       console.error('Error occurred:', error.message);
     }
+  }
+  async getBrandCategories(brand_id: string, section_id: string) {
+    const products = await this.getAllProductsForDashboard(
+      new ProductsDashboardQuery({
+        brand_id,
+        limit: 1000,
+        page: 1,
+        section_id,
+        sort: 'brand',
+      }),
+    );
+    console.log(products[0]);
+
+    // return products;
+    const categoriesGroupedById = products['products'].reduce(
+     
+      (acc: any, product) => {
+        product.product_measurements.forEach((subCategory) => {
+          const category =
+            subCategory.product_category_prices[0]?.product_sub_category
+              .category_subCategory?.section_category.category;
+
+          if (!acc.find((item) => item.id == category.id)) {
+            acc.push({
+              ...category,
+              order:
+                subCategory.product_category_prices[0].product_sub_category
+                  .category_subCategory.section_category.order_by,
+            });
+          }
+
+          return acc;
+        }, []);
+
+        categoriesGroupedById.sort((a, b) => a.order - b.order);
+        return categoriesGroupedById;
+      },
+    );
   }
 }

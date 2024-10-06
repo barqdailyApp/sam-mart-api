@@ -84,8 +84,8 @@ export class ProductClientService {
       case 'new':
         productsSort = { 'product_sub_category.order_by': 'ASC' };
 
-        case 'brand':
-          productsSort = { 'product.order_by_brand': 'ASC' };
+      case 'brand':
+        productsSort = { 'product.order_by_brand': 'ASC' };
         break;
       // handle other sort cases if needed
     }
@@ -147,10 +147,8 @@ export class ProductClientService {
       .innerJoinAndSelect(
         'category_subCategory.section_category',
         'section_category',
-      ).leftJoinAndSelect(
-        'section_category.category',
-        'category',
       )
+      .leftJoinAndSelect('section_category.category', 'category')
 
       .orderBy(productsSort)
 
@@ -850,26 +848,48 @@ export class ProductClientService {
     return { products_favorite, total };
   }
 
-  async getBrandCategories(brand_id: string,section_id: string) {
-    const products = await this.getAllProductsForClient(new ProductClientQuery({brand_id, limit: 1000, page: 1, section_id,sort:'brand' }));
- 
-// return products;
-    const categoriesGroupedById = products['products'].reduce((acc:any, product) => {
-     
-      product.product_measurements.forEach((subCategory) => {
-        const category =
-          subCategory.product_category_prices[0].product_sub_category.category_subCategory.section_category.category;
-   
-        if (!acc.includes(category)) {
-        acc.push({...category, products: []});}
-      
-        const productResponse = new ProductsNewResponse(product);
-     
-        acc.find((item) => item.id== category.id).products.push(productResponse);
-      });
-    
-      return acc;
-    }, []);
+  async getBrandCategories(brand_id: string, section_id: string) {
+    const products = await this.getAllProductsForClient(
+      new ProductClientQuery({
+        brand_id,
+        limit: 1000,
+        page: 1,
+        section_id,
+        sort: 'brand',
+      }),
+    );
+
+    // return products;
+    const categoriesGroupedById = products['products'].reduce(
+      (acc: any, product) => {
+        product.product_measurements.forEach((subCategory) => {
+          const category =
+            subCategory.product_category_prices[0].product_sub_category
+              .category_subCategory.section_category.category;
+
+          if (!acc.find((item) => item.id == category.id)) {
+            acc.push({
+              ...category,
+              order:
+                subCategory.product_category_prices[0].product_sub_category
+                  .category_subCategory.section_category.order_by,
+              products: [],
+            });
+          }
+
+          const productResponse = new ProductsNewResponse(product);
+
+          acc
+            .find((item) => item.id == category.id)
+            .products.push(productResponse);
+        });
+
+        return acc;
+      },
+      [],
+    );
+
+    categoriesGroupedById.sort((a, b) => a.order - b.order);
 
     return categoriesGroupedById;
   }
