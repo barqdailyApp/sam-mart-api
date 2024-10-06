@@ -853,7 +853,7 @@ export class ProductClientService {
  
 // return products;
     const categoriesGroupedById = products['products'].reduce((acc:any, product) => {
-      console.log("ssss");
+     
       product.product_measurements.forEach((subCategory) => {
         const category =
           subCategory.product_category_prices[0].product_sub_category.category_subCategory.section_category.category;
@@ -862,7 +862,8 @@ export class ProductClientService {
         acc.push({...category, products: []});}
       
         const productResponse = new ProductsNewResponse(product);
-        acc.filter((category) => category.id === category.id)[0].products.push(productResponse);
+     
+        acc.find((item) => item.id== category.id).products.push(productResponse);
       });
     
       return acc;

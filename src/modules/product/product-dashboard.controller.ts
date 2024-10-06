@@ -285,10 +285,12 @@ export class ProductDashboardController {
     @Res() res: Response,
     @Query('start_date') start_date: Date,
     @Query('to_date') to_date: Date,
+    @Query('warehouse_id') warehouse_id: string,
   ) {
     const File = await this.productDashboardService.getSellingStats(
       start_date,
       to_date,
+      warehouse_id,
     );
     res.download(`${File}`);
   }

@@ -1507,10 +1507,15 @@ export class ProductDashboardService {
 
     return result;
   }
-  async getSellingStats(start_date?: Date, to_date?: Date) {
+  async getSellingStats(start_date?: Date, to_date?: Date,warehouse_id?:string) {
     const result = await this.shipmentProduct_repo
       .createQueryBuilder('shipment_product')
       .select('shipment_product.product_id', 'productId')
+      .leftJoinAndSelect('shipment_product.shipment', 'shipment')
+      .leftJoinAndSelect('shipment.order', 'order')
+      .where('order.warehouse_id = :warehouse_id', {
+        warehouse_id:warehouse_id ?? null,
+      })
 
       .leftJoinAndSelect('shipment_product.product', 'product')
       .addSelect('SUM(shipment_product.quantity)', 'totalQuantity')
