@@ -367,13 +367,13 @@ export class ShipmentService extends BaseService<Shipment> {
       throw new NotFoundException('message.shipment_not_found');
     }
 
-
     shipment.order_ready_for_pickup_at = new Date();
     shipment.status = ShipmentStatusEnum.READY_FOR_PICKUP;
 
     shipment.shipment_products.forEach((product) => {
-      if(!product.is_checked) throw new BadRequestException('message.product_not_checked')
-    })
+      if (!product.is_checked)
+        throw new BadRequestException('message.product_not_checked');
+    });
     await this.shipmentRepository.save(shipment);
 
     await this.orderGateway.notifyOrderStatusChange({
@@ -578,7 +578,6 @@ export class ShipmentService extends BaseService<Shipment> {
     return this.orderFeedBackRepository.save(shipmentFeedBackCreated);
   }
 
-
   async assignDriver(shipment_id: string, driver_id: string) {
     return this.addDriverToShipment(
       shipment_id,
@@ -622,7 +621,7 @@ export class ShipmentService extends BaseService<Shipment> {
         shipment.order.user_id !== this.currentUser.id) ||
       (currentUserRole.includes(Role.DRIVER) &&
         shipment.driver_id !== driver.id &&
-        !currentUserRole.includes(Role.ADMIN)&&
+        !currentUserRole.includes(Role.ADMIN) &&
         !currentUserRole.includes(Role.EMPLOYEE))
     ) {
       throw new UnauthorizedException('message.not_allowed_to_cancel');
@@ -794,12 +793,12 @@ export class ShipmentService extends BaseService<Shipment> {
     }
 
     const old_driver_id = shipment.driver.user_id;
-    const old_driver= await this.getDriver(old_driver_id);
+    const old_driver = await this.getDriver(old_driver_id);
     old_driver.current_orders = old_driver.current_orders - 1;
-    if(old_driver.id==driver.id){
-     throw new BadRequestException('message.driver_already_assigned'); 
+    if (old_driver.id == driver.id) {
+      throw new BadRequestException('message.driver_already_assigned');
     }
-    await this.driverRepository.save(old_driver);    
+    await this.driverRepository.save(old_driver);
 
     shipment.driver = driver;
 
@@ -972,13 +971,32 @@ export class ShipmentService extends BaseService<Shipment> {
     return shipment;
   }
 
-  async checkShipmentProduct(id:string){
-    const product = await this.shipmentProductRepository.findOne({where:{id}})
-    if(!product){
-      throw new NotFoundException('message.shipment_not_found')
+  async checkShipmentProduct(id: string) {
+    const product = await this.shipmentProductRepository.findOne({
+      where: { id },
+    });
+    if (!product) {
+      throw new NotFoundException('message.shipment_not_found');
     }
-    product.is_checked=!product.is_checked
-    await this.shipmentProductRepository.save(product)
+    product.is_checked = !product.is_checked;
+    await this.shipmentProductRepository.save(product);
+    return product;
+  }
+
+  async removeShipmentProudct(id: string) {
+    const product = await this.shipmentProductRepository.findOne({
+      where: { id },
+      relations: { shipment: { order: true } },
+    });
+    if (!product) {
+      throw new NotFoundException('message.shipment_not_found');
+    }
+    await this.shipmentProductRepository.remove(product);
+    product.shipment.order.total_price =
+      product.shipment.order.total_price - product.price;
+    product.shipment.order.products_price =
+      product.shipment.order.products_price - product.price;
+    await this.orderRepository.save(product.shipment.order);
     return product;
   }
 }

@@ -209,5 +209,18 @@ export class ShipmentController {
     );
   }
 
+  @Post('remove-product/:shipment_product_id')
+  @Roles(Role.ADMIN)
+  async removeProduct(
+    @Param('shipment_product_id') shipment_product_id: string,
+   
+  ) {
+    return new ActionResponse(
+     
+        await this.shipmentService.removeShipmentProudct(shipment_product_id),
+      
+    );
+  }
+
   // admin convert order from scheduled to fast delivery [Order Controller]
 }
