@@ -13,6 +13,7 @@ import {
   IsNull,
   LessThan,
   LessThanOrEqual,
+  Like,
   Not,
   Repository,
 } from 'typeorm';
@@ -47,6 +48,7 @@ import { DiscountType } from 'src/infrastructure/data/enums/discount-type.enum';
 import { FileService } from '../file/file.service';
 import { plainToClass } from 'class-transformer';
 import { validate } from 'class-validator';
+import * as fs from 'fs';
 import {
   CreateProductExcelRequest,
   CreateProductsExcelRequest,
@@ -1639,5 +1641,35 @@ export class ProductDashboardService {
 
     categoriesGroupedById.sort((a, b) => a.order - b.order);
     return categoriesGroupedById;
+  }
+
+  async getLargeImages() {
+    const products = [];
+    const data = fs.readFileSync('./json/large_files.csv', 'utf8');
+    
+    const images = data.split('\n');
+    console.log(images[1]);
+    for (const image of images) {
+      const data = image.split(',');
+      let url = data[0];
+
+      const productImage = await this.productImageRepository.findOne({
+        where: { url: Like('%' + url + '%') },
+        relations: { product: true },
+        withDeleted: true,
+      });
+      if(!productImage) continue;
+      products.push({
+        url: toUrl(productImage?.url),
+        size: data[1],
+        name: productImage.product?.name_ar,
+        barcode: productImage.product?.barcode,
+      });
+    }
+    return await this._fileService.exportExcel(
+      products,
+      'products',
+      'products',
+    );
   }
 }

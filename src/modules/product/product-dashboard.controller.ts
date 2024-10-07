@@ -494,4 +494,17 @@ export class ProductDashboardController {
 
  return new ActionResponse(categories);   
   }
+
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @Get('large-images')
+  @Header(
+    'Content-type',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  )
+  async exportlargeImages(@Res() res: Response) {
+    const File =
+      await this.productDashboardService.getLargeImages();
+    res.download(`${File}`);
+  }
 }
