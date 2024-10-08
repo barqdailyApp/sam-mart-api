@@ -44,6 +44,7 @@ const PdfDocumnet = require('pdfkit-table');
 import { Response } from 'express';
 import { Product } from 'src/infrastructure/entities/product/product.entity';
 import { options } from 'joi';
+import { EditDeliveryOrderRequest } from './dto/request/edit-delivery-order.request';
 @Injectable()
 export class OrderService extends BaseUserService<Order> {
   constructor(
@@ -580,7 +581,8 @@ export class OrderService extends BaseUserService<Order> {
       )
 
       .leftJoinAndSelect('product_sub_category.product', 'product')
-      .leftJoinAndSelect('product.product_images', 'product_images').orderBy('category.name_ar', 'DESC');
+      .leftJoinAndSelect('product.product_images', 'product_images')
+      .orderBy('category.name_ar', 'DESC');
 
     //  single order
     query = query.where('order.id = :id', { id: order_id });
@@ -591,7 +593,8 @@ export class OrderService extends BaseUserService<Order> {
   async getSingleOrder(order_id: string) {
     const user = this.currentUser;
     const cartUser = await this.cart_repo.findOne({
-      where: { user_id: user.id },withDeleted:true
+      where: { user_id: user.id },
+      withDeleted: true,
     });
 
     let query = this.orderRepository
@@ -668,7 +671,8 @@ export class OrderService extends BaseUserService<Order> {
       .leftJoinAndSelect(
         'cart_product_category_price.product_offer',
         'cart_product_offer',
-      ).orderBy('category.name_ar', 'DESC');
+      )
+      .orderBy('category.name_ar', 'DESC');
 
     //  single order
     query = query.where('order.id = :id', { id: order_id });
@@ -945,8 +949,7 @@ export class OrderService extends BaseUserService<Order> {
         'product_category_price.product_sub_category',
         'product_sub_category',
       )
-      
-      
+
       .leftJoinAndSelect(
         'product_sub_category.category_subCategory',
         'category_subCategory',
@@ -959,7 +962,6 @@ export class OrderService extends BaseUserService<Order> {
         'section_category',
       )
       .leftJoinAndSelect('section_category.category', 'category')
-
 
       .leftJoinAndSelect(
         'product_category_price.product_measurement',
@@ -1022,5 +1024,15 @@ export class OrderService extends BaseUserService<Order> {
         warehouse: shipment.warehouse,
       },
     });
+  }
+
+  async editDeliveryPrice(request: EditDeliveryOrderRequest) {
+    const order = await this.orderRepository.findOne({
+      where: { id: request.order_id },
+    });
+    if (!order) throw new NotFoundException('message.order_not_found');
+    order.total_price = order.products_price + request.price;
+    order.delivery_fee = request.price;
+    return await this.orderRepository.save(order);
   }
 }

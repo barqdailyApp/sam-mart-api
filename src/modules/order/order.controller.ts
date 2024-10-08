@@ -48,6 +48,7 @@ import { AddReturnOrderReason } from './dto/request/add-return-order-reason.requ
 import { ShipmentDashboardResponse } from './dto/response/dashboard-response/shipment-dashboard.response';
 import { GetReturnOrderResponse } from './dto/response/return-order/get-return-order.response';
 import { Response } from 'express';
+import { EditDeliveryOrderRequest } from './dto/request/edit-delivery-order.request';
 
 @ApiTags('Order')
 @ApiHeader({
@@ -63,7 +64,7 @@ export class OrderController {
     private readonly orderService: OrderService,
     private readonly returnOrderService: ReturnOrderService,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
-  ) { }
+  ) {}
   @Post()
   async makeOrder(@Body() req: MakeOrderRequest) {
     return new ActionResponse(await this.orderService.makeOrder(req));
@@ -90,19 +91,27 @@ export class OrderController {
   }
 
   @Get('invoice/:order_id')
-  async getOrderInvoice(@Param('order_id') order_id: string, @Res() res: Response) {
+  async getOrderInvoice(
+    @Param('order_id') order_id: string,
+    @Res() res: Response,
+  ) {
     // res.setHeader('Content-Type', 'application/pdf');
 
-    const {order_details,buffer} = await this.orderService.generateInvoice(order_id, res);
+    const { order_details, buffer } = await this.orderService.generateInvoice(
+      order_id,
+      res,
+    );
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename=${order_details.order_number}.pdf`);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename=${order_details.order_number}.pdf`,
+    );
     res.setHeader('Content-Length', buffer.length);
 
     // Send the PDF buffer as the response
     res.send(buffer);
 
     res.end();
-
   }
   @Get('single-order/:order_id')
   async getSingleClientOrder(@Param('order_id') order_id: string) {
@@ -114,7 +123,6 @@ export class OrderController {
 
     return new ActionResponse(data);
   }
-
 
   @Get('dashboard-orders')
   async getDashboardOrders(@Query() orderClientQuery: OrderClientQuery) {
@@ -152,12 +160,8 @@ export class OrderController {
   async getDashboardOrdersTotal() {
     const ordersTotal = await this.orderService.getTotalDashboardOrders();
 
-
-
     return new ActionResponse(ordersTotal);
   }
-
-
 
   @Get('dashboard-shipments')
   async getShipmentsDashboard(
@@ -181,7 +185,6 @@ export class OrderController {
 
     return new ActionResponse(pageDto);
   }
-
 
   @Get('shipments-driver-total')
   async getTotalDriverShipments() {
@@ -229,52 +232,63 @@ export class OrderController {
     return new ActionResponse(data);
   }
 
-  @Post("/return-order/:order_id")
+  @Post('/return-order/:order_id')
   async returnOrder(
     @Param('order_id') order_id: string,
-    @Body() req: ReturnOrderRequest
+    @Body() req: ReturnOrderRequest,
   ) {
-    const data = await this.returnOrderService.returnOrder(order_id, req)
-    const result = plainToInstance(GetReturnOrderResponse,data,{
-      excludeExtraneousValues: true
-    })
+    const data = await this.returnOrderService.returnOrder(order_id, req);
+    const result = plainToInstance(GetReturnOrderResponse, data, {
+      excludeExtraneousValues: true,
+    });
     return new ActionResponse(result);
   }
 
   @Roles(Role.ADMIN)
-  @Patch("/update-return-order-status/:return_order_id")
+  @Patch('/update-return-order-status/:return_order_id')
   async updateReturnOrderStatus(
     @Param('return_order_id') return_order_id: string,
-    @Body() req: UpdateReturnOrderStatusRequest
+    @Body() req: UpdateReturnOrderStatusRequest,
   ) {
-    const data = await this.returnOrderService.updateReturnOrderStatus(return_order_id, req);
-    const result = plainToInstance(GetReturnOrderResponse,data,{
-      excludeExtraneousValues: true
-    })
+    const data = await this.returnOrderService.updateReturnOrderStatus(
+      return_order_id,
+      req,
+    );
+    const result = plainToInstance(GetReturnOrderResponse, data, {
+      excludeExtraneousValues: true,
+    });
     return new ActionResponse(result);
   }
 
-  @Get("/return-orders")
+  @Get('/return-orders')
   async getReturnOrder(
-    @Query() query: PaginatedRequest
+    @Query() query: PaginatedRequest,
   ): Promise<PaginatedResponse<GetReturnOrderResponse[]>> {
     const returnOrders = await this.returnOrderService.getReturnOrders(query);
     const total = await this.returnOrderService.count(query);
 
     let result = plainToInstance(GetReturnOrderResponse, returnOrders, {
-      excludeExtraneousValues: true
+      excludeExtraneousValues: true,
     });
     result = this._i18nResponse.entity(result);
 
     return new PaginatedResponse<GetReturnOrderResponse[]>(result, {
       meta: { total, ...query },
-    })
+    });
   }
 
   @Roles(Role.ADMIN)
   @Post('broadcast-order-drivers/:order_id')
   async broadcastOrderDrivers(@Param('order_id') order_id: string) {
-    return new ActionResponse(await this.orderService.broadcastOrderDrivers(order_id));
+    return new ActionResponse(
+      await this.orderService.broadcastOrderDrivers(order_id),
+    );
   }
 
+  @Post('/return-order/:order_id')
+  async editDelivryPrice(@Body() req: EditDeliveryOrderRequest) {
+    const data = await this.orderService.editDeliveryPrice(req);
+
+    return new ActionResponse(data);
+  }
 }

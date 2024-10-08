@@ -611,6 +611,8 @@ export class ProductDashboardService {
         break;
       case 'order_by':
         productsSort = { 'product_sub_categories.order_by': 'ASC' };
+        case 'brand':
+        productsSort = { 'product.order_by_brand': 'ASC' };
         break;
     }
     let query = this.productRepository

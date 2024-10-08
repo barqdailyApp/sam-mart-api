@@ -49,7 +49,7 @@ export class ProductsDashboardQuery {
 
 
 
-  @ApiProperty({ required: false, enum: ['new','order_by'], default: 'order_by' })
+  @ApiProperty({ required: false, enum: ['new','order_by','brand'], default: 'order_by' })
   @IsOptional()
   @IsString()
   sort: 'new' | 'order_by' | 'brand';
