@@ -1630,6 +1630,7 @@ export class ProductDashboardService {
           if (!acc.find((item) => item.id == category?.id)) {
             acc.push({
               ...category,
+              section_category_id:      subCategory.category_subCategory.section_category,
               order: subCategory.category_subCategory.section_category.order_by,
             });
           }

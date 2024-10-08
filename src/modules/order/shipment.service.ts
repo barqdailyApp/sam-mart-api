@@ -993,9 +993,9 @@ export class ShipmentService extends BaseService<Shipment> {
     }
     await this.shipmentProductRepository.remove(product);
     product.shipment.order.total_price =
-      product.shipment.order.total_price - product.price;
+      product.shipment.order.total_price - product.quantity * product.price;
     product.shipment.order.products_price =
-      product.shipment.order.products_price - product.price;
+      product.shipment.order.products_price - product.quantity * product.price;
     await this.orderRepository.save(product.shipment.order);
     return product;
   }
