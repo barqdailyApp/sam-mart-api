@@ -34,6 +34,7 @@ import { GetCommentQueryRequest } from '../support-ticket/dto/request/get-commen
 import { AddShipmentFeedBackRequest } from './dto/request/add-shipment-feedback.request';
 import { CancelShipmentRequest } from './dto/request/cancel-shipment.request';
 import { ShipmentResponse } from './dto/response/shipment.response';
+import { AddProductOrderRequest } from './dto/request/add-product-order.request';
 
 @ApiTags('Shipment')
 @ApiHeader({
@@ -177,7 +178,10 @@ export class ShipmentController {
     return new ActionResponse(
       plainToInstance(
         ShipmentResponse,
-        await this.shipmentService.assignDriverToShipment(shipment_id, driver_id),
+        await this.shipmentService.assignDriverToShipment(
+          shipment_id,
+          driver_id,
+        ),
       ),
     );
   }
@@ -199,7 +203,6 @@ export class ShipmentController {
   @Roles(Role.ADMIN)
   async checkProduct(
     @Param('shipment_product_id') shipment_product_id: string,
-   
   ) {
     return new ActionResponse(
       plainToInstance(
@@ -208,17 +211,23 @@ export class ShipmentController {
       ),
     );
   }
+  @Roles(Role.ADMIN)
+  @Post('add-product')
+  @Roles(Role.ADMIN)
+  async addProduct(@Body() req: AddProductOrderRequest) {
+  
+    return new ActionResponse(
+      await this.shipmentService.addProductToShipment(req),
+    );
+  }
 
   @Post('remove-product/:shipment_product_id')
   @Roles(Role.ADMIN)
   async removeProduct(
     @Param('shipment_product_id') shipment_product_id: string,
-   
   ) {
     return new ActionResponse(
-     
-        await this.shipmentService.removeShipmentProudct(shipment_product_id),
-      
+      await this.shipmentService.removeShipmentProudct(shipment_product_id),
     );
   }
 

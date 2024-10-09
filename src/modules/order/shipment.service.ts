@@ -10,7 +10,7 @@ import { Order } from 'src/infrastructure/entities/order/order.entity';
 import { Request } from 'express';
 import { REQUEST } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 import { Shipment } from 'src/infrastructure/entities/order/shipment.entity';
 import { BaseService } from 'src/core/base/service/service.base';
@@ -48,6 +48,10 @@ import { operationType } from 'src/infrastructure/data/enums/operation-type.enum
 import { ProductMeasurement } from 'src/infrastructure/entities/product/product-measurement.entity';
 import { PaymentMethodEnum } from 'src/infrastructure/data/enums/payment-method';
 import { ShipmentProduct } from 'src/infrastructure/entities/order/shipment-product.entity';
+import { calculateSum } from 'src/core/helpers/cast.helper';
+import { ProductCategoryPrice } from 'src/infrastructure/entities/product/product-category-price.entity';
+import { Warehouse } from 'src/infrastructure/entities/warehouse/warehouse.entity';
+import { AddProductOrderRequest } from './dto/request/add-product-order.request';
 @Injectable()
 export class ShipmentService extends BaseService<Shipment> {
   constructor(
@@ -81,6 +85,12 @@ export class ShipmentService extends BaseService<Shipment> {
     private readonly reasonService: ReasonService,
     @Inject(TransactionService)
     private readonly transactionService: TransactionService,
+
+    @InjectRepository(ProductCategoryPrice)
+    private productCategoryPriceRepository: Repository<ProductCategoryPrice>,
+
+    @InjectRepository(Warehouse)
+    private readonly warehouseRepository: Repository<Warehouse>,
 
     private readonly notificationService: NotificationService,
     private readonly warehouseOperationTransaction: WarehouseOperationTransaction,
@@ -981,6 +991,92 @@ export class ShipmentService extends BaseService<Shipment> {
     product.is_checked = !product.is_checked;
     await this.shipmentProductRepository.save(product);
     return product;
+  }
+
+  async addProductToShipment(req: AddProductOrderRequest) {
+    const shipment = await this.shipmentRepository.findOne({
+      where: {
+        id: req.shipment_id,
+      },
+      relations: { order: true },
+    });
+
+    const product_price = await this.productCategoryPriceRepository.findOne({
+      where: {
+        id: req.product_category_price_id,
+      },
+      relations: {
+        product_measurement: { measurement_unit: true },
+        product_offer: true,
+        product_additional_services: true,
+        product_sub_category: {
+          category_subCategory: { section_category: true },
+        },
+      },
+    });
+    const original_price = product_price.price;
+    const nearst_warehouse = await this.warehouseRepository.findOne({
+      where: { id: shipment.order.warehouse_id },
+    });
+
+    const warehouse_product = await this.warehouseProductsRepository.findOne({
+      where: {
+        warehouse_id: nearst_warehouse.id,
+        product_id: product_price.product_measurement.product_id,
+      },
+    });
+    if (!warehouse_product) {
+      throw new BadRequestException('message.warehouse_product_not_enough');
+    }
+
+    const is_offer =
+      product_price.product_offer &&
+      product_price.product_offer.offer_quantity > 0 &&
+      product_price.product_offer.is_active &&
+      product_price.product_offer.start_date < new Date() &&
+      new Date() < product_price.product_offer.end_date &&
+      product_price.product_offer.offer_quantity >=
+        product_price.min_order_quantity;
+    if (is_offer) {
+      product_price.min_order_quantity =
+        product_price.product_offer.min_offer_quantity;
+      product_price.max_order_quantity =
+        product_price.product_offer.max_offer_quantity;
+      product_price.price = product_price.product_offer.price;
+    }
+
+    warehouse_product.quantity =
+      warehouse_product.quantity -
+      product_price.min_order_quantity *
+        product_price.product_measurement.conversion_factor;
+
+    if (warehouse_product.quantity < 0) {
+      throw new BadRequestException('message.warehouse_product_not_enough');
+    }
+
+    const shipmmentProduct =await this.shipmentProductRepository.save(
+      new ShipmentProduct({
+        
+        shipment_id: req.shipment_id,
+        is_offer: is_offer,
+  quantity: req.quantity,
+        section_id:
+          product_price.product_sub_category.category_subCategory
+            .section_category.section_id,
+    
+        product_id: product_price.product_sub_category.product_id,
+        product_category_price_id: req.product_category_price_id,
+        price: original_price,
+        conversion_factor: product_price.product_measurement.conversion_factor,
+        main_measurement_id:
+          product_price.product_measurement.measurement_unit_id,
+      }),
+    );
+    shipment.order.products_price = Number(shipment.order.products_price) + Number( original_price * req.quantity);
+    shipment.order.total_price = Number(shipment.order.total_price) + Number( original_price * req.quantity);
+
+    await this.orderRepository.save(shipment.order);
+    return shipmmentProduct;
   }
 
   async removeShipmentProudct(id: string) {
