@@ -27,6 +27,8 @@ export class ShipmentSingleResponse {
   @Expose() order: any;
   @Expose() shipment_feedback: any;
 
+  @Expose() note: string;
+
   @Expose() warehouse: any;
 
   constructor(shipments: Shipment) {
@@ -39,6 +41,7 @@ export class ShipmentSingleResponse {
     this.order_canceled_at = shipments.order_canceled_at;
     this.canceled_by = shipments.canceled_by;
     this.status = shipments.status;
+
     this.driver = shipments.driver_id
       ? {
           id: shipments.driver.id,
@@ -55,7 +58,7 @@ export class ShipmentSingleResponse {
       total_price: shipments.order.total_price,
       estimated_delivery_time: shipments.order.estimated_delivery_time,
       products_price: shipments.order.products_price,
-
+      note :shipments.order.note,
       is_paid: shipments.order.is_paid,
       promo_code_discount: shipments.order.promo_code_discount,
       payment_method: shipments.order.payment_method,
