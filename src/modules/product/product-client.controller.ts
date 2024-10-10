@@ -29,7 +29,10 @@ import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 import { toUrl } from 'src/core/helpers/file.helper';
 import { BrandService } from './brand.service';
-import { applyQueryFilters, applyQuerySort } from 'src/core/helpers/service-related.helper';
+import {
+  applyQueryFilters,
+  applyQuerySort,
+} from 'src/core/helpers/service-related.helper';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -133,13 +136,13 @@ export class ProductClientController {
     return new ActionResponse(product);
   }
 
-
-
   @Get('get-brands-client')
   async getBrandsClient(@Query() query: PaginatedRequest) {
-    applyQuerySort(query,"order=ASC");
-    applyQueryFilters(query,"is_active=1");
-    const brands = this._i18nResponse.entity( await this.brandService.findAll(query));
+    applyQuerySort(query, 'order=ASC');
+    applyQueryFilters(query, 'is_active=1');
+    const brands = this._i18nResponse.entity(
+      await this.brandService.findAll(query),
+    );
     brands.map((brand) => {
       brand.logo = toUrl(brand.logo);
     });
@@ -147,16 +150,19 @@ export class ProductClientController {
     return new PaginatedResponse(brands, {
       meta: { total, page: query.page, limit: query.limit },
     });
-    
   }
-  
-  
-  @Get('get-brands-categories')
-  async getBrandsCategories(@Query("brand_id") brand_id:string,@Query("section_id") section_id:string)  {
- 
-    const categories = this._i18nResponse.entity( await this.productClientService.getBrandCategories(brand_id,section_id));
 
- return new ActionResponse(categories);   
+  @Get('get-brands-categories')
+  async getBrandsCategories(
+    @Query('brand_id') brand_id: string,
+    @Query('section_id') section_id: string,
+    @Query('user_id') user_id?: string,
+  ) {
+    const categories = this._i18nResponse.entity(
+      await this.productClientService.getBrandCategories(brand_id, section_id,
+        user_id),
+    );
+
+    return new ActionResponse(categories);
   }
-  
 }

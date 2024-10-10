@@ -848,7 +848,7 @@ export class ProductClientService {
     return { products_favorite, total };
   }
 
-  async getBrandCategories(brand_id: string, section_id: string) {
+  async getBrandCategories(brand_id: string, section_id: string,user_id?:string) {
     const products = await this.getAllProductsForClient(
       new ProductClientQuery({
         brand_id,
@@ -856,6 +856,7 @@ export class ProductClientService {
         page: 1,
         section_id,
         sort: 'brand',
+        user_id
       }),
     );
 
