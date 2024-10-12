@@ -83,7 +83,7 @@ export class ProductClientService {
         break;
       case 'new':
         productsSort = { 'product_sub_category.order_by': 'ASC' };
-
+      break;
       case 'brand':
         productsSort = { 'product.order_by_brand': 'ASC' };
         break;
