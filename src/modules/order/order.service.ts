@@ -1031,7 +1031,7 @@ export class OrderService extends BaseUserService<Order> {
       where: { id: request.order_id },
     });
     if (!order) throw new NotFoundException('message.order_not_found');
-    order.total_price = order.products_price - order.delivery_fee + request.price;
+    order.total_price = order.total_price - order.delivery_fee + request.price;
 
     order.delivery_fee = request.price;
     return await this.orderRepository.save(order);
