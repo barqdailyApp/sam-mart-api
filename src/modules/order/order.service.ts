@@ -1029,8 +1029,19 @@ export class OrderService extends BaseUserService<Order> {
   async editDeliveryPrice(request: EditDeliveryOrderRequest) {
     const order = await this.orderRepository.findOne({
       where: { id: request.order_id },
+      relations: { shipments: true },
     });
     if (!order) throw new NotFoundException('message.order_not_found');
+
+    if (
+      order.shipments.some(
+        (shipment) =>
+          shipment.status == ShipmentStatusEnum.DELIVERED ||
+          shipment.status == ShipmentStatusEnum.CANCELED,
+      )
+    ) {
+      throw new BadRequestException('message.cannot_edit_delivery_price');
+    }
     order.total_price = order.total_price - order.delivery_fee + request.price;
 
     order.delivery_fee = request.price;

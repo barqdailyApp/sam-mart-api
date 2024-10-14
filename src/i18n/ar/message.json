@@ -84,5 +84,8 @@
     "logo_cannot_be_deleted":"لا يمكن حذف الشعار",
     "product_has_offers": "المنتج لديه عروض",
     "product_has_sub_category": "المنتج لديه فئة فرعية",
-    "discount_value_must_be_between_0_and_1" :  "قيمة الخصم يجب أن تكون بين 0 و 1"
+    "discount_value_must_be_between_0_and_1" :  "قيمة الخصم يجب أن تكون بين 0 و 1",
+    "cannot_edit_delivery_price":"لا يمكن تعديل سعر التوصيل",
+    "cannot_add_product_to_shipment": "لا يمكنك اضافة المنتج للشحنة",
+    "cannot_remove_product_from_shipment" : "لا يمكنك حذف المنتج من الشحنة"
 }
