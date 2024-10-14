@@ -1045,10 +1045,14 @@ export class ShipmentService extends BaseService<Shipment> {
       product_price.price = product_price.product_offer.price;
     }
 
+    // warehouse_product.quantity =
+    //   warehouse_product.quantity -
+    //   product_price.min_order_quantity *
+    //     product_price.product_measurement.conversion_factor;
+
     warehouse_product.quantity =
       warehouse_product.quantity -
-      product_price.min_order_quantity *
-        product_price.product_measurement.conversion_factor;
+      req.quantity * product_price.product_measurement.conversion_factor;
 
     if (warehouse_product.quantity < 0) {
       throw new BadRequestException('message.warehouse_product_not_enough');
