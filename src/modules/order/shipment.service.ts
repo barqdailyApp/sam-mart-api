@@ -1107,7 +1107,9 @@ export class ShipmentService extends BaseService<Shipment> {
       throw new BadRequestException('message.warehouse_product_not_found');
     }
 
-    warehouse_product.quantity += product.quantity * product.conversion_factor;
+    warehouse_product.quantity += product.quantity / product.conversion_factor;
+
+    
 
     await this.warehouseProductsRepository.save(warehouse_product);
 
