@@ -1000,6 +1000,13 @@ export class ShipmentService extends BaseService<Shipment> {
       },
       relations: { order: true },
     });
+    if (
+      shipment.status == ShipmentStatusEnum.DELIVERED ||  
+     shipment.status == ShipmentStatusEnum.CANCELED
+     
+    ) {
+      throw new BadRequestException('message.cannot_add_product_to_shipment');
+    }
 
     const product_price = await this.productCategoryPriceRepository.findOne({
       where: {
@@ -1094,6 +1101,13 @@ export class ShipmentService extends BaseService<Shipment> {
     });
     if (!product) {
       throw new NotFoundException('message.shipment_not_found');
+    }
+    if (
+      product.shipment.status == ShipmentStatusEnum.DELIVERED ||  
+      product.shipment.status == ShipmentStatusEnum.CANCELED
+     
+    ) {
+      throw new BadRequestException('message.cannot_remove_product_from_shipment');
     }
 
     const warehouse_product = await this.warehouseProductsRepository.findOne({

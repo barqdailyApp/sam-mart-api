@@ -84,5 +84,8 @@
     "logo_cannot_be_deleted":"Logo cannot be deleted",
     "product_has_offers": "Product has offers",
     "product_has_sub_category": "Product has sub category",
-    "discount_value_must_be_between_0_and_1" :  "Discount value must be between 0 and 1"
+    "discount_value_must_be_between_0_and_1" :  "Discount value must be between 0 and 1",
+    "cannot_edit_delivery_price":"Cannot edit delivery price",
+    "cannot_add_product_to_shipment": "Cannot add product to shipment",
+    "cannot_remove_product_from_shipment" : "Cannot remove product from shipment"
 }
