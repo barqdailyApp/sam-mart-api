@@ -1053,6 +1053,7 @@ export class ShipmentService extends BaseService<Shipment> {
     if (warehouse_product.quantity < 0) {
       throw new BadRequestException('message.warehouse_product_not_enough');
     }
+    await this.warehouseProductsRepository.save(warehouse_product);
 
     const shipmmentProduct =await this.shipmentProductRepository.save(
       new ShipmentProduct({
