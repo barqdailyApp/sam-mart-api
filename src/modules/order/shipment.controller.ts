@@ -227,7 +227,7 @@ export class ShipmentController {
     @Param('shipment_product_id') shipment_product_id: string,
   ) {
     return new ActionResponse(
-      await this.shipmentService.removeShipmentProudct(shipment_product_id),
+      await this.shipmentService.removeShipmentProduct(shipment_product_id),
     );
   }
 
