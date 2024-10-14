@@ -1055,16 +1055,15 @@ export class ShipmentService extends BaseService<Shipment> {
     }
     await this.warehouseProductsRepository.save(warehouse_product);
 
-    const shipmmentProduct =await this.shipmentProductRepository.save(
+    const shipmmentProduct = await this.shipmentProductRepository.save(
       new ShipmentProduct({
-        
         shipment_id: req.shipment_id,
         is_offer: is_offer,
-  quantity: req.quantity,
+        quantity: req.quantity,
         section_id:
           product_price.product_sub_category.category_subCategory
             .section_category.section_id,
-    
+
         product_id: product_price.product_sub_category.product_id,
         product_category_price_id: req.product_category_price_id,
         price: original_price,
@@ -1073,14 +1072,18 @@ export class ShipmentService extends BaseService<Shipment> {
           product_price.product_measurement.measurement_unit_id,
       }),
     );
-    shipment.order.products_price = Number(shipment.order.products_price) + Number( original_price * req.quantity);
-    shipment.order.total_price = Number(shipment.order.total_price) + Number( original_price * req.quantity);
+    shipment.order.products_price =
+      Number(shipment.order.products_price) +
+      Number(original_price * req.quantity);
+    shipment.order.total_price =
+      Number(shipment.order.total_price) +
+      Number(original_price * req.quantity);
 
     await this.orderRepository.save(shipment.order);
     return shipmmentProduct;
   }
 
-  async removeShipmentProudct(id: string) {
+  async removeShipmentProduct(id: string) {
     const product = await this.shipmentProductRepository.findOne({
       where: { id },
       relations: { shipment: { order: true } },
@@ -1088,6 +1091,22 @@ export class ShipmentService extends BaseService<Shipment> {
     if (!product) {
       throw new NotFoundException('message.shipment_not_found');
     }
+
+    const warehouse_product = await this.warehouseProductsRepository.findOne({
+      where: {
+        warehouse_id: product.shipment.order.warehouse_id,
+        product_id: product.product_id,
+      },
+    });
+
+    if (!warehouse_product) {
+      throw new BadRequestException('message.warehouse_product_not_found');
+    }
+
+    warehouse_product.quantity += product.quantity * product.conversion_factor;
+
+    await this.warehouseProductsRepository.save(warehouse_product);
+
     await this.shipmentProductRepository.remove(product);
     product.shipment.order.total_price =
       product.shipment.order.total_price - product.quantity * product.price;
