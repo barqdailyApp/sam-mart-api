@@ -216,13 +216,27 @@ export class OrderService extends BaseUserService<Order> {
         { orderDate: order_date },
       );
     }
+    // if (order_delivery_date) {
+    //   //*using database functions to truncate the time part of the order.created_at timestamp to compare only the date components
+    //   query.andWhere(
+    //     '((DATE(shipments.order_delivered_at) = :orderDate AND TIME(shipments.order_delivered_at) < "21:00:00") OR (DATE(shipments.order_delivered_at) = DATE_SUB(:orderDate, INTERVAL 1 DAY) AND TIME(shipments.order_delivered_at) >= "21:00:00"))',
+    //     { orderDate: order_delivery_date },
+    //   );
+    // }
+    // if (order_delivery_date) {
+    //   query.andWhere(
+    //     '(DATE(shipments.order_delivered_at) = :orderDate AND TIME(shipments.order_delivered_at) < "21:00:00") OR (DATE(shipments.order_delivered_at) = :previousOrderDate AND TIME(shipments.order_delivered_at) >= "21:00:00")',
+    //     { orderDate: order_delivery_date, previousOrderDate: new Date(order_delivery_date).setDate(new Date(order_delivery_date).getDate() - 1) },
+    //   );
+    // }
     if (order_delivery_date) {
-      //*using database functions to truncate the time part of the order.created_at timestamp to compare only the date components
       query.andWhere(
-        '((DATE(shipments.order_delivered_at) = :orderDate AND TIME(shipments.order_delivered_at) < "21:00:00") OR (DATE(shipments.order_delivered_at) = DATE_SUB(:orderDate, INTERVAL 1 DAY) AND TIME(shipments.order_delivered_at) >= "21:00:00"))',
+        'DATE(shipments.order_delivered_at) = :orderDate',
         { orderDate: order_delivery_date },
       );
     }
+    
+    
 
     if (is_paid !== undefined) {
       query = query.andWhere('order.is_paid = :is_paid', {
