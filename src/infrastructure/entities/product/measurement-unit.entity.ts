@@ -4,6 +4,7 @@ import { ProductImage } from './product-image.entity';
 import { Product } from './product.entity';
 import { ProductMeasurement } from './product-measurement.entity';
 import { ShipmentProduct } from '../order/shipment-product.entity';
+import { ShipmentProductHistory } from '../order/shipment-product-history.entity';
 
 @Entity()
 export class MeasurementUnit extends AuditableEntity {
@@ -21,7 +22,12 @@ export class MeasurementUnit extends AuditableEntity {
 
   @OneToMany(
     () => ShipmentProduct,
-    (shipmentProduct) => shipmentProduct.main_measurement_unit
+    (shipmentProduct) => shipmentProduct.main_measurement_unit,
   )
   shipment_products: ShipmentProduct[];
+  @OneToMany(
+    () => ShipmentProductHistory,
+    (shipmentProductHistory) => shipmentProductHistory.main_measurement_unit,
+  )
+  shipment_product_histories: ShipmentProductHistory[];
 }

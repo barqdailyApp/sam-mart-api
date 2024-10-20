@@ -57,6 +57,7 @@ import { SamModules } from '../entities/sam-modules/sam-modules.entity';
 import { SamModulesEndpoints } from '../entities/sam-modules/sam-modules-endpoints.entity';
 import { UsersSamModules } from '../entities/sam-modules/users-sam-modules.entity';
 import { Brand } from '../entities/brand/brand';
+import { ShipmentProductHistory } from '../entities/order/shipment-product-history.entity';
 
 export const DB_ENTITIES = [
   User,
@@ -118,7 +119,8 @@ export const DB_ENTITIES = [
   SamModules,
   SamModulesEndpoints,
   UsersSamModules,
-  Brand
+  Brand,
+  ShipmentProductHistory
 ];
 
 export const DB_VIEWS = [];

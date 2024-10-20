@@ -52,6 +52,8 @@ import { calculateSum } from 'src/core/helpers/cast.helper';
 import { ProductCategoryPrice } from 'src/infrastructure/entities/product/product-category-price.entity';
 import { Warehouse } from 'src/infrastructure/entities/warehouse/warehouse.entity';
 import { AddProductOrderRequest } from './dto/request/add-product-order.request';
+import { ShipmentProductHistory } from 'src/infrastructure/entities/order/shipment-product-history.entity';
+import { ShipmentProductActionType } from 'src/infrastructure/data/enums/shipment-product-action-type.enum';
 @Injectable()
 export class ShipmentService extends BaseService<Shipment> {
   constructor(
@@ -91,6 +93,9 @@ export class ShipmentService extends BaseService<Shipment> {
 
     @InjectRepository(Warehouse)
     private readonly warehouseRepository: Repository<Warehouse>,
+
+    @InjectRepository(ShipmentProductHistory)
+    private readonly shipmentProductHistoryRepository: Repository<ShipmentProductHistory>,
 
     private readonly notificationService: NotificationService,
     private readonly warehouseOperationTransaction: WarehouseOperationTransaction,
@@ -1001,9 +1006,8 @@ export class ShipmentService extends BaseService<Shipment> {
       relations: { order: true },
     });
     if (
-      shipment.status == ShipmentStatusEnum.DELIVERED ||  
-     shipment.status == ShipmentStatusEnum.CANCELED
-     
+      shipment.status == ShipmentStatusEnum.DELIVERED ||
+      shipment.status == ShipmentStatusEnum.CANCELED
     ) {
       throw new BadRequestException('message.cannot_add_product_to_shipment');
     }
@@ -1066,7 +1070,7 @@ export class ShipmentService extends BaseService<Shipment> {
     }
     await this.warehouseProductsRepository.save(warehouse_product);
 
-    const shipmmentProduct = await this.shipmentProductRepository.save(
+    const shipmentProduct = await this.shipmentProductRepository.save(
       new ShipmentProduct({
         shipment_id: req.shipment_id,
         is_offer: is_offer,
@@ -1091,48 +1095,138 @@ export class ShipmentService extends BaseService<Shipment> {
       Number(original_price * req.quantity);
 
     await this.orderRepository.save(shipment.order);
-    return shipmmentProduct;
+
+    const shipmentProductHistoryCreate =
+      this.shipmentProductHistoryRepository.create({
+        shipment_id: shipment.id,
+        product_id: shipmentProduct.product_id,
+        product_category_price_id: shipmentProduct.product_category_price_id,
+        main_measurement_id: shipmentProduct.main_measurement_id,
+        modified_by_id: this.currentUser.id,
+        action_type: ShipmentProductActionType.CREATE,
+        additions: shipmentProduct.additions,
+        conversion_factor: shipmentProduct.conversion_factor,
+        is_offer: shipmentProduct.is_offer,
+        quantity: shipmentProduct.quantity,
+        shipment_product_id: shipmentProduct.id,
+        price: shipmentProduct.price,
+        total_price: Number(shipmentProduct.price * shipmentProduct.quantity),
+      });
+
+    await this.shipmentProductHistoryRepository.save(
+      shipmentProductHistoryCreate,
+    );
+
+    return shipmentProduct;
   }
 
   async removeShipmentProduct(id: string) {
-    const product = await this.shipmentProductRepository.findOne({
+    // Fetch the ShipmentProduct entity by ID with related Shipment and Order.
+    const shipmentProduct = await this.shipmentProductRepository.findOne({
       where: { id },
-      relations: { shipment: { order: true } },
+      relations: { shipment: { order: true } }, // Including related shipment and order details.
     });
-    if (!product) {
+
+    // If the ShipmentProduct is not found, throw a "Not Found" exception.
+    if (!shipmentProduct) {
       throw new NotFoundException('message.shipment_not_found');
     }
+
+    // Prevent removal if the shipment status is DELIVERED or CANCELED.
     if (
-      product.shipment.status == ShipmentStatusEnum.DELIVERED ||  
-      product.shipment.status == ShipmentStatusEnum.CANCELED
-     
+      shipmentProduct.shipment.status == ShipmentStatusEnum.DELIVERED ||
+      shipmentProduct.shipment.status == ShipmentStatusEnum.CANCELED
     ) {
-      throw new BadRequestException('message.cannot_remove_product_from_shipment');
+      throw new BadRequestException(
+        'message.cannot_remove_product_from_shipment',
+      );
     }
 
+    // Find the corresponding WarehouseProduct (to update its stock later).
     const warehouse_product = await this.warehouseProductsRepository.findOne({
       where: {
-        warehouse_id: product.shipment.order.warehouse_id,
-        product_id: product.product_id,
+        warehouse_id: shipmentProduct.shipment.order.warehouse_id,
+        product_id: shipmentProduct.product_id,
       },
     });
 
+    // If the product does not exist in the warehouse, throw an exception.
     if (!warehouse_product) {
       throw new BadRequestException('message.warehouse_product_not_found');
     }
 
-    warehouse_product.quantity += product.quantity / product.conversion_factor;
+    // Adjust the quantity in the warehouse (restore the quantity of the removed product).
+    warehouse_product.quantity +=
+      shipmentProduct.quantity / shipmentProduct.conversion_factor;
 
-    
+    // Create a record in the ShipmentProductHistory to log the deletion.
+    const shipmentProductHistoryCreate =
+      this.shipmentProductHistoryRepository.create({
+        shipment_id: shipmentProduct.shipment_id,
+        product_id: shipmentProduct.product_id,
+        product_category_price_id: shipmentProduct.product_category_price_id,
+        main_measurement_id: shipmentProduct.main_measurement_id,
+        modified_by_id: this.currentUser.id, // Log the user who performed the action.
+        action_type: ShipmentProductActionType.DELETE, // Action type is DELETE.
+        additions: shipmentProduct.additions, // Any additions associated with the product.
+        conversion_factor: shipmentProduct.conversion_factor,
+        is_offer: shipmentProduct.is_offer,
+        quantity: shipmentProduct.quantity, // Log the product quantity being removed.
+        shipment_product_id: shipmentProduct.id, // Reference to the original ShipmentProduct.
+        price: shipmentProduct.price, // Store the product's price.
+        total_price: Number(shipmentProduct.price * shipmentProduct.quantity), // Calculate total price of the product being removed.
+      });
 
+    // Save the history record.
+    await this.shipmentProductHistoryRepository.save(
+      shipmentProductHistoryCreate,
+    );
+
+    // Update the warehouse product quantity and save the changes.
     await this.warehouseProductsRepository.save(warehouse_product);
 
-    await this.shipmentProductRepository.remove(product);
-    product.shipment.order.total_price =
-      product.shipment.order.total_price - product.quantity * product.price;
-    product.shipment.order.products_price =
-      product.shipment.order.products_price - product.quantity * product.price;
-    await this.orderRepository.save(product.shipment.order);
-    return product;
+    // Remove the product from the shipment.
+    await this.shipmentProductRepository.softDelete(shipmentProduct.id);
+
+    // Adjust the total order price by subtracting the removed product's total cost.
+    shipmentProduct.shipment.order.total_price =
+      shipmentProduct.shipment.order.total_price -
+      shipmentProduct.quantity * shipmentProduct.price;
+
+    // Adjust the products price in the order.
+    shipmentProduct.shipment.order.products_price =
+      shipmentProduct.shipment.order.products_price -
+      shipmentProduct.quantity * shipmentProduct.price;
+
+    // Save the updated order with the new prices.
+    await this.orderRepository.save(shipmentProduct.shipment.order);
+
+    // Return the removed shipment product.
+    return shipmentProduct;
+  }
+  async getAllShipmentProductHistories(shipment_id: string) {
+    return await this.shipmentProductHistoryRepository.find({
+      where: { shipment_id: shipment_id },
+      withDeleted: true,
+      relations: {
+        modified_by: true,
+
+        shipment_product: {
+          main_measurement_unit:true,
+          product: {
+            product_images: true,
+          },
+          product_category_price: {
+            product_sub_category: {
+              category_subCategory: {
+                section_category: { category: true },
+                subcategory: true,
+              },
+            },
+          },
+        },
+      },
+      order: { created_at: 'DESC' },
+    });
   }
 }
