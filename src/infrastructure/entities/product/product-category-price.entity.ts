@@ -14,6 +14,7 @@ import { ProductSubCategory } from './product-sub-category.entity';
 import { ProductOffer } from './product-offer.entity';
 import { CartProduct } from '../cart/cart-products';
 import { ShipmentProduct } from '../order/shipment-product.entity';
+import { ShipmentProductHistory } from '../order/shipment-product-history.entity';
 
 @Entity()
 export class ProductCategoryPrice extends AuditableEntity {
@@ -74,4 +75,10 @@ export class ProductCategoryPrice extends AuditableEntity {
     (shipmentProduct) => shipmentProduct.product_category_price,
   )
   shipment_products: ShipmentProduct[];
+
+  @OneToMany(
+    () => ShipmentProductHistory,
+    (shipmentProductHistory) => shipmentProductHistory.product_category_price,
+  )
+  shipment_product_histories: ShipmentProductHistory[];
 }

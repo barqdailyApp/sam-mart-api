@@ -9,6 +9,7 @@ import { ProductFavorite } from './product-favorite.entity';
 import { ShipmentProduct } from '../order/shipment-product.entity';
 import { Brand } from '../brand/brand';
 import { WarehouseOpreationProducts } from '../warehouse/wahouse-opreation-products.entity';
+import { ShipmentProductHistory } from '../order/shipment-product-history.entity';
 
 @Entity()
 
@@ -87,4 +88,7 @@ export class Product extends AuditableEntity {
     shipmentProduct => shipmentProduct.product
   )
   shipment_products: ShipmentProduct[];
+
+  @OneToMany(() => ShipmentProductHistory, (shipmentProductHistory) => shipmentProductHistory.product)
+  shipment_product_histories: ShipmentProductHistory[];
 }

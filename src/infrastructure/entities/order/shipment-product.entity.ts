@@ -13,6 +13,7 @@ import { ReturnOrderProduct } from './return-order/return-order-product.entity';
 import { Product } from '../product/product.entity';
 import { ProductMeasurement } from '../product/product-measurement.entity';
 import { MeasurementUnit } from '../product/measurement-unit.entity';
+import { ShipmentProductHistory } from './shipment-product-history.entity';
 @Entity()
 export class ShipmentProduct extends AuditableEntity {
   @ManyToOne(() => Shipment, (shipment) => shipment.shipment_products)
@@ -82,9 +83,15 @@ export class ShipmentProduct extends AuditableEntity {
   @Column({ default: false })
   is_checked: boolean;
 
+  @OneToMany(() => ShipmentProductHistory, (shipmentProductHistory) => shipmentProductHistory.shipment_product)
+  shipment_product_histories: ShipmentProductHistory[];
+
+
 
   constructor(partial?: Partial<ShipmentProduct>) {
     super();
     Object.assign(this, partial);
   }
 }
+
+

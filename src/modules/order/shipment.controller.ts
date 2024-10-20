@@ -35,6 +35,8 @@ import { AddShipmentFeedBackRequest } from './dto/request/add-shipment-feedback.
 import { CancelShipmentRequest } from './dto/request/cancel-shipment.request';
 import { ShipmentResponse } from './dto/response/shipment.response';
 import { AddProductOrderRequest } from './dto/request/add-product-order.request';
+import { ShipmentProductHistoryResponse } from './dto/response/shipment-product-history.response';
+import { I18nResponse } from 'src/core/helpers/i18n.helper';
 
 @ApiTags('Shipment')
 @ApiHeader({
@@ -46,7 +48,10 @@ import { AddProductOrderRequest } from './dto/request/add-product-order.request'
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('shipment')
 export class ShipmentController {
-  constructor(private readonly shipmentService: ShipmentService) {}
+  constructor(
+    private readonly shipmentService: ShipmentService,
+    @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
+  ) {}
 
   @Post('driver/accept/:id')
   async acceptShipment(@Param('id') id: string) {
@@ -215,7 +220,6 @@ export class ShipmentController {
   @Post('add-product')
   @Roles(Role.ADMIN)
   async addProduct(@Body() req: AddProductOrderRequest) {
-  
     return new ActionResponse(
       await this.shipmentService.addProductToShipment(req),
     );
@@ -229,6 +233,22 @@ export class ShipmentController {
     return new ActionResponse(
       await this.shipmentService.removeShipmentProduct(shipment_product_id),
     );
+  }
+
+  // getAllShipmentProductHistories(shipment_id: string)
+  @Get('get-all-shipment-product-histories/:shipment_id')
+  async getAllShipmentProductHistories(
+    @Param('shipment_id') shipment_id: string,
+  ) {
+    const shipments = await this.shipmentService.getAllShipmentProductHistories(
+      shipment_id,
+    );
+    const shipments_response = shipments.map((shipment) => {
+      return new ShipmentProductHistoryResponse(shipment);
+    });
+    const responses_translate = this._i18nResponse.entity(shipments_response);
+
+    return new ActionResponse(responses_translate);
   }
 
   // admin convert order from scheduled to fast delivery [Order Controller]

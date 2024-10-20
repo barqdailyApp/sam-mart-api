@@ -9,6 +9,7 @@ import { ShipmentChat } from './shipment-chat.entity';
 import { ShipmentFeedback } from './shipment-feedback.entity';
 import { Reason } from '../reason/reason.entity';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
+import { ShipmentProductHistory } from './shipment-product-history.entity';
 
 @Entity()
 export class Shipment extends AuditableEntity {
@@ -72,6 +73,9 @@ export class Shipment extends AuditableEntity {
     cascade: true,
   })
   shipment_chats: ShipmentChat[];
+
+  @OneToMany(() => ShipmentProductHistory, (shipmentProductHistory) => shipmentProductHistory.shipment)
+  shipment_product_histories: ShipmentProductHistory[];
 
   constructor(partial?: Partial<Shipment>) {
     super();

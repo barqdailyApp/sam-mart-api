@@ -155,7 +155,9 @@ export class OrderService extends BaseUserService<Order> {
       delivery_type,
       status,
       order_search,
-      order_delivery_date,
+      order_delivery_date_end,
+      order_delivery_date_start,
+      is_shipment_Changes,
     } = orderClientQuery;
     const skip = (page - 1) * limit;
 
@@ -171,6 +173,11 @@ export class OrderService extends BaseUserService<Order> {
       .leftJoinAndSelect('order.warehouse', 'warehouse_order')
       .leftJoinAndSelect('order.address', 'address')
       .leftJoinAndSelect('order.shipments', 'shipments')
+      .leftJoinAndSelect(
+        'shipments.shipment_product_histories',
+        'shipment_product_histories',
+      )
+
       .leftJoinAndSelect(
         'shipments.cancelShipmentReason',
         'cancelShipmentReason',
@@ -229,14 +236,19 @@ export class OrderService extends BaseUserService<Order> {
     //     { orderDate: order_delivery_date, previousOrderDate: new Date(order_delivery_date).setDate(new Date(order_delivery_date).getDate() - 1) },
     //   );
     // }
-    if (order_delivery_date) {
+    if (order_delivery_date_start && order_delivery_date_end) {
       query.andWhere(
-        'DATE(shipments.order_delivered_at) = :orderDate',
-        { orderDate: order_delivery_date },
+        'DATE(shipments.order_delivered_at) BETWEEN :start AND :end',
+        {
+          start: order_delivery_date_start,
+          end: order_delivery_date_end,
+        },
       );
     }
-    
-    
+
+    if (is_shipment_Changes == true) {
+      query.andWhere('shipment_product_histories.id IS NOT NULL');
+    }
 
     if (is_paid !== undefined) {
       query = query.andWhere('order.is_paid = :is_paid', {

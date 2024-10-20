@@ -28,6 +28,7 @@ import { UserStatus } from 'src/infrastructure/data/enums/user-status.enum';
 import { PromoCode } from '../promo-code/promo-code.entity';
 import { SamModules } from '../sam-modules/sam-modules.entity';
 import { UsersSamModules } from '../sam-modules/users-sam-modules.entity';
+import { ShipmentProductHistory } from '../order/shipment-product-history.entity';
 
 @Entity()
 export class User extends AuditableEntity {
@@ -116,6 +117,9 @@ export class User extends AuditableEntity {
     {cascade: true}
   )
   samModules: UsersSamModules[];
+
+  @OneToMany(() => ShipmentProductHistory, (shipmentProductHistory) => shipmentProductHistory.modified_by)
+  shipment_product_histories: ShipmentProductHistory[];
 
   @Column({ type: 'enum', enum: Language, default: Language.AR })
   language: Language;

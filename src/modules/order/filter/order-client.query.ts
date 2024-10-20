@@ -31,10 +31,7 @@ export class OrderClientQuery {
   @IsString()
   order_date: string;
 
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  order_delivery_date: string;
+
 
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()
@@ -82,4 +79,23 @@ export class OrderClientQuery {
   @IsOptional()
   @IsEnum(ShipmentStatusEnum)
   status: ShipmentStatusEnum;
+
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  order_delivery_date_start: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  order_delivery_date_end: string;
+
+  @ApiProperty({ nullable: true, required: false })
+  @IsOptional()
+  @Transform(({ value }) => {
+    return value === 'true' || value === true;
+  })
+  @IsBoolean()
+  is_shipment_Changes: boolean;
 }
