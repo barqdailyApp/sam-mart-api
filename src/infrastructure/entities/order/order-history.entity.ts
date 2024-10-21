@@ -17,45 +17,24 @@ import { MeasurementUnit } from '../product/measurement-unit.entity';
 import { ShipmentProduct } from './shipment-product.entity';
 import { User } from '../user/user.entity';
 import { ShipmentProductActionType } from 'src/infrastructure/data/enums/shipment-product-action-type.enum';
+import { Warehouse } from '../warehouse/warehouse.entity';
+import { Address } from '../user/address.entity';
+import { PromoCode } from '../promo-code/promo-code.entity';
+import { Section } from '../section/section.entity';
+import { PaymentMethodEnum } from 'src/infrastructure/data/enums/payment-method';
+import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
+import { Slot } from './slot.entity';
+import { PaymentMethod } from '../payment_method/payment_method.entity';
+import { Order } from './order.entity';
 
 @Entity()
-export class ShipmentProductHistory extends AuditableEntity {
-  @ManyToOne(() => ShipmentProduct)
-  @JoinColumn({ name: 'shipment_product_id' })
-  shipment_product: ShipmentProduct;
+export class OrderHistory extends AuditableEntity {
+  @ManyToOne(() => Order, (order) => order.order_histories)
+  @JoinColumn()
+  order: Order;
 
   @Column()
-  shipment_product_id: string;
-
-  @ManyToOne(() => Shipment)
-  @JoinColumn({ name: 'shipment_id' })
-  shipment: Shipment;
-
-  @Column()
-  shipment_id: string;
-
- 
-  @Column()
-  quantity: number;
-
-
-
-  @Column()
-  conversion_factor: number;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
-  price: number;
-
-
-
-  @Column({ type: 'simple-array', nullable: true })
-  additions: string[];
-
-  @Column({ nullable: true, default: false })
-  is_offer: boolean;
-
-  @Column({ type: 'enum', enum: ShipmentProductActionType })
-  action_type: ShipmentProductActionType;
+  order_id: string;
 
   @ManyToOne(() => User)
   @JoinColumn({ name: 'modified_by_id' })
@@ -64,6 +43,6 @@ export class ShipmentProductHistory extends AuditableEntity {
   @Column()
   modified_by_id: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
-  total_price: number;
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  delivery_fee: number;
 }

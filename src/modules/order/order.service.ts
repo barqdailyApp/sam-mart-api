@@ -45,6 +45,7 @@ import { Response } from 'express';
 import { Product } from 'src/infrastructure/entities/product/product.entity';
 import { options } from 'joi';
 import { EditDeliveryOrderRequest } from './dto/request/edit-delivery-order.request';
+import { OrderHistory } from 'src/infrastructure/entities/order/order-history.entity';
 @Injectable()
 export class OrderService extends BaseUserService<Order> {
   constructor(
@@ -72,6 +73,8 @@ export class OrderService extends BaseUserService<Order> {
 
     @InjectRepository(Cart)
     private readonly cart_repo: Repository<Cart>,
+    @InjectRepository(OrderHistory)
+    private readonly order_history_repo: Repository<OrderHistory>,
   ) {
     super(orderRepository, request);
   }
@@ -169,6 +172,8 @@ export class OrderService extends BaseUserService<Order> {
         'user',
         'user.deleted_at IS NOT NULL OR user.deleted_at IS NULL',
       )
+      .leftJoinAndSelect('order.order_histories', 'order_histories')
+
       .leftJoinAndSelect('order.section', 'section_order')
       .leftJoinAndSelect('order.warehouse', 'warehouse_order')
       .leftJoinAndSelect('order.address', 'address')
@@ -247,7 +252,9 @@ export class OrderService extends BaseUserService<Order> {
     }
 
     if (is_shipment_Changes == true) {
-      query.andWhere('shipment_product_histories.id IS NOT NULL');
+      query.andWhere(
+        '(shipment_product_histories.id IS NOT NULL OR order_histories.id IS NOT NULL)',
+      );
     }
 
     if (is_paid !== undefined) {
@@ -1071,6 +1078,14 @@ export class OrderService extends BaseUserService<Order> {
     order.total_price = order.total_price - order.delivery_fee + request.price;
 
     order.delivery_fee = request.price;
+
+    const order_history_create = this.order_history_repo.create({
+      delivery_fee: request.price,
+      modified_by_id: this.currentUser.id,
+      order_id: order.id,
+    });
+
+    await this.order_history_repo.save(order_history_create);
     return await this.orderRepository.save(order);
   }
 }

@@ -25,9 +25,5 @@ export class MeasurementUnit extends AuditableEntity {
     (shipmentProduct) => shipmentProduct.main_measurement_unit,
   )
   shipment_products: ShipmentProduct[];
-  @OneToMany(
-    () => ShipmentProductHistory,
-    (shipmentProductHistory) => shipmentProductHistory.main_measurement_unit,
-  )
-  shipment_product_histories: ShipmentProductHistory[];
+
 }

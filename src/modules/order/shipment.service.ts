@@ -54,6 +54,7 @@ import { Warehouse } from 'src/infrastructure/entities/warehouse/warehouse.entit
 import { AddProductOrderRequest } from './dto/request/add-product-order.request';
 import { ShipmentProductHistory } from 'src/infrastructure/entities/order/shipment-product-history.entity';
 import { ShipmentProductActionType } from 'src/infrastructure/data/enums/shipment-product-action-type.enum';
+import { OrderHistory } from 'src/infrastructure/entities/order/order-history.entity';
 @Injectable()
 export class ShipmentService extends BaseService<Shipment> {
   constructor(
@@ -96,6 +97,8 @@ export class ShipmentService extends BaseService<Shipment> {
 
     @InjectRepository(ShipmentProductHistory)
     private readonly shipmentProductHistoryRepository: Repository<ShipmentProductHistory>,
+    @InjectRepository(OrderHistory)
+    private readonly order_history_repo: Repository<OrderHistory>,
 
     private readonly notificationService: NotificationService,
     private readonly warehouseOperationTransaction: WarehouseOperationTransaction,
@@ -1099,9 +1102,7 @@ export class ShipmentService extends BaseService<Shipment> {
     const shipmentProductHistoryCreate =
       this.shipmentProductHistoryRepository.create({
         shipment_id: shipment.id,
-        product_id: shipmentProduct.product_id,
-        product_category_price_id: shipmentProduct.product_category_price_id,
-        main_measurement_id: shipmentProduct.main_measurement_id,
+
         modified_by_id: this.currentUser.id,
         action_type: ShipmentProductActionType.CREATE,
         additions: shipmentProduct.additions,
@@ -1163,9 +1164,6 @@ export class ShipmentService extends BaseService<Shipment> {
     const shipmentProductHistoryCreate =
       this.shipmentProductHistoryRepository.create({
         shipment_id: shipmentProduct.shipment_id,
-        product_id: shipmentProduct.product_id,
-        product_category_price_id: shipmentProduct.product_category_price_id,
-        main_measurement_id: shipmentProduct.main_measurement_id,
         modified_by_id: this.currentUser.id, // Log the user who performed the action.
         action_type: ShipmentProductActionType.DELETE, // Action type is DELETE.
         additions: shipmentProduct.additions, // Any additions associated with the product.
@@ -1212,7 +1210,7 @@ export class ShipmentService extends BaseService<Shipment> {
         modified_by: true,
 
         shipment_product: {
-          main_measurement_unit:true,
+          main_measurement_unit: true,
           product: {
             product_images: true,
           },
@@ -1226,6 +1224,14 @@ export class ShipmentService extends BaseService<Shipment> {
           },
         },
       },
+      order: { created_at: 'DESC' },
+    });
+  }
+
+  async getAllOrderHistories(order_id: string) {
+    return await this.order_history_repo.find({
+      where: { order_id: order_id },
+      relations: { modified_by: true },
       order: { created_at: 'DESC' },
     });
   }

@@ -286,7 +286,7 @@ export class OrderController {
   }
 
   @Post('/edit-delivery-price')
-  async editDelivryPrice(@Body() req: EditDeliveryOrderRequest) {
+  async editDeliveryPrice(@Body() req: EditDeliveryOrderRequest) {
     const data = await this.orderService.editDeliveryPrice(req);
 
     return new ActionResponse(data);

@@ -37,6 +37,7 @@ import { ShipmentResponse } from './dto/response/shipment.response';
 import { AddProductOrderRequest } from './dto/request/add-product-order.request';
 import { ShipmentProductHistoryResponse } from './dto/response/shipment-product-history.response';
 import { I18nResponse } from 'src/core/helpers/i18n.helper';
+import { OrderHistoryResponse } from './dto/response/order-history.response';
 
 @ApiTags('Shipment')
 @ApiHeader({
@@ -249,6 +250,18 @@ export class ShipmentController {
     const responses_translate = this._i18nResponse.entity(shipments_response);
 
     return new ActionResponse(responses_translate);
+  }
+  //getAllOrderHistories
+  @Get('get-all-order-histories/:order_id')
+  async getAllOrderHistories(@Param('order_id') order_id: string) {
+    const order_histories = await this.shipmentService.getAllOrderHistories(
+      order_id,
+    );
+    const order_histories_response = order_histories.map((order_history) => {
+      return new OrderHistoryResponse(order_history);
+    });
+   
+    return new ActionResponse(order_histories_response);
   }
 
   // admin convert order from scheduled to fast delivery [Order Controller]
