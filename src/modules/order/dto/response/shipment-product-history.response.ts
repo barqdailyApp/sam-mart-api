@@ -7,6 +7,7 @@ export class ShipmentProductHistoryResponse {
   shipment_product: any;
   main_category: any;
   sub_category: any;
+  created_at:Date;
 
   constructor(shipmentProductHistory: ShipmentProductHistory) {
     this.id = shipmentProductHistory.id;
@@ -59,5 +60,6 @@ export class ShipmentProductHistoryResponse {
       name_en :  shipmentProductHistory.shipment_product.main_measurement_unit.name_en,
       }
     };
+    this.created_at=shipmentProductHistory.created_at;
   }
 }

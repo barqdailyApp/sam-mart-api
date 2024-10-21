@@ -14,6 +14,7 @@ import { ReturnOrder } from './return-order/return-order.entity';
 import { PaymentMethod } from '../payment_method/payment_method.entity';
 import { Reason } from '../reason/reason.entity';
 import { PromoCode } from '../promo-code/promo-code.entity';
+import { OrderHistory } from './order-history.entity';
 
 @Entity()
 export class Order extends OwnedEntity {
@@ -36,8 +37,6 @@ export class Order extends OwnedEntity {
   @JoinColumn()
   address: Address;
 
-
-
   @ManyToOne(() => PromoCode, (promoCode) => promoCode.orders)
   @JoinColumn()
   promo_code: PromoCode;
@@ -53,7 +52,11 @@ export class Order extends OwnedEntity {
   @Column()
   section_id: string;
 
-  @OneToMany(() => ReturnOrder, (returnOrderRequest) => returnOrderRequest.order, { cascade: true })
+  @OneToMany(
+    () => ReturnOrder,
+    (returnOrderRequest) => returnOrderRequest.order,
+    { cascade: true },
+  )
   returnOrders: ReturnOrder[];
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
@@ -71,7 +74,7 @@ export class Order extends OwnedEntity {
   @Column({ default: false })
   is_paid: boolean;
 
-  @Column({ length: 10})
+  @Column({ length: 10 })
   number: string;
 
   @Column()
@@ -102,6 +105,9 @@ export class Order extends OwnedEntity {
   @Column({ nullable: true })
   slot_id: string;
 
-  @Column({nullable:true})
-  promo_code_discount:number
+  @Column({ nullable: true })
+  promo_code_discount: number;
+
+  @OneToMany(() => OrderHistory, (orderHistory) => orderHistory.order)
+  order_histories: OrderHistory[];
 }

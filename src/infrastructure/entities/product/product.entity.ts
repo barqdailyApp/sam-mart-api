@@ -89,6 +89,5 @@ export class Product extends AuditableEntity {
   )
   shipment_products: ShipmentProduct[];
 
-  @OneToMany(() => ShipmentProductHistory, (shipmentProductHistory) => shipmentProductHistory.product)
-  shipment_product_histories: ShipmentProductHistory[];
+
 }
