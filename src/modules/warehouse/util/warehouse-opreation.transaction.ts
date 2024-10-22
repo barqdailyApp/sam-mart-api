@@ -34,7 +34,7 @@ import { WarehouseOpreationProducts as WarehouseOpreationProduct } from 'src/inf
 @Injectable()
 export class WarehouseOperationTransaction extends BaseTransaction<
   WarehouseOperationRequest,
-  WarehouseOperations
+  any
 > {
   constructor(
     dataSource: DataSource,
@@ -47,23 +47,27 @@ export class WarehouseOperationTransaction extends BaseTransaction<
   protected async execute(
     request: WarehouseOperationRequest,
     context: EntityManager,
-  ): Promise<WarehouseOperations> {
+  ): Promise<any> {
     const warehouseOperation = plainToInstance(WarehouseOperations, {
       type: request.type,
       warehouse_id: request.warehouse_id,
       user_id: this.request.user.id,
     });
-    
+
     await context.save(warehouseOperation);
+
+    let products_quantity = [];
 
     await Promise.all(
       request.products.map(async (item) => {
         const find_product = await context.findOne(Product, {
-          where: [{
-            id: item.product_id,
-          },{barcode:item.barcode}],
-          
-        })
+          where: [
+            {
+              id: item.product_id,
+            },
+            { barcode: item.barcode },
+          ],
+        });
         const product = plainToInstance(WarehouseOpreationProduct, {
           ...item,
           product_id: find_product.id,
@@ -113,8 +117,18 @@ export class WarehouseOperationTransaction extends BaseTransaction<
 
         if (warehouseProducts) {
           warehouseProducts.quantity = warehouseProducts.quantity + quantity;
+          products_quantity.push({
+            name_ar: find_product.name_ar,
+            name_en: find_product.name_en,
+            quantity: warehouseProducts.quantity,
+          });
           await context.save(warehouseProducts);
         } else {
+          products_quantity.push({
+            name_ar: find_product.name_ar,
+            name_en: find_product.name_en,
+            quantity: quantity,
+          });
           await context.save(
             new WarehouseProducts({
               warehouse_id: request.warehouse_id,
@@ -127,6 +141,11 @@ export class WarehouseOperationTransaction extends BaseTransaction<
       }),
     );
 
-    return warehouseOperation;
+    const response_result = {
+      ...warehouseOperation,
+      products: products_quantity,
+    };
+
+    return response_result;
   }
 }
