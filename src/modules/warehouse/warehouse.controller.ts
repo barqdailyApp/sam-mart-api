@@ -32,7 +32,7 @@ import {
 } from './dto/requests/warehouse-transfer-product.request';
 import { Roles } from '../authentication/guards/roles.decorator';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
-import { query , Response} from 'express';
+import { query, Response } from 'express';
 import { WarehouseProductsQuery } from './dto/requests/warehouse-products-query';
 import { PageMetaDto } from 'src/core/helpers/pagination/page-meta.dto';
 import { PageDto } from 'src/core/helpers/pagination/page.dto';
@@ -99,9 +99,11 @@ export class WarehouseController {
   @Roles(Role.ADMIN)
   @Post('operation')
   async createWarehouseOperation(@Body() request: WarehouseOperationRequest) {
-    return new ActionResponse(
-      await this.warehouseService.CreateWAarehouseOperation(request),
+    const response = await this.warehouseService.CreateWAarehouseOperation(
+      request,
     );
+    const data = this._i18nResponse.entity(response);
+    return new ActionResponse(data);
   }
   @Roles(Role.ADMIN)
   @Patch('/:id')
@@ -163,7 +165,11 @@ export class WarehouseController {
     @Query('to_date') to_date: Date,
     @Query('warehouse_id') warehouse_id: string,
   ) {
-    const File = await this.warehouseService.warehouseOperationExport(start_date, to_date,warehouse_id);
+    const File = await this.warehouseService.warehouseOperationExport(
+      start_date,
+      to_date,
+      warehouse_id,
+    );
     res.download(`${File}`);
   }
 }
