@@ -1,4 +1,5 @@
 import { toUrl } from 'src/core/helpers/file.helper';
+import { ShipmentProductActionType } from 'src/infrastructure/data/enums/shipment-product-action-type.enum';
 import { ShipmentProductHistory } from 'src/infrastructure/entities/order/shipment-product-history.entity';
 
 export class ShipmentProductHistoryResponse {
@@ -7,8 +8,8 @@ export class ShipmentProductHistoryResponse {
   shipment_product: any;
   main_category: any;
   sub_category: any;
-  created_at:Date;
-
+  created_at: Date;
+  action_type: ShipmentProductActionType;
   constructor(shipmentProductHistory: ShipmentProductHistory) {
     this.id = shipmentProductHistory.id;
     this.modified_by = {
@@ -26,6 +27,7 @@ export class ShipmentProductHistoryResponse {
             (item) => item.is_logo === true,
           )[0].url,
         ),
+        barcode: shipmentProductHistory.shipment_product.product.barcode,
       },
 
       main_category: {
@@ -51,15 +53,18 @@ export class ShipmentProductHistoryResponse {
           shipmentProductHistory.shipment_product.product_category_price
             .product_sub_category.category_subCategory.subcategory.name_en,
       },
-      price : shipmentProductHistory.price,
-      quantity:shipmentProductHistory.quantity,
-      total_price : shipmentProductHistory.total_price,
-      main_measurement_unit:{
-      id:  shipmentProductHistory.shipment_product.main_measurement_unit.id,
-      name_ar :  shipmentProductHistory.shipment_product.main_measurement_unit.name_ar,
-      name_en :  shipmentProductHistory.shipment_product.main_measurement_unit.name_en,
-      }
+      price: shipmentProductHistory.price,
+      quantity: shipmentProductHistory.quantity,
+      total_price: shipmentProductHistory.total_price,
+      main_measurement_unit: {
+        id: shipmentProductHistory.shipment_product.main_measurement_unit.id,
+        name_ar:
+          shipmentProductHistory.shipment_product.main_measurement_unit.name_ar,
+        name_en:
+          shipmentProductHistory.shipment_product.main_measurement_unit.name_en,
+      },
     };
-    this.created_at=shipmentProductHistory.created_at;
+    this.created_at = shipmentProductHistory.created_at;
+    this.action_type = shipmentProductHistory.action_type;
   }
 }
