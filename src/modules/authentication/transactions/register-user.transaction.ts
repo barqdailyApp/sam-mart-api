@@ -34,6 +34,23 @@ export class RegisterUserTransaction extends BaseTransaction<
     context: EntityManager,
   ): Promise<User> {
     try {
+      if (req.phone) {
+        const userPhoneExist = await context.findOneBy(User, {
+          phone: req.phone,
+        });
+        if (userPhoneExist) {
+          throw new BadRequestException('message.user_phone_exists');
+        }
+      }
+      if (req.email) {
+        const userEmailExist = await context.findOneBy(User, {
+          email: req.email,
+        });
+        if (userEmailExist) {
+          throw new BadRequestException('message.user_email_exists');
+        }
+      }
+
       // upload avatar
       const user = new User(req);
       // upload avatar

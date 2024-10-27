@@ -43,12 +43,29 @@ export class RegisterDriverTransaction extends BaseTransaction<
     context: EntityManager,
   ): Promise<User> {
     try {
+      if (req.phone) {
+        const userPhoneExist = await context.findOneBy(User, {
+          phone: req.phone,
+        });
+        if (userPhoneExist) {
+          throw new BadRequestException('message.user_phone_exists');
+        }
+      }
+      if (req.email) {
+        const userEmailExist = await context.findOneBy(User, {
+          email: req.email,
+        });
+        if (userEmailExist) {
+          throw new BadRequestException('message.user_email_exists');
+        }
+      }
+
       //* This Data user needed
       const { username, email, phone, birth_date, avatarFile } = req;
 
       //* -------------------- Create User ----------------------------
       const createUser = context.create(User, {
-        username:phone,
+        username: phone,
         email,
         phone,
         birth_date,
@@ -67,7 +84,6 @@ export class RegisterDriverTransaction extends BaseTransaction<
 
       //* save avatar
       if (avatarFile) {
-       
         const pathAvatar = await this.storageManager.store(
           { buffer: avatarFile.buffer, originalname: avatarFile.originalname },
           { path: 'avatars' },
@@ -79,7 +95,7 @@ export class RegisterDriverTransaction extends BaseTransaction<
 
       //* save user
       const savedUser = await context.save(User, createUser);
-     
+
       //* This Data driver needed
       const {
         country_id,
@@ -124,7 +140,7 @@ export class RegisterDriverTransaction extends BaseTransaction<
         },
         { path: 'id_card_images' },
       );
- 
+
       //* set avatar path
       CreateDriver.id_card_image = pathIdCardImage;
 
@@ -136,13 +152,12 @@ export class RegisterDriverTransaction extends BaseTransaction<
         },
         { path: 'license_images' },
       );
-   
 
       //* set licenseImage path
       CreateDriver.license_image = pathLicenseImage;
       const savedDriver = await context.save(Driver, CreateDriver);
       await context.save(new Wallet({ user_id: savedUser.id }));
-     
+
       // return user
       return savedUser;
     } catch (error) {
