@@ -20,12 +20,10 @@ export class RegisterRequest {
   @IsOptional()
   @IsNotEmpty()
   @IsEmail()
-  @Unique('User')
   email?: string;
 
   @ApiProperty()
   @IsNotEmpty()
-  @Unique('User')
   phone: string;
 
   @ApiProperty({ type: 'file', required: false })
