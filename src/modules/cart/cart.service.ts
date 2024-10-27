@@ -180,7 +180,7 @@ if(warehouses_product!=null){
       where: [{ is_favorite: true, user_id: user.id }],
     });
     if (!address) {
-      throw new BadRequestException('user does not have a default address');
+      throw new BadRequestException('message.user_does_not_have_a_default_address');
     }
     const product_price = await this.productCategoryPrice.findOne({
       where: {
