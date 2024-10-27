@@ -16,7 +16,7 @@ import {
   FileFieldsInterceptor,
   FileInterceptor,
 } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 import { ActionResponse } from 'src/core/base/responses/action.response';
 import { Router } from 'src/core/base/router';
@@ -37,7 +37,11 @@ import { Roles } from './guards/roles.decorator';
 import { UpdateDriverStatusRequest } from './dto/requests/update-driver-status.request';
 import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
-
+@ApiHeader({
+  name: 'Accept-Language',
+  required: false,
+  description: 'Language header: en, ar',
+})
 @ApiTags(Router.Auth.ApiTag)
 @Controller(Router.Auth.Base)
 export class AuthenticationController {
