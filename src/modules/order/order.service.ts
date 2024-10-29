@@ -46,6 +46,9 @@ import { Product } from 'src/infrastructure/entities/product/product.entity';
 import { options } from 'joi';
 import { EditDeliveryOrderRequest } from './dto/request/edit-delivery-order.request';
 import { OrderHistory } from 'src/infrastructure/entities/order/order-history.entity';
+import { NotificationTypes } from 'src/infrastructure/data/enums/notification-types.enum';
+import { NotificationEntity } from 'src/infrastructure/entities/notification/notification.entity';
+import { NotificationService } from '../notification/notification.service';
 @Injectable()
 export class OrderService extends BaseUserService<Order> {
   constructor(
@@ -57,6 +60,7 @@ export class OrderService extends BaseUserService<Order> {
     @InjectRepository(ShipmentProduct)
     private shipmentProductRepository: Repository<ShipmentProduct>,
 
+    private readonly notificationService: NotificationService,
     @InjectRepository(ReturnOrder)
     private ReturnOrderRepository: Repository<ReturnOrder>,
     @InjectRepository(ReturnOrderProduct)
@@ -1057,6 +1061,30 @@ export class OrderService extends BaseUserService<Order> {
         warehouse: shipment.warehouse,
       },
     });
+
+    const driversWarehouse = await this.driverRepository.find( {
+      where: {
+        warehouse_id: shipment.warehouse_id,
+      },
+      relations: { user: true },
+    });
+
+    for (let index = 0; index < driversWarehouse.length; index++) {
+      if (driversWarehouse[index].user?.fcm_token != null)
+        await this.notificationService.create(
+          new NotificationEntity({
+            user_id: driversWarehouse[index].user_id,
+            url: shipment.id,
+            type: NotificationTypes.ORDERS,
+            title_ar: 'طلب جديد',
+            title_en: 'new order',
+            text_ar: 'هل تريد اخذ هذا الطلب ؟',
+            text_en: 'Do you want to take this order?',
+          }),
+        );
+    }
+
+
   }
 
   async editDeliveryPrice(request: EditDeliveryOrderRequest) {
