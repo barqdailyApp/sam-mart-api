@@ -20,7 +20,6 @@ export class SingleProductDashboardNewResponse {
   @Expose() product_measurements: any[];
 
   constructor(product: Product) {
-   
     const product_sub_categories = product.product_sub_categories;
     const product_measurements = product.product_measurements;
     const product_images = product.product_images;
@@ -39,7 +38,13 @@ export class SingleProductDashboardNewResponse {
       product_barcode: product.barcode,
       row_number: product.row_number,
       product_keywords: product.keywords,
-      subcategory: product.product_sub_categories[0].category_subCategory.subcategory,
+      subcategory:product.product_sub_categories[0]?.category_subCategory? {
+        id: product.product_sub_categories[0].category_subCategory.id,
+        name_ar: product.product_sub_categories[0].category_subCategory.subcategory.name_ar,
+        name_en: product.product_sub_categories[0].category_subCategory.subcategory.name_en,
+        logo: toUrl(product.product_sub_categories[0].category_subCategory.subcategory.logo),
+        category_subCategory_id: product.product_sub_categories[0].category_subCategory.id,
+      }:null,
       Warehouse_products: product.warehouses_products.map((item) => {
         return {
           warehouse_id: item.warehouse.id,
@@ -65,7 +70,6 @@ export class SingleProductDashboardNewResponse {
       }),
     };
     (this.product_sub_category = {
-    
       product_sub_category_id:
         product_sub_categories.length > 0
           ? product.product_sub_categories[0].id
