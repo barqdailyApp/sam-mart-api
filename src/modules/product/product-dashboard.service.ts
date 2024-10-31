@@ -969,6 +969,7 @@ export class ProductDashboardService {
         'product_sub_categories.category_subCategory',
         'product_category_subCategory',
       )
+      .leftJoinAndSelect('product_category_subCategory.subcategory', 'subcategory')
       .leftJoinAndSelect(
         'product_category_subCategory.section_category',
         'product_section_category',
