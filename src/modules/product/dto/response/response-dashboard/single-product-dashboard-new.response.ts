@@ -39,7 +39,7 @@ export class SingleProductDashboardNewResponse {
       product_barcode: product.barcode,
       row_number: product.row_number,
       product_keywords: product.keywords,
-      subcategory: product.product_sub_categories[0].category_subCategory.subcategory,
+      subcategory: product.product_sub_categories[0].category_subCategory,
       Warehouse_products: product.warehouses_products.map((item) => {
         return {
           warehouse_id: item.warehouse.id,
