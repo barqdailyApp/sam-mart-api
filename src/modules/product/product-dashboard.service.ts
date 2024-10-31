@@ -612,7 +612,7 @@ export class ProductDashboardService {
       case 'order_by':
         productsSort = { 'product_sub_categories.order_by': 'ASC' };
         break;
-        case 'brand':
+      case 'brand':
         productsSort = { 'product.order_by_brand': 'ASC' };
         break;
     }
@@ -1013,8 +1013,8 @@ export class ProductDashboardService {
     query
       .leftJoinAndSelect(
         'product_sub_category.category_subCategory',
-        'category_subCategory',
-      ).leftJoinAndSelect('category_subCategory.subcategory', 'subcategory')
+        'category_subCategory',)
+      .leftJoinAndSelect('category_subCategory.subcategory', 'subcategory')
       .leftJoin('category_subCategory.section_category', 'section_category');
 
     // Get single product
@@ -1634,7 +1634,8 @@ export class ProductDashboardService {
           if (!acc.find((item) => item.id == category?.id)) {
             acc.push({
               ...category,
-              section_category_id:      subCategory.category_subCategory.section_category.id,
+              section_category_id:
+                subCategory.category_subCategory.section_category.id,
               order: subCategory.category_subCategory.section_category.order_by,
             });
           }
@@ -1651,7 +1652,7 @@ export class ProductDashboardService {
   async getLargeImages() {
     const products = [];
     const data = fs.readFileSync('./json/large_files.csv', 'utf8');
-    
+
     const images = data.split('\n');
     console.log(images[1]);
     for (const image of images) {
@@ -1663,7 +1664,7 @@ export class ProductDashboardService {
         relations: { product: true },
         withDeleted: true,
       });
-      if(!productImage) continue;
+      if (!productImage) continue;
       products.push({
         url: toUrl(productImage?.url),
         size: data[1],
