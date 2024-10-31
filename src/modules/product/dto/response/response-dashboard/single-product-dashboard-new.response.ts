@@ -65,6 +65,7 @@ export class SingleProductDashboardNewResponse {
       }),
     };
     (this.product_sub_category = {
+      subcategory: product_sub_categories[0].category_subCategory.subcategory,
       product_sub_category_id:
         product_sub_categories.length > 0
           ? product.product_sub_categories[0].id
