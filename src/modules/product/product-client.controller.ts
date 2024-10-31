@@ -33,6 +33,7 @@ import {
   applyQueryFilters,
   applyQuerySort,
 } from 'src/core/helpers/service-related.helper';
+import { Subcategory } from 'src/infrastructure/entities/category/subcategory.entity';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -71,17 +72,19 @@ export class ProductClientController {
   @Get('all-products-subcategories-client')
   async allProductsSubcategoriesClient(@Query() productClientFilter: ProductClientQuery) {
     const category= await this.productClientService.getSubCategoryProductsForClient(productClientFilter);
- return category;
-    // const productsResponse = category.product_sub_categories.map((product) => {
-    //   const productResponse = new ProductsNewResponse(product.product);
-    //   return productResponse;
-    // });
+    let result= this._i18nResponse.entity(category);
+   result=  result.map(element => {
+const products= element.product_sub_categories.map(product_sub_category => {
+  
 
-    // const data = this._i18nResponse.entity(productsResponse);
-   
-
-    // return new ActionResponse(data);
-    
+    return new ProductsNewResponse(product_sub_category.product)
+  });
+  
+  
+  
+  return {subcategory:{name:element.subcategory.name,id:element.subcategory.id},products:products}
+})
+return new ActionResponse(result);
   }
 
   @Get('all-products-offers-for-client')

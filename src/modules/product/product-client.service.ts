@@ -291,38 +291,143 @@ export class ProductClientService {
       user_id,
     } = productClientQuery;
     const skip = (page - 1) * limit;
+    let warehouse: Warehouse;
+    if (latitude && longitude) {
+      warehouse = await this.warehouse_repo
+        .createQueryBuilder('warehouse')
+        .where('is_active = :is_active', { is_active: true })
+        .orderBy(
+          `ST_Distance_Sphere(
+             ST_SRID(point(${latitude}, ${longitude}), 4326),
+             warehouse.location
+         )`,
+        )
+        .getOne();
+    }
+    let productsSort = {};
 
-    const subCategoryProducts = await this.categorySubcategory_repo.find({
-      where: {
-        section_category_id: section_category_id,
-        is_active: true,
-        product_sub_categories: {
-          is_active: true,
-          product: {
-            product_measurements: { product_category_prices:true },
-          },
+    switch (sort) {
+      case 'lowest_price':
+        // Convert price to a numeric type before sorting
+        productsSort = { 'product_category_prices.price': 'ASC' };
+
+        break;
+      case 'highest_price':
+        productsSort = { 'product_category_prices.price': 'DESC' };
+
+        break;
+      case 'new':
+        productsSort = { 'product_sub_category.order_by': 'ASC' };
+        break;
+      case 'brand':
+        productsSort = { 'product.order_by_brand': 'ASC' };
+        break;
+      // handle other sort cases if needed
+    }
+
+    // const cartUser = await this.cart_repo.findOne({ where: { user_id } });
+
+    // const subCategoryProducts = await this.categorySubcategory_repo.find({
+    //   where: {
+    //     section_category_id: section_category_id,
+    //     is_active: true,
+    //     product_sub_categories: {
+    //       is_active: true,
+    //       product: {
+    //         product_measurements: { product_category_prices:true },
+    //       },
+    //     },
+    //   },
+    //   relations: {
+    //     subcategory: true,
+    //     product_sub_categories: {
+
+    //           product: {
+    //             product_images: true,
+    //             product_measurements: {
+    //               measurement_unit:true,
+    //               product_category_prices: { cart_products: true,product_offer: true ,},
+    //             },warehouses_products: true,
+    //           },
+    //         },
+
+    //   },
+    // });
+    let query = await this.categorySubcategory_repo
+      .createQueryBuilder('categorySubcategory')
+      .where('categorySubcategory.section_category_id = :section_category_id', {
+        section_category_id,
+      })
+      .andWhere('categorySubcategory.is_active = true')
+      .leftJoinAndSelect('categorySubcategory.subcategory', 'subcategory')
+      .leftJoinAndSelect(
+        'categorySubcategory.product_sub_categories',
+        'product_sub_categories',
+      )
+      .leftJoinAndSelect('product_sub_categories.product', 'product')
+      .andWhere('product.is_active = true')
+     
+      .leftJoinAndSelect('product.product_images', 'product_images')
+      .leftJoinAndSelect('product.product_measurements', 'product_measurements')
+      .leftJoinAndSelect('product_measurements.measurement_unit', 'measurement_unit')
+      .innerJoinAndSelect(
+        'product_measurements.product_category_prices',
+        'product_category_prices',
+      )
+      .innerJoinAndSelect(
+        'product_category_prices.product_sub_category',
+        'product_sub_category',
+      )
+
+      .leftJoinAndSelect(
+        'product_category_prices.product_offer',
+        'product_offer',
+        'product_offer.offer_quantity > 0 AND product_offer.start_date <= :current_date AND product_offer.end_date >= :current_date AND product_offer.is_active = :isActive',
+        {
+          current_date: new Date(),
+          isActive: true,
         },
-      },
-      relations: {
-        subcategory: true,
-        product_sub_categories: {
-         
-         
-              product: {
-                product_images: true,
-                product_measurements: {
-                  measurement_unit:true,
-                  product_category_prices: { cart_products: true,product_offer: true ,},
-                },warehouses_products: true,
-              },
-            },
-          
-      },
-    });
+      )
+      .leftJoinAndSelect('product.warehouses_products', 'warehouses_products');
 
-   
+    if (user_id) {
+      const cartUser = await this.cart_repo.findOne({ where: { user_id } });
+      if (!cartUser) {
+        throw new NotFoundException('message.user_not_found');
+      }
 
-    return subCategoryProducts;
+      query = query.leftJoinAndSelect(
+        'product_category_prices.cart_products',
+        'cart_products',
+        'cart_products.cart_id = :cart_id',
+        { cart_id: cartUser.id },
+      );
+      query = query.leftJoinAndSelect('cart_products.cart', 'cart');
+
+      query = query.leftJoinAndSelect(
+        'cart_products.product_category_price',
+        'cart_product_category_price',
+      );
+      query = query.leftJoinAndSelect(
+        'cart_product_category_price.product_offer',
+        'cart_product_offer',
+      );
+
+      query = query.leftJoinAndSelect(
+        'product.products_favorite',
+        'products_favorite',
+        'products_favorite.user_id = :user_id',
+        { user_id },
+      );
+    }
+    // Modify condition if warehouse is defined
+    if (warehouse) {
+      query = query.andWhere('warehousesProduct.warehouse_id = :warehouseId', {
+        warehouseId: warehouse.id,
+      });
+    }
+    const productSubCategories = query .orderBy(productsSort).getMany();
+    return productSubCategories;
   }
 
   //* Get All Products Offers  For Client
