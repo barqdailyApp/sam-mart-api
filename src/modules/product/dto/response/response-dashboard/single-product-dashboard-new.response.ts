@@ -40,7 +40,15 @@ export class SingleProductDashboardNewResponse {
       row_number: product.row_number,
       product_keywords: product.keywords,
       subcategory: product.product_sub_categories[0].category_subCategory.subcategory,
-      Warehouse_products: product.warehouses_products,
+      Warehouse_products: product.warehouses_products.map((item) => {
+        return {
+          warehouse_id: item.warehouse.id,
+          warehouse_name_ar: item.warehouse.name_ar,
+          warehouse_name_en: item.warehouse.name_en,
+
+          quantity: item.quantity,
+        };
+      }),
       quantity_available: product.warehouses_products.reduce(
         (acc, cur) => acc + cur.quantity,
         0,

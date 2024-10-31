@@ -976,6 +976,7 @@ export class ProductDashboardService {
 
       .leftJoinAndSelect('product_section_category.section', 'product_section')
       .leftJoinAndSelect('product.warehouses_products', 'warehousesProduct')
+      .leftJoinAndSelect('warehousesProduct.warehouse', 'warehouse')
 
       .leftJoinAndSelect('product.product_measurements', 'product_measurements')
 
