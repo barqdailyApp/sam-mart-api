@@ -1015,7 +1015,7 @@ export class ProductDashboardService {
       .leftJoinAndSelect(
         'product_sub_category.category_subCategory',
         'category_subCategory',)
-      .leftJoinAndSelect('category_subCategory.subcategory', 'subcategory')
+      
       .leftJoin('category_subCategory.section_category', 'section_category');
 
     // Get single product
