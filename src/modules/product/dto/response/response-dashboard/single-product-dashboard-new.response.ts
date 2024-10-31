@@ -39,7 +39,7 @@ export class SingleProductDashboardNewResponse {
       row_number: product.row_number,
       product_keywords: product.keywords,
       subcategory:product.product_sub_categories[0]?.category_subCategory? {
-        id: product.product_sub_categories[0].category_subCategory.id,
+        id: product.product_sub_categories[0].category_subCategory.subcategory.id,
         name_ar: product.product_sub_categories[0].category_subCategory.subcategory.name_ar,
         name_en: product.product_sub_categories[0].category_subCategory.subcategory.name_en,
         logo: toUrl(product.product_sub_categories[0].category_subCategory.subcategory.logo),
