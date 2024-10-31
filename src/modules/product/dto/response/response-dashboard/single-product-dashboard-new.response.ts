@@ -9,6 +9,8 @@ import { ProductMeasurementResponse } from '../product-measurement.response';
 import { ProductImagesResponse } from '../product-images.response';
 import { Product } from 'src/infrastructure/entities/product/product.entity';
 import { Console } from 'console';
+import { Warehouse } from 'src/infrastructure/entities/warehouse/warehouse.entity';
+import { Subcategory } from 'src/infrastructure/entities/category/subcategory.entity';
 
 @Exclude()
 export class SingleProductDashboardNewResponse {
@@ -37,6 +39,8 @@ export class SingleProductDashboardNewResponse {
       product_barcode: product.barcode,
       row_number: product.row_number,
       product_keywords: product.keywords,
+      Subcategory: product.product_sub_categories[0].category_subCategory.subcategory,
+      Warehouse_products: product.warehouses_products,
       quantity_available: product.warehouses_products.reduce(
         (acc, cur) => acc + cur.quantity,
         0,

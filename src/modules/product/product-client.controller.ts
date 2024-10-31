@@ -68,6 +68,21 @@ export class ProductClientController {
 
     return new ActionResponse(pageDto);
   }
+  @Get('all-products-subcategories-client')
+  async allProductsSubcategoriesClient(@Query() productClientFilter: ProductClientQuery) {
+    const category= await this.productClientService.getSubCategoryProductsForClient(productClientFilter);
+ return category;
+    // const productsResponse = category.product_sub_categories.map((product) => {
+    //   const productResponse = new ProductsNewResponse(product.product);
+    //   return productResponse;
+    // });
+
+    // const data = this._i18nResponse.entity(productsResponse);
+   
+
+    // return new ActionResponse(data);
+    
+  }
 
   @Get('all-products-offers-for-client')
   async allProductsOffersForClient(

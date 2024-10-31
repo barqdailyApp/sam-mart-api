@@ -7,7 +7,7 @@ import { Warehouse } from 'src/infrastructure/entities/warehouse/warehouse.entit
 
 import { ProductClientQuery } from './dto/filter/products-client.query';
 import { SingleProductClientQuery } from './dto/filter/single-product-client.query';
-import { Brackets, Repository } from 'typeorm';
+import { Brackets, IsNull, Not, Repository } from 'typeorm';
 import { SubcategoryService } from '../subcategory/subcategory.service';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
@@ -83,7 +83,7 @@ export class ProductClientService {
         break;
       case 'new':
         productsSort = { 'product_sub_category.order_by': 'ASC' };
-      break;
+        break;
       case 'brand':
         productsSort = { 'product.order_by_brand': 'ASC' };
         break;
@@ -271,6 +271,58 @@ export class ProductClientService {
 
     const [products, total] = await query.getManyAndCount();
     return { products, total };
+  }
+
+  //* Get All Products For Client grouped by sub category
+
+  async getSubCategoryProductsForClient(
+    productClientQuery: ProductClientQuery,
+  ) {
+    const {
+      page,
+      limit,
+      longitude,
+      latitude,
+      section_id,
+      category_sub_category_id,
+      section_category_id,
+      product_name,
+      sort,
+      user_id,
+    } = productClientQuery;
+    const skip = (page - 1) * limit;
+
+    const subCategoryProducts = await this.categorySubcategory_repo.find({
+      where: {
+        section_category_id: section_category_id,
+        is_active: true,
+        product_sub_categories: {
+          is_active: true,
+          product: {
+            product_measurements: { product_category_prices:true },
+          },
+        },
+      },
+      relations: {
+        subcategory: true,
+        product_sub_categories: {
+         
+         
+              product: {
+                product_images: true,
+                product_measurements: {
+                  measurement_unit:true,
+                  product_category_prices: { cart_products: true,product_offer: true ,},
+                },warehouses_products: true,
+              },
+            },
+          
+      },
+    });
+
+   
+
+    return subCategoryProducts;
   }
 
   //* Get All Products Offers  For Client
@@ -848,7 +900,11 @@ export class ProductClientService {
     return { products_favorite, total };
   }
 
-  async getBrandCategories(brand_id: string, section_id: string,user_id?:string) {
+  async getBrandCategories(
+    brand_id: string,
+    section_id: string,
+    user_id?: string,
+  ) {
     const products = await this.getAllProductsForClient(
       new ProductClientQuery({
         brand_id,
@@ -856,7 +912,7 @@ export class ProductClientService {
         page: 1,
         section_id,
         sort: 'brand',
-        user_id
+        user_id,
       }),
     );
 

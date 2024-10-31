@@ -41,13 +41,13 @@ export class ProductsNewResponse {
     const product_category_price =
       product_measurement.product_category_prices[0];
     const measurement_unit = product_measurement.measurement_unit;
-    const cart_products = product_category_price.cart_products;
-    const product_offer = product_category_price.product_offer;
+    const cart_products = product_category_price?.cart_products;
+    const product_offer = product_category_price?.product_offer;
 
     // Manually setting the values based on the transformation logic
     this.section_id =
-      product_category_price.product_sub_category.category_subCategory.section_category.section_id;
-    this.product_category_price_id = product_category_price.id;
+      product_category_price?.product_sub_category?.category_subCategory?.section_category.section_id;
+    this.product_category_price_id = product_category_price?.id;
     this.offer_id = product_offer ? product_offer.id : null;
     this.offer_price = product_offer ? product_offer.price : null;
     this.offer_quantity = product_offer ? product_offer.offer_quantity : null;
