@@ -6,4 +6,9 @@ export enum TransactionTypes {
     ADMIN_RESET = 'ADMIN_RESET',
     OTHER = 'OTHER',
     ORDER_RETURN = 'ORDER_RETURN',
+    PURCHASE='PURCHASE',
+    BOX='BOX',
+    DELIVERY_PRECNTAGE='DELIVERY_PRECNTAGE',
+
+
 }

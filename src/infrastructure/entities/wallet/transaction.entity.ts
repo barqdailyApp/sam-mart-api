@@ -35,6 +35,9 @@ export class Transaction extends AuditableEntity {
 
   @Column()
   user_id: string;
+
+  @Column({nullable:true})
+  note: string;
   
   @Column({ length: 8, unique: true })
   number: string;
