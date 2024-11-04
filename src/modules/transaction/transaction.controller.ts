@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { TransactionService } from './transaction.service';
 import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
@@ -10,6 +10,8 @@ import { RolesGuard } from '../authentication/guards/roles.guard';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { MakeTransactionRequest } from './dto/requests/make-transaction-request';
 import { Roles } from '../authentication/guards/roles.decorator';
+import { Response } from 'express';
+import { TransactionTypes } from 'src/infrastructure/data/enums/transaction-types';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -51,6 +53,20 @@ export class TransactionController {
     return new ActionResponse(await this.transactionService.makeTransaction(request));
     
   }
+  @Roles(Role.ADMIN)
+@Get('driver-transactions')
+  async getDriverTransactions(
+    @Res() res: Response,
+    @Query('start_date') start_date: Date,
+    @Query('to_date') to_date: Date,
+    @Query('transaction_type') transaction_type: TransactionTypes,
+  ) {
+    const File = await this.transactionService.getDriverTransactions(
+      start_date,
+      to_date,
+      transaction_type,
+    );
+    res.download(`${File}`);}
 
 
 }
