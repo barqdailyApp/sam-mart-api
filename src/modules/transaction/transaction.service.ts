@@ -76,6 +76,7 @@ export class TransactionService extends BaseUserService<Transaction> {
       .leftJoinAndSelect('transaction.order', 'order')
       .leftJoinAndSelect('transaction.user', 'user')
       .where('user.roles = :role', { role: 'DRIVER' })
+      .orderBy('transaction.created_at', 'DESC')
       .getMany();
 
     if (transactions.length < 1)
@@ -84,8 +85,8 @@ export class TransactionService extends BaseUserService<Transaction> {
       return {
         id: transaction.id,
         order_number: transaction.order?.number,
-        driver_name: transaction.order?.user?.name,
-        driver_number: transaction.order?.user?.phone,
+        driver_name: transaction.user?.name,
+        driver_number: transaction.user?.phone,
         transaction_type: transaction.type,
         amount: transaction.amount,
         created_at: transaction.created_at,
