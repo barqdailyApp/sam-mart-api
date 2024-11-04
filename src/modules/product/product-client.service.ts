@@ -378,7 +378,7 @@ export class ProductClientService {
         'product_category_prices.product_sub_category',
         'product_sub_category',
       )
-
+      .innerJoinAndSelect('product.warehouses_products', 'warehousesProduct')
       .leftJoinAndSelect(
         'product_category_prices.product_offer',
         'product_offer',
@@ -388,7 +388,7 @@ export class ProductClientService {
           isActive: true,
         },
       )
-      .leftJoinAndSelect('product.warehouses_products', 'warehouses_products');
+     
 
     if (user_id) {
       const cartUser = await this.cart_repo.findOne({ where: { user_id } });
