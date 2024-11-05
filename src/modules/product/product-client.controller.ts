@@ -72,19 +72,20 @@ export class ProductClientController {
   @Get('all-products-subcategories-client')
   async allProductsSubcategoriesClient(@Query() productClientFilter: ProductClientQuery) {
     const category= await this.productClientService.getSubCategoryProductsForClient(productClientFilter);
-    let result= this._i18nResponse.entity(category);
+    let result= category as any
    result=  result.map(element => {
-const products= this._i18nResponse.entity( element.product_sub_categories.map(product_sub_category => {
+const products=  element.product_sub_categories.map(product_sub_category => {
   
 
     return new ProductsNewResponse(product_sub_category.product)
-  }));
+  });
   
   
   
   return {subcategory:{name:element.subcategory.name,id:element.subcategory.id},products:products}
 })
-return new ActionResponse(result);
+
+return new ActionResponse(this._i18nResponse.entity(result));
   }
 
   @Get('all-products-offers-for-client')
