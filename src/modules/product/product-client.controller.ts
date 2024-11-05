@@ -82,7 +82,7 @@ const products=  element.product_sub_categories.map(product_sub_category => {
   
   
   
-  return {subcategory:{name:element.subcategory.name,id:element.subcategory.id},products:products}
+  return {subcategory:{name_ar:element.subcategory.name_ar,name_en:element.subcategory.name_en,id:element.subcategory.id},products:products}
 })
 
 return new ActionResponse(this._i18nResponse.entity(result));
