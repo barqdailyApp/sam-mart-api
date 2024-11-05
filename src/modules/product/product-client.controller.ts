@@ -74,11 +74,11 @@ export class ProductClientController {
     const category= await this.productClientService.getSubCategoryProductsForClient(productClientFilter);
     let result= this._i18nResponse.entity(category);
    result=  result.map(element => {
-const products= element.product_sub_categories.map(product_sub_category => {
+const products= this._i18nResponse.entity( element.product_sub_categories.map(product_sub_category => {
   
 
     return new ProductsNewResponse(product_sub_category.product)
-  });
+  }));
   
   
   
