@@ -2,9 +2,10 @@ import { BaseEntity } from "src/infrastructure/base/base.entity";
 import { Column, Entity, JoinColumn, ManyToMany, ManyToOne } from "typeorm";
 import { WarehouseOperations } from "./warehouse-opreations.entity";
 import { Product } from "../product/product.entity";
+import { AuditableEntity } from "src/infrastructure/base/auditable.entity";
 
 @Entity()
-export class WarehouseOpreationProducts extends BaseEntity {
+export class WarehouseOpreationProducts extends AuditableEntity {
     @ManyToOne(() => Product, (product) => product.warehouse_operations_products, {
         onDelete: 'CASCADE',
     })
