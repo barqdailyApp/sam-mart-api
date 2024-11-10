@@ -712,7 +712,7 @@ export class ShipmentService extends BaseService<Shipment> {
     await this.warehouseOperationTransaction.run({
       products: mappedImportedProducts,
       warehouse_id: shipment.warehouse_id,
-      type: operationType.IMPORT,
+      type: operationType.CANCEL_ORDER,
     });
 
     await this.orderGateway.notifyOrderStatusChange({
