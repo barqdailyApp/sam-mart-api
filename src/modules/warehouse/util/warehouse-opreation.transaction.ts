@@ -91,7 +91,7 @@ export class WarehouseOperationTransaction extends BaseTransaction<
             ? product.quantity
             : passed_measurement.conversion_factor * product.quantity;
         quantity =
-          operationType.IMPORT == request.type ? quantity : quantity * -1;
+          (operationType.IMPORT ||operationType.CANCEL_ORDER) == request.type ? quantity : quantity * -1;
 
         product.quantity = quantity;
 
