@@ -185,7 +185,7 @@ export class WarehouseService extends BaseService<Warehouse> {
         
     operation:{
       created_at: Between(start_date, end_date),
-      type:Not(operationType.SELL),
+      type:In([operationType.IMPORT,operationType.EXPORT]),
       warehouse_id:warehouse_id
     }
        
