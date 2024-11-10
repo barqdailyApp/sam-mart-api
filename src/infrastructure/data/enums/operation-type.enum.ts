@@ -1,5 +1,6 @@
 export enum operationType {
    IMPORT='IMPORT',
    EXPORT='EXPORT',
-   SELL='SELL'
+   SELL='SELL',
+   CANCEL_ORDER='CANCEL_ORDER',
   }
