@@ -568,7 +568,7 @@ export class OrderService extends BaseUserService<Order> {
     }
     let query = this.orderRepository
       .createQueryBuilder('order')
-      // .withDeleted()
+      .withDeleted()
       .leftJoinAndSelect('order.user', 'user')
       .leftJoinAndSelect('order.section', 'section_order')
       .leftJoinAndSelect('order.warehouse', 'warehouse_order')
