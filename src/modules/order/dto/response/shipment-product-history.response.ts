@@ -17,51 +17,51 @@ export class ShipmentProductHistoryResponse {
       name: shipmentProductHistory.modified_by.name,
     };
     this.shipment_product = {
-      id: shipmentProductHistory.shipment_product.id,
+      id: shipmentProductHistory.product_category_price.product_sub_category.id,
       product: {
-        id: shipmentProductHistory.shipment_product.product.id,
-        name_ar: shipmentProductHistory.shipment_product.product.name_ar,
-        name_en: shipmentProductHistory.shipment_product.product.name_en,
+        id: shipmentProductHistory.product_category_price.product_sub_category.product.id,
+        name_ar: shipmentProductHistory.product_category_price.product_sub_category.product.name_ar,
+        name_en:  shipmentProductHistory.product_category_price.product_sub_category.product.name_en,
         logo: toUrl(
-          shipmentProductHistory.shipment_product.product.product_images.filter(
+          shipmentProductHistory.product_category_price.product_sub_category.product.product_images.filter(
             (item) => item.is_logo === true,
           )[0].url,
         ),
-        barcode: shipmentProductHistory.shipment_product.product.barcode,
+        barcode: shipmentProductHistory.product_category_price.product_sub_category.product.barcode,
       },
 
       main_category: {
-        id: shipmentProductHistory.shipment_product.product_category_price
+        id: shipmentProductHistory.product_category_price
           .product_sub_category.category_subCategory.section_category.category
           .id,
         name_ar:
-          shipmentProductHistory.shipment_product.product_category_price
+          shipmentProductHistory.product_category_price
             .product_sub_category.category_subCategory.section_category.category
             .name_ar,
         name_en:
-          shipmentProductHistory.shipment_product.product_category_price
+          shipmentProductHistory.product_category_price
             .product_sub_category.category_subCategory.section_category.category
             .name_en,
       },
       sub_category: {
-        id: shipmentProductHistory.shipment_product.product_category_price
+        id: shipmentProductHistory.product_category_price
           .product_sub_category.category_subCategory.subcategory.id,
         name_ar:
-          shipmentProductHistory.shipment_product.product_category_price
+          shipmentProductHistory.product_category_price
             .product_sub_category.category_subCategory.subcategory.name_ar,
         name_en:
-          shipmentProductHistory.shipment_product.product_category_price
+          shipmentProductHistory.product_category_price
             .product_sub_category.category_subCategory.subcategory.name_en,
       },
       price: shipmentProductHistory.price,
       quantity: shipmentProductHistory.quantity,
       total_price: shipmentProductHistory.total_price,
       main_measurement_unit: {
-        id: shipmentProductHistory.shipment_product.main_measurement_unit.id,
+        id: shipmentProductHistory.product_category_price.product_measurement.measurement_unit.id,
         name_ar:
-          shipmentProductHistory.shipment_product.main_measurement_unit.name_ar,
+        shipmentProductHistory.product_category_price.product_measurement.measurement_unit.name_ar,
         name_en:
-          shipmentProductHistory.shipment_product.main_measurement_unit.name_en,
+        shipmentProductHistory.product_category_price.product_measurement.measurement_unit.name_en,
       },
     };
     this.created_at = shipmentProductHistory.created_at;

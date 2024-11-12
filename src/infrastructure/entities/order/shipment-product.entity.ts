@@ -83,8 +83,7 @@ export class ShipmentProduct extends AuditableEntity {
   @Column({ default: false })
   is_checked: boolean;
 
-  @OneToMany(() => ShipmentProductHistory, (shipmentProductHistory) => shipmentProductHistory.shipment_product)
-  shipment_product_histories: ShipmentProductHistory[];
+ 
 
 
 

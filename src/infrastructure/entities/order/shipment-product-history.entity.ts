@@ -20,12 +20,12 @@ import { ShipmentProductActionType } from 'src/infrastructure/data/enums/shipmen
 
 @Entity()
 export class ShipmentProductHistory extends AuditableEntity {
-  @ManyToOne(() => ShipmentProduct)
-  @JoinColumn({ name: 'shipment_product_id' })
-  shipment_product: ShipmentProduct;
+  @ManyToOne(() => ProductCategoryPrice)
+  @JoinColumn({ name: 'product_category_price_id' })
+  product_category_price: ProductCategoryPrice;
 
   @Column()
-  shipment_product_id: string;
+  product_category_price_id: string;
 
   @ManyToOne(() => Shipment)
   @JoinColumn({ name: 'shipment_id' })

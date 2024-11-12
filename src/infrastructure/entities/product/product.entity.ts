@@ -88,6 +88,6 @@ export class Product extends AuditableEntity {
     shipmentProduct => shipmentProduct.product
   )
   shipment_products: ShipmentProduct[];
-
+ 
 
 }

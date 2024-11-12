@@ -1109,7 +1109,7 @@ export class ShipmentService extends BaseService<Shipment> {
         conversion_factor: shipmentProduct.conversion_factor,
         is_offer: shipmentProduct.is_offer,
         quantity: shipmentProduct.quantity,
-        shipment_product_id: shipmentProduct.id,
+        product_category_price_id: shipmentProduct.product_category_price_id,
         price: shipmentProduct.price,
         total_price: Number(shipmentProduct.price * shipmentProduct.quantity),
       });
@@ -1170,7 +1170,7 @@ export class ShipmentService extends BaseService<Shipment> {
         conversion_factor: shipmentProduct.conversion_factor,
         is_offer: shipmentProduct.is_offer,
         quantity: shipmentProduct.quantity, // Log the product quantity being removed.
-        shipment_product_id: shipmentProduct.id, // Reference to the original ShipmentProduct.
+        product_category_price_id: shipmentProduct.product_category_price_id, // Reference to the original ShipmentProduct.
         price: shipmentProduct.price, // Store the product's price.
         total_price: Number(shipmentProduct.price * shipmentProduct.quantity), // Calculate total price of the product being removed.
       });
@@ -1184,7 +1184,7 @@ export class ShipmentService extends BaseService<Shipment> {
     await this.warehouseProductsRepository.save(warehouse_product);
 
     // Remove the product from the shipment.
-    await this.shipmentProductRepository.softDelete(shipmentProduct.id);
+    await this.shipmentProductRepository.delete(shipmentProduct.id);
 
     // Adjust the total order price by subtracting the removed product's total cost.
     shipmentProduct.shipment.order.total_price =
@@ -1208,21 +1208,30 @@ export class ShipmentService extends BaseService<Shipment> {
       withDeleted: true,
       relations: {
         modified_by: true,
-
-        shipment_product: {
-          main_measurement_unit: true,
-          product: {
-            product_images: true,
-          },
-          product_category_price: {
-            product_sub_category: {
-              category_subCategory: {
-                section_category: { category: true },
-                subcategory: true,
-              },
-            },
-          },
-        },
+product_category_price:{
+  product_measurement: {measurement_unit:true},  
+  product_sub_category: {
+    product:{product_images:true},
+    category_subCategory: {
+      section_category: { category: true },
+      subcategory: true,
+    },
+  },
+}
+        // shipment_product: {
+        //   main_measurement_unit: true,
+        //   product: {
+        //     product_images: true,
+        //   },
+        //   product_category_price: {
+        //     product_sub_category: {
+        //       category_subCategory: {
+        //         section_category: { category: true },
+        //         subcategory: true,
+        //       },
+        //     },
+        //   },
+        // },
       },
       order: { created_at: 'DESC' },
     });

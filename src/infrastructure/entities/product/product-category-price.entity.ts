@@ -76,5 +76,6 @@ export class ProductCategoryPrice extends AuditableEntity {
   )
   shipment_products: ShipmentProduct[];
 
-
+  @OneToMany(() => ShipmentProductHistory, (shipmentProductHistory) => shipmentProductHistory.product_category_price)
+  shipment_product_histories: ShipmentProductHistory[];
 }
