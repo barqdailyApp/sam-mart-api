@@ -366,6 +366,8 @@ export class ProductClientService {
       )
       .leftJoinAndSelect('product_sub_categories.product', 'product')
       .andWhere('product.is_active = true')
+      .andWhere('product_sub_categories.is_active = true')
+      
      
       .leftJoinAndSelect('product.product_images', 'product_images')
       .leftJoinAndSelect('product.product_measurements', 'product_measurements')
@@ -426,7 +428,7 @@ export class ProductClientService {
         warehouseId: warehouse.id,
       });
     }
-    const productSubCategories = query .orderBy(productsSort).getMany();
+    const productSubCategories = query.orderBy('categorySubcategory.order_by') .orderBy(productsSort).getMany();
     return productSubCategories;
   }
 
