@@ -428,7 +428,7 @@ export class ProductClientService {
         warehouseId: warehouse.id,
       });
     }
-    const productSubCategories = query.orderBy('product_sub_category.order_by', 'ASC') .addOrderBy(productsSort as unknown as string).getMany();
+    const productSubCategories = query.orderBy('categorySubcategory.order_by', 'ASC') .addOrderBy(productsSort as unknown as string).getMany();
     return productSubCategories;
   }
 
