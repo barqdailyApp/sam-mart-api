@@ -304,28 +304,30 @@ export class ProductClientService {
         )
         .getOne();
     }
-    let productsSort = '';
-
+    let productsSortField = '';
+    let productsSortOrder = 'ASC';
+    
     switch (sort) {
       case 'lowest_price':
-        // Sort by price in ascending order
-        productsSort = 'product_category_prices.price ASC';
+        productsSortField = 'product_category_prices.price';
+        productsSortOrder = 'ASC';
         break;
       case 'highest_price':
-        // Sort by price in descending order
-        productsSort = 'product_category_prices.price DESC';
+        productsSortField = 'product_category_prices.price';
+        productsSortOrder = 'DESC';
         break;
       case 'new':
-        // Sort by sub-category order in ascending order
-        productsSort = 'product_sub_category.order_by ASC';
+        productsSortField = 'product_sub_category.order_by';
+        productsSortOrder = 'ASC';
         break;
       case 'brand':
-        // Sort by brand order in ascending order
-        productsSort = 'product.order_by_brand ASC';
+        productsSortField = 'product.order_by_brand';
+        productsSortOrder = 'ASC';
         break;
       // Add more cases as needed
     }
-    // const cartUser = await this.cart_repo.findOne({ where: { user_id } });
+    
+
 
     // const subCategoryProducts = await this.categorySubcategory_repo.find({
     //   where: {
@@ -428,7 +430,7 @@ export class ProductClientService {
         warehouseId: warehouse.id,
       });
     }
-    const productSubCategories = query.orderBy('categorySubcategory.order_by', 'ASC') .addOrderBy(productsSort ).getMany();
+    const productSubCategories = query.orderBy('categorySubcategory.order_by', 'ASC') .addOrderBy(productsSortField, productsSortOrder as unknown as 'ASC'||'DESC' ).getMany();
     return productSubCategories;
   }
 
