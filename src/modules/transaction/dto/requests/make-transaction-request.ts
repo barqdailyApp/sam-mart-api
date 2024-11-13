@@ -18,6 +18,11 @@ export class MakeTransactionRequest {
   @ApiProperty()
   @IsString()
   user_id: string;
+  @ApiProperty({required:false})
+  @IsOptional()
+  @IsString()
+  note: string;
+
 
   constructor(partial?: Partial<MakeTransactionRequest>) {
     Object.assign(this, partial);
