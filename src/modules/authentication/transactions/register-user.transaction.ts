@@ -13,6 +13,8 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { Cart } from 'src/infrastructure/entities/cart/cart.entity';
 import { Wallet } from 'src/infrastructure/entities/wallet/wallet.entity';
+import { Address } from 'src/infrastructure/entities/user/address.entity';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class RegisterUserTransaction extends BaseTransaction<
@@ -89,6 +91,13 @@ export class RegisterUserTransaction extends BaseTransaction<
 
       await context.save(new Cart({ user_id: savedUser.id }));
       await context.save(new Wallet({ user_id: savedUser.id }));
+      if (req.address) {
+        const address = context.create(
+          Address,
+          plainToInstance(Address, req.address),
+        );
+        await context.save(address);
+      }
       // return user
       return savedUser;
     } catch (error) {
