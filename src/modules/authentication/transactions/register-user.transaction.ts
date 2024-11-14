@@ -94,7 +94,7 @@ export class RegisterUserTransaction extends BaseTransaction<
       if (req.address) {
         const address = context.create(
           Address,
-          plainToInstance(Address, req.address),
+          plainToInstance(Address, { ...req.address, user_id: savedUser.id }),
         );
         await context.save(address);
       }
