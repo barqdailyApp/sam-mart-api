@@ -92,12 +92,11 @@ export class RegisterUserTransaction extends BaseTransaction<
       await context.save(new Cart({ user_id: savedUser.id }));
       await context.save(new Wallet({ user_id: savedUser.id }));
       if (req.address) {
-        const address = context.create(
-          Address,
-          plainToInstance(Address, { ...req.address, user_id: savedUser.id }),
-        );
-        await context.save(address);
-      }
+        const addressRequest=JSON.parse(req.address) as unknown as CreateAddressRequest[]
+        for (let index = 0; index < addressRequest.length; index++) {
+          await context.save(plainToInstance(Address,{...addressRequest[index],user_id:savedUser.id}));     
+          
+        }
       // return user
       return savedUser;
     } catch (error) {

@@ -37,12 +37,13 @@ export class RegisterRequest {
   // @IsNotEmpty()
   // @IsEnum(Role)
   // role: Role;
-
-  @ApiPropertyOptional({isArray:true,})
+  @ApiPropertyOptional({
+    required: false,
+    type: '[String]',
+    example: [{ name: "string", phone: "string", latitude: "123", longitude: "123",address:"string",is_favorite:false, }],
+  })
   @IsOptional()
-  @ValidateNested({ each: true })
-  @Type(() => CreateAddressRequest)
-  address:CreateAddressRequest[]
+  address:string
   
   constructor(data:Partial<RegisterRequest>){
     Object.assign(this,data)
