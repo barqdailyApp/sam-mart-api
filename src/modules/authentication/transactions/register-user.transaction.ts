@@ -15,6 +15,7 @@ import { Cart } from 'src/infrastructure/entities/cart/cart.entity';
 import { Wallet } from 'src/infrastructure/entities/wallet/wallet.entity';
 import { Address } from 'src/infrastructure/entities/user/address.entity';
 import { plainToInstance } from 'class-transformer';
+import { CreateAddressRequest } from 'src/modules/address/dto/requests/create-address.request';
 
 @Injectable()
 export class RegisterUserTransaction extends BaseTransaction<
@@ -96,7 +97,7 @@ export class RegisterUserTransaction extends BaseTransaction<
         for (let index = 0; index < addressRequest.length; index++) {
           await context.save(plainToInstance(Address,{...addressRequest[index],user_id:savedUser.id}));     
           
-        }
+        }}
       // return user
       return savedUser;
     } catch (error) {
