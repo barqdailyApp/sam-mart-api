@@ -293,6 +293,7 @@ export class OrderController {
     return new ActionResponse(data);
   }
 
+  @Roles(Role.ADMIN)
   @Post('add-note')
   async addNote(@Body() req: AddNoteRequest) {
     return new ActionResponse(await this.orderService.addNote(req));

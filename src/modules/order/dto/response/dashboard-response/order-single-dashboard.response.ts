@@ -10,7 +10,7 @@ export class OrderSingleDashboardResponse {
   @Expose() slot_id: string;
   @Expose() section: any;
   @Expose() order_created_at: Date;
-
+  @Expose() self_note: string;
   @Expose() order_number: string;
   @Expose() transaction_number: string;
 
@@ -49,6 +49,7 @@ export class OrderSingleDashboardResponse {
       name_ar: order.section.name_ar,
       name_en: order.section.name_en,
     };
+    this.self_note = order.self_note;
     this.order_created_at = order.created_at;
     this.order_number = order.number;
     this.transaction_number = order.transaction_number;
@@ -82,7 +83,7 @@ export class OrderSingleDashboardResponse {
       address: order.address.address,
       latitude: order.address.latitude,
       longitude: order.address.longitude,
-      phone:order.address?.phone
+      phone: order.address?.phone,
     };
     this.shipments = {
       id: order.shipments[0].id,
