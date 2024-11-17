@@ -49,6 +49,7 @@ import { OrderHistory } from 'src/infrastructure/entities/order/order-history.en
 import { NotificationTypes } from 'src/infrastructure/data/enums/notification-types.enum';
 import { NotificationEntity } from 'src/infrastructure/entities/notification/notification.entity';
 import { NotificationService } from '../notification/notification.service';
+import { AddNoteRequest } from './dto/request/add-note.request';
 @Injectable()
 export class OrderService extends BaseUserService<Order> {
   constructor(
@@ -1114,6 +1115,15 @@ export class OrderService extends BaseUserService<Order> {
     });
 
     await this.order_history_repo.save(order_history_create);
+    return await this.orderRepository.save(order);
+  }
+
+  async addNote(request: AddNoteRequest) {
+    const order = await this.orderRepository.findOne({
+      where: { id: request.order_id },
+    });
+    if (!order) throw new NotFoundException('message.order_not_found');
+    order.self_note = request.note;
     return await this.orderRepository.save(order);
   }
 }

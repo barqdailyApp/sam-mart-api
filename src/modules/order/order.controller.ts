@@ -49,6 +49,7 @@ import { ShipmentDashboardResponse } from './dto/response/dashboard-response/shi
 import { GetReturnOrderResponse } from './dto/response/return-order/get-return-order.response';
 import { Response } from 'express';
 import { EditDeliveryOrderRequest } from './dto/request/edit-delivery-order.request';
+import { AddNoteRequest } from './dto/request/add-note.request';
 
 @ApiTags('Order')
 @ApiHeader({
@@ -290,5 +291,10 @@ export class OrderController {
     const data = await this.orderService.editDeliveryPrice(req);
 
     return new ActionResponse(data);
+  }
+
+  @Post('add-note')
+  async addNote(@Body() req: AddNoteRequest) {
+    return new ActionResponse(await this.orderService.addNote(req));
   }
 }

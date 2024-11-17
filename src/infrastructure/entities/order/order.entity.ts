@@ -15,6 +15,7 @@ import { PaymentMethod } from '../payment_method/payment_method.entity';
 import { Reason } from '../reason/reason.entity';
 import { PromoCode } from '../promo-code/promo-code.entity';
 import { OrderHistory } from './order-history.entity';
+import { Col } from 'sequelize/types/utils';
 
 @Entity()
 export class Order extends OwnedEntity {
@@ -110,4 +111,7 @@ export class Order extends OwnedEntity {
 
   @OneToMany(() => OrderHistory, (orderHistory) => orderHistory.order)
   order_histories: OrderHistory[];
+
+  @Column({nullable:true})
+  self_note:string
 }
