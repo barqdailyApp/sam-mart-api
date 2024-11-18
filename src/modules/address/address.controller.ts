@@ -60,6 +60,13 @@ export class AddressController {
         return new ActionResponse<AddressResponse>(response);
     }
 
+    @Post('validate')
+    async validateAddress(@Body() req: CreateAddressRequest): Promise<ActionResponse<AddressResponse>> {
+        const data = plainToInstance(Address, req);
+        const result = await this.addressService.isLocationWithinWorkingArea(data.latitude, data.longitude);
+        const response = plainToInstance(AddressResponse, result, { excludeExtraneousValues: true });
+        return new ActionResponse<AddressResponse>(response);
+    }
     @Put(Router.Addresses.Update)
     async update(@Body() req: UpdateAddressRequest): Promise<ActionResponse<AddressResponse>> {
         const data = plainToInstance(Address, req);
