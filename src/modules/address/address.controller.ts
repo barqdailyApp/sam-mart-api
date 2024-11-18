@@ -1,4 +1,5 @@
 import {
+    BadRequestException,
   Body,
   Controller,
   Delete,
@@ -102,6 +103,8 @@ export class AddressController {
       data.latitude,
       data.longitude,
     );
+    if (result == false)
+        throw new BadRequestException('message.invalid_location');
     const response = plainToInstance(AddressResponse, result, {
       excludeExtraneousValues: true,
     });
