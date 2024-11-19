@@ -237,7 +237,7 @@
     {
       "path": "/v1/product/warehouse/export",
       "method": "GET",
-      "modules": ["WAREHOUSES"]
+      "modules": ["FINANCIAL_REPORTS"]
     },
     {
       "path": "/v1/measurement-unit/all-measurement-units",
