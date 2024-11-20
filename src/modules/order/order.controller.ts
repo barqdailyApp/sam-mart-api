@@ -279,13 +279,13 @@ export class OrderController {
   }
 
   @Roles(Role.ADMIN)
-  @Post('broadcast-order-drivers/:order_id')
+  @Post('/broadcast-order-drivers/:order_id')
   async broadcastOrderDrivers(@Param('order_id') order_id: string) {
     return new ActionResponse(
       await this.orderService.broadcastOrderDrivers(order_id),
     );
   }
-
+  @Roles(Role.ADMIN)
   @Post('/edit-delivery-price')
   async editDeliveryPrice(@Body() req: EditDeliveryOrderRequest) {
     const data = await this.orderService.editDeliveryPrice(req);
@@ -294,7 +294,7 @@ export class OrderController {
   }
 
   @Roles(Role.ADMIN)
-  @Post('add-note')
+  @Post('/add-note')
   async addNote(@Body() req: AddNoteRequest) {
     return new ActionResponse(await this.orderService.addNote(req));
   }
