@@ -21,6 +21,9 @@ export class WarehouseProductRespone {
   logo: string;
 
   @Expose()
+  is_active: boolean;
+
+  @Expose()
   quantity: number;
 
   @Expose()
@@ -36,6 +39,7 @@ export class WarehouseProductRespone {
     this.id = data.product.id;
     this.name_ar = data.product.name_ar;
     this.name_en = data.product.name_en;
+    this.is_active = data.product.is_active;
     this.barcode = data.product.barcode;
     this.description_ar = data.product.description_ar;
     this.description_en = data.product.description_en;
