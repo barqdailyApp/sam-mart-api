@@ -8,7 +8,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/core/base/service/service.base';
 import { BaseUserService } from 'src/core/base/service/user-service.base';
 import { Warehouse } from 'src/infrastructure/entities/warehouse/warehouse.entity';
-import { In, Repository, Like, LessThan, LessThanOrEqual, Between, Not } from 'typeorm';
+import {
+  In,
+  Repository,
+  Like,
+  LessThan,
+  LessThanOrEqual,
+  Between,
+  Not,
+} from 'typeorm';
 import { WarehouseOperationTransaction } from './util/warehouse-opreation.transaction';
 import { WarehouseOperationRequest } from './dto/requests/warehouse-operation.request';
 import { UpdateWarehouseRequest } from './dto/requests/update-warehouse.request';
@@ -35,7 +43,7 @@ export class WarehouseService extends BaseService<Warehouse> {
     private readonly warehouse_operation_products_repo: Repository<WarehouseOpreationProducts>,
     private readonly warehouseOperationTransaction: WarehouseOperationTransaction,
     @Inject(RegionService) private readonly regionService: RegionService,
-   private readonly _fileService: FileService, 
+    private readonly _fileService: FileService,
     @InjectRepository(Driver) private readonly driver_repo: Repository<Driver>,
     @InjectRepository(WarehouseProducts)
     private readonly warehouseProducts_repo: Repository<WarehouseProducts>,
@@ -88,7 +96,6 @@ export class WarehouseService extends BaseService<Warehouse> {
       order: { updated_at: 'DESC' },
       relations: {
         product: { product_images: true },
-        
 
         product_measurement: { measurement_unit: true },
       },
@@ -179,40 +186,43 @@ export class WarehouseService extends BaseService<Warehouse> {
     warehouse.drivers.push(driver);
     return await this.warehouse_repo.save(warehouse);
   }
-  async warehouseOperationExport(start_date: Date, end_date: Date,warehouse_id:string) {
+  async warehouseOperationExport(
+    start_date: Date,
+    end_date: Date,
+    warehouse_id: string,
+  ) {
     start_date.setHours(start_date.getHours() - 3);
     end_date.setHours(21);
     const operations = await this.warehouse_operation_products_repo.find({
       where: {
-        
-    operation:{
-      created_at: Between(start_date, end_date),
-      type:In([operationType.IMPORT,operationType.EXPORT]),
-      warehouse_id:warehouse_id
-    }
-       
+        operation: {
+          created_at: Between(start_date, end_date),
+          type: In([operationType.IMPORT, operationType.EXPORT]),
+          warehouse_id: warehouse_id,
+        },
       },
       order: { operation: { created_at: 'ASC' } },
       relations: {
-        product: true,operation:{warehouse:{products:true}}}
-
-    })
+        product: true,
+        operation: { warehouse: { products: true } },
+      },
+      withDeleted: true,
+    });
 
     // Create a flat structure for products
     const flattenedProducts = operations.map((operation) => {
       return {
-      date: operation.operation.created_at,  
-    product_name: operation.product.name_ar,
-    product_barcode: operation.product.barcode,
-    quantity: operation.quantity,
-    operation_type: operation.operation.type,
-    current_balance: operation.operation.warehouse.products.filter((p)=>p.product_id===operation.product_id).map((p)=>p.quantity)[0],
-    warehouse:operation.operation.warehouse.name_ar
-   
-   
+        date: operation.operation.created_at,
+        product_name: operation.product.name_ar,
+        product_barcode: operation.product.barcode,
+        quantity: operation.quantity,
+        operation_type: operation.operation.type,
+        current_balance: operation.operation.warehouse.products
+          .filter((p) => p.product_id === operation.product_id)
+          .map((p) => p.quantity)[0],
+        warehouse: operation.operation.warehouse.name_ar,
       };
     });
-   
 
     return await this._fileService.exportExcel(
       flattenedProducts,
