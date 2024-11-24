@@ -224,6 +224,7 @@ export class WarehouseService extends BaseService<Warehouse> {
       };
     });
 
+    if(flattenedProducts.length === 0) throw new NotFoundException('No data found');
     return await this._fileService.exportExcel(
       flattenedProducts,
       'operations',
