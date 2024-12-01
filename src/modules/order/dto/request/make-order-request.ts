@@ -1,6 +1,8 @@
+import { fa } from '@faker-js/faker';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty, IsOptional, IsString, ValidateIf } from 'class-validator';
 import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
+import { PlatformType } from 'src/infrastructure/data/enums/order-with-type.enum';
 import { PaymentMethodEnum } from 'src/infrastructure/data/enums/payment-method';
 
 export class PaymentMethodRequest {
@@ -68,4 +70,16 @@ export class MakeOrderRequest {
   @IsNotEmpty()
   @ValidateIf((obj) => obj.delivery_type === DeliveryType.SCHEDULED)
   slot_day: OrderSlotRequest;
+
+
+  @ApiProperty({
+    type: 'enum',
+    enum: [PlatformType.WEB, PlatformType.MOBILE],
+    required:false
+  })
+  @IsOptional()
+  @IsEnum(PlatformType)
+  @IsNotEmpty()
+  platform: PlatformType;
+
 }

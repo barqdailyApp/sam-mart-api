@@ -118,7 +118,7 @@ export class MakeOrderTransaction extends BaseTransaction<
       const date =
         req.delivery_type == DeliveryType.SCHEDULED
           ? new Date(req.slot_day?.day)
-          : new Date()
+          : new Date();
       // date.setHours(date.getHours() + 3);
       const isoDate = date.toISOString().slice(0, 10);
       const count = await context
@@ -131,6 +131,7 @@ export class MakeOrderTransaction extends BaseTransaction<
         user_id: user.id,
         warehouse_id: cart_products[0].warehouse_id,
         delivery_fee: section.delivery_price,
+        platform: req.platform,
         number: generateOrderNumber(count, isoDate),
         address_id: address.id,
         is_paid: payment_method.type != PaymentMethodEnum.CASH ? true : false,
@@ -164,9 +165,8 @@ export class MakeOrderTransaction extends BaseTransaction<
             order.estimated_delivery_time.setHours(
               order.estimated_delivery_time.getHours() - 3,
             );
-            if(order.estimated_delivery_time<new Date())
+            if (order.estimated_delivery_time < new Date())
               throw new BadRequestException('هذا الوقت منتهي');
-         
           }
           break;
         case DeliveryType.WAREHOUSE_PICKUP:

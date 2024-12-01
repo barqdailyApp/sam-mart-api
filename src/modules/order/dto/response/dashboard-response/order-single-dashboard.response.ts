@@ -1,6 +1,7 @@
 import { Exclude, Expose } from 'class-transformer';
 import { toUrl } from 'src/core/helpers/file.helper';
 import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
+import { PlatformType } from 'src/infrastructure/data/enums/order-with-type.enum';
 import { PaymentMethodEnum } from 'src/infrastructure/data/enums/payment-method';
 import { Order } from 'src/infrastructure/entities/order/order.entity';
 
@@ -32,6 +33,7 @@ export class OrderSingleDashboardResponse {
   @Expose() products_price: number;
   @Expose() promo_code: any;
   @Expose() note: string;
+  @Expose() platform:PlatformType
 
   constructor(order: Order) {
     this.order_id = order.id;
@@ -63,6 +65,7 @@ export class OrderSingleDashboardResponse {
     this.delivery_type = order.delivery_type;
     this.delivery_fee = order.delivery_fee;
     this.note = order.note;
+    this.platform=order.platform
 
     this.warehouse = {
       id: order.warehouse.id,

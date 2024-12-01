@@ -16,6 +16,7 @@ import { Reason } from '../reason/reason.entity';
 import { PromoCode } from '../promo-code/promo-code.entity';
 import { OrderHistory } from './order-history.entity';
 import { Col } from 'sequelize/types/utils';
+import { PlatformType } from 'src/infrastructure/data/enums/order-with-type.enum';
 
 @Entity()
 export class Order extends OwnedEntity {
@@ -114,4 +115,7 @@ export class Order extends OwnedEntity {
 
   @Column({nullable:true})
   self_note:string
+
+  @Column({ default: PlatformType.MOBILE })
+  platform: PlatformType;
 }
