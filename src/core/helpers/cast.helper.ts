@@ -33,9 +33,9 @@ export function toLowerCase(value: string): string {
 }
 
 export function removeQueryFromUrl(url) {
-  const urlObj = new URL(url);
-  urlObj.search = ''; // Clear the query string
-  return urlObj.toString();
+    const [basePath] = url.split('?'); // Split the path at '?' and take the first part
+    return basePath;
+
 }
 
 export function reverseNumbersInString(str) {
