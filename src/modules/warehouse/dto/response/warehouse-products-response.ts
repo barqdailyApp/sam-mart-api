@@ -29,13 +29,13 @@ export class WarehouseProductRespone {
   @Expose()
   product_measurement_id: string;
 
- 
   @Expose()
   barcode: string;
   @Expose()
   product_measurement: any;
+  @Expose()
+  price: number;
   constructor(data: any) {
-  
     this.id = data.product.id;
     this.name_ar = data.product.name_ar;
     this.name_en = data.product.name_en;
@@ -43,6 +43,7 @@ export class WarehouseProductRespone {
     this.barcode = data.product.barcode;
     this.description_ar = data.product.description_ar;
     this.description_en = data.product.description_en;
+    this.price = data.product_measurement.product_category_prices[0].price;
     this.logo = toUrl(data.product.product_images.find((e) => e.is_logo).url);
     this.quantity = data.quantity;
     this.product_measurement = {

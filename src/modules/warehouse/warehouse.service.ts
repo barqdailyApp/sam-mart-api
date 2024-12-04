@@ -97,7 +97,7 @@ export class WarehouseService extends BaseService<Warehouse> {
       relations: {
         product: { product_images: true },
 
-        product_measurement: { measurement_unit: true },
+        product_measurement: { measurement_unit: true,product_category_prices:true },
       },
       skip: (query.page - 1) * query.limit,
       take: query.limit,
