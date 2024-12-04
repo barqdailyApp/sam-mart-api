@@ -32,6 +32,12 @@ export function toLowerCase(value: string): string {
   return value.toLowerCase() || '';
 }
 
+export function removeQueryFromUrl(url) {
+  const urlObj = new URL(url);
+  urlObj.search = ''; // Clear the query string
+  return urlObj.toString();
+}
+
 export function reverseNumbersInString(str) {
   if(!str) return str
   return str.replace(/\d+/g, (match) => {

@@ -18,6 +18,8 @@ import { Employee } from 'src/infrastructure/entities/employee/employee.entity';
 import { UsersSamModules } from 'src/infrastructure/entities/sam-modules/users-sam-modules.entity';
 import { Request } from 'express';
 import { replaceUUIDInURL } from 'src/core/helpers/replace-url-uuid.helper';
+import { SamModulesEndpoints } from 'src/infrastructure/entities/sam-modules/sam-modules-endpoints.entity';
+import { removeQueryFromUrl } from 'src/core/helpers/cast.helper';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -29,7 +31,7 @@ export class RolesGuard implements CanActivate {
     private readonly employeeRepository: Repository<Employee>,
     @InjectRepository(UsersSamModules)
     private readonly userSamModulesRepository: Repository<UsersSamModules>,
-  ) { }
+  ) {}
 
   async canActivate(context: ExecutionContext) {
     const requiredRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
@@ -48,8 +50,11 @@ export class RolesGuard implements CanActivate {
     }
 
     if (user.roles?.includes(Role.EMPLOYEE)) {
-      const isAuthorizedEmployee =
-        await this.checkEmployeeModulePermissions(user, request.url, request.method);
+      const isAuthorizedEmployee = await this.checkEmployeeModulePermissions(
+        user,
+        request.url,
+        request.method,
+      );
 
       if (!isAuthorizedEmployee) {
         throw new UnauthorizedException('Unauthorized employee');
@@ -73,7 +78,8 @@ export class RolesGuard implements CanActivate {
 
     if (driver.status !== DriverStatus.VERIFIED) {
       throw new UnauthorizedException(
-        `You're not verified driver, your account is ${driver.status
+        `You're not verified driver, your account is ${
+          driver.status
         } now reason: ${driver.status_reason ?? 'no reason specified'}`,
       );
     }
@@ -82,28 +88,30 @@ export class RolesGuard implements CanActivate {
   async checkEmployeeModulePermissions(
     user: User,
     path: string,
-    method: string
+    method: string,
   ): Promise<boolean> {
     path = replaceUUIDInURL(path);
+    path = removeQueryFromUrl(path);
     const employee = await this.employeeRepository.findOne({
       where: { user_id: user.id },
     });
 
     if (!employee) throw new UnauthorizedException('invalid_employee');
-
+console.log(path);
     const userSamModule = await this.userSamModulesRepository.findOne({
-      where: { user_id: user.id },
+      where: {
+        user_id: user.id,
+        samModule: { samModuleEndpoints: { endpoint: path } },
+      },
       relations: {
         samModule: {
-          samModuleEndpoints: true
-        }
-      }
-    })
+          samModuleEndpoints: true,
+        },
+      },
+    });
 
-    for (const endpoint of userSamModule?.samModule?.samModuleEndpoints) {
-      if (endpoint.method === method && endpoint.endpoint === path) {
-        return true;
-      }
+    if (userSamModule) {
+      return true;
     }
 
     return false;
