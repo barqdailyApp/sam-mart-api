@@ -745,6 +745,42 @@
       "path": "/v1/product/delete-brands/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
       "method": "DELETE",
       "modules": ["BRANDS"]
+    },
+    {
+      "path":"/v1/warehouse/warehouse-operation/export",
+      "method":"POST",
+      "modules":["WAREHOUSES_REPORTS"]
+    },
+    
+      {
+        "path": "/v1/banar",
+        "method": "POST",
+        "modules": ["POSTERS"]
+      },
+      {
+        "path": "/v1/banar",
+        "method": "GET",
+        "modules": ["POSTERS"]
+      },
+      {
+        "path": "/v1/banar/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+        "method": "GET",
+        "modules": ["POSTERS"]
+      },
+      {
+        "path": "/v1/banar/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+        "method": "PATCH",
+        "modules": ["POSTERS"]
+      },
+      {
+        "path": "/v1/banar/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+        "method": "DELETE",
+        "modules": ["POSTERS"]
+    },
+    {
+      "path":"/v1/auth/get-otps",
+      "method":"GET",
+      "modules":["OTP"]
     }
 
   ]
