@@ -546,6 +546,34 @@
       "method": "GET",
       "modules": ["ORDERS"]
     },
+
+    {
+      "path": "/v1/order/add-note",
+      "method": "POST",
+      "modules": ["ORDERS"]
+    },
+    {
+      "path": "/v1/shipment/add-product",
+      "method": "POST",
+      "modules": ["ORDERS"]
+    },
+    {
+      "path": "v1/shipment/remove-product",
+      "method": "POST",
+      "modules": ["ORDERS"]
+    },
+    {
+      "path": "v1/order/edit-delivery-price",
+      "method": "POST",
+      "modules": ["ORDERS"]
+    },
+ 
+    
+    {
+      "path": "v1/shipment/product-checked",
+      "method": "POST",
+      "modules": ["ORDERS"]
+    },
     {
       "path": "/v1/order/dashboard-orders",
       "method": "GET",
