@@ -485,12 +485,12 @@
       "modules": ["WAREHOUSES"]
     },
     {
-      "path": "/v1/warehouse/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "path": "/v1/warehouse/{id}",
       "method": "PATCH",
       "modules": ["WAREHOUSES"]
     },
     {
-      "path": "/v1/warehouse/([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})",
+      "path": "/v1/warehouse/{id}",
       "method": "DELETE",
       "modules": ["WAREHOUSES"]
     },
