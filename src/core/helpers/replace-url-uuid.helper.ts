@@ -1,7 +1,7 @@
-export function replaceUUIDInURL(url: string): { path: string } {
+export function replaceUUIDInURL(url: string): string {
     // Decode URL to handle encoded characters like %7B and %7D
     const decodedUrl = decodeURIComponent(url);
-
+    
     // Split the URL into the path and query parts
     const [path] = decodedUrl.split('?'); // Ignore query parameters
     
@@ -13,6 +13,5 @@ export function replaceUUIDInURL(url: string): { path: string } {
         return uuidRegex.test(part) ? uuidPlaceholder : part;
     });
 
-    // Join the parts back into a path and return as part of an object
-    return { path: replacedParts.join('/') };
+    return replacedParts.join('/');
 }
