@@ -10,6 +10,7 @@ import { ShipmentProduct } from '../order/shipment-product.entity';
 import { Brand } from '../brand/brand';
 import { WarehouseOpreationProducts } from '../warehouse/wahouse-opreation-products.entity';
 import { ShipmentProductHistory } from '../order/shipment-product-history.entity';
+import { ProductChanges,  } from './product-changes.entity';
 
 @Entity()
 
@@ -89,5 +90,10 @@ export class Product extends AuditableEntity {
   )
   shipment_products: ShipmentProduct[];
  
+  @OneToMany(
+    () =>   ProductChanges,
+    productChanges => productChanges.product
+  )
+  product_changes: ProductChanges[];
 
 }

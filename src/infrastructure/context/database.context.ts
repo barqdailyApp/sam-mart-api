@@ -59,6 +59,7 @@ import { UsersSamModules } from '../entities/sam-modules/users-sam-modules.entit
 import { Brand } from '../entities/brand/brand';
 import { ShipmentProductHistory } from '../entities/order/shipment-product-history.entity';
 import { OrderHistory } from '../entities/order/order-history.entity';
+import { ProductChanges } from '../entities/product/product-changes.entity';
 
 export const DB_ENTITIES = [
   User,
@@ -122,7 +123,8 @@ export const DB_ENTITIES = [
   UsersSamModules,
   Brand,
   ShipmentProductHistory,
-  OrderHistory
+  OrderHistory,
+  ProductChanges
 ];
 
 export const DB_VIEWS = [];

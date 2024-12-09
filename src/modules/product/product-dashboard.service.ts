@@ -66,11 +66,14 @@ import { DeleteProductTransaction } from './utils/delete-product.transaction';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { ShipmentProduct } from 'src/infrastructure/entities/order/shipment-product.entity';
 import { Brand } from 'src/infrastructure/entities/brand/brand';
+import { Request } from 'express';
 import {
   CreateBrandRequest,
   UpdateBrandRequest,
 } from './dto/request/create-brand.request';
 import { ShipmentStatusEnum } from 'src/infrastructure/data/enums/shipment_status.enum';
+import { REQUEST } from '@nestjs/core';
+import { ProductChanges } from 'src/infrastructure/entities/product/product-changes.entity';
 
 @Injectable()
 export class ProductDashboardService {
@@ -110,6 +113,8 @@ export class ProductDashboardService {
     @InjectRepository(Warehouse)
     private readonly warehouse_repo: Repository<Warehouse>,
 
+    @InjectRepository(ProductChanges) private readonly  product_changes_repo: Repository<ProductChanges>,
+
     @InjectRepository(WarehouseProducts)
     private readonly warehouse_products_repo: Repository<WarehouseProducts>,
 
@@ -125,6 +130,8 @@ export class ProductDashboardService {
     @Inject(StorageManager) private readonly storageManager: StorageManager,
 
     @Inject(ImageManager) private readonly imageManager: ImageManager,
+
+    @Inject(REQUEST) private readonly request: Request,
 
     @Inject(FileService) private _fileService: FileService,
     private readonly notificationService: NotificationService,
@@ -460,6 +467,27 @@ export class ProductDashboardService {
         order_by_brand,
       },
     );
+    const historyRecords = [];
+    for (const [key, value] of Object.entries(updateProductRequest)) {
+      if (product[key] !== value) {
+        historyRecords.push({
+          product: product,
+          fieldChanged: key,
+          oldValue: product[key].toString(),
+          newValue: value.toString(),
+           user_id: this.request.user.id,
+        });
+        product[key] = value;
+      }
+    }
+
+   
+    await this.productRepository.save(product);
+
+    if (historyRecords.length) {
+      await this.product_changes_repo.save(historyRecords);
+    }
+
     return await this.productRepository.findOne({
       where: { id: product_id },
     });
@@ -969,7 +997,10 @@ export class ProductDashboardService {
         'product_sub_categories.category_subCategory',
         'product_category_subCategory',
       )
-      .leftJoinAndSelect('product_category_subCategory.subcategory', 'subcategory')
+      .leftJoinAndSelect(
+        'product_category_subCategory.subcategory',
+        'subcategory',
+      )
       .leftJoinAndSelect(
         'product_category_subCategory.section_category',
         'product_section_category',
@@ -1014,8 +1045,9 @@ export class ProductDashboardService {
     query
       .leftJoinAndSelect(
         'product_sub_category.category_subCategory',
-        'category_subCategory',)
-      
+        'category_subCategory',
+      )
+
       .leftJoin('category_subCategory.section_category', 'section_category');
 
     // Get single product

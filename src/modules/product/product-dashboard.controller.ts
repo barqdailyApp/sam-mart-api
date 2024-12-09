@@ -62,12 +62,18 @@ import { SingleProductDashboardNewResponse } from './dto/response/response-dashb
 import { ProductsOffersDashboardNewResponse } from './dto/response/response-dashboard/products-offers-dashboard-new.response';
 import { UpdateProductOfferRequest } from './dto/request/update-product-offer.request';
 import { CreateBanarRequest } from '../banar/dto/request/create-banar.request';
-import { CreateBrandRequest, LinkBrandProuductRequest, UpdateBrandRequest } from './dto/request/create-brand.request';
+import {
+  CreateBrandRequest,
+  LinkBrandProuductRequest,
+  UpdateBrandRequest,
+} from './dto/request/create-brand.request';
 import { BrandService } from './brand.service';
 import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 import { toUrl } from 'src/core/helpers/file.helper';
-import { applyQuerySort } from 'src/core/helpers/service-related.helper';
+import { applyQueryIncludes, applyQuerySort } from 'src/core/helpers/service-related.helper';
+import { ProductChangesService } from './product-changes.service';
+import { UserResponse } from '../user/dto/responses/user.response';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -83,6 +89,7 @@ export class ProductDashboardController {
     private readonly productDashboardService: ProductDashboardService,
     private readonly productClientService: ProductClientService,
     private readonly brandService: BrandService,
+    private readonly productChangesService: ProductChangesService,
 
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
   ) {}
@@ -464,18 +471,14 @@ export class ProductDashboardController {
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
   @Post('link-brand-proudct')
-  async linkBrand(
-    @Body() req: LinkBrandProuductRequest,
-  ) {
-    const products = await this.brandService.linkBrandToProduct(
-     req
-    );
+  async linkBrand(@Body() req: LinkBrandProuductRequest) {
+    const products = await this.brandService.linkBrandToProduct(req);
     return new ActionResponse(products);
   }
 
   @Get('get-brands')
   async getBrands(@Query() query: PaginatedRequest) {
-    applyQuerySort(query,"order=ASC");
+    applyQuerySort(query, 'order=ASC');
     const brands = await this.brandService.findAll(query);
     brands.map((brand) => {
       brand.logo = toUrl(brand.logo);
@@ -485,14 +488,20 @@ export class ProductDashboardController {
       meta: { total, page: query.page, limit: query.limit },
     });
   }
- 
 
   @Get('admin-brands-categories')
-  async getBrandsCategories(@Query("brand_id") brand_id:string,@Query("section_id") section_id:string)  {
- 
-    const categories = this._i18nResponse.entity( await this.productDashboardService.getBrandCategories(brand_id,section_id));
+  async getBrandsCategories(
+    @Query('brand_id') brand_id: string,
+    @Query('section_id') section_id: string,
+  ) {
+    const categories = this._i18nResponse.entity(
+      await this.productDashboardService.getBrandCategories(
+        brand_id,
+        section_id,
+      ),
+    );
 
- return new ActionResponse(categories);   
+    return new ActionResponse(categories);
   }
 
   @Roles(Role.ADMIN)
@@ -503,8 +512,25 @@ export class ProductDashboardController {
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   )
   async exportlargeImages(@Res() res: Response) {
-    const File =
-      await this.productDashboardService.getLargeImages();
+    const File = await this.productDashboardService.getLargeImages();
     res.download(`${File}`);
+  }
+
+  @Get('changes-history')
+  async getChangesHistory(@Query() query: PaginatedRequest) {
+    applyQuerySort(query, 'created_at=desc');
+    applyQueryIncludes(query, 'product');
+    applyQueryIncludes(query, 'user');
+    const products = await this.productChangesService.findAll(query);
+    const total = await this.productChangesService.count(query);
+    const result = products.map((product) => {
+      return {
+       product: plainToInstance(ProductResponse,product.product),
+        ...product,changed_by:plainToInstance(UserResponse,product.user),
+      };
+    })
+    return new PaginatedResponse(result, {
+      meta: { total, page: query.page, limit: query.limit },
+    });
   }
 }
