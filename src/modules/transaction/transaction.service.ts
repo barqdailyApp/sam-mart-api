@@ -60,7 +60,7 @@ export class TransactionService extends BaseUserService<Transaction> {
   async getSystemWallets() {
     const wallets = await this.walletRepository.find({
       where: {
-        type: In(["JAIB", "KURAIMI", "JAWALI,BARQ_WALLET"]),
+        type: In(["JAIB", "KURAIMI", "JAWALI","BARQ_WALLET"]),
       },
   
     });
