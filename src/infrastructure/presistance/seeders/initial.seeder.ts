@@ -14,6 +14,8 @@ import { SupportTicketSubjectSeeder } from './suppot-ticket-subjects.seeder';
 import { ConstantSeeder } from './constant-seeder';
 import { PaymentSeeder } from './payment.seeder';
 import { SamModulesSeeder } from './sam-modules.seeder';
+import { Wallet } from 'src/infrastructure/entities/wallet/wallet.entity';
+import { WalletSeeder } from './wallet-seeder';
 
 export const DB_SEEDERS = [
   // UsersSeeder,
@@ -29,7 +31,9 @@ export const DB_SEEDERS = [
   // WareHouseProductsSeeder,
   // SupportTicketSubjectSeeder,
   // ConstantSeeder,
-  // PaymentSeeder,
-  SamModulesSeeder
+  // // PaymentSeeder,
+  // SamModulesSeeder,
+  WalletSeeder
+
 
 ];

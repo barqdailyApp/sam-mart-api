@@ -11,7 +11,7 @@ export class Wallet extends OwnedEntity {
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   balance: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2,nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   limit: number;
   //one to many relation with user
   @OneToOne(() => User, (user) => user.wallet)
@@ -22,6 +22,8 @@ export class Wallet extends OwnedEntity {
     cascade: true,
   })
   transactions: Transaction[];
+  @Column({ default: 'user' })
+  type: string;
 
   constructor(partial?: Partial<Wallet>) {
     super();

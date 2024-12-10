@@ -2,7 +2,7 @@ import { BadRequestException, Inject, Injectable, NotFoundException } from '@nes
 import { InjectRepository } from '@nestjs/typeorm';
 import { Transaction } from 'src/infrastructure/entities/wallet/transaction.entity';
 import { Wallet } from 'src/infrastructure/entities/wallet/wallet.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { MakeTransactionRequest } from './dto/requests/make-transaction-request';
 import { plainToInstance } from 'class-transformer';
 import { BaseUserService } from 'src/core/base/service/user-service.base';
@@ -26,8 +26,11 @@ export class TransactionService extends BaseUserService<Transaction> {
 
   async makeTransaction(req: MakeTransactionRequest) {
     const wallet = await this.walletRepository.findOneBy({
-      user_id: req.user_id,
+      user_id: req.user_id,type:req.wallet_type
     });
+
+    if (!wallet) {
+      throw new NotFoundException('Wallet not found');}
 
     wallet.balance = Number(wallet.balance) + Number(req.amount);
 
@@ -52,6 +55,16 @@ export class TransactionService extends BaseUserService<Transaction> {
       select: { user: { name: true, email: true, id: true } },
     });
     return wallet;
+  }
+
+  async getSystemWallets() {
+    const wallets = await this.walletRepository.find({
+      where: {
+        type: In(["JAIB", "KURAIMI", "JAWALI,BARQ_WALLET"]),
+      },
+  
+    });
+    return wallets;
   }
 
   async getDriverTransactions(

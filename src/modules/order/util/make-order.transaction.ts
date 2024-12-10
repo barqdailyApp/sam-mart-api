@@ -182,27 +182,6 @@ export class MakeOrderTransaction extends BaseTransaction<
           break;
       }
 
-      // if (order.delivery_type == DeliveryType.FAST) {
-      //   const currentDate = new Date();
-
-      //   // Add 40 minutes
-      //   currentDate.setMinutes(currentDate.getMinutes() + 40);
-      //   order.delivery_day = currentDate.toISOString().slice(0, 10);
-      //   order.estimated_delivery_time = currentDate;
-      // } else {
-      //   order.delivery_day = req.slot_day.day;
-      //   order.slot_id = req.slot_day.slot_id;
-      //   const slot = await context.findOne(Slot, {
-      //     where: { id: req.slot_day.slot_id },
-      //   });
-      //   order.estimated_delivery_time = new Date(
-      //     req.slot_day.day + 'T' + slot.start_time + 'Z',
-      //   );
-      //   order.estimated_delivery_time.setHours(
-      //     order.estimated_delivery_time.getHours() - 3,
-      //   );
-      // }
-
       const shipment = await context.save(Shipment, {
         order_id: order.id,
         warehouse_id: cart_products[0].warehouse_id,
@@ -312,6 +291,15 @@ export class MakeOrderTransaction extends BaseTransaction<
           if (!make_payment) {
             throw new BadRequestException('message.payment_failed');
           }
+          try{
+          await this.transactionService.makeTransaction(
+            new MakeTransactionRequest({
+              amount: order.total_price,
+              type: TransactionTypes.ORDER_PAYMENT,
+              order_id: order.id,
+              wallet_type: 'JAWALI',
+            }),
+          );}catch(e){}
           break;
         }
         case PaymentMethodEnum.WALLET: {
@@ -331,6 +319,16 @@ export class MakeOrderTransaction extends BaseTransaction<
           await context.save(transaction);
 
           await context.save(wallet);
+          try {
+            await this.transactionService.makeTransaction(
+              new MakeTransactionRequest({
+                amount: order.total_price,
+                type: TransactionTypes.ORDER_PAYMENT,
+                order_id: order.id,
+                wallet_type: 'BARQ_WALLET',
+              }),
+            );
+          } catch (e) {}
           break;
         }
         case PaymentMethodEnum.KURAIMI: {
@@ -347,6 +345,16 @@ export class MakeOrderTransaction extends BaseTransaction<
                 : make_payment['MessageDesc'],
             );
           }
+          try {
+            await this.transactionService.makeTransaction(
+              new MakeTransactionRequest({
+                amount: order.total_price,
+                type: TransactionTypes.ORDER_PAYMENT,
+                order_id: order.id,
+                wallet_type: 'KURAIMI',
+              }),
+            );
+          } catch (e) {}
           break;
         }
         case PaymentMethodEnum.JAIB: {
@@ -356,6 +364,16 @@ export class MakeOrderTransaction extends BaseTransaction<
             total,
             order.number.toString(),
           );
+          try {
+            await this.transactionService.makeTransaction(
+              new MakeTransactionRequest({
+                amount: order.total_price,
+                type: TransactionTypes.ORDER_PAYMENT,
+                order_id: order.id,
+                wallet_type: 'JAIB',
+              }),
+            );
+          } catch (e) {}
           break;
         }
         default:

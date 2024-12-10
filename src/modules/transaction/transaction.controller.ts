@@ -48,6 +48,12 @@ export class TransactionController {
     return new ActionResponse(await this.transactionService.getWallet(user_id));
   }
 
+  @Roles(Role.ADMIN)
+  @Get('system-wallet')
+  async getSystemWallets() {
+    return new ActionResponse(await this.transactionService.getSystemWallets());
+  }
+  @Roles(Role.ADMIN)
   @Post()
  async makeTransaction(@Body() request: MakeTransactionRequest) { 
     return new ActionResponse(await this.transactionService.makeTransaction(request));

@@ -6,6 +6,6 @@ import { AuditableEntity } from './auditable.entity';
 
 @Entity()
 export abstract class OwnedEntity extends AuditableEntity {
-    @Column()
+    @Column({nullable:true})
     user_id: string;
 }

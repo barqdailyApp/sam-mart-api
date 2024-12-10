@@ -33,7 +33,7 @@ export class Transaction extends AuditableEntity {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @Column()
+  @Column({nullable:true})
   user_id: string;
 
   @Column({nullable:true})
