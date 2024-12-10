@@ -44,7 +44,8 @@ import { TransactionTypes } from 'src/infrastructure/data/enums/transaction-type
 import { Wallet } from 'src/infrastructure/entities/wallet/wallet.entity';
 import { Transaction } from 'src/infrastructure/entities/wallet/transaction.entity';
 import { encodeUUID } from 'src/core/helpers/cast.helper';
-@Injectable()
+import * as uuidv4 from 'uuid';
+ @Injectable()
 export class MakeOrderTransaction extends BaseTransaction<
   MakeOrderRequest,
   Order
@@ -126,8 +127,10 @@ export class MakeOrderTransaction extends BaseTransaction<
         .where('order.delivery_day = :specificDate', { specificDate: isoDate })
         .getCount();
 
+        const order_id=uuidv4();
       const order = await context.save(Order, {
         ...plainToInstance(Order, req),
+        id: order_id,
         user_id: user.id,
         warehouse_id: cart_products[0].warehouse_id,
         delivery_fee: section.delivery_price,
@@ -296,7 +299,7 @@ export class MakeOrderTransaction extends BaseTransaction<
             new MakeTransactionRequest({
               amount: order.total_price,
               type: TransactionTypes.ORDER_PAYMENT,
-              order_id: order.id,
+              order_id: order_id,
               wallet_type: 'JAWALI',
             }),
           );}catch(e){}
@@ -312,6 +315,7 @@ export class MakeOrderTransaction extends BaseTransaction<
           const transaction = plainToInstance(Transaction, {
             amount: -total,
             user_id: user.id,
+            order_id: order_id,
             type: TransactionTypes.ORDER_PAYMENT,
             wallet_id: wallet.id,
           });
@@ -324,7 +328,7 @@ export class MakeOrderTransaction extends BaseTransaction<
               new MakeTransactionRequest({
                 amount: order.total_price,
                 type: TransactionTypes.ORDER_PAYMENT,
-                // order_id: order.id,
+                order_id: order_id,
                 wallet_type: 'BARQ_WALLET',
               }),
             );
@@ -350,7 +354,7 @@ export class MakeOrderTransaction extends BaseTransaction<
               new MakeTransactionRequest({
                 amount: order.total_price,
                 type: TransactionTypes.ORDER_PAYMENT,
-                order_id: order.id,
+                order_id: order_id,
                 wallet_type: 'KURAIMI',
               }),
             );
@@ -369,7 +373,7 @@ export class MakeOrderTransaction extends BaseTransaction<
               new MakeTransactionRequest({
                 amount: order.total_price,
                 type: TransactionTypes.ORDER_PAYMENT,
-                order_id: order.id,
+                order_id: order_id,
                 wallet_type: 'JAIB',
               }),
             );
