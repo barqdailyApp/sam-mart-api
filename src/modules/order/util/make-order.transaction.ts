@@ -328,7 +328,7 @@ export class MakeOrderTransaction extends BaseTransaction<
                 wallet_type: 'BARQ_WALLET',
               }),
             );
-          } catch (e) {}
+          } catch (e) {console.log(e);}
           break;
         }
         case PaymentMethodEnum.KURAIMI: {
