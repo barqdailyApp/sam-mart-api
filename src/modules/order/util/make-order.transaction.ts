@@ -324,7 +324,7 @@ export class MakeOrderTransaction extends BaseTransaction<
               new MakeTransactionRequest({
                 amount: order.total_price,
                 type: TransactionTypes.ORDER_PAYMENT,
-                order_id: order.id,
+                // order_id: order.id,
                 wallet_type: 'BARQ_WALLET',
               }),
             );
