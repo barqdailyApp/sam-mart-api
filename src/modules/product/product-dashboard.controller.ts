@@ -526,7 +526,7 @@ export class ProductDashboardController {
     const result = products.map((product) => {
       return {
        product: plainToInstance(ProductResponse,product.product),
-        ...product,changed_by:plainToInstance(UserResponse,product.user),
+        ...product,changed_by:plainToInstance(UserResponse,product.user,{excludeExtraneousValues: true}),
       };
     })
     return new PaginatedResponse(result, {
