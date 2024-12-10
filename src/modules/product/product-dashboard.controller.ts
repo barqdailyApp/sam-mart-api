@@ -71,9 +71,13 @@ import { BrandService } from './brand.service';
 import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 import { toUrl } from 'src/core/helpers/file.helper';
-import { applyQueryIncludes, applyQuerySort } from 'src/core/helpers/service-related.helper';
+import {
+  applyQueryIncludes,
+  applyQuerySort,
+} from 'src/core/helpers/service-related.helper';
 import { ProductChangesService } from './product-changes.service';
 import { UserResponse } from '../user/dto/responses/user.response';
+import { create } from 'domain';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -525,10 +529,17 @@ export class ProductDashboardController {
     const total = await this.productChangesService.count(query);
     const result = products.map((product) => {
       return {
-       product: plainToInstance(ProductResponse,product.product),
-        ...product,changed_by:plainToInstance(UserResponse,product.user,{excludeExtraneousValues: true}),
+        created_at: product.created_at,
+        id: product.id,
+        product: plainToInstance(ProductResponse, product.product),
+        old_value: product.oldValue,
+        new_value: product.newValue,
+        field_changed: product.fieldChanged,
+        changed_by: plainToInstance(UserResponse, product.user, {
+          excludeExtraneousValues: true,
+        }),
       };
-    })
+    });
     return new PaginatedResponse(result, {
       meta: { total, page: query.page, limit: query.limit },
     });
