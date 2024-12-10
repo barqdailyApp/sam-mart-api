@@ -44,7 +44,7 @@ import { TransactionTypes } from 'src/infrastructure/data/enums/transaction-type
 import { Wallet } from 'src/infrastructure/entities/wallet/wallet.entity';
 import { Transaction } from 'src/infrastructure/entities/wallet/transaction.entity';
 import { encodeUUID } from 'src/core/helpers/cast.helper';
-import * as uuidv4 from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
  @Injectable()
 export class MakeOrderTransaction extends BaseTransaction<
   MakeOrderRequest,
