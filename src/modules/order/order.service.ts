@@ -90,7 +90,7 @@ export class OrderService extends BaseUserService<Order> {
 
   async makeOrder(req: MakeOrderRequest) {
     const order = await this.makeOrdrTransacton.run(req);
-    switch (order.paymentMethod.type) {
+    switch (order.payment_method) {
       case PaymentMethodEnum.JAIB: {
         try {
           await this.transactionService.makeTransaction(
