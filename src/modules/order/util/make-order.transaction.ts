@@ -44,8 +44,8 @@ import { TransactionTypes } from 'src/infrastructure/data/enums/transaction-type
 import { Wallet } from 'src/infrastructure/entities/wallet/wallet.entity';
 import { Transaction } from 'src/infrastructure/entities/wallet/transaction.entity';
 import { encodeUUID } from 'src/core/helpers/cast.helper';
-import { v4 as uuidv4 } from 'uuid';
- @Injectable()
+import * as uuidv4 from 'uuid';
+@Injectable()
 export class MakeOrderTransaction extends BaseTransaction<
   MakeOrderRequest,
   Order
@@ -127,10 +127,8 @@ export class MakeOrderTransaction extends BaseTransaction<
         .where('order.delivery_day = :specificDate', { specificDate: isoDate })
         .getCount();
 
-        const order_id=uuidv4();
       const order = await context.save(Order, {
         ...plainToInstance(Order, req),
-        id: order_id,
         user_id: user.id,
         warehouse_id: cart_products[0].warehouse_id,
         delivery_fee: section.delivery_price,
@@ -294,15 +292,7 @@ export class MakeOrderTransaction extends BaseTransaction<
           if (!make_payment) {
             throw new BadRequestException('message.payment_failed');
           }
-          try{
-          await this.transactionService.makeTransaction(
-            new MakeTransactionRequest({
-              amount: order.total_price,
-              type: TransactionTypes.ORDER_PAYMENT,
-              order_id: order_id,
-              wallet_type: 'JAWALI',
-            }),
-          );}catch(e){}
+
           break;
         }
         case PaymentMethodEnum.WALLET: {
@@ -315,7 +305,7 @@ export class MakeOrderTransaction extends BaseTransaction<
           const transaction = plainToInstance(Transaction, {
             amount: -total,
             user_id: user.id,
-            order_id: order_id,
+            order_id: order.id,
             type: TransactionTypes.ORDER_PAYMENT,
             wallet_id: wallet.id,
           });
@@ -323,16 +313,7 @@ export class MakeOrderTransaction extends BaseTransaction<
           await context.save(transaction);
 
           await context.save(wallet);
-          try {
-            await this.transactionService.makeTransaction(
-              new MakeTransactionRequest({
-                amount: order.total_price,
-                type: TransactionTypes.ORDER_PAYMENT,
-                order_id: order_id,
-                wallet_type: 'BARQ_WALLET',
-              }),
-            );
-          } catch (e) {console.log(e);}
+
           break;
         }
         case PaymentMethodEnum.KURAIMI: {
@@ -349,16 +330,7 @@ export class MakeOrderTransaction extends BaseTransaction<
                 : make_payment['MessageDesc'],
             );
           }
-          try {
-            await this.transactionService.makeTransaction(
-              new MakeTransactionRequest({
-                amount: order.total_price,
-                type: TransactionTypes.ORDER_PAYMENT,
-                order_id: order_id,
-                wallet_type: 'KURAIMI',
-              }),
-            );
-          } catch (e) {}
+
           break;
         }
         case PaymentMethodEnum.JAIB: {
@@ -368,16 +340,7 @@ export class MakeOrderTransaction extends BaseTransaction<
             total,
             order.number.toString(),
           );
-          try {
-            await this.transactionService.makeTransaction(
-              new MakeTransactionRequest({
-                amount: order.total_price,
-                type: TransactionTypes.ORDER_PAYMENT,
-                order_id: order_id,
-                wallet_type: 'JAIB',
-              }),
-            );
-          } catch (e) {}
+
           break;
         }
         default:

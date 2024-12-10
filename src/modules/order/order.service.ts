@@ -50,6 +50,10 @@ import { NotificationTypes } from 'src/infrastructure/data/enums/notification-ty
 import { NotificationEntity } from 'src/infrastructure/entities/notification/notification.entity';
 import { NotificationService } from '../notification/notification.service';
 import { AddNoteRequest } from './dto/request/add-note.request';
+import { PaymentMethodEnum } from 'src/infrastructure/data/enums/payment-method';
+import { TransactionService } from '../transaction/transaction.service';
+import { MakeTransactionRequest } from '../transaction/dto/requests/make-transaction-request';
+import { TransactionTypes } from 'src/infrastructure/data/enums/transaction-types';
 @Injectable()
 export class OrderService extends BaseUserService<Order> {
   constructor(
@@ -60,7 +64,7 @@ export class OrderService extends BaseUserService<Order> {
     private shipmentRepository: Repository<Shipment>,
     @InjectRepository(ShipmentProduct)
     private shipmentProductRepository: Repository<ShipmentProduct>,
-
+    private readonly transactionService: TransactionService,
     private readonly notificationService: NotificationService,
     @InjectRepository(ReturnOrder)
     private ReturnOrderRepository: Repository<ReturnOrder>,
@@ -85,7 +89,67 @@ export class OrderService extends BaseUserService<Order> {
   }
 
   async makeOrder(req: MakeOrderRequest) {
-    return await this.makeOrdrTransacton.run(req);
+    const order = await this.makeOrdrTransacton.run(req);
+    switch (order.paymentMethod.type) {
+      case PaymentMethodEnum.JAIB: {
+        try {
+          await this.transactionService.makeTransaction(
+            new MakeTransactionRequest({
+              amount: order.total_price,
+              type: TransactionTypes.ORDER_PAYMENT,
+              order_id: order.id,
+              wallet_type: 'JAIB',
+            }),
+          );
+        } catch (e) {
+          console.log(e);
+        }
+      }
+      case PaymentMethodEnum.JAWALI: {
+        try {
+          await this.transactionService.makeTransaction(
+            new MakeTransactionRequest({
+              amount: order.total_price,
+              type: TransactionTypes.ORDER_PAYMENT,
+              order_id: order.id,
+              wallet_type: 'JAWALI',
+            }),
+          );
+        } catch (e) {
+          console.log(e);
+        }
+      }
+      case PaymentMethodEnum.KURAIMI: {
+        try {
+          await this.transactionService.makeTransaction(
+            new MakeTransactionRequest({
+              amount: order.total_price,
+              type: TransactionTypes.ORDER_PAYMENT,
+              order_id: order.id,
+              wallet_type: 'KURAIMI',
+            }),
+          );
+        } catch (e) {
+          console.log(e);
+        }
+      }
+      case PaymentMethodEnum.WALLET: {
+        try {
+          await this.transactionService.makeTransaction(
+            new MakeTransactionRequest({
+              amount: order.total_price,
+              type: TransactionTypes.ORDER_PAYMENT,
+              order_id: order.id,
+              wallet_type: 'BARQ_WALLET',
+            }),
+          );
+        } catch (e) {
+          console.log(e);
+        }
+      }
+    }
+
+    return order;
   }
 
   async getAllClientOrders(orderClientQuery: OrderClientQuery) {
@@ -1063,7 +1127,7 @@ export class OrderService extends BaseUserService<Order> {
       },
     });
 
-    const driversWarehouse = await this.driverRepository.find( {
+    const driversWarehouse = await this.driverRepository.find({
       where: {
         warehouse_id: shipment.warehouse_id,
       },
@@ -1084,8 +1148,6 @@ export class OrderService extends BaseUserService<Order> {
           }),
         );
     }
-
-
   }
 
   async editDeliveryPrice(request: EditDeliveryOrderRequest) {
