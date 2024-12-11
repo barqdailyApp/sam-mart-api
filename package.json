@@ -25,6 +25,7 @@
   "dependencies": {
     "@codebrew/nestjs-storage": "^0.1.7",
     "@faker-js/faker": "^8.0.2",
+    "@nestjs/cache-manager": "^2.3.0",
     "@nestjs/common": "^9.3.9",
     "@nestjs/config": "^2.3.1",
     "@nestjs/core": "^9.3.9",
@@ -43,7 +44,7 @@
     "@slynova/flydrive-s3": "^1.0.3",
     "axios": "^1.6.8",
     "bcrypt": "^5.1.0",
-    "cache-manager": "^5.1.7",
+    "cache-manager": "^5.7.6",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "compression": "^1.7.4",

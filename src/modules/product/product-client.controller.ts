@@ -1,4 +1,5 @@
 import {
+
   ConflictException,
   Controller,
   Get,
@@ -7,6 +8,7 @@ import {
   Post,
   Query,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { plainToClass } from 'class-transformer';
@@ -34,6 +36,7 @@ import {
   applyQuerySort,
 } from 'src/core/helpers/service-related.helper';
 import { Subcategory } from 'src/infrastructure/entities/category/subcategory.entity';
+import { CacheInterceptor } from '@nestjs/cache-manager/dist/interceptors';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -42,6 +45,7 @@ import { Subcategory } from 'src/infrastructure/entities/category/subcategory.en
   description: 'Language header: en, ar',
 })
 @ApiTags('Product')
+@UseInterceptors(CacheInterceptor)
 @Controller('product')
 export class ProductClientController {
   constructor(

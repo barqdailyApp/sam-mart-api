@@ -78,6 +78,7 @@ import {
 import { ProductChangesService } from './product-changes.service';
 import { UserResponse } from '../user/dto/responses/user.response';
 import { create } from 'domain';
+import { CacheInterceptor } from '@nestjs/cache-manager/dist/interceptors';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -86,6 +87,7 @@ import { create } from 'domain';
 })
 @ApiTags('Product')
 @UseGuards(JwtAuthGuard, RolesGuard)
+@UseInterceptors(CacheInterceptor)
 @Controller('product')
 @Roles(Role.ADMIN)
 export class ProductDashboardController {
