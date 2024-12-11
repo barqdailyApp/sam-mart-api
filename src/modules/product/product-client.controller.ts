@@ -37,6 +37,8 @@ import {
 } from 'src/core/helpers/service-related.helper';
 import { Subcategory } from 'src/infrastructure/entities/category/subcategory.entity';
 import { CacheInterceptor } from '@nestjs/cache-manager/dist/interceptors';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -52,6 +54,7 @@ export class ProductClientController {
     private readonly productClientService: ProductClientService,
     private readonly brandService: BrandService,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
+    @Inject(CACHE_MANAGER) private readonly cacheManager:Cache,
   ) {}
   @Get('all-products-for-client')
   async allProductsForClient(@Query() productClientFilter: ProductClientQuery) {
@@ -188,4 +191,9 @@ return new ActionResponse(this._i18nResponse.entity(result));
 
     return new ActionResponse(categories);
   }
+  @Get('cached-key')
+  async cachedKey() {
+    return new ActionResponse({ key: await this.cacheManager.store.keys() });
+  }
+  
 }
