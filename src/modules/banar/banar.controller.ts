@@ -19,6 +19,7 @@ import { BannerResponse } from './dto/response/banner.response';
 import { UpdateBannerRequest } from './dto/request/update-banner.request';
 import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
+import { CacheInterceptor } from '@nestjs/cache-manager/dist/interceptors';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -27,6 +28,7 @@ import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
     description: 'Language header: en, ar',
 })
 @ApiTags('Banar')
+@UseInterceptors(CacheInterceptor)
 @Controller('banar')
 export class BanarController {
     constructor(

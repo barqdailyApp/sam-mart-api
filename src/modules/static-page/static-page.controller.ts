@@ -1,6 +1,8 @@
 import {
     Body,
-    Controller, Get, Param, Patch, UseGuards
+   
+    Controller, Get, Param, Patch, UseGuards,
+    UseInterceptors
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
@@ -16,6 +18,7 @@ import { ActionResponse } from 'src/core/base/responses/action.response';
 import { StaticPage } from 'src/infrastructure/entities/static-pages/static-pages.entity';
 import { plainToInstance } from 'class-transformer';
 import { StaticPageResponse } from './dto/response/static-page.response';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 
 
 @ApiBearerAuth()
@@ -25,6 +28,7 @@ import { StaticPageResponse } from './dto/response/static-page.response';
     description: 'Language header: en, ar',
 })
 @ApiTags('Satic Page')
+@UseInterceptors(CacheInterceptor)
 @Controller('static-page')
 export class StaticPageController {
     constructor(

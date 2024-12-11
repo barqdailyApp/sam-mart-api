@@ -43,12 +43,14 @@ import { UpdateSectionCategoryRequest } from '../section/dto/requests/update-sec
 import { Response } from 'express';
 import { ImportCategoryRequest } from './dto/requests/import-category-request';
 import { toUrl } from 'src/core/helpers/file.helper';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 @ApiHeader({
   name: 'Accept-Language',
   required: false,
   description: 'Language header: en, ar',
 })
 @ApiTags('Category')
+@UseInterceptors(CacheInterceptor)
 @Controller('category')
 export class CategoryController {
   constructor(

@@ -45,6 +45,7 @@ import {
   MostHitSubcategoryReponseWithInfo,
 } from './dto/response/most-hit-subcategory.response';
 import { toUrl } from 'src/core/helpers/file.helper';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 
 @ApiHeader({
   name: 'Accept-Language',
@@ -52,6 +53,7 @@ import { toUrl } from 'src/core/helpers/file.helper';
   description: 'Language header: en, ar',
 })
 @ApiTags('Subcategory')
+@UseInterceptors(CacheInterceptor)
 @Controller('subcategory')
 @ApiBearerAuth()
 export class SubcategoryController {

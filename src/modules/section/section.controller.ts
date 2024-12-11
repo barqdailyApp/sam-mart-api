@@ -45,6 +45,7 @@ import { Roles } from '../authentication/guards/roles.decorator';
 import { ImportCategoryRequest } from '../category/dto/requests/import-category-request';
 import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 import { SectionResponse } from './dto/response/section.response';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 
 @ApiHeader({
   name: 'Accept-Language',
@@ -52,6 +53,7 @@ import { SectionResponse } from './dto/response/section.response';
   description: 'Language header: en, ar',
 })
 @ApiTags('Section')
+@UseInterceptors(CacheInterceptor)
 @Controller('section')
 export class SectionController {
   constructor(

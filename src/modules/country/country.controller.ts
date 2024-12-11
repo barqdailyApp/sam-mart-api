@@ -8,6 +8,8 @@ import {
   Put,
   Delete,
   Inject,
+  
+  UseInterceptors,
 } from '@nestjs/common';
 import { CountryService } from './country.service';
 import { ApiBearerAuth, ApiTags, ApiHeader } from '@nestjs/swagger';
@@ -20,6 +22,8 @@ import { plainToClass } from 'class-transformer';
 import { CountryResponse } from './dto/responses/country.response';
 import { I18nResponse } from 'src/core/helpers/i18n.helper';
 import { ActionResponse } from 'src/core/base/responses/action.response';
+
+import { CacheInterceptor } from '@nestjs/cache-manager';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -27,6 +31,7 @@ import { ActionResponse } from 'src/core/base/responses/action.response';
   description: 'Language header: en, ar',
 })
 @ApiTags('Country')
+@UseInterceptors(CacheInterceptor)
 @Controller('country')
 export class CountryController {
   constructor(

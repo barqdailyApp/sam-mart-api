@@ -1,10 +1,10 @@
-import { CacheModule } from "@nestjs/cache-manager/dist";
+import { CacheModule } from "@nestjs/cache-manager";
 
 
 export default () => (
   CacheModule.register({
     isGlobal: true,
-    ttl: 5, // seconds
-    max: 10, 
+    ttl: 0, // seconds
+    max: 1000, 
   })
 );
