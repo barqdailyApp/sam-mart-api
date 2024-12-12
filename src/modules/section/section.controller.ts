@@ -115,7 +115,6 @@ export class SectionController {
     return new ActionResponse(section);
   }
 
-
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
@@ -173,16 +172,18 @@ export class SectionController {
   @CacheKey('sections')
   @ApiQuery({ name: 'user_id', type: String, required: false })
   async getSections(@Query('user_id') userId?: string) {
-    const sections=  (await this.sectionService.getSections(userId)).map((e) => {
-      e.logo = toUrl(e.logo);
-     
-      const data=plainToInstance(SectionResponse, {...e, delivery_type_list:e.delivery_type});
-      return data;
-    });
-    return new ActionResponse(
-      sections
-    
+    const sections = (await this.sectionService.getSections(userId)).map(
+      (e) => {
+        e.logo = toUrl(e.logo);
+
+        const data = plainToInstance(SectionResponse, {
+          ...e,
+          delivery_type_list: e.delivery_type,
+        });
+        return data;
+      },
     );
+    return new ActionResponse(sections);
   }
 
   @ApiProperty({ required: false })
@@ -203,7 +204,6 @@ export class SectionController {
       page,
     );
     const data = this._i18nResponse.entity(categories);
-    
 
     return new PaginatedResponse(
       data.section_categories[0].map(
@@ -216,7 +216,11 @@ export class SectionController {
           }),
       ),
       {
-        meta: { total: data.section_categories[1] || 0, limit: limit, page: page },
+        meta: {
+          total: data.section_categories[1] || 0,
+          limit: limit,
+          page: page,
+        },
       },
     );
   }

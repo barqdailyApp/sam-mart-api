@@ -87,7 +87,6 @@ import { CacheInterceptor } from '@nestjs/cache-manager/dist/interceptors';
 })
 @ApiTags('Product')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@UseInterceptors(CacheInterceptor)
 @Controller('product')
 @Roles(Role.ADMIN)
 export class ProductDashboardController {

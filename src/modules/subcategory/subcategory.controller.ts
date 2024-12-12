@@ -53,7 +53,7 @@ import { CacheInterceptor } from '@nestjs/cache-manager';
   description: 'Language header: en, ar',
 })
 @ApiTags('Subcategory')
-@UseInterceptors(CacheInterceptor)
+
 @Controller('subcategory')
 @ApiBearerAuth()
 export class SubcategoryController {

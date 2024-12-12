@@ -86,7 +86,7 @@ export class CategoryController {
     req.logo = logo;
     return new ActionResponse(await this.categoryService.updateCategory(req));
   }
-  @UseInterceptors(CacheInterceptor)
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()

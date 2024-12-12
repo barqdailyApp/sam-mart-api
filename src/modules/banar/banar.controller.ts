@@ -50,7 +50,6 @@ export class BanarController {
         const result = plainToInstance(BannerResponse, banner, { excludeExtraneousValues: true })
         return new ActionResponse<BannerResponse>(result);
     }
-    @UseInterceptors(CacheInterceptor)
     @Roles(Role.ADMIN)
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Get()
@@ -70,7 +69,7 @@ export class BanarController {
         }
         return new ActionResponse<BannerResponse[]>(result);
     }
-    @UseInterceptors(CacheInterceptor)
+   
     @Get("/guest")
     async getGuestBanars(
         @Query() query: PaginatedRequest
@@ -88,7 +87,7 @@ export class BanarController {
         }
         return new ActionResponse<BannerResponse[]>(result);
     }
-    @UseInterceptors(CacheInterceptor)
+   
     @Get("/Popup/guest")
     async getGuestPopup(
        

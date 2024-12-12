@@ -52,8 +52,9 @@ export class SectionService extends BaseService<Section> {
         ? null
         : await this.user_repo.findOne({ where: { id: user_id } });
     const sections = await this.section_repo.find({
-      where: { is_active: true },
-      order: { order_by: 'ASC' },
+      where: { is_active: true ,section_categories:{is_active:true}},
+      order: { order_by: 'ASC' ,section_categories:{order_by:'ASC'}},
+      relations: { section_categories: { category: true } },
     });
 
     if (!user)
