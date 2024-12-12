@@ -45,7 +45,7 @@ import { Roles } from '../authentication/guards/roles.decorator';
 import { ImportCategoryRequest } from '../category/dto/requests/import-category-request';
 import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 import { SectionResponse } from './dto/response/section.response';
-import { CacheInterceptor } from '@nestjs/cache-manager';
+import { CacheInterceptor, CacheKey } from '@nestjs/cache-manager';
 
 @ApiHeader({
   name: 'Accept-Language',
@@ -54,6 +54,7 @@ import { CacheInterceptor } from '@nestjs/cache-manager';
 })
 @ApiTags('Section')
 @Controller('section')
+@UseInterceptors(CacheInterceptor)
 export class SectionController {
   constructor(
     private readonly sectionService: SectionService,
@@ -169,7 +170,7 @@ export class SectionController {
   }
 
   @Get()
-  @UseInterceptors(CacheInterceptor)
+  @CacheKey('sections')
   @ApiQuery({ name: 'user_id', type: String, required: false })
   async getSections(@Query('user_id') userId?: string) {
     const sections=  (await this.sectionService.getSections(userId)).map((e) => {
