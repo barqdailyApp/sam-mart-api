@@ -5,7 +5,7 @@ import { redisStore } from "cache-manager-redis-store";
 export default () => (
   CacheModule.register({
     isGlobal: true,
-    ttl: 2000, // seconds
+    ttl: 0, // seconds
     max: 100, 
     store:redisStore,
     host: "localhost",

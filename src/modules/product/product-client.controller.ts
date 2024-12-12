@@ -47,7 +47,6 @@ import { Cache } from 'cache-manager';
   description: 'Language header: en, ar',
 })
 @ApiTags('Product')
-@UseInterceptors(CacheInterceptor)
 @Controller('product')
 export class ProductClientController {
   constructor(
