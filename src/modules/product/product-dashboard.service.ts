@@ -473,8 +473,8 @@ export class ProductDashboardService {
         historyRecords.push({
           product: product,
           fieldChanged: key,
-          oldValue: product[key].toString(),
-          newValue: value.toString(),
+          oldValue: product[key]?.toString(),
+            newValue: value.toString(),
            user_id: this.request.user.id,
         });
         product[key] = value;
