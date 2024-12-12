@@ -469,7 +469,7 @@ export class ProductDashboardService {
     );
     const historyRecords = [];
     for (const [key, value] of Object.entries(updateProductRequest)) {
-      if (product[key].toString() !== value.toString()) {
+      if (product[key]?.toString() !== value?.toString()) {
         historyRecords.push({
           product: product,
           fieldChanged: key,
