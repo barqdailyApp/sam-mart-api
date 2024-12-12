@@ -51,7 +51,7 @@ else value ='SCHEDULED&FAST';
   @Transform(( value ) => {
     return value.obj?.section_categories?.map((category) => {
       return new CategoryResponse({
-        ...category,id:category.id,category_id:category.category.id});
+        ...category.category,id:category.id,category_id:category.category.id});
     });
   })
   categories:CategoryResponse[];
