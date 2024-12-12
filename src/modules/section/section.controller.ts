@@ -53,7 +53,6 @@ import { CacheInterceptor } from '@nestjs/cache-manager';
   description: 'Language header: en, ar',
 })
 @ApiTags('Section')
-@UseInterceptors(CacheInterceptor)
 @Controller('section')
 export class SectionController {
   constructor(
@@ -115,6 +114,7 @@ export class SectionController {
     return new ActionResponse(section);
   }
 
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
@@ -169,6 +169,7 @@ export class SectionController {
   }
 
   @Get()
+  @UseInterceptors(CacheInterceptor)
   @ApiQuery({ name: 'user_id', type: String, required: false })
   async getSections(@Query('user_id') userId?: string) {
     const sections=  (await this.sectionService.getSections(userId)).map((e) => {

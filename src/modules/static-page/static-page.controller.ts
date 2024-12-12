@@ -1,8 +1,11 @@
 import {
-    Body,
-   
-    Controller, Get, Param, Patch, UseGuards,
-    UseInterceptors
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
@@ -18,48 +21,51 @@ import { ActionResponse } from 'src/core/base/responses/action.response';
 import { StaticPage } from 'src/infrastructure/entities/static-pages/static-pages.entity';
 import { plainToInstance } from 'class-transformer';
 import { StaticPageResponse } from './dto/response/static-page.response';
-import { CacheInterceptor } from '@nestjs/cache-manager';
-
+import { CacheInterceptor, CacheKey } from '@nestjs/cache-manager';
 
 @ApiBearerAuth()
 @ApiHeader({
-    name: 'Accept-Language',
-    required: false,
-    description: 'Language header: en, ar',
+  name: 'Accept-Language',
+  required: false,
+  description: 'Language header: en, ar',
 })
 @ApiTags('Satic Page')
-@UseInterceptors(CacheInterceptor)
 @Controller('static-page')
 export class StaticPageController {
-    constructor(
-        private readonly staticPageService: StaticPageService,
-        private readonly _i18nResponse: I18nResponse,
-    ) { }
+  constructor(
+    private readonly staticPageService: StaticPageService,
+    private readonly _i18nResponse: I18nResponse,
+  ) {}
 
-    @Patch()
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(Role.ADMIN)
-    async updateStaticPage(@Body() req: UpdateStaticPageRequest): Promise<ActionResponse<StaticPage>> {
-        const result = await this.staticPageService.updateStaticPageByType(req);
-        return new ActionResponse<StaticPage>(result);
-    }
-    @Get("whats-app")
-    async  getWhatsAppStaticPage() {
-        return new ActionResponse({support:"+967734220888",shein:null});
-        
-    }
+  @Patch()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  async updateStaticPage(
+    @Body() req: UpdateStaticPageRequest,
+  ): Promise<ActionResponse<StaticPage>> {
+    const result = await this.staticPageService.updateStaticPageByType(req);
+    return new ActionResponse<StaticPage>(result);
+  }
+ 
+  @Get('whats-app')
+  @UseInterceptors(CacheInterceptor)
+  async getWhatsAppStaticPage() {
+    return new ActionResponse({ support: '+967734220888', shein: null });
+  }
 
-    @Get("/:static_page_type")
-    async getStaticPage(@Param() param: GetStaticPage): Promise<ActionResponse<StaticPageResponse>> {
-        let staticPage = await this.staticPageService.getStaticPageByType(param.static_page_type);
-        staticPage = this._i18nResponse.entity(staticPage)
-        
-        const result = plainToInstance(StaticPageResponse, staticPage, {
-            excludeExtraneousValues: true
-        });
-        return new ActionResponse<StaticPageResponse>(result);
-    }
+  @Get('/:static_page_type')
+  @UseInterceptors(CacheInterceptor)
+  async getStaticPage(
+    @Param() param: GetStaticPage,
+  ): Promise<ActionResponse<StaticPageResponse>> {
+    let staticPage = await this.staticPageService.getStaticPageByType(
+      param.static_page_type,
+    );
+    staticPage = this._i18nResponse.entity(staticPage);
 
-    
-
+    const result = plainToInstance(StaticPageResponse, staticPage, {
+      excludeExtraneousValues: true,
+    });
+    return new ActionResponse<StaticPageResponse>(result);
+  }
 }

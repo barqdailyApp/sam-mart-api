@@ -98,7 +98,7 @@ export class WarehouseService extends BaseService<Warehouse> {
         product: { product_images: true },
 
         product_measurement: { measurement_unit: true,product_category_prices:true },
-      },
+      },withDeleted:true,
       skip: (query.page - 1) * query.limit,
       take: query.limit,
     });

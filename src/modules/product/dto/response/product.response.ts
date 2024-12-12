@@ -23,6 +23,9 @@ export class ProductResponse {
 
   @Expose() readonly is_active: boolean;
 
+  
+  @Expose() readonly barcode: number;
+
   @Expose() readonly is_recovered: boolean;
 
   @Expose() readonly created_at: Date;

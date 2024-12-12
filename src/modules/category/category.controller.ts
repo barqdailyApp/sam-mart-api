@@ -50,7 +50,7 @@ import { CacheInterceptor } from '@nestjs/cache-manager';
   description: 'Language header: en, ar',
 })
 @ApiTags('Category')
-@UseInterceptors(CacheInterceptor)
+
 @Controller('category')
 export class CategoryController {
   constructor(
@@ -86,7 +86,7 @@ export class CategoryController {
     req.logo = logo;
     return new ActionResponse(await this.categoryService.updateCategory(req));
   }
-
+  @UseInterceptors(CacheInterceptor)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()

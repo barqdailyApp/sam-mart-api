@@ -36,8 +36,8 @@ import {
   applyQuerySort,
 } from 'src/core/helpers/service-related.helper';
 import { Subcategory } from 'src/infrastructure/entities/category/subcategory.entity';
-import { CacheInterceptor } from '@nestjs/cache-manager/dist/interceptors';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { CacheInterceptor } from '@nestjs/cache-manager';
+import { CACHE_MANAGER, CacheKey } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 
 @ApiBearerAuth()
@@ -56,6 +56,7 @@ export class ProductClientController {
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
     @Inject(CACHE_MANAGER) private readonly cacheManager:Cache,
   ) {}
+  @UseInterceptors(CacheInterceptor)
   @Get('all-products-for-client')
   async allProductsForClient(@Query() productClientFilter: ProductClientQuery) {
     const { limit, page } = productClientFilter;
@@ -76,6 +77,7 @@ export class ProductClientController {
 
     return new ActionResponse(pageDto);
   }
+  @UseInterceptors(CacheInterceptor)
   @Get('all-products-subcategories-client')
   async allProductsSubcategoriesClient(@Query() productClientFilter: ProductClientQuery) {
     const category= await this.productClientService.getSubCategoryProductsForClient(productClientFilter);
@@ -94,7 +96,7 @@ const products=  element.product_sub_categories.map(product_sub_category => {
 
 return new ActionResponse(this._i18nResponse.entity(result));
   }
-
+  @UseInterceptors(CacheInterceptor)
   @Get('all-products-offers-for-client')
   async allProductsOffersForClient(
     @Query() productClientFilter: ProductClientQuery,
@@ -162,6 +164,7 @@ return new ActionResponse(this._i18nResponse.entity(result));
     return new ActionResponse(product);
   }
 
+  @UseInterceptors(CacheInterceptor)
   @Get('get-brands-client')
   async getBrandsClient(@Query() query: PaginatedRequest) {
     applyQuerySort(query, 'order=ASC');
@@ -177,7 +180,7 @@ return new ActionResponse(this._i18nResponse.entity(result));
       meta: { total, page: query.page, limit: query.limit },
     });
   }
-
+  @UseInterceptors(CacheInterceptor)
   @Get('get-brands-categories')
   async getBrandsCategories(
     @Query('brand_id') brand_id: string,
@@ -193,7 +196,8 @@ return new ActionResponse(this._i18nResponse.entity(result));
   }
   @Get('cached-key')
   async cachedKey() {
-    return new ActionResponse({ key: await this.cacheManager.store.keys() });
+    const key = await this.cacheManager.store.keys();
+    return new ActionResponse(key);
   }
   
 }
