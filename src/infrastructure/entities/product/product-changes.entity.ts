@@ -20,10 +20,10 @@ export class ProductChanges extends OwnedEntity {
   @Column()
   fieldChanged: string;
 
-  @Column()
+  @Column({ nullable: true })
   oldValue: string;
 
-  @Column()
+  @Column({ nullable: true })
   newValue: string;
 
 
