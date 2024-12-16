@@ -43,7 +43,7 @@ export class WarehouseProductRespone {
     this.barcode = data.product.barcode;
     this.description_ar = data.product.description_ar;
     this.description_en = data.product.description_en;
-    this.price = data.product_measurement.product_category_prices[0].price;
+    this.price = data.product_measurement.product_category_prices[0]?.price;
     this.logo = toUrl(data.product.product_images.find((e) => e.is_logo).url);
     this.quantity = data.quantity;
     this.product_measurement = {
