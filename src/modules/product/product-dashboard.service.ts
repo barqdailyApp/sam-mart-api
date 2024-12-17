@@ -113,7 +113,8 @@ export class ProductDashboardService {
     @InjectRepository(Warehouse)
     private readonly warehouse_repo: Repository<Warehouse>,
 
-    @InjectRepository(ProductChanges) private readonly  product_changes_repo: Repository<ProductChanges>,
+    @InjectRepository(ProductChanges)
+    private readonly product_changes_repo: Repository<ProductChanges>,
 
     @InjectRepository(WarehouseProducts)
     private readonly warehouse_products_repo: Repository<WarehouseProducts>,
@@ -474,14 +475,13 @@ export class ProductDashboardService {
           product: product,
           fieldChanged: key,
           oldValue: product[key]?.toString(),
-            newValue: value.toString(),
-           user_id: this.request.user.id,
+          newValue: value.toString(),
+          user_id: this.request.user.id,
         });
         product[key] = value;
       }
     }
 
-   
     await this.productRepository.save(product);
 
     if (historyRecords.length) {
@@ -1374,7 +1374,14 @@ export class ProductDashboardService {
         ? { warehouse_id, quantity: LessThanOrEqual(quantity) }
         : { warehouse_id },
       relations: {
-        product: true,
+        product: {
+          product_sub_categories: {
+            category_subCategory: {
+              subcategory: true,
+              section_category: { category: true },
+            },
+          },
+        },
         product_measurement: { measurement_unit: true },
       },
       order: { product: { name_ar: 'ASC' } },
@@ -1386,7 +1393,12 @@ export class ProductDashboardService {
         barcode: product.product.barcode,
         name_ar: product.product.name_ar,
         name_en: product.product.name_en,
-
+        subcategory:
+          product.product.product_sub_categories[0]?.category_subCategory
+            .subcategory.name_ar,
+        category:
+          product.product.product_sub_categories[0]?.category_subCategory
+            .section_category.category.name_ar,
         quatntity: product.quantity,
         measurement_units_ar:
           product.product_measurement.measurement_unit.name_ar,
