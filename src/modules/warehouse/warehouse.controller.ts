@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Header,
+  Inject,
   Param,
   Patch,
   Post,
@@ -37,7 +38,8 @@ import { WarehouseProductsQuery } from './dto/requests/warehouse-products-query'
 import { PageMetaDto } from 'src/core/helpers/pagination/page-meta.dto';
 import { PageDto } from 'src/core/helpers/pagination/page.dto';
 import { WarehouseProductRespone } from './dto/response/warehouse-products-response';
-
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from '@nestjs/cache-manager';
 @ApiBearerAuth()
 @ApiTags('Warehouse')
 @ApiHeader({
@@ -51,6 +53,7 @@ export class WarehouseController {
   constructor(
     private readonly warehouseService: WarehouseService,
     private readonly _i18nResponse: I18nResponse,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache
   ) {}
   @Roles(Role.ADMIN)
   @Get()
@@ -74,6 +77,7 @@ export class WarehouseController {
   @Roles(Role.ADMIN)
   @Post()
   async create(@Body() request: CreateWarehouseRequest) {
+    this.cacheManager.reset();
     return new ActionResponse(
       await this.warehouseService.create(plainToInstance(Warehouse, request)),
     );
@@ -99,6 +103,7 @@ export class WarehouseController {
   @Roles(Role.ADMIN)
   @Post('operation')
   async createWarehouseOperation(@Body() request: WarehouseOperationRequest) {
+    this.cacheManager.reset();
     const response = await this.warehouseService.CreateWAarehouseOperation(
       request,
     );
@@ -111,6 +116,7 @@ export class WarehouseController {
     @Body() request: UpdateWarehouseRequest,
     @Query('id') id: string,
   ) {
+    this.cacheManager.reset();
     return new ActionResponse(
       await this.warehouseService.updateWarehouse(id, request),
     );
@@ -119,6 +125,7 @@ export class WarehouseController {
   @Roles(Role.ADMIN)
   @Delete('/:id')
   async delete(@Query('id') id: string) {
+    this.cacheManager.reset();
     return new ActionResponse(await this.warehouseService.softDelete(id));
   }
 
@@ -128,6 +135,7 @@ export class WarehouseController {
     @Param('to_warehouse_id') to_warehouse_id: string,
     @Body() body: WarehouseTransferProductsRequest,
   ) {
+    this.cacheManager.reset();
     return new ActionResponse(
       await this.warehouseService.transferWarehouseProducts(
         from_warehouse_id,
@@ -143,6 +151,7 @@ export class WarehouseController {
     @Param('warehouse_id') warehouse_id: string,
     @Param('driver_id') driver_id: string,
   ) {
+    this.cacheManager.reset();
     return new ActionResponse(
       await this.warehouseService.attachDriverToWarehouse(
         driver_id,

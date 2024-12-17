@@ -45,7 +45,8 @@ import { Roles } from '../authentication/guards/roles.decorator';
 import { ImportCategoryRequest } from '../category/dto/requests/import-category-request';
 import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 import { SectionResponse } from './dto/response/section.response';
-import { CacheInterceptor, CacheKey } from '@nestjs/cache-manager';
+import { CACHE_MANAGER, CacheInterceptor, CacheKey } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @ApiHeader({
   name: 'Accept-Language',
@@ -59,6 +60,7 @@ export class SectionController {
   constructor(
     private readonly sectionService: SectionService,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -72,6 +74,7 @@ export class SectionController {
     @UploadedFile(new UploadValidator().build())
     logo: Express.Multer.File,
   ) {
+    this.cacheManager.reset();
     req.logo = logo;
     return new ActionResponse(await this.sectionService.createSection(req));
   }
@@ -126,7 +129,9 @@ export class SectionController {
     @UploadedFile(new UploadValidator().build())
     logo: Express.Multer.File,
   ) {
+    this.cacheManager.reset();
     req.logo = logo;
+
     return new ActionResponse(await this.sectionService.updateSection(req));
   }
 
@@ -135,6 +140,7 @@ export class SectionController {
   @ApiBearerAuth()
   @Delete('/:id')
   async deleteSection(@Param('id') id: string) {
+    this.cacheManager.reset();
     return new ActionResponse(await this.sectionService.delete(id));
   }
 
@@ -143,6 +149,7 @@ export class SectionController {
   @ApiBearerAuth()
   @Post('/add-category')
   async addCategoryToSection(@Body() req: SectionCategoryRequest) {
+    this.cacheManager.reset();
     return new ActionResponse(
       await this.sectionService.addCategoryToSection(req),
     );
@@ -153,6 +160,7 @@ export class SectionController {
   @ApiBearerAuth()
   @Put('/section-category')
   async updateSectionCategory(@Body() req: UpdateSectionCategoryRequest) {
+    this.cacheManager.reset();
     return new ActionResponse(
       await this.sectionService.updatSectionCategory(req),
     );
@@ -163,6 +171,7 @@ export class SectionController {
   @ApiBearerAuth()
   @Delete('/section-category/:id')
   async deleteSectionCategory(@Param('id') id: string) {
+    this.cacheManager.reset();
     return new ActionResponse(
       await this.sectionService.deleteSectionCategory(id),
     );

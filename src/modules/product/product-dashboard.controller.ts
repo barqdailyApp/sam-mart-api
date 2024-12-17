@@ -79,6 +79,8 @@ import { ProductChangesService } from './product-changes.service';
 import { UserResponse } from '../user/dto/responses/user.response';
 import { create } from 'domain';
 import { CacheInterceptor } from '@nestjs/cache-manager/dist/interceptors';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -95,12 +97,13 @@ export class ProductDashboardController {
     private readonly productClientService: ProductClientService,
     private readonly brandService: BrandService,
     private readonly productChangesService: ProductChangesService,
-
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
   ) {}
 
   @Post('create-product')
   async createProduct(@Body() createProductRequest: CreateProductRequest) {
+    this.cacheManager.reset();
     const product = await this.productDashboardService.createProduct(
       createProductRequest,
     );
@@ -114,6 +117,7 @@ export class ProductDashboardController {
     @Param('product_category_price_id') product_category_price_id: string,
     @Body() createProductOfferRequest: CreateProductOfferRequest,
   ) {
+    this.cacheManager.reset();
     const product = await this.productDashboardService.createProductOffer(
       product_category_price_id,
       createProductOfferRequest,
@@ -125,6 +129,7 @@ export class ProductDashboardController {
     @Param('offer_id') offer_id: string,
     @Body() updateProductOfferRequest: UpdateProductOfferRequest,
   ) {
+    this.cacheManager.reset();
     const product = await this.productDashboardService.updateProductOffer(
       offer_id,
       updateProductOfferRequest,
@@ -133,6 +138,7 @@ export class ProductDashboardController {
   }
   @Delete('delete-product-offer/:offer_id')
   async deleteProductOffer(@Param('offer_id') offer_id: string) {
+    this.cacheManager.reset();
     const product = await this.productDashboardService.deleteProductOffer(
       offer_id,
     );
@@ -147,6 +153,7 @@ export class ProductDashboardController {
     @Body() createSingleImageRequest: CreateSingleImageRequest,
     @UploadedFile() file: Express.Multer.File,
   ) {
+    this.cacheManager.reset();
     createSingleImageRequest.file = file;
     const product = await this.productDashboardService.addProductImage(
       id,
@@ -160,6 +167,7 @@ export class ProductDashboardController {
     @Param('product_id') product_id: string,
     @Body() createProductMeasurementRequest: CreateProductMeasurementRequest,
   ) {
+    this.cacheManager.reset();
     const product = await this.productDashboardService.addProductMeasurement(
       product_id,
       createProductMeasurementRequest,
@@ -172,6 +180,7 @@ export class ProductDashboardController {
     @Param('product_id') product_id: string,
     @Body() updateProductRequest: UpdateProductRequest,
   ) {
+    this.cacheManager.reset();
     const product = await this.productDashboardService.updateProduct(
       product_id,
       updateProductRequest,
@@ -186,6 +195,7 @@ export class ProductDashboardController {
     @Param('product_measurement_unit_id') product_measurement_unit_id: string,
     @Body() updateProductMeasurementRequest: UpdateProductMeasurementRequest,
   ) {
+    this.cacheManager.reset();
     const product = await this.productDashboardService.updateProductMeasurement(
       product_id,
       product_measurement_unit_id,
@@ -199,6 +209,7 @@ export class ProductDashboardController {
     @Param('product_id') product_id: string,
     @Param('image_id') image_id: string,
   ) {
+    this.cacheManager.reset();
     const product = await this.productDashboardService.updateProductImage(
       product_id,
       image_id,
@@ -210,6 +221,7 @@ export class ProductDashboardController {
   async allProductsForDashboard(
     @Query() productsDashboardQuery: ProductsDashboardQuery,
   ) {
+ 
     const { limit, page } = productsDashboardQuery;
 
     const { products, total } =
@@ -318,6 +330,7 @@ export class ProductDashboardController {
 
   @Delete('delete-Product/:product_id')
   async deleteProduct(@Param('product_id') id: string) {
+    this.cacheManager.reset();
     const product = await this.productDashboardService.deleteProduct(id);
     return new ActionResponse(product);
   }
@@ -327,6 +340,7 @@ export class ProductDashboardController {
     @Param('product_id') product_id: string,
     @Param('image_id') image_id: string,
   ) {
+    this.cacheManager.reset();
     const product = await this.productDashboardService.deleteProductImage(
       product_id,
       image_id,
@@ -338,6 +352,7 @@ export class ProductDashboardController {
     @Param('product_id') product_id: string,
     @Param('product_measurement_id') product_measurement_id: string,
   ) {
+    this.cacheManager.reset();
     const product = await this.productDashboardService.deleteProductMeasurement(
       product_id,
       product_measurement_id,
@@ -443,6 +458,7 @@ export class ProductDashboardController {
     @UploadedFile(new UploadValidator().build())
     logo: Express.Multer.File,
   ) {
+    this.cacheManager.reset();
     req.logo = logo;
     const products = await this.productDashboardService.CreateBrand(req);
     return new ActionResponse(products);
@@ -458,6 +474,7 @@ export class ProductDashboardController {
     @UploadedFile(new UploadValidator().build())
     logo: Express.Multer.File,
   ) {
+    this.cacheManager.reset();
     req.logo = logo;
     const products = await this.productDashboardService.updateBrand(req);
     return new ActionResponse(products);
@@ -468,6 +485,7 @@ export class ProductDashboardController {
   @ApiBearerAuth()
   @Delete('delete-brands/:id')
   async deleteBrand(@Param('id') id: string) {
+    this.cacheManager.reset();
     const products = await this.brandService.softDelete(id);
     return new ActionResponse(products);
   }
@@ -477,6 +495,7 @@ export class ProductDashboardController {
   @ApiBearerAuth()
   @Post('link-brand-proudct')
   async linkBrand(@Body() req: LinkBrandProuductRequest) {
+    this.cacheManager.reset();
     const products = await this.brandService.linkBrandToProduct(req);
     return new ActionResponse(products);
   }

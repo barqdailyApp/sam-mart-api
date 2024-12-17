@@ -6,6 +6,7 @@ import {
   Delete,
   Get,
   Header,
+  Inject,
   Param,
   Post,
   Put,
@@ -43,7 +44,8 @@ import { UpdateSectionCategoryRequest } from '../section/dto/requests/update-sec
 import { Response } from 'express';
 import { ImportCategoryRequest } from './dto/requests/import-category-request';
 import { toUrl } from 'src/core/helpers/file.helper';
-import { CacheInterceptor } from '@nestjs/cache-manager';
+import { CACHE_MANAGER, CacheInterceptor } from '@nestjs/cache-manager';
+import { Cache } from '@nestjs/cache-manager';
 @ApiHeader({
   name: 'Accept-Language',
   required: false,
@@ -56,6 +58,7 @@ export class CategoryController {
   constructor(
     private readonly categoryService: CategoryService,
     private readonly _i18nResponse: I18nResponse,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -69,6 +72,7 @@ export class CategoryController {
     @UploadedFile(new UploadValidator().build())
     logo: Express.Multer.File,
   ) {
+    this.cacheManager.reset();
     req.logo = logo;
     return new ActionResponse(await this.categoryService.createCategory(req));
   }
@@ -83,6 +87,7 @@ export class CategoryController {
     @UploadedFile(new UploadValidator().build())
     logo: Express.Multer.File,
   ) {
+    this.cacheManager.reset();
     req.logo = logo;
     return new ActionResponse(await this.categoryService.updateCategory(req));
   }
@@ -175,6 +180,7 @@ export class CategoryController {
   @ApiBearerAuth()
   @Post('/add-subcategory')
   async addSubcategoryToCategory(@Body() req: CategorySubcategoryRequest) {
+    this.cacheManager.reset();
     return new ActionResponse(
       await this.categoryService.addSubcategoryToCategory(req),
     );
@@ -185,6 +191,7 @@ export class CategoryController {
   @ApiBearerAuth()
   @Put('/category-subcategory')
   async updateSectionCategory(@Body() req: UpdateSectionCategoryRequest) {
+    this.cacheManager.reset();
     return new ActionResponse(
       await this.categoryService.updateCategorySubcategory(req),
     );
@@ -195,6 +202,7 @@ export class CategoryController {
   @ApiBearerAuth()
   @Delete('/category-subcategory/:id')
   async deleteSectionCategory(@Param('id') id: string) {
+    this.cacheManager.reset();
     return new ActionResponse(
       await this.categoryService.deleteCategorySubcategory(id),
     );
@@ -205,6 +213,7 @@ export class CategoryController {
   @ApiBearerAuth()
   @Delete('/:id')
   async deleteCategory(@Param('id') id: string) {
+    this.cacheManager.reset();
     const category = await this.categoryService._repo.findOne({
       where: {
         id,

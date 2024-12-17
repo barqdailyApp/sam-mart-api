@@ -6,6 +6,7 @@ import {
   Delete,
   Get,
   Header,
+  Inject,
   Param,
   Post,
   Put,
@@ -45,7 +46,8 @@ import {
   MostHitSubcategoryReponseWithInfo,
 } from './dto/response/most-hit-subcategory.response';
 import { toUrl } from 'src/core/helpers/file.helper';
-import { CacheInterceptor } from '@nestjs/cache-manager';
+import { CACHE_MANAGER, CacheInterceptor } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @ApiHeader({
   name: 'Accept-Language',
@@ -60,6 +62,7 @@ export class SubcategoryController {
   constructor(
     private readonly subcategoryService: SubcategoryService,
     private readonly _i18nResponse: I18nResponse,
+     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
@@ -71,6 +74,7 @@ export class SubcategoryController {
     @UploadedFile(new UploadValidator().build())
     logo: Express.Multer.File,
   ) {
+    this.cacheManager.reset();
     req.logo = logo;
     return new ActionResponse(
       await this.subcategoryService.createSubcategory(req),
@@ -143,6 +147,7 @@ export class SubcategoryController {
     @UploadedFile(new UploadValidator().build())
     logo: Express.Multer.File,
   ) {
+    this.cacheManager.reset();
     req.logo = logo;
     return new ActionResponse(
       await this.subcategoryService.updateSubCategory(req),
@@ -152,6 +157,7 @@ export class SubcategoryController {
   @Roles(Role.ADMIN)
   @Delete('/:sub_category_id')
   async delete(@Param('sub_category_id') id: string) {
+    this.cacheManager.reset();
     return new ActionResponse(
       await this.subcategoryService.deleteSubCategory(id),
     );
