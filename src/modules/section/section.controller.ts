@@ -55,7 +55,7 @@ import { Cache } from 'cache-manager';
 })
 @ApiTags('Section')
 @Controller('section')
-@UseInterceptors(CacheInterceptor)
+
 export class SectionController {
   constructor(
     private readonly sectionService: SectionService,
