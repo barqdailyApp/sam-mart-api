@@ -178,7 +178,7 @@ export class SectionController {
   }
 
   @Get()
-  @CacheKey('sections')
+  // @CacheKey('sections')
   @ApiQuery({ name: 'user_id', type: String, required: false })
   async getSections(@Query('user_id') userId?: string) {
     const sections = (await this.sectionService.getSections(userId)).map(
