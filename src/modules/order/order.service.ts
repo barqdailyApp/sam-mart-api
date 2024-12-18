@@ -93,60 +93,48 @@ export class OrderService extends BaseUserService<Order> {
     try {
       switch (order.payment_method) {
         case PaymentMethodEnum.JAIB: {
-          try {
-            await this.transactionService.makeTransaction(
-              new MakeTransactionRequest({
-                amount: order.total_price,
-                type: TransactionTypes.ORDER_PAYMENT,
-                order_id: order.id,
-                wallet_type: 'JAIB',
-              }),
-            );
-          } catch (e) {
-            console.log(e);
-          }
+          await this.transactionService.makeTransaction(
+            new MakeTransactionRequest({
+              amount: order.total_price,
+              type: TransactionTypes.ORDER_PAYMENT,
+              order_id: order.id,
+              wallet_type: 'JAIB',
+            }),
+          );
+          break;
         }
         case PaymentMethodEnum.JAWALI: {
-          try {
-            await this.transactionService.makeTransaction(
-              new MakeTransactionRequest({
-                amount: order.total_price,
-                type: TransactionTypes.ORDER_PAYMENT,
-                order_id: order.id,
-                wallet_type: 'JAWALI',
-              }),
-            );
-          } catch (e) {
-            console.log(e);
-          }
+          await this.transactionService.makeTransaction(
+            new MakeTransactionRequest({
+              amount: order.total_price,
+              type: TransactionTypes.ORDER_PAYMENT,
+              order_id: order.id,
+              wallet_type: 'JAWALI',
+            }),
+          );
+          break;
         }
         case PaymentMethodEnum.KURAIMI: {
-          try {
-            await this.transactionService.makeTransaction(
-              new MakeTransactionRequest({
-                amount: order.total_price,
-                type: TransactionTypes.ORDER_PAYMENT,
-                order_id: order.id,
-                wallet_type: 'KURAIMI',
-              }),
-            );
-          } catch (e) {
-            console.log(e);
-          }
+          await this.transactionService.makeTransaction(
+            new MakeTransactionRequest({
+              amount: order.total_price,
+              type: TransactionTypes.ORDER_PAYMENT,
+              order_id: order.id,
+              wallet_type: 'KURAIMI',
+            }),
+          );
+          break;
         }
         case PaymentMethodEnum.WALLET: {
-          try {
-            await this.transactionService.makeTransaction(
-              new MakeTransactionRequest({
-                amount: order.total_price,
-                type: TransactionTypes.ORDER_PAYMENT,
-                order_id: order.id,
-                wallet_type: 'BARQ_WALLET',
-              }),
-            );
-          } catch (e) {
-            console.log(e);
-          }
+          await this.transactionService.makeTransaction(
+            new MakeTransactionRequest({
+              amount: order.total_price,
+              type: TransactionTypes.ORDER_PAYMENT,
+              order_id: order.id,
+              wallet_type: 'BARQ_WALLET',
+            }),
+          );
+          break;
         }
       }
     } catch (e) {
