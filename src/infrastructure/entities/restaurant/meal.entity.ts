@@ -32,7 +32,7 @@ export class Meal extends AuditableEntity{
 
     @ManyToOne(()=>RestaurantCategory,restaurantCategory=>restaurantCategory.meals)
     @JoinColumn({name:"restaurant_category_id"})
-    restaurantCategory:RestaurantCategory
+    restaurant_category:RestaurantCategory
 
     @Column({nullable:true})
     restaurant_category_id:string

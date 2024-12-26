@@ -22,7 +22,7 @@ export class RestaurantCategory extends AuditableEntity {
   @Column()
   restaurant_id: string;
 
-  @OneToMany(() => Meal, (meal) => meal.restaurantCategory)
+  @OneToMany(() => Meal, (meal) => meal.restaurant_category)
   meals: Meal[]
 
 
