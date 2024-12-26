@@ -29,5 +29,5 @@ export class MealResponse {
         }
         return null; // Handle cases where `value` is null or not an object
       })
-      restaurant_category: any;
+      resturantCategory: any;
 }
