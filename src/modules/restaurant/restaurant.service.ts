@@ -98,7 +98,7 @@ export class RestaurantService extends BaseService<Restaurant> {
       .orderBy('meal.sales_count', 'DESC')
       .limit(50) // Example ordering by top sales
       .getMany();
-  
+  console.log(meals);
     return meals;
   }
   
