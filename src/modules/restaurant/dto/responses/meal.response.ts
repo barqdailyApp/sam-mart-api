@@ -18,14 +18,14 @@ export class MealResponse {
     @Transform(({ value }) => toUrl(value)) 
     image: string;
     @Expose()
-    @Transform(({ value }) => {
+    @Transform(( value ) => {
         console.log(value);
         if (value && typeof value === 'object') {
           return {
-            id: value.id,
-            name_ar: value.name_ar,
-            name_en: value.name_en,
-            restaurant_id: value.restaurant_id,
+            id: value.obj.restaurant_category.id,
+            name_ar: value.obj.restaurant_category.name_ar,
+            name_en: value.obj.restaurant_category.name_en,
+            restaurant_id: value.obj.restaurant_category.restaurant_id,
           };
         }
         return null; // Handle cases where `value` is null or not an object
