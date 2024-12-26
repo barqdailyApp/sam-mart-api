@@ -19,6 +19,7 @@ export class MealResponse {
     image: string;
     @Expose()
     @Transform(({ value }) => {
+        console.log(value);
         if (value && typeof value === 'object') {
           return {
             id: value.id,
@@ -29,5 +30,5 @@ export class MealResponse {
         }
         return null; // Handle cases where `value` is null or not an object
       })
-      resturantCategory: any;
+      restaurant_category: any;
 }
