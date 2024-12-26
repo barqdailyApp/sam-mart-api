@@ -17,4 +17,7 @@ export class MealResponse {
     @Expose()
     @Transform(({ value }) => toUrl(value)) 
     image: string;
+    @Expose()
+    @Transform(({ value }) =>({id:value.id,name_ar:value.name_ar,name_en:value.name_en,resturant_id:value.resturant_id}))
+    resturant_category:any
 }

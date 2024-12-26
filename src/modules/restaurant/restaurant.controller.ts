@@ -4,6 +4,8 @@ import { GetNearResturantsQuery } from './dto/requests/get-near-resturants.query
 import { RestaurantService } from './restaurant.service';
 import { I18nResponse } from 'src/core/helpers/i18n.helper';
 import { ActionResponse } from 'src/core/base/responses/action.response';
+import { plainToInstance } from 'class-transformer';
+import { MealResponse } from './dto/responses/meal.response';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -30,7 +32,7 @@ async getNearResturants(@Query() query: GetNearResturantsQuery) {
 @Get('/top-seller-meals')
 async getTopSellerMeals(@Query() query: GetNearResturantsQuery){
   const meals = await this.restaurantService.getTopSellerMeals(query);
-  const response = this._i18nResponse.entity(meals);
+  const response =  this._i18nResponse.entity(plainToInstance( MealResponse,meals, { excludeExtraneousValues: true }));
 
   return new ActionResponse(response);
 

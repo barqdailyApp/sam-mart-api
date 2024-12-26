@@ -95,7 +95,8 @@ export class RestaurantService extends BaseService<Restaurant> {
         )) <= :radius`,
         { latitude, longitude, radius }
       )
-      .orderBy('meal.sales_count', 'DESC') // Example ordering by top sales
+      .orderBy('meal.sales_count', 'DESC')
+      .limit(50) // Example ordering by top sales
       .getMany();
   
     return meals;
