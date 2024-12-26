@@ -28,8 +28,8 @@ async getNearResturants(@Query() query: GetNearResturantsQuery) {
 
 
 @Get('/top-seller-meals')
-async getTopSellerMeals(){
-  const meals = await this.restaurantService.getTopSellerMeals();
+async getTopSellerMeals(@Query() query: GetNearResturantsQuery){
+  const meals = await this.restaurantService.getTopSellerMeals(query);
   const response = this._i18nResponse.entity(meals);
 
   return new ActionResponse(response);

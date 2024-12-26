@@ -1,6 +1,7 @@
 import { AuditableEntity } from 'src/infrastructure/base/auditable.entity';
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { Restaurant } from './restaurant.entity';
+import { Meal } from './meal.entity';
 @Entity('')
 export class RestaurantCategory extends AuditableEntity {
   @Column()
@@ -20,4 +21,9 @@ export class RestaurantCategory extends AuditableEntity {
   restaurant: Restaurant;
   @Column()
   restaurant_id: string;
+
+  @OneToMany(() => Meal, (meal) => meal.restaurantCategory)
+  meals: Meal[]
+
+
 }

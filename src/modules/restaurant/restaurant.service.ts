@@ -77,13 +77,29 @@ export class RestaurantService extends BaseService<Restaurant> {
   }
 
 
-  async getTopSellerMeals(){
-    const meals = await this.mealRepository.find({
-      where:{is_active:true},
-      order:{meal_order_count:"desc",},
-      take:30
-    })
-return meals;
+  async getTopSellerMeals(query: GetNearResturantsQuery) {
+    const { latitude, longitude, radius } = query;
+  
+    const meals = await this.mealRepository
+      .createQueryBuilder('meal')
+      .leftJoinAndSelect('meal.restaurantCategory', 'category')
+      .leftJoinAndSelect('category.restaurant', 'restaurant')
+      .where('restaurant.is_active = :is_active', { is_active: true })
+      .andWhere('category.is_active = :is_active', { is_active: true })
+      .andWhere('meal.is_active = :is_active', { is_active: true })
+      .andWhere(
+        `(6371 * acos(
+          cos(radians(:latitude)) * cos(radians(restaurant.latitude)) *
+          cos(radians(restaurant.longitude) - radians(:longitude)) +
+          sin(radians(:latitude)) * sin(radians(restaurant.latitude))
+        )) <= :radius`,
+        { latitude, longitude, radius }
+      )
+      .orderBy('meal.sales_count', 'DESC') // Example ordering by top sales
+      .getMany();
+  
+    return meals;
   }
+  
   
 }

@@ -1,5 +1,7 @@
+import { Res } from "@nestjs/common";
 import { AuditableEntity } from "src/infrastructure/base/auditable.entity";
-import { Column, Entity } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
+import { RestaurantCategory } from "./restaurant-category.entity";
 @Entity()
 export class Meal extends AuditableEntity{
 
@@ -26,6 +28,14 @@ export class Meal extends AuditableEntity{
 
     @Column({default:0})
     meal_order_count :number
+
+
+    @ManyToOne(()=>RestaurantCategory,restaurantCategory=>restaurantCategory.meals)
+    @JoinColumn({name:"restaurant_category_id"})
+    restaurantCategory:RestaurantCategory
+
+    @Column({nullable:true})
+    restaurant_category_id:string
 
     
 
