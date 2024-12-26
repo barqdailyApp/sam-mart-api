@@ -82,7 +82,7 @@ export class RestaurantService extends BaseService<Restaurant> {
   
     const meals = await this.mealRepository
       .createQueryBuilder('meal')
-      .leftJoinAndSelect('meal.restaurantCategory', 'category')
+      .leftJoinAndSelect('meal.restaurant_category', 'category')
       .leftJoinAndSelect('category.restaurant', 'restaurant')
       .where('restaurant.is_active = :is_active', { is_active: true })
       .andWhere('category.is_active = :is_active', { is_active: true })
