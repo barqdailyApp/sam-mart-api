@@ -64,6 +64,7 @@ import { Restaurant } from '../entities/restaurant/restaurant.entity';
 import { CuisineType } from '../entities/restaurant/cuisine-type.entity';
 import { Res } from '@nestjs/common';
 import { RestaurantCategory } from '../entities/restaurant/restaurant-category.entity';
+import { Meal } from '../entities/restaurant/meal.entity';
 
 export const DB_ENTITIES = [
   User,
@@ -131,7 +132,8 @@ export const DB_ENTITIES = [
   ProductChanges,
   Restaurant,
   CuisineType,
-  RestaurantCategory
+  RestaurantCategory,
+  Meal
 ];
 
 export const DB_VIEWS = [];
