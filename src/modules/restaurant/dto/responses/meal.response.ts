@@ -19,7 +19,7 @@ export class MealResponse {
     image: string;
     @Expose()
     @Transform(( value ) => {
-        console.log(value);
+    
         if (value && typeof value === 'object') {
           return {
             id: value.obj.restaurant_category.id,
