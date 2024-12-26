@@ -11,6 +11,7 @@ import { FileModule } from './modules/file/file.module';
 import { AddressModule } from './modules/address/address.module';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard } from '@nestjs/throttler';
+import { RestaurantModule } from './modules/restaurant/restaurant.module';
 
 @Module({
   imports: [
@@ -21,7 +22,7 @@ import { ThrottlerGuard } from '@nestjs/throttler';
     UserModule, // !Global
     AuthenticationModule, // !Global
     FileModule, // !Global
-    AddressModule,
+    AddressModule, RestaurantModule,
   ],
   controllers: [AppController],
 

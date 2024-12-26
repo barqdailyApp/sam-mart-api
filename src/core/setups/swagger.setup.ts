@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { PaymentMethod } from 'src/infrastructure/entities/payment_method/payment_method.entity';
 import { PromoCode } from 'src/infrastructure/entities/promo-code/promo-code.entity';
+import { Restaurant } from 'src/infrastructure/entities/restaurant/restaurant.entity';
 
 import { AdditionalServiceModule } from 'src/modules/additional-service/additional-service.module';
 import { AddressModule } from 'src/modules/address/address.module';
@@ -26,6 +27,7 @@ import { ProductModule } from 'src/modules/product/product.module';
 import { PromoCodeModule } from 'src/modules/promo-code/promo-code.module';
 import { ReasonModule } from 'src/modules/reason/reason.module';
 import { RegionModule } from 'src/modules/region/region.module';
+import { RestaurantModule } from 'src/modules/restaurant/restaurant.module';
 import { SectionModule } from 'src/modules/section/section.module';
 import { SlotModule } from 'src/modules/slot/slot.module';
 import { StaticPageModule } from 'src/modules/static-page/static-page.module';
@@ -87,4 +89,22 @@ export default (app: INestApplication, config: ConfigService) => {
   });
 
   SwaggerModule.setup('swagger', app, publicDocument);
+
+  const foodConfig = new DocumentBuilder()
+  .addBearerAuth()
+  .setTitle(`${config.get('APP_NAME')} API`)
+  .setDescription(`${config.get('APP_NAME')} API description`)
+  .setVersion('v1')
+  .addServer(config.get('APP_HOST'))
+  .build();
+
+const foodDocument = SwaggerModule.createDocument(app, foodConfig, {
+  include: [
+   RestaurantModule
+  ],
+  operationIdFactory,
+
+});
+
+SwaggerModule.setup('swagger/food', app, foodDocument);
 };

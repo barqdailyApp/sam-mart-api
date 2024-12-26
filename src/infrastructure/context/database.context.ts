@@ -60,6 +60,10 @@ import { Brand } from '../entities/brand/brand';
 import { ShipmentProductHistory } from '../entities/order/shipment-product-history.entity';
 import { OrderHistory } from '../entities/order/order-history.entity';
 import { ProductChanges } from '../entities/product/product-changes.entity';
+import { Restaurant } from '../entities/restaurant/restaurant.entity';
+import { CuisineType } from '../entities/restaurant/cuisine-type.entity';
+import { Res } from '@nestjs/common';
+import { RestaurantCategory } from '../entities/restaurant/restaurant-category.entity';
 
 export const DB_ENTITIES = [
   User,
@@ -124,7 +128,10 @@ export const DB_ENTITIES = [
   Brand,
   ShipmentProductHistory,
   OrderHistory,
-  ProductChanges
+  ProductChanges,
+  Restaurant,
+  CuisineType,
+  RestaurantCategory
 ];
 
 export const DB_VIEWS = [];
