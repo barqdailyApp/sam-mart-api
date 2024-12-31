@@ -45,4 +45,11 @@ async getSingleRestaurant(@Param("id") id:string){
  const response= this._i18nResponse.entity((plainToInstance(RestaurantResponse,restaurant,{excludeExtraneousValues:true}))) 
  return new ActionResponse(response);
 }
+
+@Get('/meal/details/:id')
+async getSingleMeal(@Param("id") id:string){
+  const meal=await this.restaurantService.getSingleMeal(id);
+ const response= this._i18nResponse.entity((plainToInstance(MealResponse,meal ,{excludeExtraneousValues:true}))) 
+ return new ActionResponse(response);
+}
 }

@@ -65,7 +65,9 @@ import { CuisineType } from '../entities/restaurant/cuisine-type.entity';
 import { Res } from '@nestjs/common';
 import { RestaurantCategory } from '../entities/restaurant/restaurant-category.entity';
 import { Meal } from '../entities/restaurant/meal.entity';
-
+import { OptionGroup } from '../entities/restaurant/option-group.entity';
+import { Option } from '../entities/restaurant/option.entity';
+import { MealOptionGroup } from '../entities/restaurant/meal-option-group';
 export const DB_ENTITIES = [
   User,
   Address,
@@ -133,7 +135,10 @@ export const DB_ENTITIES = [
   Restaurant,
   CuisineType,
   RestaurantCategory,
-  Meal
+  Meal,
+  Option,
+  OptionGroup,
+  MealOptionGroup
 ];
 
 export const DB_VIEWS = [];

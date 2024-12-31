@@ -8,6 +8,7 @@ import { plainToInstance } from 'class-transformer';
 import { RestaurantResponse } from './dto/responses/restaurant.response';
 import { CuisineResponse } from './dto/responses/cuisine.response';
 import { Meal } from 'src/infrastructure/entities/restaurant/meal.entity';
+import { json } from 'sequelize';
 
 @Injectable()
 export class RestaurantService extends BaseService<Restaurant> {
@@ -108,6 +109,14 @@ export class RestaurantService extends BaseService<Restaurant> {
   if(!restaurant) throw new NotFoundException("no resturant found");
   return restaurant;
   }
+
+  async getSingleMeal(id:string){
+    
+    const meal=  await this.mealRepository.findOne(({where:{id},relations:{meal_option_groups:{option_group:{options:true}}}}))
+    if(!meal) throw new NotFoundException("no meal found");
+    return meal;
+    }
+    
   
   
 }

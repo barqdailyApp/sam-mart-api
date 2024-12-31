@@ -1,5 +1,8 @@
-import { Expose, Transform } from "class-transformer";
+import { Expose, plainToInstance, Transform } from "class-transformer";
 import { toUrl } from "src/core/helpers/file.helper";
+import { MealOptionGroup } from "src/infrastructure/entities/restaurant/meal-option-group";
+import { OptionGroup } from "src/infrastructure/entities/restaurant/option-group.entity";
+import { OptionGroupResponse } from "./option.resonse";
 
 export class MealResponse {
     @Expose()
@@ -31,4 +34,8 @@ export class MealResponse {
         return null; // Handle cases where `value` is null or not an object
       })
       restaurant_category: any;
+
+      @Expose()
+      @Transform((value)=>{return value.obj.meal_option_groups?.map((item:MealOptionGroup)=>plainToInstance(OptionGroupResponse,item.option_group,{excludeExtraneousValues:true}))})
+      option_groups:OptionGroupResponse
 }
