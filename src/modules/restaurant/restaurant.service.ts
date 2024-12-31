@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/core/base/service/service.base';
 import { Restaurant } from 'src/infrastructure/entities/restaurant/restaurant.entity';
@@ -98,8 +98,15 @@ export class RestaurantService extends BaseService<Restaurant> {
       .orderBy('meal.sales_count', 'DESC')
       .limit(50) // Example ordering by top sales
       .getMany();
-  console.log(meals);
+
     return meals;
+  }
+
+  async getSingleRestaurant(id:string){
+    
+  const restaurant=  await this._repo.findOne(({where:{id},relations:{categories:{meals:true}}}))
+  if(!restaurant) throw new NotFoundException("no resturant found");
+  return restaurant;
   }
   
   

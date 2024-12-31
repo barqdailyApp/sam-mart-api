@@ -20,7 +20,7 @@ export class MealResponse {
     @Expose()
     @Transform(( value ) => {
     
-        if (value && typeof value === 'object') {
+        if (value.obj.restaurant_category && typeof value.obj.restaurant_category === 'object') {
           return {
             id: value.obj.restaurant_category.id,
             name_ar: value.obj.restaurant_category.name_ar,

@@ -1,6 +1,20 @@
-import { Expose, Transform } from "class-transformer";
+import { Expose, plainToInstance, Transform } from "class-transformer";
 import { toUrl } from "src/core/helpers/file.helper";
+import { MealResponse } from "./meal.response";
 
+
+export class RestaurantCategoryResponse{
+    @Expose()
+    id:string
+    @Expose()
+    name_ar:string
+    @Expose()
+    name_en:string
+    @Expose()
+    @Transform((value)=>plainToInstance(MealResponse,value.obj.meals,{excludeExtraneousValues:true}),)
+    meals:MealResponse[]
+
+}
 export class RestaurantResponse {
     @Expose()
     id: string;
@@ -28,5 +42,8 @@ export class RestaurantResponse {
     @Expose()
     min_order_price: number;
     @Expose()
-    categories: string[];
+    @Transform((value)=>plainToInstance(RestaurantCategoryResponse,value.obj.categories,{excludeExtraneousValues:true}))
+    categories: RestaurantCategoryResponse[];
 }
+
+
