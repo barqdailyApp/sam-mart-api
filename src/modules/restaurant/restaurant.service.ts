@@ -72,7 +72,7 @@ export class RestaurantService extends BaseService<Restaurant> {
       cuisines: plainToInstance(CuisineResponse, Array.from(cuisines).map((cuisine) =>
         JSON.parse(cuisine as string),
       )),
-      sorting:[{type:"top",keys:[{average_rating:"desc"}],},{type:"popular",keys:[{No_of_reviews:"desc"},{average_rating:"desc"}],}]
+      sorting:[{type:"top",keys:[{average_rating:"desc"}],},{type:"popular",keys:[{no_of_reviews:"desc"},{average_rating:"desc"}],}]
 
     };
   }

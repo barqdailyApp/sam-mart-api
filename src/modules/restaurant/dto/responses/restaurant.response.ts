@@ -40,6 +40,12 @@ export class RestaurantResponse {
     distance: number;
 
     @Expose()
+    average_rating: number;
+
+    @Expose()
+    no_of_reviews: number;
+
+    @Expose()
     min_order_price: number;
     @Expose()
     @Transform((value)=>plainToInstance(RestaurantCategoryResponse,value.obj.categories,{excludeExtraneousValues:true}))
