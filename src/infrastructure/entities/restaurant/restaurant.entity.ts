@@ -51,7 +51,7 @@ export class Restaurant extends AuditableEntity {
 
 
   @Column({default:0})
-  No_of_reviews: number;
+  no_of_reviews: number;
 
   @Column({nullable:true})
   logo:string
