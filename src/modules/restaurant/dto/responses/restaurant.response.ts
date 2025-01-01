@@ -33,6 +33,7 @@ export class RestaurantResponse {
     @Expose()
     @Transform(({ value }) => toUrl(value)) 
     logo: string[];
+    @Expose()
     @Transform(({ value }) => toUrl(value)) 
     image: string[];
     
