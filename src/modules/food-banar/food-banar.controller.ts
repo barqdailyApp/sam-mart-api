@@ -22,8 +22,9 @@ import { CacheInterceptor } from '@nestjs/cache-manager/dist/interceptors';
 import { CreateFoodBanarRequest } from './dto/request/create-food-banar.request';
 import { FoodBannerResponse } from './dto/response/food-banner.response';
 import { UpdateFoodBannerRequest } from './dto/request/update-food-banner.request';
+import { GetNearResturantsQuery } from '../restaurant/dto/requests/get-near-resturants.query';
 
-@ApiBearerAuth()
+// @ApiBearerAuth()
 @ApiHeader({
     name: 'Accept-Language',
     required: false,
@@ -37,9 +38,9 @@ export class BanarController {
         private readonly banarService: BanarService,
     ) { }
 
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    // @UseGuards(JwtAuthGuard, RolesGuard)
     @Post()
-    @Roles(Role.ADMIN)
+    // @Roles(Role.ADMIN)
     @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('banar'))
     @ApiConsumes('multipart/form-data')
     async createBanar(
@@ -74,19 +75,12 @@ export class BanarController {
    
     @Get("/guest")
     async getGuestBanars(
-        @Query() query: PaginatedRequest
+        @Query() query: GetNearResturantsQuery
     ): Promise<ActionResponse<FoodBannerResponse[]>> {
         const banners = await this.banarService.getGuestBanars(query);
-        const count = await this.banarService.count(query);
+       
         const result = plainToInstance(FoodBannerResponse, banners, { excludeExtraneousValues: true })
-        if (Object.keys(query).length) {
-            return new PaginatedResponse<FoodBannerResponse[]>(result, {
-                meta: {
-                    total: count,
-                    ...query
-                }
-            });
-        }
+     
         return new ActionResponse<FoodBannerResponse[]>(result);
     }
    

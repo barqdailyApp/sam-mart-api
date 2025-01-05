@@ -3,6 +3,7 @@ import { Column, Entity, ManyToMany, OneToMany } from 'typeorm';
 import { CuisineType } from './cuisine-type.entity';
 import { RestaurantCategory } from './restaurant-category.entity';
 import { RestaurantStatus } from 'src/infrastructure/data/enums/restaurant-status.enum';
+import { FoodBanar } from './food_banar.entity';
 @Entity()
 export class Restaurant extends AuditableEntity {
   @Column()
@@ -34,12 +35,12 @@ export class Restaurant extends AuditableEntity {
   @Column({ type: 'float', precision: 11, scale: 6 })
   longitude: number;
 
-  // @Column({
-  //   type: 'geometry',
-  //   spatialFeatureType: 'Point',
-  //   srid: 4326,
-  // })
-  // location: string;
+  @Column({
+    type: 'geometry',
+    spatialFeatureType: 'Point',
+    srid: 4326,
+  })
+  location: string;
 
   @ManyToMany(() => CuisineType, (cuisine_type) => cuisine_type.restaurants)
   cuisine_types: CuisineType[];
@@ -68,4 +69,7 @@ export class Restaurant extends AuditableEntity {
 
   @Column({default:0})
   min_order_price: number;
+
+  
+
 }
