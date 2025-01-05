@@ -3,19 +3,20 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/core/base/service/service.base';
 import {  LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { Banar } from 'src/infrastructure/entities/banar/banar.entity';
-import { CreateBanarRequest } from './dto/request/create-banar.request';
+import { CreateFoodBanarRequest } from './dto/request/create-food-banar.request';
 import { FileService } from '../file/file.service';
 
-import { UpdateBannerRequest } from './dto/request/update-banner.request';
+import { UpdateFoodBannerRequest } from './dto/request/update-food-banner.request';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { User } from 'src/infrastructure/entities/user/user.entity';
 import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
+import { FoodBanar } from 'src/infrastructure/entities/restaurant/food_banar.entity';
 
 @Injectable()
-export class BanarService extends BaseService<Banar> {
+export class BanarService extends BaseService<FoodBanar> {
     constructor(
-        @InjectRepository(Banar) private readonly banarRepository: Repository<Banar>,
+        @InjectRepository(FoodBanar) private readonly banarRepository: Repository<FoodBanar>,
         @Inject(FileService) private _fileService: FileService,
         @Inject(REQUEST) private readonly request: Request
 
@@ -23,10 +24,10 @@ export class BanarService extends BaseService<Banar> {
         super(banarRepository);
     }
 
-    async createBanar(banar: CreateBanarRequest) {
+    async createBanar(banar: CreateFoodBanarRequest) {
         const tempImage = await this._fileService.upload(
             banar.banar,
-            `banars`,
+            `food-banars`,
         );
 
         let createdBanar = this.banarRepository.create({
@@ -34,7 +35,8 @@ export class BanarService extends BaseService<Banar> {
             started_at: banar.started_at,
             ended_at: banar.ended_at,
             is_active: banar.is_active,
-            is_popup:banar?.is_popup
+            is_popup:banar?.is_popup,
+            restaurant_id:banar?.restaurant_id
         });
 
         return await this.banarRepository.save(createdBanar);
@@ -46,7 +48,8 @@ export class BanarService extends BaseService<Banar> {
                 is_active: true,
                 started_at: LessThanOrEqual(new Date()),
                 ended_at: MoreThanOrEqual(new Date()),
-                is_popup:false
+                is_popup:false,
+               
             }
         });
     }
@@ -61,7 +64,7 @@ export class BanarService extends BaseService<Banar> {
         });
     }
 
-    async updateBanar(id: string, banar: UpdateBannerRequest) {
+    async updateBanar(id: string, banar: UpdateFoodBannerRequest) {
         let tempImage = null;
         const banarEntity = await this.banarRepository.findOne({ where: { id } });
         if (!banarEntity) {
@@ -71,7 +74,7 @@ export class BanarService extends BaseService<Banar> {
         if (banar.banar) {
             tempImage = await this._fileService.upload(
                 banar.banar,
-                `banars`,
+                `food-banars`,
             );
         }
 
@@ -80,6 +83,8 @@ export class BanarService extends BaseService<Banar> {
             started_at: banar.started_at ? banar.started_at : banarEntity.started_at,
             ended_at: banar.ended_at ? banar.ended_at : banarEntity.ended_at,
             is_active: banar.is_active != null ? banar.is_active : banarEntity.is_active,
+            restaurant_id:banar?.restaurant_id
+            
         });
 
         return await this.banarRepository.save(banarEntity);

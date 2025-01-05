@@ -26,6 +26,7 @@ import { NotificationModule } from "./notification/notification.module";
 import { PaymentMethodModule } from './payment_method/payment_method.module';
 import { ReasonModule } from "./reason/reason.module";
 import { PromoCodeModule } from './promo-code/promo-code.module';
+import { FoodBanarModule } from "./food-banar/food-banar.module";
 
 
 @Module({
@@ -56,7 +57,8 @@ import { PromoCodeModule } from './promo-code/promo-code.module';
     NotificationModule,
     PaymentMethodModule,
     ReasonModule,
-    PromoCodeModule
+    PromoCodeModule,
+    FoodBanarModule
   ],
   exports: [],
   providers: [],

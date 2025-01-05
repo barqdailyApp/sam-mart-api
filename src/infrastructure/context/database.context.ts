@@ -68,6 +68,7 @@ import { Meal } from '../entities/restaurant/meal.entity';
 import { OptionGroup } from '../entities/restaurant/option-group.entity';
 import { Option } from '../entities/restaurant/option.entity';
 import { MealOptionGroup } from '../entities/restaurant/meal-option-group';
+import { FoodBanar } from '../entities/restaurant/food_banar.entity';
 export const DB_ENTITIES = [
   User,
   Address,
@@ -138,7 +139,8 @@ export const DB_ENTITIES = [
   Meal,
   Option,
   OptionGroup,
-  MealOptionGroup
+  MealOptionGroup,
+  FoodBanar
 ];
 
 export const DB_VIEWS = [];

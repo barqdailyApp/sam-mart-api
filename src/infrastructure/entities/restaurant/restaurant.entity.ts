@@ -2,6 +2,7 @@ import { AuditableEntity } from 'src/infrastructure/base/auditable.entity';
 import { Column, Entity, ManyToMany, OneToMany } from 'typeorm';
 import { CuisineType } from './cuisine-type.entity';
 import { RestaurantCategory } from './restaurant-category.entity';
+import { RestaurantStatus } from 'src/infrastructure/data/enums/restaurant-status.enum';
 @Entity()
 export class Restaurant extends AuditableEntity {
   @Column()
@@ -22,8 +23,8 @@ export class Restaurant extends AuditableEntity {
   @Column({ nullable: true })
   closing_time: string;
 
-  @Column({ default: true })
-  is_active: boolean;
+  @Column({ default: RestaurantStatus.PENDING })
+  status: RestaurantStatus;
 
   // latitude
   @Column({ type: 'float', precision: 10, scale: 6 })

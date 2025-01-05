@@ -9,6 +9,7 @@ import { RestaurantResponse } from './dto/responses/restaurant.response';
 import { CuisineResponse } from './dto/responses/cuisine.response';
 import { Meal } from 'src/infrastructure/entities/restaurant/meal.entity';
 import { json } from 'sequelize';
+import { RestaurantStatus } from 'src/infrastructure/data/enums/restaurant-status.enum';
 
 @Injectable()
 export class RestaurantService extends BaseService<Restaurant> {
@@ -37,7 +38,7 @@ export class RestaurantService extends BaseService<Restaurant> {
         ))`,
         'distance',
       )
-      .where('restaurant.is_active = :is_active', { is_active: true })
+      .where('restaurant.status = :status', { status: RestaurantStatus.ACTIVE }) // Assuming 'ACTIVE' is the status you want to filter on', { is_active: true })
       .andWhere('cuisine.is_active = :is_active', { is_active: true })
       .having('distance <= :radius', { radius: query.radius })
       .setParameters({ latitude: query.latitude, longitude: query.longitude })
@@ -85,7 +86,7 @@ export class RestaurantService extends BaseService<Restaurant> {
       .createQueryBuilder('meal')
       .leftJoinAndSelect('meal.restaurant_category', 'category')
       .leftJoinAndSelect('category.restaurant', 'restaurant')
-      .where('restaurant.is_active = :is_active', { is_active: true })
+      .where('restaurant.status = :status', { status: RestaurantStatus.ACTIVE })
       .andWhere('category.is_active = :is_active', { is_active: true })
       .andWhere('meal.is_active = :is_active', { is_active: true })
       .andWhere(

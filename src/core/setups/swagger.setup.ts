@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { PaymentMethod } from 'src/infrastructure/entities/payment_method/payment_method.entity';
 import { PromoCode } from 'src/infrastructure/entities/promo-code/promo-code.entity';
+import { FoodBanar } from 'src/infrastructure/entities/restaurant/food_banar.entity';
 import { Restaurant } from 'src/infrastructure/entities/restaurant/restaurant.entity';
 
 import { AdditionalServiceModule } from 'src/modules/additional-service/additional-service.module';
@@ -17,6 +18,7 @@ import { CountryModule } from 'src/modules/country/country.module';
 import { DriverModule } from 'src/modules/driver/driver.module';
 import { EmployeeModule } from 'src/modules/employee/employee.module';
 import { FileModule } from 'src/modules/file/file.module';
+import { FoodBanarModule } from 'src/modules/food-banar/food-banar.module';
 import { MeasurementUnitModule } from 'src/modules/measurement-unit/measurement-unit.module';
 import { NotificationModule } from 'src/modules/notification/notification.module';
 import { OrderModule } from 'src/modules/order/order.module';
@@ -100,7 +102,8 @@ export default (app: INestApplication, config: ConfigService) => {
 
 const foodDocument = SwaggerModule.createDocument(app, foodConfig, {
   include: [
-   RestaurantModule
+   RestaurantModule,
+   FoodBanarModule
   ],
   operationIdFactory,
 
