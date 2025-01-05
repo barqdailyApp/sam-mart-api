@@ -35,12 +35,12 @@ export class Restaurant extends AuditableEntity {
   @Column({ type: 'float', precision: 11, scale: 6 })
   longitude: number;
 
-  @Column({
-    type: 'geometry',
-    spatialFeatureType: 'Point',
-    srid: 4326,
-  })
-  location: string;
+  // @Column({
+  //   type: 'geometry',
+  //   spatialFeatureType: 'Point',
+  //   srid: 4326,
+  // })
+  // location: string;
 
   @ManyToMany(() => CuisineType, (cuisine_type) => cuisine_type.restaurants)
   cuisine_types: CuisineType[];
@@ -70,6 +70,7 @@ export class Restaurant extends AuditableEntity {
   @Column({default:0})
   min_order_price: number;
 
-  
+  // @OneToMany(() => FoodBanar, (foodBanar) => foodBanar.restaurant)
+  // banars: FoodBanar[];
 
 }
