@@ -1,7 +1,7 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/core/base/service/service.base';
-import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import { Brackets, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { Banar } from 'src/infrastructure/entities/banar/banar.entity';
 import { CreateFoodBanarRequest } from './dto/request/create-food-banar.request';
 import { FileService } from '../file/file.service';
@@ -45,30 +45,33 @@ export class BanarService extends BaseService<FoodBanar> {
 
   async getGuestBanars(query: GetNearResturantsQuery) {
     return await this.banarRepository
-      .createQueryBuilder('food_banar')
-      .leftJoinAndSelect('food_banar.restaurant', 'restaurant')
-      .where('food_banar.is_active = :is_active', { is_active: true })
-      .andWhere('food_banar.started_at <= :started_at', {
-        started_at: new Date(),
-      })
-      .andWhere('food_banar.ended_at >= :ended_at', { ended_at: new Date() })
-      .andWhere('food_banar.is_popup = :is_popup', { is_popup: false })
-      //nearby resturant use latitude and longitude
-      .andWhere(
-        `(6371 * acos(
-          cos(radians(:latitude)) * cos(radians(restaurant.latitude)) *
-          cos(radians(restaurant.longitude) - radians(:longitude)) +
-          sin(radians(:latitude)) * sin(radians(restaurant.latitude))
-        )) <= :radius`,
-        {
-          latitude: query.latitude,
-          longitude: query.longitude,
-          radius: query.radius,
-        },
-      )
-      //status = ACTIVE
-      .andWhere('restaurant.status = :status', { status: 'ACTIVE' })
-      .getMany();
+    .createQueryBuilder('food_banar')
+    .leftJoinAndSelect('food_banar.restaurant', 'restaurant')
+    .where('food_banar.is_active = :is_active', { is_active: true })
+    .andWhere('food_banar.started_at <= :started_at', {
+      started_at: new Date(),
+    })
+    .andWhere('food_banar.ended_at >= :ended_at', { ended_at: new Date() })
+    .andWhere('food_banar.is_popup = :is_popup', { is_popup: false })
+    .andWhere(
+      new Brackets((qb) => {
+        qb.where(
+          `(6371 * acos(
+            cos(radians(:latitude)) * cos(radians(COALESCE(restaurant.latitude, 0))) *
+            cos(radians(COALESCE(restaurant.longitude, 0)) - radians(:longitude)) +
+            sin(radians(:latitude)) * sin(radians(COALESCE(restaurant.latitude, 0)))
+          )) <= :radius`,
+          {
+            latitude: query.latitude,
+            longitude: query.longitude,
+            radius: query.radius,
+          },
+        ).orWhere('restaurant.id IS NULL');
+      }),
+    )
+    .andWhere('restaurant.status = :status OR restaurant.id IS NULL', { status: 'ACTIVE' })
+    .getMany();
+  
   }
   async getGuestPopup() {
     return await this.banarRepository.findOne({
