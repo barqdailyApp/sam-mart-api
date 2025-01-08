@@ -20,6 +20,7 @@ import { Request } from 'express';
 import { replaceUUIDInURL } from 'src/core/helpers/replace-url-uuid.helper';
 import { SamModulesEndpoints } from 'src/infrastructure/entities/sam-modules/sam-modules-endpoints.entity';
 import { removeQueryFromUrl } from 'src/core/helpers/cast.helper';
+import { RestaurantAdmin } from 'src/infrastructure/entities/restaurant/restaurant-admin.entity';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -29,6 +30,8 @@ export class RolesGuard implements CanActivate {
     private readonly driverRepository: Repository<Driver>,
     @InjectRepository(Employee)
     private readonly employeeRepository: Repository<Employee>,
+    @InjectRepository(RestaurantAdmin)
+    private readonly restaurantAdminRepository: Repository<RestaurantAdmin>,
     @InjectRepository(UsersSamModules)
     private readonly userSamModulesRepository: Repository<UsersSamModules>,
   ) {}
@@ -61,6 +64,10 @@ export class RolesGuard implements CanActivate {
       } else {
         return true;
       }
+    }
+
+    if (user.roles?.includes(Role.RESTAURANT_ADMIN)) {
+      await this.checkRestaurantModulePermissions(user, request);
     }
 
     if (user.user_status == UserStatus.BlockedClient)
@@ -97,7 +104,7 @@ export class RolesGuard implements CanActivate {
     });
 
     if (!employee) throw new UnauthorizedException('invalid_employee');
-console.log(path);
+    console.log(path);
     const userSamModule = await this.userSamModulesRepository.findOne({
       where: {
         user_id: user.id,
@@ -115,5 +122,18 @@ console.log(path);
     }
 
     return false;
+  }
+
+  async checkRestaurantModulePermissions(user: User, request: Request) {
+    {
+      const restaurantId = request.params.restaurantId;
+      const restaurantAdmin = await this.restaurantAdminRepository.findOne({
+        where: { user: { id: user.id }, restaurant: { id: restaurantId } },
+      });
+      if (!restaurantAdmin) {
+       throw new UnauthorizedException('invalid_restaurant_admin'); 
+      }
+      
+    }
   }
 }

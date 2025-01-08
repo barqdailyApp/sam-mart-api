@@ -12,6 +12,7 @@ import * as sharp from 'sharp';
 import { UploadFileRequest } from './dto/requests/upload-file.request';
 import * as excelJs from 'exceljs';
 import * as tmp from 'tmp';
+import * as path from 'path';
 
 @Injectable()
 export class FileService {
@@ -32,27 +33,26 @@ export class FileService {
       const baseUrl = this.config.get('storage.local.root');
       let ext = req.originalname.split('.').pop();
       ext = ext.replace(/\s+/g, ''); // Remove any spaces from the extension
-    
+
       const randName = ext.split('.').shift() + '-' + new Date().getTime();
       let fileLocation = `${baseUrl}/${dir}/${randName}.${ext}`;
       fileLocation = fileLocation.replace(/\s+/g, '%20'); // Replace any spaces with '%20'
-    
+
       let fileBuffer = req.buffer;
-      
+
       // Skip resizing if the file is a GIF
       if (ext.toLowerCase() !== 'gif') {
         // Use sharp to resize image if it's not a GIF
         fileBuffer = await sharp(req.buffer).toBuffer();
       }
-      
+
       await this.storage.getDisk().put(fileLocation, fileBuffer);
       return fileLocation;
     } catch (error) {
       throw error;
     }
   }
-  
-  
+
   async delete(fileLocation: string) {
     try {
       await this.storage.getDisk().delete(fileLocation);
@@ -96,8 +96,6 @@ export class FileService {
       // Check if the element contains an image path
       for (const key in data) {
         if (key == 'product_images') {
-     
-
           const imagePath = data['product_images'][0]['url'];
           try {
             const imageBuffer = fs.readFileSync(imagePath);
@@ -106,8 +104,6 @@ export class FileService {
               base64: imageBase64,
               extension: 'png',
             };
-      
-            
           } catch (error) {
             console.error(`Error reading image ${imagePath}:`, error);
           }
@@ -116,7 +112,6 @@ export class FileService {
 
       rows.push(values);
     }
-    
 
     const workbook = new excelJs.Workbook();
     const worksheet = workbook.addWorksheet(sheetName);
@@ -125,7 +120,6 @@ export class FileService {
 
     // Add images
     rows.forEach((row, index) => {
-   
       const imagePath = row['image'] && row['image']['base64'];
       if (imagePath) {
         const imageId = workbook.addImage({
@@ -134,7 +128,7 @@ export class FileService {
         });
 
         worksheet.addImage(imageId, {
-          tl: { col: Object.keys(row).length + 1, row: index  },
+          tl: { col: Object.keys(row).length + 1, row: index },
           ext: { width: 50, height: 50 },
         });
       }
@@ -177,5 +171,24 @@ export class FileService {
     });
 
     return File;
+  }
+
+  // Function to move an image
+  async moveImage(oldPath: string, newPath: string) {
+    try {
+      // Ensure the target directory exists
+      const directory = path.dirname(newPath);
+      if (!fs.existsSync(directory)) {
+        fs.mkdirSync(directory, { recursive: true });
+      }
+
+      // Move the file
+      await fs.promises.rename(oldPath, newPath);
+
+      console.log(`Image moved from ${oldPath} to ${newPath}`);
+      return newPath;
+    } catch (error) {
+      console.error('Error moving the image:', error);
+    }
   }
 }

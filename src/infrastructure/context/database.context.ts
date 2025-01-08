@@ -69,6 +69,8 @@ import { OptionGroup } from '../entities/restaurant/option-group.entity';
 import { Option } from '../entities/restaurant/option.entity';
 import { MealOptionGroup } from '../entities/restaurant/meal-option-group';
 import { FoodBanar } from '../entities/restaurant/food_banar.entity';
+import { RestaurantAttachment } from '../entities/restaurant/restaurant-attachment.entity';
+import { RestaurantAdmin } from '../entities/restaurant/restaurant-admin.entity';
 export const DB_ENTITIES = [
   User,
   Address,
@@ -140,7 +142,9 @@ export const DB_ENTITIES = [
   Option,
   OptionGroup,
   MealOptionGroup,
-  FoodBanar
+  FoodBanar,
+  RestaurantAttachment,
+  RestaurantAdmin
 ];
 
 export const DB_VIEWS = [];

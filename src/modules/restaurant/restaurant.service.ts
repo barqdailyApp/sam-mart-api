@@ -10,6 +10,8 @@ import { CuisineResponse } from './dto/responses/cuisine.response';
 import { Meal } from 'src/infrastructure/entities/restaurant/meal.entity';
 import { json } from 'sequelize';
 import { RestaurantStatus } from 'src/infrastructure/data/enums/restaurant-status.enum';
+import { RegisterRestaurantRequest } from './dto/requests/register-restaurant.request';
+import { RegisterRestaurantTransaction } from './util/register-restaurant.transaction';
 
 @Injectable()
 export class RestaurantService extends BaseService<Restaurant> {
@@ -19,6 +21,7 @@ export class RestaurantService extends BaseService<Restaurant> {
 
     @InjectRepository(Meal)
     private readonly mealRepository: Repository<Meal>,
+    private readonly registerRestaurantTransaction: RegisterRestaurantTransaction,
   ) {
     super(restaurantRepository);
   }
@@ -44,10 +47,10 @@ export class RestaurantService extends BaseService<Restaurant> {
       .setParameters({ latitude: query.latitude, longitude: query.longitude })
       .orderBy('distance', 'ASC')
       .getRawAndEntities(); // This will return both raw fields and entity objects
-  
+
     // `getRawAndEntities()` returns { raw: [], entities: [] }
     const { raw, entities } = restaurants;
-  
+
     // Map the distance from raw data into the restaurant entities
     const restaurantsWithDistance = entities.map((restaurant, index) => {
       const distance = raw[index]?.distance; // Get the corresponding distance value
@@ -56,7 +59,7 @@ export class RestaurantService extends BaseService<Restaurant> {
         distance: parseFloat(distance), // Ensure distance is a number
       };
     });
-  
+
     // Extract unique cuisine types
     const cuisines = new Set();
     restaurantsWithDistance.forEach((restaurant) => {
@@ -64,24 +67,33 @@ export class RestaurantService extends BaseService<Restaurant> {
         cuisines.add(JSON.stringify(cuisine)),
       );
     });
-  
+
     // Return both restaurants with distance and unique cuisines
     return {
-      restaurants: plainToInstance(RestaurantResponse, restaurantsWithDistance, {
-        excludeExtraneousValues: true,
-      }),
-      cuisines: plainToInstance(CuisineResponse, Array.from(cuisines).map((cuisine) =>
-        JSON.parse(cuisine as string),
-      )),
-      sorting:[{type:"top",keys:[{average_rating:"desc"}],},{type:"popular",keys:[{no_of_reviews:"desc"},{average_rating:"desc"}],}]
-
+      restaurants: plainToInstance(
+        RestaurantResponse,
+        restaurantsWithDistance,
+        {
+          excludeExtraneousValues: true,
+        },
+      ),
+      cuisines: plainToInstance(
+        CuisineResponse,
+        Array.from(cuisines).map((cuisine) => JSON.parse(cuisine as string)),
+      ),
+      sorting: [
+        { type: 'top', keys: [{ average_rating: 'desc' }] },
+        {
+          type: 'popular',
+          keys: [{ no_of_reviews: 'desc' }, { average_rating: 'desc' }],
+        },
+      ],
     };
   }
 
-
   async getTopSellerMeals(query: GetNearResturantsQuery) {
     const { latitude, longitude, radius } = query;
-  
+
     const meals = await this.mealRepository
       .createQueryBuilder('meal')
       .leftJoinAndSelect('meal.restaurant_category', 'category')
@@ -95,7 +107,7 @@ export class RestaurantService extends BaseService<Restaurant> {
           cos(radians(restaurant.longitude) - radians(:longitude)) +
           sin(radians(:latitude)) * sin(radians(restaurant.latitude))
         )) <= :radius`,
-        { latitude, longitude, radius }
+        { latitude, longitude, radius },
       )
       .orderBy('meal.sales_count', 'DESC')
       .limit(50) // Example ordering by top sales
@@ -104,20 +116,39 @@ export class RestaurantService extends BaseService<Restaurant> {
     return meals;
   }
 
-  async getSingleRestaurant(id:string){
-    
-  const restaurant=  await this._repo.findOne(({where:{id},relations:{categories:{meals:true}}}))
-  if(!restaurant) throw new NotFoundException("no resturant found");
-  return restaurant;
+  async getSingleRestaurant(id: string) {
+    const restaurant = await this._repo.findOne({
+      where: { id },
+      relations: {
+        categories: { meals: true },
+        attachments: true,
+        admins: {user:true},
+        cuisine_types: true,
+      },
+    });
+
+    if (!restaurant) throw new NotFoundException('no resturant found');
+    return restaurant;
   }
 
-  async getSingleMeal(id:string){
-    
-    const meal=  await this.mealRepository.findOne(({where:{id},relations:{meal_option_groups:{option_group:{options:true}}}}))
-    if(!meal) throw new NotFoundException("no meal found");
+  async getSingleMeal(id: string) {
+    const meal = await this.mealRepository.findOne({
+      where: { id },
+      relations: { meal_option_groups: { option_group: { options: true } } },
+    });
+    if (!meal) throw new NotFoundException('no meal found');
     return meal;
-    }
-    
-  
-  
+  }
+
+  async register(req: RegisterRestaurantRequest) {
+    const restaurant = await this.registerRestaurantTransaction.run(req);
+    return restaurant;
+  }
+
+  async acceptRestaurant(id: string) {
+    const restaurant = await this._repo.findOne({ where: { id ,status: RestaurantStatus.PENDING} });
+    if (!restaurant) throw new NotFoundException('no resturant found');
+    restaurant.status = RestaurantStatus.ACTIVE;
+    return await this._repo.save(restaurant);
+  }
 }
