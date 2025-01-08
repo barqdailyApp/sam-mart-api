@@ -20,7 +20,7 @@ export class OrdersDashboardResponse {
 
   @Expose() total_price: number;
   @Expose() payment_method: PaymentMethodEnum;
-  @Expose() paymentMethod:PaymentMethod
+  @Expose() payment_info:PaymentMethod
 
   @Expose() is_paid: boolean;
   @Expose() delivery_day: string;
@@ -51,7 +51,7 @@ export class OrdersDashboardResponse {
     this.delivery_day = order.delivery_day;
     this.delivery_type = order.delivery_type;
     this.delivery_fee = order.delivery_fee;
-    this.paymentMethod=order.paymentMethod
+    this.payment_info=order.paymentMethod
     this.warehouse = {
       id: order.warehouse.id,
       name_ar: order.warehouse.name_ar,

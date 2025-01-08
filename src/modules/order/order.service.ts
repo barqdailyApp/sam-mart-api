@@ -239,7 +239,7 @@ export class OrderService extends BaseUserService<Order> {
       .leftJoinAndSelect('order.warehouse', 'warehouse_order')
       .leftJoinAndSelect('order.address', 'address')
       .leftJoinAndSelect('order.shipments', 'shipments')
-      .leftJoinAndSelect('order.paymentMethod', 'order_payment_method')
+      .leftJoinAndSelect('order.paymentMethod', 'payment_info')
       .leftJoinAndSelect(
         'shipments.shipment_product_histories',
         'shipment_product_histories',
