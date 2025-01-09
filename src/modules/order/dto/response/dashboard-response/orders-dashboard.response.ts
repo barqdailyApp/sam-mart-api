@@ -32,7 +32,7 @@ export class OrdersDashboardResponse {
   @Expose() address: any;
   @Expose() shipments: any;
   @Expose() promo_code_discount: number;
-
+  @Expose() estimated_delivery_time: Date;
   @Expose() products_price:number;
 
   constructor(order: Order) {
@@ -48,6 +48,7 @@ export class OrdersDashboardResponse {
     this.products_price=order.products_price;
     this.payment_method = order.payment_method;
     this.is_paid = order.is_paid;
+    this.estimated_delivery_time = order.estimated_delivery_time;
     this.delivery_day = order.delivery_day;
     this.delivery_type = order.delivery_type;
     this.delivery_fee = order.delivery_fee;
