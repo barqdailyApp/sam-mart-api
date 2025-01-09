@@ -20,7 +20,7 @@ export class OrdersDashboardResponse {
 
   @Expose() total_price: number;
   @Expose() payment_method: PaymentMethodEnum;
-  @Transform(( value ) => value.obj?.paymentMethod)
+  @Transform(( value ) => value.obj?.payment_info)
   @Expose() payment_info:PaymentMethod
 
   @Expose() is_paid: boolean;
