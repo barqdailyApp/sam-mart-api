@@ -206,7 +206,7 @@ export class WarehouseService extends BaseService<Warehouse> {
         product: true,
         operation: { warehouse: { products: true } },
       },
-      withDeleted: true,
+      // withDeleted: true,
     });
 
     // Create a flat structure for products
