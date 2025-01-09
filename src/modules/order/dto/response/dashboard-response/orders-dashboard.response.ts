@@ -1,4 +1,4 @@
-import { Exclude, Expose } from 'class-transformer';
+import { Exclude, Expose, Transform } from 'class-transformer';
 import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
 import { PaymentMethodEnum } from 'src/infrastructure/data/enums/payment-method';
 import { Order } from 'src/infrastructure/entities/order/order.entity';
@@ -20,6 +20,7 @@ export class OrdersDashboardResponse {
 
   @Expose() total_price: number;
   @Expose() payment_method: PaymentMethodEnum;
+  @Transform(( value ) => value.obj?.paymentMethod)
   @Expose() payment_info:PaymentMethod
 
   @Expose() is_paid: boolean;
