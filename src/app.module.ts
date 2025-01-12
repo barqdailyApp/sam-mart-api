@@ -22,7 +22,7 @@ import { RestaurantModule } from './modules/restaurant/restaurant.module';
     UserModule, // !Global
     AuthenticationModule, // !Global
     FileModule, // !Global
-    AddressModule, RestaurantModule,
+    AddressModule,
   ],
   controllers: [AppController],
 

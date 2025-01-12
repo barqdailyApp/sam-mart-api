@@ -1,4 +1,4 @@
-import { Controller, UseGuards } from '@nestjs/common';
+import { Controller, Post, UseGuards } from '@nestjs/common';
 import { RestaurantCartService } from './restaurant-cart.service';
 import { AddMealRestaurantCartRequest } from './dto/request/add-meal-restaurant-cart.request';
 import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
@@ -21,6 +21,7 @@ export class RestaurantCartController {
     constructor(private readonly resturantCartService: RestaurantCartService) {
           
     }
+    @Post('add-meal')
     async addMealToCart(req: AddMealRestaurantCartRequest) {
         return await this.resturantCartService.addMealToCart(req);
     }
