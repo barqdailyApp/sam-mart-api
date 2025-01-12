@@ -27,6 +27,8 @@ import { PaymentMethodModule } from './payment_method/payment_method.module';
 import { ReasonModule } from "./reason/reason.module";
 import { PromoCodeModule } from './promo-code/promo-code.module';
 import { FoodBanarModule } from "./food-banar/food-banar.module";
+import { RestaurantCartController } from './restaurant-cart/restaurant-cart.controller';
+import { RestaurantCartModule } from './restaurant-cart/restaurant-cart.module';
 
 
 @Module({
@@ -58,9 +60,10 @@ import { FoodBanarModule } from "./food-banar/food-banar.module";
     PaymentMethodModule,
     ReasonModule,
     PromoCodeModule,
-    FoodBanarModule
+    FoodBanarModule,
+    RestaurantCartModule
   ],
   exports: [],
-  providers: [],
+
 })
 export class AssemblyModule {}

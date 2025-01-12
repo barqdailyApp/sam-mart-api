@@ -34,14 +34,15 @@ import { AdminRestaurantDeatailsResponse } from './dto/responses/admin-restauran
   description: 'Language header: en, ar',
 })
 @ApiTags('Restaurant')
-// @UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
 @Controller('restaurant')
 export class AdminRestaurantController {
   constructor(
     private readonly restaurantService: RestaurantService,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
   ) {}
-  // @Roles(Role.ADMIN)
+
   @Get('admin/requests')
   async getRestaurantRequests(@Query() query: PaginatedRequest) {
     applyQueryFilters(query, `status=${RestaurantStatus.PENDING}`);

@@ -11,8 +11,8 @@ export class OptionGroup extends AuditableEntity {
     name_en: string
     @Column({default:false})
     is_required: boolean
-    @Column({default:false})
-    multiple_selection: boolean
+    @Column({default:0})
+    min_selection: number
     @Column({nullable:true})
     max_selection:number
     @OneToMany(()=>Option,option=>option.option_group)

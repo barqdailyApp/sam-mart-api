@@ -23,7 +23,7 @@ export class OptionGroupResponse{
     name_en:string
 
     @Expose()
-    multiple_selection:boolean
+    min_selection:number
     @Expose()
     max_selection:number
    
