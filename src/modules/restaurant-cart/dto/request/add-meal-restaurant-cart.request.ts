@@ -4,7 +4,7 @@ import { IsNotEmpty, IsNumber, IsOptional, IsUUID, Validate, ValidateNested } fr
 
 export class AddMealRestaurantCartRequest  {
     @ApiProperty()
-    @IsUUID()
+    // @IsUUID()
     @IsNotEmpty()
     meal_id: string
 
@@ -16,7 +16,7 @@ export class AddMealRestaurantCartRequest  {
     // list of meal option group ids
     @ApiProperty({isArray: true})
     @IsOptional()
-    @IsUUID('all', {each: true})
+    // @IsUUID('all', {each: true})
     meal_option_group_ids?: string[]
 }
 

@@ -92,7 +92,7 @@ export default (app: INestApplication, config: ConfigService) => {
 
   });
 
-  SwaggerModule.setup('swagger', app, publicDocument);
+  SwaggerModule.setup('swagger/barq-mart', app, publicDocument);
 
   const foodConfig = new DocumentBuilder()
   .addBearerAuth()

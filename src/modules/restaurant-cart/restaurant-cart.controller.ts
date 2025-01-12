@@ -1,4 +1,4 @@
-import { Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { RestaurantCartService } from './restaurant-cart.service';
 import { AddMealRestaurantCartRequest } from './dto/request/add-meal-restaurant-cart.request';
 import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
@@ -22,7 +22,7 @@ export class RestaurantCartController {
           
     }
     @Post('add-meal')
-    async addMealToCart(req: AddMealRestaurantCartRequest) {
+    async addMealToCart(@Body() req: AddMealRestaurantCartRequest) {
         return await this.resturantCartService.addMealToCart(req);
     }
 }

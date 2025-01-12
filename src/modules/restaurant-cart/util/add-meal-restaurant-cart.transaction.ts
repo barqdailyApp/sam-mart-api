@@ -41,7 +41,7 @@ export class AddMealRestaurantCartTransaction extends BaseTransaction<
           user_id: this.request.user.id,
         });
       }
-      const meal = await context.findOne(Restaurant, {
+      const meal = await context.findOne(Meal, {
         where: { id: req.meal_id },
       });
       if (!meal) throw new BadRequestException('message.meal_not_found');
@@ -52,8 +52,9 @@ export class AddMealRestaurantCartTransaction extends BaseTransaction<
       });
       // fetch requested option groups
       const proviededOptionGroups = await context.find(MealOptionGroup, {
-        where: { option_group_id: In(req.meal_option_group_ids ||[]) ,},relations:{option_group:true}
+        where: { option_group: {options:{id:In(req.meal_option_group_ids)}},},relations:{option_group:true}
       });
+  
     // Identify missing required groups
 const missingRequiredGroups = allOptionGroupsForMeal.filter(
   (group) =>
@@ -67,19 +68,21 @@ const missingRequiredGroups = allOptionGroupsForMeal.filter(
 if (missingRequiredGroups.length > 0) {
   throw new BadRequestException(
     'message.missing_required_groups')}
+    if(req.meal_option_group_ids){
 allOptionGroupsForMeal.forEach( (group) => {
  const provided_options=group.option_group.options.filter((option)=>{
     return req.meal_option_group_ids.includes(option.id)
   })
+  console.log(provided_options)
   if(group.option_group.min_selection>provided_options.length && group.option_group.is_required){
     throw new BadRequestException('message.missing_required_groups')
   }
-  if(group.option_group.max_selection<provided_options.length){
+  if(group.option_group.max_selection<provided_options.length && group.option_group.max_selection!=null){
     throw new BadRequestException('message.missing_required_groups')
   }
   
 
-})
+})}
 
       const cart_meal = await context.save(RestaurantCartMeal, {
         cart_id: restaurant_cart.id,
