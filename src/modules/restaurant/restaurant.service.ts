@@ -13,6 +13,8 @@ import { RestaurantStatus } from 'src/infrastructure/data/enums/restaurant-statu
 import { RegisterRestaurantRequest } from './dto/requests/register-restaurant.request';
 import { RegisterRestaurantTransaction } from './util/register-restaurant.transaction';
 import { CuisineType } from 'src/infrastructure/entities/restaurant/cuisine-type.entity';
+import { AddRestaurantCategoryRequest } from './dto/requests/add-restaurant-category.request';
+import { RestaurantCategory } from 'src/infrastructure/entities/restaurant/restaurant-category.entity';
 
 @Injectable()
 export class RestaurantService extends BaseService<Restaurant> {
@@ -21,6 +23,8 @@ export class RestaurantService extends BaseService<Restaurant> {
     private readonly restaurantRepository: Repository<Restaurant>,
     @InjectRepository(CuisineType)
     private readonly cuisineTypeRepository: Repository<CuisineType>,
+    @InjectRepository(RestaurantCategory)
+    private readonly restaurantCategoryRepository: Repository<RestaurantCategory>,
 
     @InjectRepository(Meal)
     private readonly mealRepository: Repository<Meal>,
@@ -157,5 +161,10 @@ export class RestaurantService extends BaseService<Restaurant> {
 
   async getCuisineTypes() {
     return await this.cuisineTypeRepository.find({where:{is_active:true},order:{order_by:"ASC"}});
+  }
+
+  async addRestaurantCategory(req:AddRestaurantCategoryRequest,restaurant_id:string) {
+    const restaurant_category =plainToInstance(RestaurantCategory,{...req,restaurant_id:restaurant_id});
+    return await this.restaurantCategoryRepository.save(restaurant_category); 
   }
 }

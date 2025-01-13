@@ -17,6 +17,9 @@ import { MealResponse } from './dto/responses/meal.response';
 import { RestaurantResponse } from './dto/responses/restaurant.response';
 import { RegisterRestaurantRequest } from './dto/requests/register-restaurant.request';
 import { CuisineResponse } from './dto/responses/cuisine.response';
+import { AddRestaurantCategoryRequest } from './dto/requests/add-restaurant-category.request';
+import { Role } from 'src/infrastructure/data/enums/role.enum';
+import { Roles } from '../authentication/guards/roles.decorator';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -85,5 +88,6 @@ export class RestaurantController {
     );
     return new ActionResponse(response);
   }
+
   
 }

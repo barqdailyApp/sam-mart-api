@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   Inject,
@@ -26,6 +27,7 @@ import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 import e from 'express';
 import { RestaurantAdmin } from 'src/infrastructure/entities/restaurant/restaurant-admin.entity';
 import { AdminRestaurantDeatailsResponse } from './dto/responses/admin-restaurant-deatails.response';
+import { AddRestaurantCategoryRequest } from './dto/requests/add-restaurant-category.request';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -74,7 +76,12 @@ export class AdminRestaurantController {
     const restaurant = await this.restaurantService.acceptRestaurant(id);
     return new ActionResponse(restaurant);
   }
-
+  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
+  @Post('/admin/category/:restaurant_id')
+  async addCategory(@Body() req: AddRestaurantCategoryRequest,@Param('restaurant_id') restaurant_id:string) {
+    const category = await this.restaurantService.addRestaurantCategory(req,restaurant_id);
+    return new ActionResponse(category);
+  }
   
 
   }
