@@ -126,7 +126,7 @@ export class RolesGuard implements CanActivate {
 
   async checkRestaurantModulePermissions(user: User, request: Request) {
     {
-      const restaurantId = request.params.restaurantId;
+      const restaurantId = request.params.restaurant_id;
       const restaurantAdmin = await this.restaurantAdminRepository.findOne({
         where: { user: { id: user.id }, restaurant: { id: restaurantId } },
       });

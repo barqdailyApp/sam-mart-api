@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { isArray, IsNotEmpty, IsString, Matches } from "class-validator";
+import { isArray, IsNotEmpty, IsString, IsStrongPassword, Matches } from "class-validator";
 import { Unique } from "src/core/validators/unique-constraints.validator";
 
 export class RegisterRestaurantRequest {
@@ -15,6 +15,11 @@ export class RegisterRestaurantRequest {
     @IsNotEmpty()
     @IsString()
     user_name: string; 
+
+    @ApiProperty()
+    @IsNotEmpty()
+    @IsStrongPassword()
+    password: string; 
     @ApiProperty()
     @IsNotEmpty()
     @IsString()

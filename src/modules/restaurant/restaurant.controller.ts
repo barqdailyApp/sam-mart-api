@@ -16,6 +16,7 @@ import { plainToInstance } from 'class-transformer';
 import { MealResponse } from './dto/responses/meal.response';
 import { RestaurantResponse } from './dto/responses/restaurant.response';
 import { RegisterRestaurantRequest } from './dto/requests/register-restaurant.request';
+import { CuisineResponse } from './dto/responses/cuisine.response';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -76,4 +77,13 @@ export class RestaurantController {
     );
     return new ActionResponse(response);
   }
+  @Get('/cuisines')
+  async getCuisineTypes() {
+    const cuisines = await this.restaurantService.getCuisineTypes();
+    const response = this._i18nResponse.entity(
+      plainToInstance(CuisineResponse, cuisines, { excludeExtraneousValues: true }),
+    );
+    return new ActionResponse(response);
+  }
+  
 }

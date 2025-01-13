@@ -74,4 +74,7 @@ export class AdminRestaurantController {
     const restaurant = await this.restaurantService.acceptRestaurant(id);
     return new ActionResponse(restaurant);
   }
+
+  
+
   }

@@ -12,12 +12,15 @@ import { json } from 'sequelize';
 import { RestaurantStatus } from 'src/infrastructure/data/enums/restaurant-status.enum';
 import { RegisterRestaurantRequest } from './dto/requests/register-restaurant.request';
 import { RegisterRestaurantTransaction } from './util/register-restaurant.transaction';
+import { CuisineType } from 'src/infrastructure/entities/restaurant/cuisine-type.entity';
 
 @Injectable()
 export class RestaurantService extends BaseService<Restaurant> {
   constructor(
     @InjectRepository(Restaurant)
     private readonly restaurantRepository: Repository<Restaurant>,
+    @InjectRepository(CuisineType)
+    private readonly cuisineTypeRepository: Repository<CuisineType>,
 
     @InjectRepository(Meal)
     private readonly mealRepository: Repository<Meal>,
@@ -150,5 +153,9 @@ export class RestaurantService extends BaseService<Restaurant> {
     if (!restaurant) throw new NotFoundException('no resturant found');
     restaurant.status = RestaurantStatus.ACTIVE;
     return await this._repo.save(restaurant);
+  }
+
+  async getCuisineTypes() {
+    return await this.cuisineTypeRepository.find({where:{is_active:true},order:{order_by:"ASC"}});
   }
 }

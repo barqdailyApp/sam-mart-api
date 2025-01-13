@@ -52,7 +52,7 @@ export class RegisterRestaurantTransaction extends BaseTransaction<
         username: req.phone,
         name: req.user_name,
         password: await bcrypt.hash(
-          randStr(12) + this._config.get('app.key'),
+        req.password+ this._config.get('app.key'),
           10,
         ),
       

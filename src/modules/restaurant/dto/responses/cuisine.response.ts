@@ -12,4 +12,7 @@ export class CuisineResponse {
     @Expose()
     @Transform(({ value }) => toUrl(value))
     logo: string[];
+    @Expose()
+    order_by: number;
+
 }
