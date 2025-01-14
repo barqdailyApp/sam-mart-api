@@ -23,8 +23,8 @@ export class FileController {
     }
 
     @UseInterceptors(FileInterceptor('file'))
-    @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    // @ApiBearerAuth()
+    // @UseGuards(JwtAuthGuard, RolesGuard)
     @Post(Router.Files.Upload)
     @ApiConsumes('multipart/form-data')
     async upload(
