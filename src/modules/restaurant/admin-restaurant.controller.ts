@@ -28,6 +28,7 @@ import e from 'express';
 import { RestaurantAdmin } from 'src/infrastructure/entities/restaurant/restaurant-admin.entity';
 import { AdminRestaurantDeatailsResponse } from './dto/responses/admin-restaurant-deatails.response';
 import { AddRestaurantCategoryRequest } from './dto/requests/add-restaurant-category.request';
+import { AddMealRequest } from './dto/requests/add-meal.request';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -83,5 +84,11 @@ export class AdminRestaurantController {
     return new ActionResponse(category);
   }
   
+  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
+  @Post('/admin/meal/:restaurant_id')
+  async addMeal(@Body() req: AddMealRequest,@Param('restaurant_id') restaurant_id:string) {
+    const meal = await this.restaurantService.addMeal(req,restaurant_id);
+    return new ActionResponse(meal);
+  }
 
   }

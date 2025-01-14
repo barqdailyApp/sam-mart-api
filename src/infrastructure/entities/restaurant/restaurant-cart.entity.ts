@@ -10,7 +10,7 @@ export class RestaurantCart extends OwnedEntity {
 @OneToOne(() => User, )
 cart: Cart
 @OneToMany(() => RestaurantCartMeal,restaurantCartMeal=>restaurantCartMeal.cart)
-meals:RestaurantCartMeal[]
+restaurant_cart_meals:RestaurantCartMeal[]
     
 
 

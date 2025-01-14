@@ -17,6 +17,6 @@ export class AddMealRestaurantCartRequest  {
     @ApiProperty({isArray: true})
     @IsOptional()
     // @IsUUID('all', {each: true})
-    meal_option_group_ids?: string[]
+    options_ids?: string[]
 }
 

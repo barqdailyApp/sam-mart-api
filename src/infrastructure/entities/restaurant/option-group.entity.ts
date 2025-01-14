@@ -9,8 +9,7 @@ export class OptionGroup extends AuditableEntity {
     name_ar: string
     @Column()
     name_en: string
-    @Column({default:false})
-    is_required: boolean
+
     @Column({default:0})
     min_selection: number
     @Column({nullable:true})

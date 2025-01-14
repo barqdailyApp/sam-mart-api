@@ -1,6 +1,7 @@
-import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
 import { OptionGroup } from "./option-group.entity";
 import { AuditableEntity } from "src/infrastructure/base/auditable.entity";
+import { RestaurantCartMealOption } from "./restaurant-cart-meal-option.entity";
 @Entity()
 export class Option extends AuditableEntity{
     @Column()
@@ -14,4 +15,8 @@ export class Option extends AuditableEntity{
    option_group:OptionGroup
    @Column({nullable:true})
    option_group_id:string
+
+   @OneToMany(()=>RestaurantCartMealOption,restaurantCartMealOption=>restaurantCartMealOption.cart_meal)
+   cart_meal_options:RestaurantCartMealOption[]
+   
 }

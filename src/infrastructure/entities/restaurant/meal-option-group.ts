@@ -25,7 +25,6 @@ export class MealOptionGroup extends AuditableEntity {
    @Column({default:true})
    is_active:boolean
    
-@OneToMany(()=>RestaurantCartMealOption,restaurantCartMealOption=>restaurantCartMealOption.meal_option_group)
-   cart_meal_options:RestaurantCartMealOption[]
+
 
 }

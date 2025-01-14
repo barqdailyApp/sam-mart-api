@@ -6,7 +6,7 @@ import { RestaurantCartMealOption } from "./restaurant-cart-meal-option.entity";
 
 @Entity()
 export class RestaurantCartMeal extends AuditableEntity {
-    @ManyToOne(() => RestaurantCart, (cart) => cart.meals)
+    @ManyToOne(() => RestaurantCart, (cart) => cart.restaurant_cart_meals)
     @JoinColumn()
     cart: RestaurantCart
     @ManyToOne(() => Meal, (meal) => meal.cart_meals)

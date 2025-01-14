@@ -15,7 +15,8 @@ import { RegisterRestaurantTransaction } from './util/register-restaurant.transa
 import { CuisineType } from 'src/infrastructure/entities/restaurant/cuisine-type.entity';
 import { AddRestaurantCategoryRequest } from './dto/requests/add-restaurant-category.request';
 import { RestaurantCategory } from 'src/infrastructure/entities/restaurant/restaurant-category.entity';
-
+import { AddMealRequest } from './dto/requests/add-meal.request';
+import * as fs from 'fs';
 @Injectable()
 export class RestaurantService extends BaseService<Restaurant> {
   constructor(
@@ -166,5 +167,13 @@ export class RestaurantService extends BaseService<Restaurant> {
   async addRestaurantCategory(req:AddRestaurantCategoryRequest,restaurant_id:string) {
     const restaurant_category =plainToInstance(RestaurantCategory,{...req,restaurant_id:restaurant_id});
     return await this.restaurantCategoryRepository.save(restaurant_category); 
+  }
+
+  async addMeal(req:AddMealRequest,restaurant_id:string) {
+    const meal = plainToInstance(Meal,{...req,restaurant_id:restaurant_id});
+    //check if directory exist
+    if(!fs.existsSync('storage/restaurant-meals/')) fs.mkdirSync('storage/restaurant-meals/');
+    if(fs.existsSync(req.image)) fs.renameSync(req.image, req.image.replace('/tmp/', '/restaurant-meals/'));
+    return await this.mealRepository.save(meal);
   }
 }
