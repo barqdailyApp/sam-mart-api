@@ -59,14 +59,22 @@ export class RegisterRestaurantTransaction extends BaseTransaction<
         roles: [Role.RESTAURANT_ADMIN],
       });
       if(!req.logo.includes('http')) {
+        //check directory
+        if (!fs.existsSync('storage/restaurant-logos')) {
+          fs.mkdirSync('storage/restaurant-logos');
+        }
         const logo = req.logo.replace('/tmp/', '/restaurant-logos/');
         fs.renameSync(req.logo, logo);
         req.logo = logo;
       }
-      if(!req.menu.includes('http')) {
-        const menu = req.image.replace('/tmp/', '/restaurant-menus/');
-        fs.renameSync(req.image, menu);
-        req.image = menu;
+      if(!req.image.includes('http')) {
+        //check directory
+        if (!fs.existsSync('storage/restaurant-images')) {
+          fs.mkdirSync('storage/restaurant-images');
+        }
+        const image = req.image.replace('/tmp/', '/restaurant-images/');
+        fs.renameSync(req.image, image);
+        req.image = image;
       }
       const menus = req.menu.map((image) => {
         if (!fs.existsSync('storage/restaurant-menus')) {
