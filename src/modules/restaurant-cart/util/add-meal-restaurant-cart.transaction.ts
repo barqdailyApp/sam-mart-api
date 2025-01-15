@@ -54,7 +54,7 @@ export class AddMealRestaurantCartTransaction extends BaseTransaction<
         where: { cart_id:restaurant_cart.id,meal:{restaurant_category:{restaurant:{id:Not(meal.restaurant_category.restaurant.id)}}}},
       })
       if (is_another_cart) throw new BadRequestException('message.clear_cart_before_adding_meal');
-      if (!meal) throw new BadRequestException('message.meal_not_found');
+      if (!meal) throw new BadRequestException('message.meal_not_found'); 
       // Fetch required option groups from the database
       const allOptionGroupsForMeal = await context.find(MealOptionGroup, {
         where: { meal_id: req.meal_id },

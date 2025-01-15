@@ -109,7 +109,6 @@ export class RegisterRestaurantTransaction extends BaseTransaction<
       if (!cuisine_types)
         throw new BadRequestException('cuisine types not found');
       restaurant.cuisine_types = cuisine_types;
-      console.log(user);
       await context.save(restaurant);
       await context.save(menus);
       await context.save(licenses);

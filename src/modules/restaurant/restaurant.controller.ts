@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { GetNearResturantsQuery } from './dto/requests/get-near-resturants.query';
@@ -20,6 +21,8 @@ import { CuisineResponse } from './dto/responses/cuisine.response';
 import { AddRestaurantCategoryRequest } from './dto/requests/add-restaurant-category.request';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { Roles } from '../authentication/guards/roles.decorator';
+import { RolesGuard } from '../authentication/guards/roles.guard';
+import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -72,11 +75,14 @@ export class RestaurantController {
     return new ActionResponse(response);
   }
 
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.CLIENT)
   @Get('/meal/details/:id')
   async getSingleMeal(@Param('id') id: string) {
     const meal = await this.restaurantService.getSingleMeal(id);
     const response = this._i18nResponse.entity(
-      plainToInstance(MealResponse, meal, { excludeExtraneousValues: true }),
+      meal, 
     );
     return new ActionResponse(response);
   }

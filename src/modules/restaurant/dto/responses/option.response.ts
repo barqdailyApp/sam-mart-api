@@ -11,6 +11,8 @@ export class OptionRespone{
     name_en:string
     @Expose()
     price:number
+    @Expose()
+    is_selected:boolean
 
 }
 export class OptionGroupResponse{

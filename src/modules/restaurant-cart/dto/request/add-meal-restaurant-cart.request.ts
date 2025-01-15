@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
-import { IsNotEmpty, IsNumber, IsOptional, IsUUID, Validate, ValidateNested } from "class-validator";
+import { IsNotEmpty, IsNumber, IsOptional, IsUUID, Min, Validate, ValidateNested } from "class-validator";
 
 export class AddMealRestaurantCartRequest  {
     @ApiProperty()
@@ -11,6 +11,7 @@ export class AddMealRestaurantCartRequest  {
     @ApiProperty()
     @IsNumber()
     @IsNotEmpty()
+    @Min(1)
     quantity: number
 
     // list of meal option group ids

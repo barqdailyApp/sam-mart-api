@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, Res } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/core/base/service/service.base';
 import { Restaurant } from 'src/infrastructure/entities/restaurant/restaurant.entity';
@@ -17,6 +17,11 @@ import { AddRestaurantCategoryRequest } from './dto/requests/add-restaurant-cate
 import { RestaurantCategory } from 'src/infrastructure/entities/restaurant/restaurant-category.entity';
 import { AddMealRequest } from './dto/requests/add-meal.request';
 import * as fs from 'fs';
+import { REQUEST } from '@nestjs/core';
+import { Request } from 'express';
+import { RestaurantCartMeal } from 'src/infrastructure/entities/restaurant/restaurant-cart-meal.entity';
+import { MealResponse } from './dto/responses/meal.response';
+
 @Injectable()
 export class RestaurantService extends BaseService<Restaurant> {
   constructor(
@@ -26,10 +31,12 @@ export class RestaurantService extends BaseService<Restaurant> {
     private readonly cuisineTypeRepository: Repository<CuisineType>,
     @InjectRepository(RestaurantCategory)
     private readonly restaurantCategoryRepository: Repository<RestaurantCategory>,
-
+    @InjectRepository(RestaurantCartMeal)
+    private readonly cartMealRepository: Repository<RestaurantCartMeal>,
     @InjectRepository(Meal)
     private readonly mealRepository: Repository<Meal>,
     private readonly registerRestaurantTransaction: RegisterRestaurantTransaction,
+    @Inject(REQUEST) private readonly request: Request,
   ) {
     super(restaurantRepository);
   }
@@ -142,13 +149,26 @@ export class RestaurantService extends BaseService<Restaurant> {
   async getSingleMeal(id: string) {
     const meal = await this.mealRepository.findOne({
       where: { id },
-      relations: { meal_option_groups: { option_group: { options: true } } },
+      relations: { meal_option_groups: { option_group: { options: true } , } },
     });
     if (!meal) throw new NotFoundException('no meal found');
-    return meal;
+     const cart_meal= await this.cartMealRepository.findOne({where:{cart:{user_id:this.request.user.id},meal_id:id},relations:{cart_meal_options:{option:true}}})
+    const meal_response= plainToInstance(MealResponse, meal, { excludeExtraneousValues: true });
+    if(cart_meal){
+      meal_response.option_groups.forEach((option_group) => {
+        option_group.options.forEach((option) => {
+          option.is_selected=cart_meal.cart_meal_options.some(cart_meal_option=>cart_meal_option.option.id===option.id)
+        });
+      })
+      meal_response.cart_quantity=cart_meal.quantity
+      //wrap in number
+      meal_response.cart_total_price=Number(meal.price)+Number(cart_meal.cart_meal_options.map(cart_meal_option=>cart_meal_option.option.price).reduce((a,b)=>a+b,0))
+    }
+
+    return meal_response;
   }
 
-  async register(req: RegisterRestaurantRequest) {
+  async register(req: RegisterRestaurantRequest) { 
     const restaurant = await this.registerRestaurantTransaction.run(req);
     return restaurant;
   }
