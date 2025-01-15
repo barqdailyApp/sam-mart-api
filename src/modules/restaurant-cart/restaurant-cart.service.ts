@@ -8,6 +8,8 @@ import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { plainToInstance } from 'class-transformer';
 import { GetCartMealsResponse } from './dto/response/get-cart-meals.response';
+import { UpdateCartItemQuantityRequest } from './dto/request/update-cart-item-quantity.request';
+import { RestaurantCartMeal } from 'src/infrastructure/entities/restaurant/restaurant-cart-meal.entity';
 
 @Injectable()
 export class RestaurantCartService {
@@ -15,6 +17,8 @@ export class RestaurantCartService {
     private readonly addMealTransaction: AddMealRestaurantCartTransaction,
     @InjectRepository(RestaurantCart)
     private readonly restaurantCartRepository: Repository<RestaurantCart>,
+    @InjectRepository(RestaurantCartMeal)
+    private readonly restaurantCartMealRepository: Repository<RestaurantCartMeal>,
     @Inject(REQUEST) private readonly request: Request,
   ) {}
 
@@ -30,5 +34,20 @@ export class RestaurantCartService {
       excludeExtraneousValues: true,
     });
     return response;
+  }
+  async clearCart() {
+    return await this.restaurantCartRepository.delete({
+      user_id: this.request.user.id,
+    });
+  }
+
+  async deleteCartMeal(cart_meal_id: string) {
+    return await this.restaurantCartRepository.delete({
+      id: cart_meal_id,
+    });
+  } 
+  async updateCartMealQuantity(req:UpdateCartItemQuantityRequest){
+    //check if cart meal exists
+    return await this.restaurantCartMealRepository.update(req.cart_meal_id,{quantity:req.quantity});
   }
 }
