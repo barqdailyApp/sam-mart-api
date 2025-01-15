@@ -6,6 +6,15 @@ export class UpdateCartItemQuantityRequest {
     @Min(1)
     quantity: number;
     @IsNotEmpty()
-    @IsUUID()
+    // @IsUUID()
     cart_meal_id: string;
+}
+
+export class UpdateCartItemOptionRequest {
+    @IsNotEmpty()
+    // @IsUUID()
+    cart_meal_id: string;
+    @IsNotEmpty()
+    // @IsUUID()
+    cart_meal_option_id: string;
 }
