@@ -77,7 +77,7 @@ const missingRequiredGroups = allOptionGroupsForMeal.filter(
 
 if (missingRequiredGroups.length > 0) {
   throw new BadRequestException(
-    'message.missing_required_groups')}
+    'message.missing_required_options')}
     if(req.options_ids){
 allOptionGroupsForMeal.forEach( (group) => {
  const provided_options=group.option_group.options.filter((option)=>{
@@ -85,10 +85,10 @@ allOptionGroupsForMeal.forEach( (group) => {
   })
 
   if(group.option_group.min_selection>provided_options.length ){
-    throw new BadRequestException('message.missing_required_groups')
+    throw new BadRequestException('message.missing_required_options')
   }
   if(group.option_group.max_selection<provided_options.length && group.option_group.max_selection!=null){
-    throw new BadRequestException('message.missing_required_groups')
+    throw new BadRequestException('message.too_many_options')
   }
   
 
