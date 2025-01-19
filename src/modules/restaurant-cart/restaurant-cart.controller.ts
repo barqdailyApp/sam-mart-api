@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Param, Post, UseGuards } from '@nestjs/common';
 import { RestaurantCartService } from './restaurant-cart.service';
 import { AddMealRestaurantCartRequest } from './dto/request/add-meal-restaurant-cart.request';
 import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
@@ -39,7 +39,14 @@ export class RestaurantCartController {
        )
        return new ActionResponse(response);
     }
-    
+    @Get('details/:cart_meal_id')
+    async getCartMealDetails(@Param('cart_meal_id') cart_meal_id:string) {
+      const cart_meal= await this.resturantCartService.getCartMealDetails(cart_meal_id);
+      const response = this._i18nResponse.entity(
+        cart_meal
+      )
+      return new ActionResponse(response);
+    }
     @Post('update-meal')
     async updateCartMeal(@Body() req: UpdateCartMealRequest) {
       return await this.resturantCartService.updateCartMeal(req);

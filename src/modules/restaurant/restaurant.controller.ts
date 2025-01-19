@@ -68,10 +68,8 @@ export class RestaurantController {
   async getSingleRestaurant(@Param('id') id: string) {
     const restaurant = await this.restaurantService.getSingleRestaurant(id);
     const response = this._i18nResponse.entity(
-      plainToInstance(RestaurantResponse, restaurant, {
-        excludeExtraneousValues: true,
-      }),
-    );
+      restaurant,  
+      );
     return new ActionResponse(response);
   }
 

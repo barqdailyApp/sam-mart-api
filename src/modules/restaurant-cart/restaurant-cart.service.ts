@@ -123,5 +123,17 @@ export class RestaurantCartService {
       },
     });
   }
+
+  async getCartMealDetails(cart_meal_id:string){
+    const cart_meal= await this.restaurantCartMealRepository.findOne({where:{id:cart_meal_id},relations:{meal:{meal_option_groups:{option_group:{options:true}}},cart_meal_options:{option:true}}});
+   const response = plainToInstance(GetCartMealsResponse, {...cart_meal.meal,meal_id:cart_meal.meal.id,quantity:cart_meal.quantity,total_price:Number(cart_meal.meal.price)+ Number(cart_meal.cart_meal_options.reduce((acc,curr)=>acc+curr.option.price,0))}, { excludeExtraneousValues: true });
+    //check if option is selected
+    response.option_groups.forEach((option_group) => {
+      option_group.options.forEach((option) => {
+        option.is_selected=cart_meal.cart_meal_options.some(cart_meal_option=>cart_meal_option.option.id===option.id)
+      });
+    })
+    return response
+  }
   
 }

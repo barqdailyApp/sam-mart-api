@@ -44,4 +44,7 @@ export class MealResponse {
 
       @Expose()
       cart_total_price:number
+
+      @Expose()
+      direct_add:boolean
 }

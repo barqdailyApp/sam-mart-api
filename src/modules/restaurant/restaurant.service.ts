@@ -135,15 +135,28 @@ export class RestaurantService extends BaseService<Restaurant> {
     const restaurant = await this._repo.findOne({
       where: { id },
       relations: {
-        categories: { meals: true },
+        categories: { meals: {meal_option_groups:{option_group:true}} , },
         attachments: true,
         admins: {user:true},
         cuisine_types: true,
       },
     });
-
+  
     if (!restaurant) throw new NotFoundException('no resturant found');
-    return restaurant;
+    const response = plainToInstance(RestaurantResponse, restaurant, {
+      excludeExtraneousValues: true,
+    })
+    response.categories.forEach((category) => {
+      category.meals.forEach((meal) => {
+        meal.direct_add=true
+        //if option group min_selection >0
+        if(meal.option_groups.some(meal_option_group=>meal_option_group?.min_selection>0)){
+          meal.direct_add=false
+        }
+        
+      });
+    })
+    return response;
   }
 
   async getSingleMeal(id: string,include_cart?: boolean) {
