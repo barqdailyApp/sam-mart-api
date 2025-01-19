@@ -79,10 +79,10 @@ export class RestaurantController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.CLIENT)
   @Get('/meal/details/:id')
-  async getSingleMeal(@Param('id') id: string) {
-    const meal = await this.restaurantService.getSingleMeal(id);
+  async getSingleMeal(@Query('include_cart') include_cart: boolean, @Param('id') id: string) {
+    const meal = await this.restaurantService.getSingleMeal(id, include_cart);
     const response = this._i18nResponse.entity(
-      meal, 
+      meal,
     );
     return new ActionResponse(response);
   }

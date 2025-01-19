@@ -1,20 +1,21 @@
-import { IsNotEmpty, IsNumber, Min, IsUUID } from "class-validator";
+import { ApiProperty } from "@nestjs/swagger";
+import { IsNotEmpty, IsNumber, Min, IsUUID, IsArray, IsOptional } from "class-validator";
 
-export class UpdateCartItemQuantityRequest {
+export class UpdateCartMealRequest {
+    @ApiProperty()
+    @IsOptional()
     @IsNotEmpty()
     @IsNumber()
     @Min(1)
     quantity: number;
+    @ApiProperty()
     @IsNotEmpty()
     // @IsUUID()
     cart_meal_id: string;
+    @ApiProperty({ isArray: true })
+    @IsArray()
+    @IsOptional()
+    // @IsUUID()
+    options: string[];
 }
 
-export class UpdateCartItemOptionRequest {
-    @IsNotEmpty()
-    // @IsUUID()
-    cart_meal_id: string;
-    @IsNotEmpty()
-    // @IsUUID()
-    cart_meal_option_id: string;
-}

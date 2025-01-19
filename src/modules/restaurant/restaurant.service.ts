@@ -146,7 +146,7 @@ export class RestaurantService extends BaseService<Restaurant> {
     return restaurant;
   }
 
-  async getSingleMeal(id: string) {
+  async getSingleMeal(id: string,include_cart?: boolean) {
     const meal = await this.mealRepository.findOne({
       where: { id },
       relations: { meal_option_groups: { option_group: { options: true } , } },
@@ -154,7 +154,7 @@ export class RestaurantService extends BaseService<Restaurant> {
     if (!meal) throw new NotFoundException('no meal found');
      const cart_meal= await this.cartMealRepository.findOne({where:{cart:{user_id:this.request.user.id},meal_id:id},relations:{cart_meal_options:{option:true}}})
     const meal_response= plainToInstance(MealResponse, meal, { excludeExtraneousValues: true });
-    if(cart_meal){
+    if(cart_meal && include_cart===true){
       meal_response.option_groups.forEach((option_group) => {
         option_group.options.forEach((option) => {
           option.is_selected=cart_meal.cart_meal_options.some(cart_meal_option=>cart_meal_option.option.id===option.id)

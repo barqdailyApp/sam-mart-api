@@ -9,7 +9,7 @@ import { RolesGuard } from '../authentication/guards/roles.guard';
 import { I18n } from 'nestjs-i18n';
 import { I18nResponse } from 'src/core/helpers/i18n.helper';
 import { ActionResponse } from 'src/core/base/responses/action.response';
-import { UpdateCartItemOptionRequest, UpdateCartItemQuantityRequest } from './dto/request/update-cart-item.request';
+import {  UpdateCartMealRequest } from './dto/request/update-cart-item.request';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -40,13 +40,9 @@ export class RestaurantCartController {
        return new ActionResponse(response);
     }
     
-    @Post('update-quantity')
-    async updateCartMealQuantity(@Body() req: UpdateCartItemQuantityRequest) {
-      return await this.resturantCartService.updateCartMealQuantity(req);
+    @Post('update-meal')
+    async updateCartMeal(@Body() req: UpdateCartMealRequest) {
+      return await this.resturantCartService.updateCartMeal(req);
     }
 
-    @Post('update-option')
-    async updateCartMealOption(@Body() req: UpdateCartItemOptionRequest) {
-      return await this.resturantCartService.updateCartMealOption(req);
-    }
 }
