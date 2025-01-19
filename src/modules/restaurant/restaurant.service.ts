@@ -150,7 +150,7 @@ export class RestaurantService extends BaseService<Restaurant> {
       category.meals.forEach((meal) => {
         meal.direct_add=true
         //if option group min_selection >0
-        if(meal.option_groups.some(meal_option_group=>meal_option_group?.min_selection>0)){
+        if(meal.option_groups?.length>0){
           meal.direct_add=false
         }
         
