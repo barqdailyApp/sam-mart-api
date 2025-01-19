@@ -4,6 +4,7 @@ import {
   Controller,
   Delete,
   Get,
+  Inject,
   Param,
   Post,
   Put,
@@ -25,6 +26,9 @@ import { Warehouse } from 'src/infrastructure/entities/warehouse/warehouse.entit
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { Roles } from '../authentication/guards/roles.decorator';
 import { WarehouseResponse } from '../warehouse/dto/response/warehouse.response';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
+
 
 @ApiTags('Cart')
 @ApiHeader({
@@ -40,6 +44,7 @@ export class CartController {
   constructor(
     private readonly _i18nResponse: I18nResponse,
     private readonly cartService: CartService,
+    @Inject(CACHE_MANAGER) private readonly cacheManager:Cache
   ) {}
 
   @Get()
@@ -115,6 +120,7 @@ export class CartController {
 
   @Post('/add')
   async createCart(@Body() req: AddToCartRequest) {
+    this.cacheManager.reset();
     const cart_product = await this.cartService.addToCart(req);
 
     if (!cart_product) throw new BadRequestException();
@@ -147,6 +153,7 @@ export class CartController {
 
   @Delete('/delete/:cart_product_id')
   async deleteCartProduct(@Param('cart_product_id') cart_product_id: string) {
+    this.cacheManager.reset();
     const get_cart_product = await this.cartService.getSingleCartProduct(
       cart_product_id,
     );
@@ -179,6 +186,7 @@ export class CartController {
 
   @Put('/update/:cart-product')
   async updateCartProduct(@Body() req: UpdateCartProductRequest) {
+    this.cacheManager.reset();
     const cart_product = await this.cartService.updatecartProduct(req);
     const result = this._i18nResponse.entity(
       await this.cartService.getSingleCartProduct(cart_product.id),
@@ -208,6 +216,7 @@ export class CartController {
 
   @Put('/update/:cart-product/service')
   async addRemoveService(@Body() req: AddRemoveCartProductServiceRequest) {
+    this.cacheManager.reset();
     const cart_product = await this.cartService.addRemoveService(req);
     const result = this._i18nResponse.entity(
       await this.cartService.getSingleCartProduct(cart_product.id),

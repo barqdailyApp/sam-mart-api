@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Inject,
   Param,
   Post,
   Put,
@@ -21,6 +22,8 @@ import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
 import { Roles } from '../authentication/guards/roles.decorator';
 import { RolesGuard } from '../authentication/guards/roles.guard';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -34,6 +37,7 @@ import { RolesGuard } from '../authentication/guards/roles.guard';
 export class ProductCategoryPriceController {
   constructor(
     private readonly productCategoryPriceService: ProductCategoryPriceService,
+        @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   @Post('create-link-product-subcategory/:product_id/:categorySubCategory_id')
@@ -41,6 +45,7 @@ export class ProductCategoryPriceController {
     @Body()
     createLinkProductSubcategoryRequest: CreateLinkProductSubcategoryRequest,
   ) {
+    this.cacheManager.reset();
     return new ActionResponse(
       await this.productCategoryPriceService.createLinkProductSubcategory(
         createLinkProductSubcategoryRequest,
@@ -54,6 +59,7 @@ export class ProductCategoryPriceController {
     @Body()
     updateLinkProductSubcategoryRequest: UpdateLinkProductSubcategoryRequest,
   ) {
+    this.cacheManager.reset();
     return new ActionResponse(
       await this.productCategoryPriceService.updateLinkProductSubcategory(
         product_sub_category_id,
@@ -78,6 +84,7 @@ export class ProductCategoryPriceController {
   async deleteLinkProductSubcategory(
     @Param('product_sub_category_id') product_sub_category_id: string,
   ) {
+    this.cacheManager.reset();
     return new ActionResponse(
       await this.productCategoryPriceService.deleteLinkProductSubcategory(
         product_sub_category_id,
@@ -104,6 +111,7 @@ export class ProductCategoryPriceController {
     productMeasurementRequest: ProductMeasurementRequest,
     @Param('product_sub_category_id') product_sub_category_id: string,
   ) {
+    this.cacheManager.reset();
     return new ActionResponse(
       await this.productCategoryPriceService.unitPriceProduct(
         product_sub_category_id,
@@ -120,6 +128,7 @@ export class ProductCategoryPriceController {
     @Param('product_measurement_id') product_measurement_id: string,
     @Body() productAdditionalServiceRequest: ProductAdditionalServiceRequest,
   ) {
+    this.cacheManager.reset();
     return new ActionResponse(
       await this.productCategoryPriceService.productAdditionalService(
         product_sub_category_id,
@@ -134,6 +143,7 @@ export class ProductCategoryPriceController {
   async deleteProductAdditionalService(
     @Param('product_additional_service_id') product_additional_service_id: string
   ) {
+    this.cacheManager.reset();
     return new ActionResponse(
       await this.productCategoryPriceService.deleteProductAdditionalService(
         product_additional_service_id
