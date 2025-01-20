@@ -18,7 +18,7 @@ import { RolesGuard } from '../authentication/guards/roles.guard';
 import { Country } from 'src/infrastructure/entities/country/country.entity';
 import { CreateCountryRequest } from './dto/requests/create-country.request';
 import { UpdateCountryRequest } from './dto/requests/update-country.request';
-import { plainToClass } from 'class-transformer';
+import { plainToClass, plainToInstance } from 'class-transformer';
 import { CountryResponse } from './dto/responses/country.response';
 import { I18nResponse } from 'src/core/helpers/i18n.helper';
 import { ActionResponse } from 'src/core/base/responses/action.response';
@@ -62,9 +62,9 @@ export class CountryController {
   @Get('all-countries')
   async allCountries() {
     const countries = await this.countryService.findAll();
-    const countriesResponse = countries.map((country) =>
-      plainToClass(CountryResponse, country),
-    );
+    const countriesResponse = plainToInstance(CountryResponse, countries, {
+      excludeExtraneousValues: true,
+    })
     return new ActionResponse(this._i18nResponse.entity(countriesResponse));
   }
   @Get('all-countries-dashboard')
