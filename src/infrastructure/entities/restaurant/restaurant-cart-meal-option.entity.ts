@@ -13,7 +13,7 @@ cart_meal: RestaurantCartMeal
 cart_meal_id: string
 
 
-@ManyToOne(()=>Option,(option)=>option.cart_meal_options)
+@ManyToOne(()=>Option,(option)=>option.cart_meal_options,{onDelete:"CASCADE"})
 @JoinColumn({name:"option_id"})
 option:Option
 

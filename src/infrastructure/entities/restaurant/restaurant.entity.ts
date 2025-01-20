@@ -7,6 +7,7 @@ import { FoodBanar } from './food_banar.entity';
 import { RestaurantAttachment } from './restaurant-attachment.entity';
 import { User } from '../user/user.entity';
 import { RestaurantAdmin } from './restaurant-admin.entity';
+import { RestaurantOrder } from './restaurant_order.entity';
 @Entity()
 export class Restaurant extends AuditableEntity {
   @Column()
@@ -85,4 +86,7 @@ export class Restaurant extends AuditableEntity {
   admins: RestaurantAdmin[];
   // @OneToMany(() => FoodBanar, (foodBanar) => foodBanar.restaurant)
   // banars: FoodBanar[];
+
+  @OneToMany(()=>RestaurantOrder,restaurantOrder=>restaurantOrder.restaurant)
+   restaurant_orders:RestaurantOrder[]
 }

@@ -9,7 +9,7 @@ import { RestaurantCartMeal } from "./restaurant-cart-meal.entity";
 export class RestaurantCart extends OwnedEntity {
 @OneToOne(() => User, )
 cart: Cart
-@OneToMany(() => RestaurantCartMeal,restaurantCartMeal=>restaurantCartMeal.cart)
+@OneToMany(() => RestaurantCartMeal,restaurantCartMeal=>restaurantCartMeal.cart ,{onDelete:"CASCADE"})
 restaurant_cart_meals:RestaurantCartMeal[]
     
 

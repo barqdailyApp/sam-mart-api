@@ -74,6 +74,8 @@ import { RestaurantAdmin } from '../entities/restaurant/restaurant-admin.entity'
 import { RestaurantCartMeal } from '../entities/restaurant/restaurant-cart-meal.entity';
 import { RestaurantCart } from '../entities/restaurant/restaurant-cart.entity';
 import { RestaurantCartMealOption } from '../entities/restaurant/restaurant-cart-meal-option.entity';
+import { RestaurantOrder } from '../entities/restaurant/restaurant_order.entity';
+import { RestaurantOrderMeal } from '../entities/restaurant/restaurant_order_meal.entity';
 export const DB_ENTITIES = [
   User,
   Address,
@@ -150,7 +152,9 @@ export const DB_ENTITIES = [
   RestaurantAdmin,
   RestaurantCart,
   RestaurantCartMeal,
-  RestaurantCartMealOption
+  RestaurantCartMealOption,
+  RestaurantOrder,
+  RestaurantOrderMeal
 ];
 
 export const DB_VIEWS = [];
