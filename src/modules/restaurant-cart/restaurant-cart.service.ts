@@ -33,7 +33,7 @@ export class RestaurantCartService {
       where: { user_id: this.request.user.id },
       relations: { restaurant_cart_meals:{meal:true,cart_meal_options:{option:true}} ,  },
     });
-    const response = plainToInstance(GetCartMealsResponse, cart.restaurant_cart_meals.map((m) => {const total_unit_price=Number(m.meal.price)+Number(m.cart_meal_options.reduce((acc,curr)=>acc+curr.option.price,0));return {...m.meal,meal_id:m.id,quantity:m.quantity,total_price:total_unit_price}}), {
+    const response = plainToInstance(GetCartMealsResponse, cart.restaurant_cart_meals.map((m) => {const total_unit_price=Number(m.meal.price)+Number(m.cart_meal_options.reduce((acc,curr)=>acc+curr.option.price,0));return {...m.meal,meal_id:m.meal.id,id:m.id,quantity:m.quantity,total_price:total_unit_price}}), {
       excludeExtraneousValues: true,
     }); 
     return response;
