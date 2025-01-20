@@ -1,7 +1,7 @@
 import { Expose, plainToInstance, Transform } from "class-transformer";
 import { toUrl } from "src/core/helpers/file.helper";
-import { MealOptionGroup } from "src/infrastructure/entities/restaurant/meal-option-group";
-import { OptionGroup } from "src/infrastructure/entities/restaurant/option-group.entity";
+import { MealOptionGroup } from "src/infrastructure/entities/restaurant/meal/meal-option-group";
+import { OptionGroup } from "src/infrastructure/entities/restaurant/option/option-group.entity";
 import { OptionGroupResponse } from "./option.response";
 
 export class MealResponse {

@@ -1,5 +1,5 @@
 import { Expose, plainToInstance, Transform } from "class-transformer";
-import { OptionGroup } from "src/infrastructure/entities/restaurant/option-group.entity";
+import { OptionGroup } from "src/infrastructure/entities/restaurant/option/option-group.entity";
 
 export class OptionRespone{
 

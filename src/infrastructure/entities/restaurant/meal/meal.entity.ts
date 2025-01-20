@@ -1,10 +1,10 @@
 import { Res } from "@nestjs/common";
 import { AuditableEntity } from "src/infrastructure/base/auditable.entity";
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
-import { RestaurantCategory } from "./restaurant-category.entity";
+import { RestaurantCategory } from "../restaurant-category.entity";
 import { MealOptionGroup } from "./meal-option-group";
-import { RestaurantCart } from "./restaurant-cart.entity";
-import { RestaurantCartMeal } from "./restaurant-cart-meal.entity";
+import { RestaurantCart } from "../cart/restaurant-cart.entity";
+import { RestaurantCartMeal } from "../cart/restaurant-cart-meal.entity";
 @Entity()
 export class Meal extends AuditableEntity{
 

@@ -1,7 +1,7 @@
 import { AuditableEntity } from "src/infrastructure/base/auditable.entity"
 import { Column, Entity, OneToMany } from "typeorm"
 import { Option } from "./option.entity"
-import { MealOptionGroup } from "./meal-option-group"
+import { MealOptionGroup } from "../meal/meal-option-group"
 @Entity()
 export class OptionGroup extends AuditableEntity {
     

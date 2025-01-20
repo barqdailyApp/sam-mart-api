@@ -7,7 +7,7 @@ import { GetNearResturantsQuery } from './dto/requests/get-near-resturants.query
 import { plainToInstance } from 'class-transformer';
 import { RestaurantResponse } from './dto/responses/restaurant.response';
 import { CuisineResponse } from './dto/responses/cuisine.response';
-import { Meal } from 'src/infrastructure/entities/restaurant/meal.entity';
+import { Meal } from 'src/infrastructure/entities/restaurant/meal/meal.entity';
 import { json } from 'sequelize';
 import { RestaurantStatus } from 'src/infrastructure/data/enums/restaurant-status.enum';
 import { RegisterRestaurantRequest } from './dto/requests/register-restaurant.request';
@@ -19,7 +19,7 @@ import { AddMealRequest } from './dto/requests/add-meal.request';
 import * as fs from 'fs';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
-import { RestaurantCartMeal } from 'src/infrastructure/entities/restaurant/restaurant-cart-meal.entity';
+import { RestaurantCartMeal } from 'src/infrastructure/entities/restaurant/cart/restaurant-cart-meal.entity';
 import { MealResponse } from './dto/responses/meal.response';
 
 @Injectable()

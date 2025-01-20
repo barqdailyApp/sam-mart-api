@@ -64,18 +64,20 @@ import { Restaurant } from '../entities/restaurant/restaurant.entity';
 import { CuisineType } from '../entities/restaurant/cuisine-type.entity';
 import { Res } from '@nestjs/common';
 import { RestaurantCategory } from '../entities/restaurant/restaurant-category.entity';
-import { Meal } from '../entities/restaurant/meal.entity';
-import { OptionGroup } from '../entities/restaurant/option-group.entity';
-import { Option } from '../entities/restaurant/option.entity';
-import { MealOptionGroup } from '../entities/restaurant/meal-option-group';
-import { FoodBanar } from '../entities/restaurant/food_banar.entity';
+import { Meal } from '../entities/restaurant/meal/meal.entity';
+import { OptionGroup } from '../entities/restaurant/option/option-group.entity';
+import { Option } from '../entities/restaurant/option/option.entity';
+import { MealOptionGroup } from '../entities/restaurant/meal/meal-option-group';
+
 import { RestaurantAttachment } from '../entities/restaurant/restaurant-attachment.entity';
 import { RestaurantAdmin } from '../entities/restaurant/restaurant-admin.entity';
-import { RestaurantCartMeal } from '../entities/restaurant/restaurant-cart-meal.entity';
-import { RestaurantCart } from '../entities/restaurant/restaurant-cart.entity';
-import { RestaurantCartMealOption } from '../entities/restaurant/restaurant-cart-meal-option.entity';
-import { RestaurantOrder } from '../entities/restaurant/restaurant_order.entity';
-import { RestaurantOrderMeal } from '../entities/restaurant/restaurant_order_meal.entity';
+import { RestaurantCartMeal } from '../entities/restaurant/cart/restaurant-cart-meal.entity';
+import { RestaurantCart } from '../entities/restaurant/cart/restaurant-cart.entity';
+import { RestaurantCartMealOption } from '../entities/restaurant/cart/restaurant-cart-meal-option.entity';
+import { RestaurantOrder } from '../entities/restaurant/order/restaurant_order.entity';
+import { RestaurantOrderMeal } from '../entities/restaurant/order/restaurant_order_meal.entity';
+import { FoodBanar } from '../entities/restaurant/banar/food_banar.entity';
+import { RestaurantOrderMealOption } from '../entities/restaurant/order/restaurant_order_meal_option.entity';
 export const DB_ENTITIES = [
   User,
   Address,
@@ -154,7 +156,8 @@ export const DB_ENTITIES = [
   RestaurantCartMeal,
   RestaurantCartMealOption,
   RestaurantOrder,
-  RestaurantOrderMeal
+  RestaurantOrderMeal,
+  RestaurantOrderMealOption,
 ];
 
 export const DB_VIEWS = [];

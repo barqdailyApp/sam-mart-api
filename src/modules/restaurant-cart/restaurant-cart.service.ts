@@ -1,6 +1,6 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { RestaurantCart } from 'src/infrastructure/entities/restaurant/restaurant-cart.entity';
+import { RestaurantCart } from 'src/infrastructure/entities/restaurant/cart/restaurant-cart.entity';
 import { In, Repository } from 'typeorm';
 import { AddMealRestaurantCartTransaction } from './util/add-meal-restaurant-cart.transaction';
 import { AddMealRestaurantCartRequest } from './dto/request/add-meal-restaurant-cart.request';
@@ -8,8 +8,8 @@ import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { plainToInstance } from 'class-transformer';
 import { GetCartMealsResponse } from './dto/response/get-cart-meals.response';
-import { RestaurantCartMeal } from 'src/infrastructure/entities/restaurant/restaurant-cart-meal.entity';
-import { RestaurantCartMealOption } from 'src/infrastructure/entities/restaurant/restaurant-cart-meal-option.entity';
+import { RestaurantCartMeal } from 'src/infrastructure/entities/restaurant/cart/restaurant-cart-meal.entity';
+import { RestaurantCartMealOption } from 'src/infrastructure/entities/restaurant/cart/restaurant-cart-meal-option.entity';
 import { UpdateCartMealRequest } from './dto/request/update-cart-item.request';
 
 @Injectable()

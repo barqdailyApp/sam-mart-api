@@ -7,13 +7,13 @@ import { FileService } from 'src/modules/file/file.service';
 import { RegisterRestaurantRequest } from 'src/modules/restaurant/dto/requests/register-restaurant.request';
 import { DataSource, EntityManager, In, Not } from 'typeorm';
 import { AddMealRestaurantCartRequest } from '../dto/request/add-meal-restaurant-cart.request';
-import { RestaurantCart } from 'src/infrastructure/entities/restaurant/restaurant-cart.entity';
+import { RestaurantCart } from 'src/infrastructure/entities/restaurant/cart/restaurant-cart.entity';
 import { Request } from 'express';
-import { RestaurantCartMeal } from 'src/infrastructure/entities/restaurant/restaurant-cart-meal.entity';
-import { Meal } from 'src/infrastructure/entities/restaurant/meal.entity';
-import { MealOptionGroup } from 'src/infrastructure/entities/restaurant/meal-option-group';
-import { OptionGroup } from 'src/infrastructure/entities/restaurant/option-group.entity';
-import { RestaurantCartMealOption } from 'src/infrastructure/entities/restaurant/restaurant-cart-meal-option.entity';
+import { RestaurantCartMeal } from 'src/infrastructure/entities/restaurant/cart/restaurant-cart-meal.entity';
+import { Meal } from 'src/infrastructure/entities/restaurant/meal/meal.entity';
+import { MealOptionGroup } from 'src/infrastructure/entities/restaurant/meal/meal-option-group';
+import { OptionGroup } from 'src/infrastructure/entities/restaurant/option/option-group.entity';
+import { RestaurantCartMealOption } from 'src/infrastructure/entities/restaurant/cart/restaurant-cart-meal-option.entity';
 import { plainToInstance } from 'class-transformer';
 @Injectable()
 export class AddMealRestaurantCartTransaction extends BaseTransaction<

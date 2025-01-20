@@ -1,13 +1,13 @@
 import { AuditableEntity } from 'src/infrastructure/base/auditable.entity';
-import { Column, Entity, ManyToMany, OneToMany } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
 import { CuisineType } from './cuisine-type.entity';
 import { RestaurantCategory } from './restaurant-category.entity';
 import { RestaurantStatus } from 'src/infrastructure/data/enums/restaurant-status.enum';
-import { FoodBanar } from './food_banar.entity';
 import { RestaurantAttachment } from './restaurant-attachment.entity';
 import { User } from '../user/user.entity';
 import { RestaurantAdmin } from './restaurant-admin.entity';
-import { RestaurantOrder } from './restaurant_order.entity';
+import { RestaurantOrder } from './order/restaurant_order.entity';
+import { City } from '../city/city.entity';
 @Entity()
 export class Restaurant extends AuditableEntity {
   @Column()
@@ -89,4 +89,12 @@ export class Restaurant extends AuditableEntity {
 
   @OneToMany(()=>RestaurantOrder,restaurantOrder=>restaurantOrder.restaurant)
    restaurant_orders:RestaurantOrder[]
+
+
+   @ManyToOne(()=>City)
+   @JoinColumn()
+   city:City
+
+   @Column({nullable:true})
+   city_id:string
 }

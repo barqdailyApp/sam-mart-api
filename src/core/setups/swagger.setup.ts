@@ -3,8 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { PaymentMethod } from 'src/infrastructure/entities/payment_method/payment_method.entity';
 import { PromoCode } from 'src/infrastructure/entities/promo-code/promo-code.entity';
-import { FoodBanar } from 'src/infrastructure/entities/restaurant/food_banar.entity';
-import { RestaurantCart } from 'src/infrastructure/entities/restaurant/restaurant-cart.entity';
+
+import { RestaurantCart } from 'src/infrastructure/entities/restaurant/cart/restaurant-cart.entity';
 import { Restaurant } from 'src/infrastructure/entities/restaurant/restaurant.entity';
 
 import { AdditionalServiceModule } from 'src/modules/additional-service/additional-service.module';

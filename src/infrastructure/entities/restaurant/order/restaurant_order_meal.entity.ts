@@ -1,8 +1,10 @@
 import { Res } from "@nestjs/common";
 import { AuditableEntity } from "src/infrastructure/base/auditable.entity";
-import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
 import { RestaurantOrder } from "./restaurant_order.entity";
-import { Meal } from "./meal.entity";
+import { Meal } from "../meal/meal.entity";
+import { RestaurantCartMealOption } from "../cart/restaurant-cart-meal-option.entity";
+import { RestaurantOrderMealOption } from "./restaurant_order_meal_option.entity";
 
 @Entity()
 export class RestaurantOrderMeal extends AuditableEntity{ 
@@ -20,4 +22,7 @@ meal:Meal
 
  @Column()
  meal_id:string
+
+ @OneToMany(()=>RestaurantOrderMealOption,(restaurantCartMealOption)=>restaurantCartMealOption.restaurant_order_meal)
+ restaurant_order_meal_options:RestaurantOrderMealOption[]
 }

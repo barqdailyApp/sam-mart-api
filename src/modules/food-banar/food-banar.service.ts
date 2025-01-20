@@ -11,8 +11,9 @@ import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { User } from 'src/infrastructure/entities/user/user.entity';
 import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
-import { FoodBanar } from 'src/infrastructure/entities/restaurant/food_banar.entity';
+
 import { GetNearResturantsQuery } from '../restaurant/dto/requests/get-near-resturants.query';
+import { FoodBanar } from 'src/infrastructure/entities/restaurant/banar/food_banar.entity';
 
 @Injectable()
 export class BanarService extends BaseService<FoodBanar> {

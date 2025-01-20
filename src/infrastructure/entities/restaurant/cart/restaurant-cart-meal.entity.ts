@@ -1,6 +1,6 @@
 import { AuditableEntity } from "src/infrastructure/base/auditable.entity";
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
-import { Meal } from "./meal.entity";
+import { Meal } from "../meal/meal.entity";
 import { RestaurantCart } from "./restaurant-cart.entity";
 import { RestaurantCartMealOption } from "./restaurant-cart-meal-option.entity";
 
@@ -18,7 +18,7 @@ export class RestaurantCartMeal extends AuditableEntity {
     meal_id: string
     @Column({default:1})
     quantity: number
-    @OneToMany(()=>RestaurantCartMealOption,restaurantCartMealOption=>restaurantCartMealOption.cart_meal)
+    @OneToMany(()=>RestaurantCartMealOption,restaurantCartMealOption=>restaurantCartMealOption.cart_meal,{onDelete:"CASCADE"})
     cart_meal_options:RestaurantCartMealOption[]
 
 }

@@ -1,8 +1,8 @@
 import { AuditableEntity } from "src/infrastructure/base/auditable.entity";
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
-import { OptionGroup } from "./option-group.entity";
+import { OptionGroup } from "../option/option-group.entity";
 import { Meal } from "./meal.entity";
-import { RestaurantCartMealOption } from "./restaurant-cart-meal-option.entity";
+import { RestaurantCartMealOption } from "../cart/restaurant-cart-meal-option.entity";
 @Entity()
 export class MealOptionGroup extends AuditableEntity {
    @ManyToOne(()=>OptionGroup,optionGroup=>optionGroup.meal_option_groups)

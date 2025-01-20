@@ -1,6 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from "typeorm";
-import { Banar } from "../banar/banar.entity";
-import { Restaurant } from "./restaurant.entity";
+import { Banar } from "../../banar/banar.entity";
+import { Restaurant } from "../restaurant.entity";
+
 @Entity()
 export class FoodBanar  extends Banar{
 

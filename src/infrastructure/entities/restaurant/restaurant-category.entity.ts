@@ -1,7 +1,7 @@
 import { AuditableEntity } from 'src/infrastructure/base/auditable.entity';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { Restaurant } from './restaurant.entity';
-import { Meal } from './meal.entity';
+import { Meal } from './meal/meal.entity';
 @Entity('')
 export class RestaurantCategory extends AuditableEntity {
   @Column()
