@@ -39,13 +39,17 @@ export class RestaurantCartService {
     return response;
   }
   async clearCart() {
-    return await this.restaurantCartRepository.delete({
-      user_id: this.request.user.id,
+    const cart= await this.restaurantCartRepository.findOne({
+     where:{ user_id: this.request.user.id},
     });
+    const cart_items= await this.restaurantCartMealRepository.find({
+      where:{cart_id:cart.id},
+    });
+ return    await this.restaurantCartMealRepository.remove(cart_items);
   }
 
   async deleteCartMeal(cart_meal_id: string) {
-    return await this.restaurantCartRepository.delete({
+    return await this.restaurantCartMealRepository.delete({
       id: cart_meal_id,
     });
   } 
