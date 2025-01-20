@@ -50,7 +50,7 @@ export class RestaurantCartController {
     @Post('update-meal')
     async updateCartMeal(@Body() req: UpdateCartMealRequest) {
       const response= await this.resturantCartService.updateCartMeal(req);
-      return new ActionResponse(response);
+      return new ActionResponse(this._i18nResponse.entity(response));
     }
 
 }

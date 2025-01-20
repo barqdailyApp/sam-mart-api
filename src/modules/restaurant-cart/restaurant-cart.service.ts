@@ -122,7 +122,7 @@ export class RestaurantCartService {
         cart_meal_options: { option: true },
       },
     });
-    const response= plainToInstance(GetCartMealsResponse,{...updated_cart_meal.meal,meal_id:updated_cart_meal.meal.id,quantity:updated_cart_meal.quantity,total_price:Number(updated_cart_meal.meal.price)+ Number(updated_cart_meal.cart_meal_options.reduce((acc,curr)=>acc+curr.option.price,0))}, { excludeExtraneousValues: true });
+    const response= plainToInstance(GetCartMealsResponse,{...updated_cart_meal.meal,id:updated_cart_meal.id,meal_id:updated_cart_meal.meal.id,quantity:updated_cart_meal.quantity,total_price:Number(updated_cart_meal.meal.price)+ Number(updated_cart_meal.cart_meal_options.reduce((acc,curr)=>acc+curr.option.price,0))}, { excludeExtraneousValues: true });
     return response
   }
 
