@@ -115,13 +115,15 @@ export class RestaurantCartService {
     }
   
     // Return the updated cart meal
-    return await this.restaurantCartMealRepository.findOne({
+    const updated_cart_meal= await this.restaurantCartMealRepository.findOne({
       where: { id: cart_meal_id },
       relations: {
         meal: { meal_option_groups: { option_group: { options: true } } },
         cart_meal_options: { option: true },
       },
     });
+    const response= plainToInstance(GetCartMealsResponse,{...updated_cart_meal,meal_id:updated_cart_meal.meal.id,quantity:updated_cart_meal.quantity,total_price:Number(updated_cart_meal.meal.price)+ Number(updated_cart_meal.cart_meal_options.reduce((acc,curr)=>acc+curr.option.price,0))}, { excludeExtraneousValues: true });
+    return response
   }
 
   async getCartMealDetails(cart_meal_id:string){
