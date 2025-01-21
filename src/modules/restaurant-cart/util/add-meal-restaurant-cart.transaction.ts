@@ -15,10 +15,11 @@ import { MealOptionGroup } from 'src/infrastructure/entities/restaurant/meal/mea
 import { OptionGroup } from 'src/infrastructure/entities/restaurant/option/option-group.entity';
 import { RestaurantCartMealOption } from 'src/infrastructure/entities/restaurant/cart/restaurant-cart-meal-option.entity';
 import { plainToInstance } from 'class-transformer';
+import { GetCartMealsResponse } from '../dto/response/get-cart-meals.response';
 @Injectable()
 export class AddMealRestaurantCartTransaction extends BaseTransaction<
   AddMealRestaurantCartRequest,
-  RestaurantCartMeal
+  GetCartMealsResponse
 > {
   constructor(
     dataSource: DataSource,
@@ -33,7 +34,7 @@ export class AddMealRestaurantCartTransaction extends BaseTransaction<
   protected async execute(
     req: AddMealRestaurantCartRequest,
     context: EntityManager,
-  ): Promise<RestaurantCartMeal> {
+  ): Promise<GetCartMealsResponse> {
    
       try {
         const { meal_id, quantity, options_ids } = req;
@@ -62,7 +63,7 @@ export class AddMealRestaurantCartTransaction extends BaseTransaction<
             meal: { restaurant_category: { restaurant: { id: Not(meal.restaurant_category.restaurant.id) } } },
           },
         });
-        if (is_another_cart) throw new BadRequestException('message.clear_cart_before_adding_meal');
+        if (is_another_cart) return null;
     
         // Fetch all option groups for the meal
         const allOptionGroupsForMeal = await context.find(MealOptionGroup, {
@@ -104,8 +105,9 @@ export class AddMealRestaurantCartTransaction extends BaseTransaction<
           where: {
             cart_id: restaurant_cart.id,
             meal_id: meal_id,
+
           },
-          relations: { cart_meal_options: true },
+          relations: { meal: true,cart_meal_options: {option:true} },
         });
     
         if (existingCartMeal) {
@@ -120,7 +122,8 @@ export class AddMealRestaurantCartTransaction extends BaseTransaction<
             // If identical meal exists, update quantity
             existingCartMeal.quantity += quantity;
             await context.save(existingCartMeal);
-            return existingCartMeal;
+            const response = plainToInstance(GetCartMealsResponse, {...existingCartMeal.meal,meal_id:existingCartMeal.meal.id,quantity:existingCartMeal.quantity,total_price:Number(existingCartMeal.meal.price)+ Number(existingCartMeal.cart_meal_options.reduce((acc,curr)=>acc+curr.option.price,0))}, { excludeExtraneousValues: true });
+            return response;
           }
         }
     
@@ -136,8 +139,13 @@ export class AddMealRestaurantCartTransaction extends BaseTransaction<
           new RestaurantCartMealOption({ cart_meal_id: cart_meal.id, option_id })
         );
         await context.save(cart_meal_options);
+        const cart_meal_with_options = await context.findOne(RestaurantCartMeal, {
+          where: { id: cart_meal.id },
+          relations: {meal: { meal_option_groups: { option_group: { options: true } }}, cart_meal_options: { option: true } },
+        })
+        const response= plainToInstance(GetCartMealsResponse, {...cart_meal_with_options.meal,id:cart_meal_with_options.meal.id,quantity:cart_meal_with_options.quantity,total_price:Number(cart_meal_with_options.meal.price)+ Number(cart_meal_with_options.cart_meal_options.reduce((acc,curr)=>acc+curr.option.price,0))}, { excludeExtraneousValues: true });
     
-        return cart_meal;
+        return response;
       } catch (error) {
         throw new BadRequestException(error.message);
       }

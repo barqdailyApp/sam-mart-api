@@ -29,7 +29,7 @@ export class RestaurantCartController {
     }
     @Post('add-meal')
     async addMealToCart(@Body() req: AddMealRestaurantCartRequest) {
-        return await this.resturantCartService.addMealToCart(req);
+        return new ActionResponse( await this.resturantCartService.addMealToCart(req));
     }
     @Get('')
     async getCartMeals() {
@@ -54,12 +54,12 @@ export class RestaurantCartController {
     }
     @Delete('/:cart_meal_id')
     async deleteCartMeal(@Param('cart_meal_id') cart_meal_id:string) {
-      return await this.resturantCartService.deleteCartMeal(cart_meal_id);
+      return new ActionResponse( await this.resturantCartService.deleteCartMeal(cart_meal_id));
     }
 
     @Delete('clear')
     async clearCart() {
-      return await this.resturantCartService.clearCart();
+      return new ActionResponse( await this.resturantCartService.clearCart());
     }
 
 }
