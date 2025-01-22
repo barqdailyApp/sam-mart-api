@@ -30,6 +30,8 @@ import { SamModules } from '../sam-modules/sam-modules.entity';
 import { UsersSamModules } from '../sam-modules/users-sam-modules.entity';
 import { ShipmentProductHistory } from '../order/shipment-product-history.entity';
 import { OrderHistory } from '../order/order-history.entity';
+import { Restaurant } from '../restaurant/restaurant.entity';
+import { RestaurantOrder } from '../restaurant/order/restaurant_order.entity';
 
 @Entity()
 export class User extends AuditableEntity {
@@ -127,6 +129,9 @@ export class User extends AuditableEntity {
 
   @Column({ type: 'enum', enum: Language, default: Language.AR })
   language: Language;
+
+  @OneToMany(()=>RestaurantOrder, (restaurantOrder) => restaurantOrder.user)
+  restaurant_orders: RestaurantOrder[]
   constructor(partial: Partial<User>) {
     super();
     Object.assign(this, partial);

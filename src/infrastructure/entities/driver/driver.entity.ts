@@ -20,6 +20,8 @@ import { Warehouse } from '../warehouse/warehouse.entity';
 import { ShipmentChat } from '../order/shipment-chat.entity';
 import { ShipmentFeedback } from '../order/shipment-feedback.entity';
 import { ReturnOrder } from '../order/return-order/return-order.entity';
+import { Restaurant } from '../restaurant/restaurant.entity';
+import { RestaurantOrder } from '../restaurant/order/restaurant_order.entity';
 
 @Entity()
 export class Driver extends AuditableEntity {
@@ -125,6 +127,9 @@ export class Driver extends AuditableEntity {
 
   @OneToMany(() => ReturnOrder, (returnOrder) => returnOrder.driver)
   returnOrders: ReturnOrder[];
+
+  @OneToMany(()=>RestaurantOrder, (restaurantOrder)=>restaurantOrder.driver)
+  restaurant_orders: RestaurantOrder[]
 
   constructor(partial?: Partial<Driver>) {
     super();

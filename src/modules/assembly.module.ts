@@ -30,6 +30,7 @@ import { FoodBanarModule } from "./food-banar/food-banar.module";
 import { RestaurantCartController } from './restaurant-cart/restaurant-cart.controller';
 import { RestaurantCartModule } from './restaurant-cart/restaurant-cart.module';
 import { RestaurantModule } from "./restaurant/restaurant.module";
+import { RestaurantOrderModule } from './restaurant-order/restaurant-order.module';
 
 
 @Module({
@@ -63,7 +64,8 @@ import { RestaurantModule } from "./restaurant/restaurant.module";
     PromoCodeModule,
     FoodBanarModule,
     RestaurantModule,
-    RestaurantCartModule
+    RestaurantCartModule,
+    RestaurantOrderModule
   ],
   exports: [],
 
