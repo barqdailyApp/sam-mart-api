@@ -11,8 +11,10 @@ import { plainToInstance } from "class-transformer";
 import { RestaurantCartMeal } from "src/infrastructure/entities/restaurant/cart/restaurant-cart-meal.entity";
 import { Request } from "express";
 import { RestaurantOrderMeal } from "src/infrastructure/entities/restaurant/order/restaurant_order_meal.entity";
+import { generateOrderNumber } from "src/modules/order/util/make-order.transaction";
+import { DeliveryType } from "src/infrastructure/data/enums/delivery-type.enum";
 @Injectable()
-export class MakeOrderTransaction extends BaseTransaction<
+export class MakeRestaurantOrderTransaction extends BaseTransaction<
   MakeRestaurantOrderRequest,
   RestaurantOrder
 > {
@@ -32,6 +34,7 @@ export class MakeOrderTransaction extends BaseTransaction<
   ): Promise<RestaurantOrder> {
    
       try {
+      
         const order = plainToInstance(RestaurantOrder, req);
         const cart_meals = await context.find(RestaurantCartMeal, {
             where:{
@@ -41,7 +44,8 @@ export class MakeOrderTransaction extends BaseTransaction<
             },
             relations:{meal:true,cart_meal_options:{option:true}}
         })
-        if(cart_meals.length == 0){
+      
+        if(cart_meals?.length == 0){
             throw new BadRequestException('message.cart_empty')}
             // tranfer cart_meals to order_meals
             order.restaurant_order_meals= cart_meals.map(cart_meal=>{
@@ -57,8 +61,20 @@ export class MakeOrderTransaction extends BaseTransaction<
                 
                 
             })
+            const date =
+                    req.delivery_type == DeliveryType.SCHEDULED
+                      ? new Date(req.slot_day?.day)
+                      : new Date();
 
+              const isoDate = date.toISOString().slice(0, 10);
+                  const count = await context
+                    .createQueryBuilder(RestaurantOrder, 'order')
+                    .where('order.delivery_day = :specificDate', { specificDate: isoDate })
+                    .getCount();
             
+            order.number= generateOrderNumber(count,isoDate)
+
+
         return await context.save(order);
      
       } catch (error) {

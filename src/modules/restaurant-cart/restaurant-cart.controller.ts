@@ -52,14 +52,15 @@ export class RestaurantCartController {
       const response= await this.resturantCartService.updateCartMeal(req);
       return new ActionResponse(this._i18nResponse.entity(response));
     }
+    @Delete('/clear')
+    async clearCart() {
+      return new ActionResponse( await this.resturantCartService.clearCart());
+    }
     @Delete('/:cart_meal_id')
     async deleteCartMeal(@Param('cart_meal_id') cart_meal_id:string) {
       return new ActionResponse( await this.resturantCartService.deleteCartMeal(cart_meal_id));
     }
 
-    @Delete('clear')
-    async clearCart() {
-      return new ActionResponse( await this.resturantCartService.clearCart());
-    }
+ 
 
 }

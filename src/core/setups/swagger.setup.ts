@@ -31,6 +31,7 @@ import { PromoCodeModule } from 'src/modules/promo-code/promo-code.module';
 import { ReasonModule } from 'src/modules/reason/reason.module';
 import { RegionModule } from 'src/modules/region/region.module';
 import { RestaurantCartModule } from 'src/modules/restaurant-cart/restaurant-cart.module';
+import { RestaurantOrderModule } from 'src/modules/restaurant-order/restaurant-order.module';
 import { RestaurantModule } from 'src/modules/restaurant/restaurant.module';
 import { SectionModule } from 'src/modules/section/section.module';
 import { SlotModule } from 'src/modules/slot/slot.module';
@@ -106,7 +107,8 @@ const foodDocument = SwaggerModule.createDocument(app, foodConfig, {
   include: [
    RestaurantModule,
    FoodBanarModule,
-   RestaurantCartModule
+   RestaurantCartModule,
+   RestaurantOrderModule
   ],
   operationIdFactory,
 

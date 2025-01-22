@@ -45,6 +45,7 @@ export class RestaurantCartService {
     const cart_items= await this.restaurantCartMealRepository.find({
       where:{cart_id:cart.id},
     });
+ 
  return    await this.restaurantCartMealRepository.remove(cart_items);
   }
 
