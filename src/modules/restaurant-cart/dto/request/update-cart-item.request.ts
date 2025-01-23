@@ -12,10 +12,14 @@ export class UpdateCartMealRequest {
     @IsNotEmpty()
     // @IsUUID()
     cart_meal_id: string;
-    @ApiProperty({ isArray: true })
-    @IsArray()
+    @ApiProperty({isArray: true})
     @IsOptional()
-    // @IsUUID()
-    options: string[];
+    // @IsUUID('all', {each: true})
+    options_ids?: string[]
+    @ApiProperty()
+    @IsOptional()
+    
+    edit_options: boolean
+    
 }
 

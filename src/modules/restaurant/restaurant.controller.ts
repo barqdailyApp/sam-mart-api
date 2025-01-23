@@ -73,12 +73,10 @@ export class RestaurantController {
     return new ActionResponse(response);
   }
 
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.CLIENT)
+
   @Get('/meal/details/:id')
-  async getSingleMeal(@Query('include_cart') include_cart: boolean, @Param('id') id: string) {
-    const meal = await this.restaurantService.getSingleMeal(id, include_cart);
+  async getSingleMeal(@Param('id') id: string) {
+    const meal = await this.restaurantService.getSingleMeal(id);
     const response = this._i18nResponse.entity(
       meal,
     );

@@ -13,6 +13,7 @@ import { Request } from "express";
 import { RestaurantOrderMeal } from "src/infrastructure/entities/restaurant/order/restaurant_order_meal.entity";
 import { generateOrderNumber } from "src/modules/order/util/make-order.transaction";
 import { DeliveryType } from "src/infrastructure/data/enums/delivery-type.enum";
+import { Address } from "src/infrastructure/entities/user/address.entity";
 @Injectable()
 export class MakeRestaurantOrderTransaction extends BaseTransaction<
   MakeRestaurantOrderRequest,
@@ -34,8 +35,31 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
   ): Promise<RestaurantOrder> {
    
       try {
-      
+        const address=await context.findOneBy(Address,{user_id:this.request.user.id,is_favorite:true})
+        if(!address) throw new BadRequestException('message.user_does_not_have_a_default_address')
         const order = plainToInstance(RestaurantOrder, req);
+        order.address_id=address.id
+        order.user_id = this.request.user.id;
+        const date =
+        req.delivery_type == DeliveryType.SCHEDULED
+          ? new Date(req.slot_day?.day)
+          : new Date();
+
+  const isoDate = date.toISOString().slice(0, 10);
+  const count = await context
+  .createQueryBuilder(RestaurantOrder, 'restaurant_order')
+  .where('DATE(restaurant_order.estimated_delivery_time) = :specificDate', { specificDate: isoDate })
+  .getCount();
+order.estimated_delivery_time = date; 
+order.number= generateOrderNumber(count,isoDate)
+
+
+
+// handle payment
+
+
+
+// handle cart
         const cart_meals = await context.find(RestaurantCartMeal, {
             where:{
                 cart:{
@@ -56,23 +80,11 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
                     total_price: Number(cart_meal.meal.price)+Number(cart_meal.cart_meal_options.map(cart_meal_option=>cart_meal_option.option.price).reduce((a,b)=>a+b,0)),
                     restaurant_order_meal_options:cart_meal.cart_meal_options.map(cart_meal_option=>{return {option_id:cart_meal_option.option_id,price:cart_meal_option.option.price}})
                 }
-            
-            )
-                
-                
+            )  
             })
-            const date =
-                    req.delivery_type == DeliveryType.SCHEDULED
-                      ? new Date(req.slot_day?.day)
-                      : new Date();
-
-              const isoDate = date.toISOString().slice(0, 10);
-                  const count = await context
-                    .createQueryBuilder(RestaurantOrder, 'order')
-                    .where('order.delivery_day = :specificDate', { specificDate: isoDate })
-                    .getCount();
+            await context.remove(cart_meals)
             
-            order.number= generateOrderNumber(count,isoDate)
+       
 
 
         return await context.save(order);

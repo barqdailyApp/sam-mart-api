@@ -159,24 +159,14 @@ export class RestaurantService extends BaseService<Restaurant> {
     return response;
   }
 
-  async getSingleMeal(id: string,include_cart?: boolean) {
+  async getSingleMeal(id: string) {
     const meal = await this.mealRepository.findOne({
       where: { id },
       relations: { meal_option_groups: { option_group: { options: true } , } },
     });
     if (!meal) throw new NotFoundException('no meal found');
-     const cart_meal= await this.cartMealRepository.findOne({where:{cart:{user_id:this.request.user.id},meal_id:id},relations:{cart_meal_options:{option:true}}})
     const meal_response= plainToInstance(MealResponse, meal, { excludeExtraneousValues: true });
-    if(cart_meal && include_cart===true){
-      meal_response.option_groups.forEach((option_group) => {
-        option_group.options.forEach((option) => {
-          option.is_selected=cart_meal.cart_meal_options.some(cart_meal_option=>cart_meal_option.option.id===option.id)
-        });
-      })
-      meal_response.cart_quantity=cart_meal.quantity
-      //wrap in number
-      meal_response.cart_total_price=Number(meal.price)+Number(cart_meal.cart_meal_options.map(cart_meal_option=>cart_meal_option.option.price).reduce((a,b)=>a+b,0))
-    }
+ 
 
     return meal_response;
   }
