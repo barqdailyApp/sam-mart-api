@@ -112,7 +112,7 @@ export class UpdateMealRestaurantCartTransaction extends BaseTransaction<
 
       // Update the quantity
       cartMeal.quantity = quantity;
-      await context.save(cartMeal);
+      await context.save(cartMeal.quantity);
 
       // Calculate total price and create response
       const total_price =
