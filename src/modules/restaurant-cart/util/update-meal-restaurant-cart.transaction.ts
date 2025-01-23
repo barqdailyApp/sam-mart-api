@@ -61,7 +61,7 @@ export class UpdateMealRestaurantCartTransaction extends BaseTransaction<
       //   throw new BadRequestException('message.invalid_meal_for_cart');
       // }
 
-      if (edit_options) {
+      if (edit_options==true)  {
         // Remove existing options
         await context.delete(RestaurantCartMealOption, {
           cart_meal_id: cartMeal.id,
