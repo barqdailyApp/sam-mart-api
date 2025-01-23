@@ -53,13 +53,13 @@ export class UpdateMealRestaurantCartTransaction extends BaseTransaction<
 
       if (!meal) throw new BadRequestException('message.meal_not_found');
 
-      // Validate that the meal belongs to the correct restaurant
-      if (
-        cartMeal.meal.restaurant_category.restaurant.id !==
-        meal.restaurant_category.restaurant.id
-      ) {
-        throw new BadRequestException('message.invalid_meal_for_cart');
-      }
+      // // Validate that the meal belongs to the correct restaurant
+      // if (
+      //   cartMeal.meal.restaurant_category.restaurant.id !==
+      //   meal.restaurant_category.restaurant.id
+      // ) {
+      //   throw new BadRequestException('message.invalid_meal_for_cart');
+      // }
 
       if (edit_options) {
         // Remove existing options
