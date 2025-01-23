@@ -6,7 +6,7 @@ import { ConfigService } from "@nestjs/config";
 import { REQUEST } from "@nestjs/core";
 import { BaseTransaction } from "src/core/base/database/base.transaction";
 import { FileService } from "src/modules/file/file.service";
-import { DataSource, EntityManager } from "typeorm";
+import { DataSource, EntityManager, Transaction } from "typeorm";
 import { plainToInstance } from "class-transformer";
 import { RestaurantCartMeal } from "src/infrastructure/entities/restaurant/cart/restaurant-cart-meal.entity";
 import { Request } from "express";
@@ -14,6 +14,13 @@ import { RestaurantOrderMeal } from "src/infrastructure/entities/restaurant/orde
 import { generateOrderNumber } from "src/modules/order/util/make-order.transaction";
 import { DeliveryType } from "src/infrastructure/data/enums/delivery-type.enum";
 import { Address } from "src/infrastructure/entities/user/address.entity";
+import { PaymentMethodEnum } from "src/infrastructure/data/enums/payment-method";
+import { encodeUUID } from "src/core/helpers/cast.helper";
+import { TransactionTypes } from "src/infrastructure/data/enums/transaction-types";
+import { Wallet } from "src/infrastructure/entities/wallet/wallet.entity";
+import { PaymentMethodService } from "src/modules/payment_method/payment_method.service";
+import { PaymentMethod } from "src/infrastructure/entities/payment_method/payment_method.entity";
+import { or } from "sequelize";
 @Injectable()
 export class MakeRestaurantOrderTransaction extends BaseTransaction<
   MakeRestaurantOrderRequest,
@@ -24,6 +31,7 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
     @Inject(REQUEST) readonly request: Request,
     private readonly fileService: FileService,
     @Inject(ConfigService) private readonly _config: ConfigService,
+    private readonly paymentService: PaymentMethodService
   ) {
     super(dataSource);
   }
@@ -35,27 +43,21 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
   ): Promise<RestaurantOrder> {
    
       try {
+        const user = this.request.user;
         const address=await context.findOneBy(Address,{user_id:this.request.user.id,is_favorite:true})
         if(!address) throw new BadRequestException('message.user_does_not_have_a_default_address')
         const order = plainToInstance(RestaurantOrder, req);
         order.address_id=address.id
         order.user_id = this.request.user.id;
-        const date =
-        req.delivery_type == DeliveryType.SCHEDULED
-          ? new Date(req.slot_day?.day)
-          : new Date();
-
+        const date = new Date();
   const isoDate = date.toISOString().slice(0, 10);
   const count = await context
   .createQueryBuilder(RestaurantOrder, 'restaurant_order')
-  .where('DATE(restaurant_order.estimated_delivery_time) = :specificDate', { specificDate: isoDate })
+  .where('DATE(restaurant_order.created_at) = :specificDate', { specificDate: isoDate })
   .getCount();
 order.estimated_delivery_time = date; 
 order.number= generateOrderNumber(count,isoDate)
 
-
-
-// handle payment
 
 
 
@@ -83,9 +85,92 @@ order.number= generateOrderNumber(count,isoDate)
             )  
             })
             await context.remove(cart_meals)
-            
+         
        
 
+// handle payment
+let total= order.restaurant_order_meals.map(order_meal=>order_meal.total_price).reduce((a,b)=>a+b,0)
+
+const devliery_fee =0;
+order.delivery_fee = devliery_fee;
+total += devliery_fee;
+order.total_price=total;
+
+
+  const payment_method = await context.findOne(PaymentMethod, {
+        where: {
+          id: req.payment_method.payment_method_id,
+          is_active: true,
+        },
+      });
+      if (!payment_method) {
+        throw new BadRequestException('message.payment_method_not_found');
+      }
+      order.payment_method_enum = payment_method.type;
+      switch (payment_method.type) {
+        case PaymentMethodEnum.JAWALI: {
+          const make_payment = await this.paymentService.jawalicashOut(
+            req.payment_method.transaction_number,
+            req.payment_method.wallet_number,
+            total,
+          );
+          if (!make_payment) {
+            throw new BadRequestException('message.payment_failed');
+          }
+
+          break;
+        }
+        case PaymentMethodEnum.WALLET: {
+          const wallet = await context.findOneBy(Wallet, { user_id: user.id });
+
+          wallet.balance = Number(wallet.balance) - Number(total);
+          if (wallet.balance < 0) {
+            throw new BadRequestException('message.insufficient_balance');
+          }
+          const transaction = plainToInstance(Transaction, {
+            amount: -total,
+            user_id: user.id,
+            order_id: order.id,
+            type: TransactionTypes.ORDER_PAYMENT,
+            wallet_id: wallet.id,
+          });
+
+          await context.save(transaction);
+
+          await context.save(wallet);
+
+          break;
+        }
+        case PaymentMethodEnum.KURAIMI: {
+          const make_payment = await this.paymentService.kuraimiPay({
+            AMOUNT: total,
+            REFNO: order.id,
+            SCustID: encodeUUID(order.user_id),
+            PINPASS: req.payment_method.transaction_number,
+          });
+          if (make_payment['Code'] != 1) {
+            throw new BadRequestException(
+              this.request.headers['accept-language'] == 'en'
+                ? make_payment['Message']
+                : make_payment['MessageDesc'],
+            );
+          }
+
+          break;
+        }
+        case PaymentMethodEnum.JAIB: {
+          await this.paymentService.jaibCashout(
+            req.payment_method.transaction_number,
+            req.payment_method.wallet_number,
+            total,
+            order.number.toString(),
+          );
+
+          break;
+        }
+        default:
+          break;
+      }
 
         return await context.save(order);
      

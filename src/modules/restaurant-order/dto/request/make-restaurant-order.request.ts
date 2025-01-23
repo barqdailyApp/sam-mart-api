@@ -13,20 +13,15 @@ export class MakeRestaurantOrderRequest {
   @ApiProperty()
   @IsNotEmpty()
   payment_method: PaymentMethodRequest;
+  
 
   @ApiProperty({
     type: 'enum',
-    enum: [DeliveryType.FAST, DeliveryType.SCHEDULED],
+    enum: [DeliveryType.FAST, DeliveryType.PICKUP],
   })
   @IsEnum(DeliveryType)
   @IsNotEmpty()
   delivery_type: DeliveryType;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  @ValidateIf((obj) => obj.delivery_type === DeliveryType.SCHEDULED)
-  slot_day: OrderSlotRequest;
-
 
   @ApiProperty({
     type: 'enum',

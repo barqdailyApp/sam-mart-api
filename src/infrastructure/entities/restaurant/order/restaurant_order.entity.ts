@@ -12,6 +12,8 @@ import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { ShipmentStatusEnum } from 'src/infrastructure/data/enums/shipment_status.enum';
 import { Reason } from '../../reason/reason.entity';
 import { Driver } from '../../driver/driver.entity';
+import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
+import { PaymentMethodEnum } from 'src/infrastructure/data/enums/payment-method';
 @Entity()
 export class RestaurantOrder extends AuditableEntity {
   @Column({ length: 10 })
@@ -28,6 +30,18 @@ export class RestaurantOrder extends AuditableEntity {
 
   @Column()
   address_id: string;
+
+
+   @Column()
+    delivery_type: DeliveryType;
+  
+
+    @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+    total_price: number;
+  
+    @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+    delivery_fee: number;
+
 
   @ManyToOne(() => Driver, (driver) => driver.restaurant_orders)
   @JoinColumn()
@@ -56,7 +70,10 @@ export class RestaurantOrder extends AuditableEntity {
 
   @ManyToOne(() => PaymentMethod)
   @JoinColumn()
-  paymentMethod: PaymentMethod;
+  payment_method: PaymentMethod;
+
+   @Column()
+    payment_method_enum: PaymentMethodEnum;
 
   @Column({ nullable: true })
   payment_method_id: string;
@@ -71,8 +88,6 @@ export class RestaurantOrder extends AuditableEntity {
   @Column({ nullable: true })
   slot_id: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
-  total_price: number;
 
   @Column({ default: ShipmentStatusEnum.PENDING })
   status: ShipmentStatusEnum;

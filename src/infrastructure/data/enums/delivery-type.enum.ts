@@ -2,6 +2,8 @@ export enum DeliveryType {
   FAST = 'FAST',
   'SCHEDULED' = 'SCHEDULED',
   'WAREHOUSE_PICKUP' = 'WAREHOUSE_PICKUP',
+  'PICKUP' = 'PICKUP',
+
 
   // 'SCHEDULED&FAST' = 'SCHEDULED&FAST',
 }
