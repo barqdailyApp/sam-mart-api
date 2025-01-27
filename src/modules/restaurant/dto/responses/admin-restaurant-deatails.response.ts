@@ -8,10 +8,12 @@ export class AdminRestaurantDeatailsResponse extends RestaurantResponse {
   @Expose()
   @Transform((value) => {
     {
-      const attachments = value.obj?.attachments?.map((item) => {
+      const attachments = value.obj.attachments.map((item) => {
+        console.log(item);
         item.url = toUrl(item.url);
         return item;
       });
+    
       return {
         menu: attachments?.filter(
           (item) => item.type === RestaurantAttachmentEnum.MENU,

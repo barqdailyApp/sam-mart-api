@@ -62,14 +62,13 @@ export class AdminRestaurantController {
 
   @Get('/admin/details/:id')
   async getSingleRestaurant(@Param('id') id: string) {
-    const restaurant = await this.restaurantService.getSingleRestaurant(id);
-
+    const restaurant = await this.restaurantService.getAdminSingleRestaurant(id);
+console.log(restaurant)
     const response = plainToInstance(
       AdminRestaurantDeatailsResponse,
       restaurant,
       { excludeExtraneousValues: true },
     );
-    console.log(response);
     return new ActionResponse(response);
   }
   @Post('/admin/accept/:id')

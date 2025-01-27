@@ -136,8 +136,6 @@ export class RestaurantService extends BaseService<Restaurant> {
       where: { id },
       relations: {
         categories: { meals: {meal_option_groups:{option_group:true}} , },
-        attachments: true,
-        admins: {user:true},
         cuisine_types: true,
       },
     });
@@ -157,6 +155,20 @@ export class RestaurantService extends BaseService<Restaurant> {
       });
     })
     return response;
+  }
+
+  async getAdminSingleRestaurant(id: string) {
+    const restaurant = await this._repo.findOne({
+      where: { id },
+      relations: {
+        categories: { meals: {meal_option_groups:{option_group:true}} , },
+        cuisine_types: true,
+        admins: true,
+        attachments: true
+      },
+    });
+    return restaurant;
+      
   }
 
   async getSingleMeal(id: string) {
