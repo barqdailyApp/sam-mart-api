@@ -65,7 +65,7 @@ export class RegisterRestaurantTransaction extends BaseTransaction<
         }
         const logo = req.logo.replace('/tmp/', '/restaurant-logos/');
         fs.renameSync(req.logo, logo);
-        req.logo = logo;
+        restaurant.logo = logo;
       }
       if(!req.image.includes('http')) {
         //check directory
@@ -74,7 +74,7 @@ export class RegisterRestaurantTransaction extends BaseTransaction<
         }
         const image = req.image.replace('/tmp/', '/restaurant-images/');
         fs.renameSync(req.image, image);
-        req.image = image;
+        restaurant.image = image;
       }
       const menus = req.menu.map((image) => {
         if (!fs.existsSync('storage/restaurant-menus')) {

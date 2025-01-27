@@ -22,6 +22,8 @@ import { ShipmentFeedback } from '../order/shipment-feedback.entity';
 import { ReturnOrder } from '../order/return-order/return-order.entity';
 import { Restaurant } from '../restaurant/restaurant.entity';
 import { RestaurantOrder } from '../restaurant/order/restaurant_order.entity';
+import { DriverType } from '@codebrew/nestjs-storage';
+import { DriverTypeEnum } from 'src/infrastructure/data/enums/driver-type.eum';
 
 @Entity()
 export class Driver extends AuditableEntity {
@@ -31,6 +33,8 @@ export class Driver extends AuditableEntity {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
+  @Column({ type: 'enum', default: DriverTypeEnum.MART , enum: DriverTypeEnum})
+  type: DriverTypeEnum;
   @Column()
   user_id: string;
 
