@@ -66,7 +66,7 @@ export class AdminRestaurantController {
       { meta: { total, ...query } },
     );
   }
-
+@Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
   @Get('/admin/details/:id')
   async getSingleRestaurant(@Param('id') id: string) {
     const restaurant = await this.restaurantService.getAdminSingleRestaurant(id);
