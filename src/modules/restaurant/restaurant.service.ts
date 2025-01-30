@@ -220,4 +220,8 @@ export class RestaurantService extends BaseService<Restaurant> {
     if(fs.existsSync(req.logo)) fs.renameSync(req.logo, req.logo.replace('/tmp/', 'storage/cuisine-types/'));
     return await this.cuisineTypeRepository.save(cuisine);
   }
+
+  async getRestaurantCategories(restaurant_id:string) {
+    return await this.restaurantCategoryRepository.find({where:{restaurant_id:restaurant_id}});
+  }
 }

@@ -89,6 +89,13 @@ console.log(restaurant)
     const category = await this.restaurantService.addRestaurantCategory(req,restaurant_id);
     return new ActionResponse(category);
   }
+
+  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
+  @Get('/admin/categories/:restaurant_id')
+  async getCategories(@Param('restaurant_id') restaurant_id:string) {
+    const categories = await this.restaurantService.getRestaurantCategories(restaurant_id);
+    return new ActionResponse(categories);
+  }
   
   @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
   @Post('/admin/meal/:restaurant_id')

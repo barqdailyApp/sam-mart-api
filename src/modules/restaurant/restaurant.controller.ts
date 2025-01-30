@@ -82,6 +82,7 @@ export class RestaurantController {
     );
     return new ActionResponse(response);
   }
+  
   @Get('/cuisines')
   async getCuisineTypes() {
     const cuisines = await this.restaurantService.getCuisineTypes();
