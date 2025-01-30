@@ -12,6 +12,7 @@ import { RestaurantCartMeal } from 'src/infrastructure/entities/restaurant/cart/
 import { RestaurantCartMealOption } from 'src/infrastructure/entities/restaurant/cart/restaurant-cart-meal-option.entity';
 import { UpdateCartMealRequest } from './dto/request/update-cart-item.request';
 import { UpdateMealRestaurantCartTransaction } from './util/update-meal-restaurant-cart.transaction';
+import { RestaurantResponse } from '../restaurant/dto/responses/restaurant.response';
 
 @Injectable()
 export class RestaurantCartService {
@@ -33,12 +34,13 @@ export class RestaurantCartService {
   async getCartMeals() {
     const cart = await this.restaurantCartRepository.findOne({
       where: { user_id: this.request.user.id },
-      relations: { restaurant_cart_meals:{meal:true,cart_meal_options:{option:true}} ,  },
+      relations: { restaurant_cart_meals:{meal:true,cart_meal_options:{option:true}} , restaurant: true },
     });
     const response = plainToInstance(GetCartMealsResponse, cart.restaurant_cart_meals.map((m) => {const total_unit_price=Number(m.meal.price)+Number(m.cart_meal_options.reduce((acc,curr)=>acc+curr.option.price,0));return {...m.meal,meal_id:m.meal.id,id:m.id,quantity:m.quantity,total_price:total_unit_price}}), {
       excludeExtraneousValues: true,
     }); 
-    return response;
+    const restaurant_respone= plainToInstance(RestaurantResponse, cart.restaurant,{excludeExtraneousValues:true});
+    return {  meals: response,restaurant:restaurant_respone};
   }
   async clearCart() {
     const cart= await this.restaurantCartRepository.findOne({

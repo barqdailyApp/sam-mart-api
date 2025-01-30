@@ -16,6 +16,7 @@ import { OptionGroup } from 'src/infrastructure/entities/restaurant/option/optio
 import { RestaurantCartMealOption } from 'src/infrastructure/entities/restaurant/cart/restaurant-cart-meal-option.entity';
 import { plainToInstance } from 'class-transformer';
 import { GetCartMealsResponse } from '../dto/response/get-cart-meals.response';
+import { User } from 'src/infrastructure/entities/user/user.entity';
 @Injectable()
 export class AddMealRestaurantCartTransaction extends BaseTransaction<
   AddMealRestaurantCartRequest,
@@ -39,15 +40,14 @@ export class AddMealRestaurantCartTransaction extends BaseTransaction<
       try {
         const { meal_id, quantity, options_ids } = req;
     
+        const user = await context.findOne(User, {
+          where: { id: this.request.user.id },
+        })
         // Find or create the user's cart
         let restaurant_cart = await context.findOne(RestaurantCart, {
           where: { user_id: this.request.user.id },
         });
-        if (!restaurant_cart) {
-          restaurant_cart = await context.save(RestaurantCart, {
-            user_id: this.request.user.id,
-          });
-        }
+       
     
         // Fetch the meal and check if it exists
         const meal = await context.findOne(Meal, {
@@ -55,7 +55,20 @@ export class AddMealRestaurantCartTransaction extends BaseTransaction<
           relations: { restaurant_category: { restaurant: true } },
         });
         if (!meal) throw new BadRequestException('message.meal_not_found');
+
+
+        if (!restaurant_cart) {
+          restaurant_cart = await context.save(RestaurantCart, {
+            user: user,
+            restaurant: meal.restaurant_category.restaurant,
+          });
+        }
+        else {
+          restaurant_cart.restaurant = meal.restaurant_category.restaurant;
+          await context.save(restaurant_cart);
+        }
     
+     
         // Check if the meal belongs to another restaurant
         const is_another_cart = await context.findOne(RestaurantCartMeal, {
           where: {
