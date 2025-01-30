@@ -43,6 +43,7 @@ export class AddMealRestaurantCartTransaction extends BaseTransaction<
         const user = await context.findOne(User, {
           where: { id: this.request.user.id },
         })
+        
         // Find or create the user's cart
         let restaurant_cart = await context.findOne(RestaurantCart, {
           where: { user_id: this.request.user.id },

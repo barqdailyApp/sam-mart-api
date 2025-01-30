@@ -124,7 +124,7 @@ export class UpdateMealRestaurantCartTransaction extends BaseTransaction<
         GetCartMealsResponse,
         {
           ...cartMeal.meal,
-          id: cartMeal.meal.id,
+          id: cartMeal.id,
           quantity: cartMeal.quantity,
           total_price,
         },

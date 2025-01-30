@@ -25,6 +25,7 @@ import { SamModules } from 'src/infrastructure/entities/sam-modules/sam-modules.
 import { UsersSamModules } from 'src/infrastructure/entities/sam-modules/users-sam-modules.entity';
 import { Otp } from 'src/infrastructure/entities/auth/otp.entity';
 import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
+import { RestaurantAdmin } from 'src/infrastructure/entities/restaurant/restaurant-admin.entity';
 
 @Injectable()
 export class AuthenticationService {
@@ -42,7 +43,7 @@ export class AuthenticationService {
     private readonly samModuleRepository: Repository<SamModules>,
     @InjectRepository(UsersSamModules)
     private readonly userSamModulesRepository: Repository<UsersSamModules>,
-
+    @InjectRepository(RestaurantAdmin) private readonly restaurantAdmin : Repository<RestaurantAdmin>,
     @Inject(SendOtpTransaction)
     private readonly sendOtpTransaction: SendOtpTransaction,
     @Inject(VerifyOtpTransaction)
@@ -61,6 +62,7 @@ export class AuthenticationService {
       { username: req.username },
       { phone: req.username },
     ] as any);
+    if(!user) return
     let isMatch = false;
     if (user) {
       isMatch = await bcrypt.compare(
@@ -87,6 +89,14 @@ export class AuthenticationService {
         .filter((samModule) => samModule !== null);
       // Assign the transformed data to a new property
       user.samModules = transformedSamModules;
+    }
+    if(user.roles.includes(Role.RESTAURANT_ADMIN)){
+     
+      const restaurantAdmin = await this.restaurantAdmin.findOne({
+        where: { user_id: user.id },
+        relations:{restaurant:true},
+      });
+      user.restaurant = restaurantAdmin.restaurant;
     }
     if (user && isMatch) {
       return user;

@@ -132,6 +132,9 @@ export class User extends AuditableEntity {
 
   @OneToMany(()=>RestaurantOrder, (restaurantOrder) => restaurantOrder.user)
   restaurant_orders: RestaurantOrder[]
+
+restaurant?:any
+  
   constructor(partial: Partial<User>) {
     super();
     Object.assign(this, partial);
