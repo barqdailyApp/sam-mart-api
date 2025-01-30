@@ -11,5 +11,5 @@ export class AuthResponse extends PartialType(RegisterResponse) {
 
     @Expose() address?: AddressResponse;
     @Expose() @Type(()=> SamModuleResponse) samModules?: SamModuleResponse[];
-    @Expose() @Transform(value=>plainToInstance(RestaurantResponse,value.obj.admin)) restaurant?: RestaurantResponse;
+    @Expose() @Transform(value=>plainToInstance(RestaurantResponse,value.obj.restaurant)) restaurant?: RestaurantResponse;
 }
