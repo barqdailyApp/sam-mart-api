@@ -18,6 +18,9 @@ export class RestaurantCategoryResponse{
 export class RestaurantResponse {
     @Expose()
     id: string;
+
+    @Expose()
+    status: string;
     @Expose()
     name_ar: string;
     @Expose()
