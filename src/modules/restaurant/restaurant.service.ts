@@ -210,6 +210,7 @@ export class RestaurantService extends BaseService<Restaurant> {
     //check if directory exist
     if(!fs.existsSync('storage/restaurant-meals/')) fs.mkdirSync('storage/restaurant-meals/');
     if(fs.existsSync(req.image)) fs.renameSync(req.image, req.image.replace('/tmp/', '/restaurant-meals/'));
+    meal.image= req.image
     return await this.mealRepository.save(meal);
   }
 
@@ -218,6 +219,7 @@ export class RestaurantService extends BaseService<Restaurant> {
     //check if directory exist
     if(!fs.existsSync('storage/cuisine-types/')) fs.mkdirSync('storage/cuisine-types/');
     if(fs.existsSync(req.logo)) fs.renameSync(req.logo, req.logo.replace('/tmp/', 'storage/cuisine-types/'));
+    cuisine.logo= req.logo
     return await this.cuisineTypeRepository.save(cuisine);
   }
 
