@@ -42,7 +42,10 @@ export class RestaurantResponse {
     
     @Expose()
     distance: number;
-
+    @Expose()
+    latitude: number;
+    @Expose()
+    longitude: number;
     @Expose()
     average_rating: number;
 
