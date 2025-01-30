@@ -29,6 +29,7 @@ import { RestaurantAdmin } from 'src/infrastructure/entities/restaurant/restaura
 import { AdminRestaurantDeatailsResponse } from './dto/responses/admin-restaurant-deatails.response';
 import { AddRestaurantCategoryRequest } from './dto/requests/add-restaurant-category.request';
 import { AddMealRequest } from './dto/requests/add-meal.request';
+import { AddCuisineRequest } from './dto/requests/add-cuisine.request';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -45,6 +46,12 @@ export class AdminRestaurantController {
     private readonly restaurantService: RestaurantService,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
   ) {}
+
+  @Post('admin/cuisine')
+  async addCuisine(@Body() req:AddCuisineRequest){
+    const cuisine = await this.restaurantService.addCuisine(req);
+    return new ActionResponse(cuisine);
+  }
 
   @Get('admin/requests')
   async getRestaurantRequests(@Query() query: PaginatedRequest) {

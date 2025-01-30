@@ -33,6 +33,7 @@ import { FileService } from '../file/file.service';
 import { WarehouseOperations } from 'src/infrastructure/entities/warehouse/warehouse-opreations.entity';
 import { Product } from 'src/infrastructure/entities/product/product.entity';
 import { WarehouseOpreationProducts } from 'src/infrastructure/entities/warehouse/wahouse-opreation-products.entity';
+import { DriverTypeEnum } from 'src/infrastructure/data/enums/driver-type.eum';
 
 @Injectable()
 export class WarehouseService extends BaseService<Warehouse> {
@@ -171,7 +172,7 @@ export class WarehouseService extends BaseService<Warehouse> {
     });
     if (!warehouse) throw new NotFoundException('Warehouse not found');
 
-    const driver = await this.driver_repo.findOne({ where: { id: driver_id } });
+    const driver = await this.driver_repo.findOne({ where: { id: driver_id ,type:DriverTypeEnum.MART } });
     if (!driver) throw new NotFoundException('Driver not found');
 
     // const isDriverAttached = warehouse.drivers.some((d) => d.id === driver_id);

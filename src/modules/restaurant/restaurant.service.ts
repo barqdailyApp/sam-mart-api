@@ -21,6 +21,7 @@ import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { RestaurantCartMeal } from 'src/infrastructure/entities/restaurant/cart/restaurant-cart-meal.entity';
 import { MealResponse } from './dto/responses/meal.response';
+import { AddCuisineRequest } from './dto/requests/add-cuisine.request';
 
 @Injectable()
 export class RestaurantService extends BaseService<Restaurant> {
@@ -210,5 +211,13 @@ export class RestaurantService extends BaseService<Restaurant> {
     if(!fs.existsSync('storage/restaurant-meals/')) fs.mkdirSync('storage/restaurant-meals/');
     if(fs.existsSync(req.image)) fs.renameSync(req.image, req.image.replace('/tmp/', '/restaurant-meals/'));
     return await this.mealRepository.save(meal);
+  }
+
+  async addCuisine(req:AddCuisineRequest) {
+    const cuisine = plainToInstance(CuisineType,{...req});
+    //check if directory exist
+    if(!fs.existsSync('storage/cuisine-types/')) fs.mkdirSync('storage/cuisine-types/');
+    if(fs.existsSync(req.logo)) fs.renameSync(req.logo, req.logo.replace('/tmp/', 'storage/cuisine-types/'));
+    return await this.cuisineTypeRepository.save(cuisine);
   }
 }
