@@ -25,3 +25,32 @@ export class AddRestaurantCategoryRequest {
 
 
 }
+export class UpdateRestaurantCategoryRequest {
+
+    @ApiProperty()
+    @IsString()
+    id: string
+
+    @ApiProperty({required:false})
+    @IsString()
+    @IsOptional()
+    @Unique('restaurant_category')
+    name_ar: string
+
+    @ApiProperty({required:false})
+    @IsString()
+    @Unique('restaurant_category')
+    name_en: string
+
+    @ApiProperty({required:false})
+    @IsNumber()
+    @IsOptional()
+    order_by: number
+
+    @ApiProperty({required:false})
+    @IsBoolean()
+    @IsOptional()
+    is_active: boolean
+
+
+}

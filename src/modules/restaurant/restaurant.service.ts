@@ -13,9 +13,9 @@ import { RestaurantStatus } from 'src/infrastructure/data/enums/restaurant-statu
 import { RegisterRestaurantRequest } from './dto/requests/register-restaurant.request';
 import { RegisterRestaurantTransaction } from './util/register-restaurant.transaction';
 import { CuisineType } from 'src/infrastructure/entities/restaurant/cuisine-type.entity';
-import { AddRestaurantCategoryRequest } from './dto/requests/add-restaurant-category.request';
+import { AddRestaurantCategoryRequest, UpdateRestaurantCategoryRequest } from './dto/requests/add-restaurant-category.request';
 import { RestaurantCategory } from 'src/infrastructure/entities/restaurant/restaurant-category.entity';
-import { AddMealRequest } from './dto/requests/add-meal.request';
+import { AddMealRequest, UpdateMealRequest } from './dto/requests/add-meal.request';
 import * as fs from 'fs';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
@@ -205,6 +205,21 @@ export class RestaurantService extends BaseService<Restaurant> {
     return await this.restaurantCategoryRepository.save(restaurant_category); 
   }
 
+  async editRestaurantCategory(req:UpdateRestaurantCategoryRequest,restaurant_id:string) {
+    const restaurant_category = await this.restaurantCategoryRepository.findOne({where:{id:req.id,restaurant_id:restaurant_id}});
+    if(!restaurant_category) throw new NotFoundException('no category found');
+    restaurant_category.name_ar=req.name_ar;
+    restaurant_category.name_en=req.name_en;
+    restaurant_category.order_by=req.order_by;
+    restaurant_category.is_active=req.is_active;
+    return await this.restaurantCategoryRepository.save(restaurant_category); 
+  }
+  async deleteCategory(id:string,restaurant_id:string) {
+    const category = await this.restaurantCategoryRepository.findOne({where:{id:id,restaurant_id:restaurant_id}});
+    if(!category) throw new NotFoundException('no category found');
+    return await this.restaurantCategoryRepository.softRemove(category);
+  }
+
   async addMeal(req:AddMealRequest,restaurant_id:string) {
     const meal = plainToInstance(Meal,{...req,restaurant_id:restaurant_id});
     //check if directory exist
@@ -225,5 +240,36 @@ export class RestaurantService extends BaseService<Restaurant> {
 
   async getRestaurantCategories(restaurant_id:string) {
     return await this.restaurantCategoryRepository.find({where:{restaurant_id:restaurant_id}});
+  }
+
+  async getRestaurantCategoryMeals(restaurant_id:string,category_id:string) {
+    return await this.restaurantCategoryRepository.findOne({where:{restaurant_id:restaurant_id,id:category_id},relations:{meals:true}});
+  }
+  // edit meal
+
+  async editMeal(req:UpdateMealRequest,restaurant_id:string) {
+    const meal = await this.mealRepository.findOne({where:{id:req.id,restaurant_category:{restaurant_id:restaurant_id}}});
+    if(!meal) throw new NotFoundException('no meal found');
+    if(req.image) {
+      //delete old image
+      if(meal.image && fs.existsSync(meal.image)) fs.unlinkSync(meal.image);
+      //check if directory exist
+      if(fs.existsSync(req.image)) fs.renameSync(req.image, req.image.replace('/tmp/', '/restaurant-meals/'));
+    }
+    meal.name_ar=req.name_ar;
+    meal.name_en=req.name_en;
+    meal.description_ar=req.description_ar;
+    meal.description_en=req.description_en;
+    meal.price=req.price;
+    meal.image= req.image
+   
+    return await this.mealRepository.save(meal);
+  }
+
+  // delete meal
+  async deleteMeal(id:string,restaurant_id:string) {
+    const meal = await this.mealRepository.findOne({where:{id:id,restaurant_category:{restaurant_id:restaurant_id}}});
+    if(!meal) throw new NotFoundException('no meal found');
+    return await this.mealRepository.softRemove(meal);
   }
 }

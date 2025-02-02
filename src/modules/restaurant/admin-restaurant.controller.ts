@@ -1,10 +1,12 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Inject,
   Param,
   Post,
+  Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -27,8 +29,8 @@ import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 import e from 'express';
 import { RestaurantAdmin } from 'src/infrastructure/entities/restaurant/restaurant-admin.entity';
 import { AdminRestaurantDeatailsResponse } from './dto/responses/admin-restaurant-deatails.response';
-import { AddRestaurantCategoryRequest } from './dto/requests/add-restaurant-category.request';
-import { AddMealRequest } from './dto/requests/add-meal.request';
+import { AddRestaurantCategoryRequest, UpdateRestaurantCategoryRequest } from './dto/requests/add-restaurant-category.request';
+import { AddMealRequest, UpdateMealRequest } from './dto/requests/add-meal.request';
 import { AddCuisineRequest } from './dto/requests/add-cuisine.request';
 
 @ApiBearerAuth()
@@ -96,11 +98,50 @@ console.log(restaurant)
     const categories = await this.restaurantService.getRestaurantCategories(restaurant_id);
     return new ActionResponse(categories);
   }
+  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
+  @Get('/admin/category-meals/:restaurant_id/:id')
+  async getCategoriesMeals(@Param('restaurant_id') restaurant_id:string, @Param('id') id:string) {
+    const categories = await this.restaurantService.getRestaurantCategoryMeals(restaurant_id,id);
+    const response =this._i18nResponse.entity(categories);
+     response.meals = plainToInstance(MealResponse, response.meals, {
+      excludeExtraneousValues: true,
+    })
+    return new ActionResponse(response);
+  }
+
+
+  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
+  @Put('/admin/category/:restaurant_id')
+  async editCategory(@Body() req: UpdateRestaurantCategoryRequest,@Param('restaurant_id') restaurant_id:string) {
+    const category = await this.restaurantService.editRestaurantCategory(req,restaurant_id);
+    return new ActionResponse(category);
+  }
+  //DELTE 
+  @Delete('/admin/category/:id/:restaurant_id')
+  async deleteCategory(@Param('id') id:string,@Param('restaurant_id') restaurant_id:string) {
+    const category = await this.restaurantService.deleteCategory(id,restaurant_id);
+    return new ActionResponse(category);
+  }
+  
+  
   
   @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
   @Post('/admin/meal/:restaurant_id')
   async addMeal(@Body() req: AddMealRequest,@Param('restaurant_id') restaurant_id:string) {
     const meal = await this.restaurantService.addMeal(req,restaurant_id);
+    return new ActionResponse(meal);
+  }
+
+  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
+  @Put('/admin/meal/:restaurant_id')
+  async editMeal(@Body() req: UpdateMealRequest,@Param('restaurant_id') restaurant_id:string) {
+    const meal = await this.restaurantService.editMeal(req,restaurant_id);
+    return new ActionResponse(meal);
+  }
+  //DELETE 
+  @Delete('/admin/meal/:restaurant_id/:id')
+  async deleteMeal(@Param('id') id:string,@Param('restaurant_id') restaurant_id:string) {
+    const meal = await this.restaurantService.deleteMeal(id,restaurant_id);
     return new ActionResponse(meal);
   }
 

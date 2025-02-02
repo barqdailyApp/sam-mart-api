@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class AddMealRequest{
    @ApiProperty()
@@ -35,6 +35,60 @@ export class AddMealRequest{
 
     @ApiProperty()
     @IsNotEmpty()
-    @IsString()
-    price: string 
+    @IsNumber()
+    price: number 
+
+    @ApiProperty({required:false})
+    @IsBoolean()
+    @IsOptional()
+    is_active: boolean
+
 }
+
+export class UpdateMealRequest{
+    @ApiProperty()
+    @IsNotEmpty()
+    @IsString()
+    id: string
+       @ApiProperty({required:false})
+        @IsBoolean()
+        @IsOptional()
+        is_active: boolean
+    
+    
+    @ApiProperty()
+     @IsOptional()
+     @IsString()
+     name_ar: string
+ 
+     @ApiProperty()
+     @IsOptional()
+     @IsString()
+     name_en: string
+     
+     @ApiProperty()
+     @IsOptional()
+     @IsString()
+     restaurant_category_id: string 
+ 
+     
+     @ApiProperty()
+     @IsOptional()
+     @IsString()
+     image: string 
+ 
+     @ApiProperty()
+     @IsOptional()
+     @IsString()
+     description_ar: string
+ 
+     @ApiProperty()
+     @IsOptional()
+     @IsString()
+     description_en: string 
+ 
+     @ApiProperty()
+     @IsOptional()
+     @IsString()
+     price: number 
+ }
