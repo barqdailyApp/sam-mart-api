@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Post, UseGuards } from '@nestjs/common';
 import { RestaurantOrderService } from './restaurant-order.service';
 import { MakeRestaurantOrderRequest } from './dto/request/make-restaurant-order.request';
 import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
@@ -6,6 +6,10 @@ import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
 import { Roles } from '../authentication/guards/roles.decorator';
 import { RolesGuard } from '../authentication/guards/roles.guard';
+import { plainToInstance } from 'class-transformer';
+import { ActionResponse } from 'src/core/base/responses/action.response';
+import { RestaurantOrderListResponse } from './dto/response/restaurant-order-list.response';
+import { I18nResponse } from 'src/core/helpers/i18n.helper';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -14,13 +18,26 @@ import { RolesGuard } from '../authentication/guards/roles.guard';
 })
 @ApiTags('Restaurant-Order')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.CLIENT)
 @Controller('restaurant-order')
 export class RestaurantOrderController {
-    constructor(private readonly restaurantOrderService: RestaurantOrderService){}
-
+    constructor(private readonly restaurantOrderService: RestaurantOrderService
+      ,@Inject(I18nResponse) private readonly _i18nResponse: I18nResponse
+    ){}
+  
+    @Roles(Role.CLIENT)
     @Post('checkout')
     async makeRestaurantOrder(@Body() req: MakeRestaurantOrderRequest){
         return await this.restaurantOrderService.makeRestaurantOrder(req);   
+    }
+
+    @Roles(Role.DRIVER)
+    @Get('driver-requests')
+    async getRestaurantOrdersDriverRequests(){
+      const orders=await this.restaurantOrderService.getRestaurantOrdersDriverRequests();
+      const response = this._i18nResponse.entity(orders);
+      const result=plainToInstance(RestaurantOrderListResponse,response,{
+        excludeExtraneousValues: true,
+      })
+      return new ActionResponse(result);
     }
 }
