@@ -132,7 +132,7 @@ export class RestaurantService extends BaseService<Restaurant> {
     return meals;
   }
 
-  async getSingleRestaurant(id: string) {
+  async getSingleRestaurant(id: string,user_id?:string) {
     const restaurant = await this._repo.findOne({
       where: { id },
       relations: {
@@ -155,7 +155,17 @@ export class RestaurantService extends BaseService<Restaurant> {
         
       });
     })
-    return response;
+    let cart_details=null
+    if(user_id){
+      const cart_meals = await this.cartMealRepository.find({
+        where: {cart:{user_id:user_id},},relations:{meal:true,cart_meal_options:{option:true}}
+      });
+
+    const  total_price= cart_meals.reduce((acc,curr)=>acc+(curr.quantity*curr.meal.price+curr.cart_meal_options.reduce((acc,curr)=>acc+curr.option.price,0)),0)
+    const meals_count=cart_meals?.length
+      cart_details={meals_count,total_price}
+    }    
+    return {restaurant:response,cart:cart_details};
   }
 
   async getAdminSingleRestaurant(id: string) {

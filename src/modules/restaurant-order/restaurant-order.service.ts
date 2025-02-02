@@ -25,6 +25,7 @@ export class RestaurantOrderService {
         const driver = await this.driverRepository.findOne({
             where: {
                 user_id: this._request.user.id,
+                is_receive_orders:true,
                 type:DriverTypeEnum.FOOD
             }
 
