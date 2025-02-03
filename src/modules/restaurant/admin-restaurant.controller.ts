@@ -102,8 +102,8 @@ console.log(restaurant)
   @Get('/admin/category-meals/:restaurant_id/:id')
   async getCategoriesMeals(@Param('restaurant_id') restaurant_id:string, @Param('id') id:string) {
     const categories = await this.restaurantService.getRestaurantCategoryMeals(restaurant_id,id);
-    const response =this._i18nResponse.entity(categories);
-     response.meals = plainToInstance(MealResponse, response.meals, {
+    const response= categories as any
+    response.meals = plainToInstance(MealResponse, response.meals, {
       excludeExtraneousValues: true,
     })
     return new ActionResponse(response);
