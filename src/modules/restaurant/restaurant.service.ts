@@ -265,13 +265,14 @@ export class RestaurantService extends BaseService<Restaurant> {
       if(meal.image && fs.existsSync(meal.image)) fs.unlinkSync(meal.image);
       //check if directory exist
       if(fs.existsSync(req.image)) fs.renameSync(req.image, req.image.replace('/tmp/', '/restaurant-meals/'));
+      meal.image= req.image.replace('/tmp/', '/restaurant-meals/');
     }
     meal.name_ar=req.name_ar;
     meal.name_en=req.name_en;
     meal.description_ar=req.description_ar;
     meal.description_en=req.description_en;
     meal.price=req.price;
-    meal.image= req.image.replace('/tmp/', '/restaurant-meals/');
+  
    
     return await this.mealRepository.save(meal);
   }
