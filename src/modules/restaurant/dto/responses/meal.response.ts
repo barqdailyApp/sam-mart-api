@@ -47,4 +47,7 @@ export class MealResponse {
 
       @Expose()
       direct_add:boolean
+
+      @Expose()
+      is_active:boolean
 }
