@@ -235,7 +235,7 @@ export class RestaurantService extends BaseService<Restaurant> {
     //check if directory exist
     if(!fs.existsSync('storage/restaurant-meals/')) fs.mkdirSync('storage/restaurant-meals/');
     if(fs.existsSync(req.image)) fs.renameSync(req.image, req.image.replace('/tmp/', '/restaurant-meals/'));
-    meal.image= req.image.replace('/restaurant-meals/', '/storage/restaurant-meals/');
+    meal.image= req.image.replace('/tmp/', '/restaurant-meals/');
     return await this.mealRepository.save(meal);
   }
 
@@ -244,7 +244,7 @@ export class RestaurantService extends BaseService<Restaurant> {
     //check if directory exist
     if(!fs.existsSync('storage/cuisine-types/')) fs.mkdirSync('storage/cuisine-types/');
     if(fs.existsSync(req.logo)) fs.renameSync(req.logo, req.logo.replace('/tmp/', 'storage/cuisine-types/'));
-    cuisine.logo= req.logo.replace('/cuisine-types/', '/storage/cuisine-types/');
+    cuisine.logo= req.logo.replace('/tmp/', '/cuisine-types/');
     return await this.cuisineTypeRepository.save(cuisine);
   }
 
@@ -271,7 +271,7 @@ export class RestaurantService extends BaseService<Restaurant> {
     meal.description_ar=req.description_ar;
     meal.description_en=req.description_en;
     meal.price=req.price;
-    meal.image= req.image.replace('/restaurant-meals/', '/storage/restaurant-meals/');
+    meal.image= req.image.replace('/tmp/', '/restaurant-meals/');
    
     return await this.mealRepository.save(meal);
   }
