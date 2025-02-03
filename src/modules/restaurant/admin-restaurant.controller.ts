@@ -117,6 +117,7 @@ console.log(restaurant)
     return new ActionResponse(category);
   }
   //DELTE 
+  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
   @Delete('/admin/category/:id/:restaurant_id')
   async deleteCategory(@Param('id') id:string,@Param('restaurant_id') restaurant_id:string) {
     const category = await this.restaurantService.deleteCategory(id,restaurant_id);
@@ -139,6 +140,7 @@ console.log(restaurant)
     return new ActionResponse(meal);
   }
   //DELETE 
+  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
   @Delete('/admin/meal/:restaurant_id/:id')
   async deleteMeal(@Param('id') id:string,@Param('restaurant_id') restaurant_id:string) {
     const meal = await this.restaurantService.deleteMeal(id,restaurant_id);
