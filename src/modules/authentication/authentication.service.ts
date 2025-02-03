@@ -57,7 +57,7 @@ export class AuthenticationService {
   ) {}
 
   async validateUser(req: LoginRequest): Promise<any> {
-    const user = await this.userService.findOne([
+    const user = await this.userService._repo.findOne([
       { email: req.username },
       { username: req.username },
       { phone: req.username },
@@ -70,6 +70,7 @@ export class AuthenticationService {
         user.password,
       );
     }
+ 
     if (user.roles.includes(Role.EMPLOYEE)) {
       const userSamModule = await this.userSamModulesRepository.find({
         where: { user_id: user.id },

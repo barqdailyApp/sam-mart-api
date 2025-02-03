@@ -87,7 +87,7 @@ export class VerifyOtpTransaction extends BaseTransaction<
         const driver = await this.driverRepository.findOne({
           where: { user_id: user.id },
         });
-
+        user.driver = driver;
         if (!driver) throw new UnauthorizedException('invalid_driver');
 
         if (driver.status !== DriverStatus.VERIFIED) {

@@ -21,6 +21,7 @@ export class RestaurantOrderService {
         return await this.makeRestaurantOrderTransaction.run(req);
     }
 
+    
     async getRestaurantOrdersDriverRequests(){
         const driver = await this.driverRepository.findOne({
             where: {

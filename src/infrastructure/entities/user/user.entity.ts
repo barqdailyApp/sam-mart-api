@@ -134,6 +134,7 @@ export class User extends AuditableEntity {
   restaurant_orders: RestaurantOrder[]
 
 restaurant?:any
+driver?:any
   
   constructor(partial: Partial<User>) {
     super();
