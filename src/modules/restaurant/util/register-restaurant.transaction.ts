@@ -114,7 +114,7 @@ export class RegisterRestaurantTransaction extends BaseTransaction<
       await context.save(licenses);
       await context.save(user);
       await context.save(
-        new RestaurantAdmin({ user: user, restaurant: restaurant }),
+        new RestaurantAdmin({ user_id: user.id, restaurant_id: restaurant.id }),
       );
       return restaurant;
     } catch (error) {
