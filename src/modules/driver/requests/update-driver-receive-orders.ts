@@ -14,10 +14,10 @@ export class UpdateDriverReceiveOrdersRequest {
     @IsBoolean()
     is_receive_orders: boolean;
 
-@ApiProperty({default:DriverTypeEnum.MART,enum:DriverTypeEnum})
-@IsNotEmpty()
-@IsString()
-@IsEnum(DriverTypeEnum)
-type:DriverTypeEnum
+// @ApiProperty({default:DriverTypeEnum.MART,enum:DriverTypeEnum})
+// @IsNotEmpty()
+// @IsString()
+// @IsEnum(DriverTypeEnum)
+// type:DriverTypeEnum
 
 }
