@@ -178,7 +178,7 @@ export class RestaurantService extends BaseService<Restaurant> {
       relations: {
         categories: { meals: {meal_option_groups:{option_group:true}} , },
         cuisine_types: true,
-        admins: true,
+        admins: {user:true},
         attachments: true
       },
     });
