@@ -50,4 +50,23 @@ export class RestaurantOrderService {
      
         return {orders:orders[0],total:orders[1]};
     }
+
+    async driverAcceptOrder(id:string){
+        const driver = await this.driverRepository.findOne({
+            where: {
+                user_id: this._request.user.id,
+                is_receive_orders:true,
+                type:DriverTypeEnum.FOOD
+            }
+        }
+        )
+        const order=await this.restaurantOrderRepository.findOne({
+            where:{id,driver_id:null},
+            relations:{user:true,restaurant:true,address:true,}
+        })
+        if(!order) throw new Error('message.order_not_found')
+        order.driver_id=driver.id
+        await this.restaurantOrderRepository.save(order)
+        return order
+    }
 }

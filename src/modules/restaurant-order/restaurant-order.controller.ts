@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { RestaurantOrderService } from './restaurant-order.service';
 import { MakeRestaurantOrderRequest } from './dto/request/make-restaurant-order.request';
 import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
@@ -49,5 +49,11 @@ export class RestaurantOrderController {
           ...query
         }
       });
+    }
+
+    @Roles(Role.DRIVER)
+    @Post('driver-accept-order/:id')
+    async driverAcceptOrder(@Param('id') id:string){
+      return new ActionResponse(await this.restaurantOrderService.driverAcceptOrder(id));
     }
 }
