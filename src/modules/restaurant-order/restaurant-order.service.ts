@@ -9,6 +9,7 @@ import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { DriverTypeEnum } from 'src/infrastructure/data/enums/driver-type.eum';
+import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 @Injectable()
 export class RestaurantOrderService {
     constructor(private readonly makeRestaurantOrderTransaction: MakeRestaurantOrderTransaction,
@@ -22,7 +23,7 @@ export class RestaurantOrderService {
     }
 
     
-    async getRestaurantOrdersDriverRequests(){
+    async getRestaurantOrdersDriverRequests(query:PaginatedRequest){
         const driver = await this.driverRepository.findOne({
             where: {
                 user_id: this._request.user.id,
@@ -39,6 +40,8 @@ export class RestaurantOrderService {
                     city_id:driver.city_id
                 }
             },
+            take:query.limit,
+            skip:query.page,
             relations:{user:true,restaurant:true,address:true,}
         })
         return orders;
