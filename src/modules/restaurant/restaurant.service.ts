@@ -158,7 +158,7 @@ export class RestaurantService extends BaseService<Restaurant> {
     let cart_details=null
     if(user_id){
       const cart_meals = await this.cartMealRepository.find({
-        where: {cart:{user_id:user_id},},relations:{meal:true,cart_meal_options:{option:true}}
+        where: {cart:{user_id:user_id},},relations:{meal:true,cart_meal_options:{option:true},cart:true}
       });
 
     const  total_price= cart_meals.reduce((acc,curr)=>acc+(curr.quantity*curr.meal.price+curr.cart_meal_options.reduce((acc,curr)=>acc+curr.option.price,0)),0)

@@ -49,6 +49,7 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
         const order = plainToInstance(RestaurantOrder, req);
         order.address_id=address.id
         order.user_id = this.request.user.id;
+      
         const date = new Date();
   const isoDate = date.toISOString().slice(0, 10);
   const count = await context
@@ -73,6 +74,7 @@ order.number= generateOrderNumber(count,isoDate)
       
         if(cart_meals?.length == 0){
             throw new BadRequestException('message.cart_empty')}
+            order.restaurant_id=cart_meals[0].cart.restaurant_id
             // tranfer cart_meals to order_meals
             order.restaurant_order_meals= cart_meals.map(cart_meal=>{
                 return plainToInstance(RestaurantOrderMeal,{
