@@ -163,7 +163,7 @@ export class RestaurantService extends BaseService<Restaurant> {
 
     const  total_price= cart_meals.reduce((acc,curr)=>acc+(curr.quantity*curr.meal.price+curr.cart_meal_options.reduce((acc,curr)=>acc+curr.option.price,0)),0)
     const meals_count=cart_meals?.length
-      cart_details={meals_count,total_price,restaurant_id:cart_meals[0].cart?.restaurant?.id}
+      cart_details= {meals_count,total_price,restaurant_id:cart_meals[0]?.cart?.restaurant?.id}
     }    
     return {restaurant:response,cart:restaurant.id== cart_details?.restaurant_id ?  cart_details:null};
   }
