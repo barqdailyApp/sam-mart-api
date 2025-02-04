@@ -8,6 +8,7 @@ import { User } from '../user/user.entity';
 import { RestaurantAdmin } from './restaurant-admin.entity';
 import { RestaurantOrder } from './order/restaurant_order.entity';
 import { City } from '../city/city.entity';
+import { OptionGroup } from './option/option-group.entity';
 @Entity()
 export class Restaurant extends AuditableEntity {
   @Column()
@@ -97,4 +98,7 @@ export class Restaurant extends AuditableEntity {
 
    @Column({nullable:true})
    city_id:string
+
+   @OneToMany(()=>OptionGroup,optionGroup=>optionGroup.restaurant)
+   option_groups:OptionGroup[]
 }

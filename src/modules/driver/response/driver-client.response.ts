@@ -1,6 +1,7 @@
 import { Exclude, Expose, Transform } from 'class-transformer';
 import { toUrl } from 'src/core/helpers/file.helper';
 import { DriverStatus } from 'src/infrastructure/data/enums/driver-status.enum';
+import { DriverTypeEnum } from 'src/infrastructure/data/enums/driver-type.eum';
 import { Gender } from 'src/infrastructure/data/enums/gender.enum';
 import { UserStatus } from 'src/infrastructure/data/enums/user-status.enum';
 import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
@@ -15,6 +16,7 @@ export class DriverClientResponse {
   @Expose() readonly birth_date: string;
   @Expose() readonly created_at: Date;
   @Expose() readonly is_receive_orders: boolean;
+  @Expose() readonly type:DriverTypeEnum
 
 
   @Expose() readonly driver_status: DriverStatus;
@@ -25,6 +27,7 @@ export class DriverClientResponse {
     this.username = driver?.user.name;
     this.email = driver?.user.email;
     this.phone = driver?.user.phone;
+    this.type = driver?.type;
     if (driver?.user?.avatar) {
       this.avatar = toUrl(driver?.user?.avatar);
     }

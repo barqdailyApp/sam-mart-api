@@ -32,6 +32,7 @@ import { AdminRestaurantDeatailsResponse } from './dto/responses/admin-restauran
 import { AddRestaurantCategoryRequest, UpdateRestaurantCategoryRequest } from './dto/requests/add-restaurant-category.request';
 import { AddMealRequest, UpdateMealRequest } from './dto/requests/add-meal.request';
 import { AddCuisineRequest } from './dto/requests/add-cuisine.request';
+import { AddOptionGroupRequest } from './dto/requests/add-option-group.request';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -146,5 +147,12 @@ console.log(restaurant)
     const meal = await this.restaurantService.deleteMeal(id,restaurant_id);
     return new ActionResponse(meal);
   }
+   
+  //create option group
+  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
+  @Post('/admin/option-group/:restaurant_id')
+  async addOptionGroup(@Body() req:AddOptionGroupRequest,@Param('restaurant_id') restaurant_id:string) {
+    const option_group = await this.restaurantService.addOptionGroup(req,restaurant_id);
+    return new ActionResponse(option_group);
 
-  }
+  }}
