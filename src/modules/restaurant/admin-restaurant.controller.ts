@@ -55,7 +55,8 @@ export class AdminRestaurantController {
     const cuisine = await this.restaurantService.addCuisine(req);
     return new ActionResponse(cuisine);
   }
-
+   
+  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
   @Get('admin/all')
   async getRestaurantRequests(@Query() query: PaginatedRequest) {
     
