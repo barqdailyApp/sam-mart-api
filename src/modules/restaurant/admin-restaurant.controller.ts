@@ -55,9 +55,9 @@ export class AdminRestaurantController {
     return new ActionResponse(cuisine);
   }
 
-  @Get('admin/requests')
+  @Get('admin/all')
   async getRestaurantRequests(@Query() query: PaginatedRequest) {
-    applyQueryFilters(query, `status=${RestaurantStatus.PENDING}`);
+    
     const restaurants = await this.restaurantService.findAll(query);
 
     const total = await this.restaurantService.count(query);
