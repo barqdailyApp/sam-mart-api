@@ -57,7 +57,7 @@ export class AuthenticationService {
   ) {}
 
   async validateUser(req: LoginRequest): Promise<any> {
-    const user = await this.userService._repo.findOne([
+    const user = await this.userService.findOne([
       { email: req.username },
       { username: req.username },
       { phone: req.username },
