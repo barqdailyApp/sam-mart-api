@@ -24,6 +24,9 @@ export class RestaurantOrderService {
 
     
     async getRestaurantOrdersDriverRequests(query:PaginatedRequest){
+        // if limit and page are null put default values
+        if (!query.limit) query.limit = 10;
+        if (!query.page) query.page = 1;
         const driver = await this.driverRepository.findOne({
             where: {
                 user_id: this._request.user.id,
@@ -32,7 +35,7 @@ export class RestaurantOrderService {
             }
 
         })
-        const orders=await this.restaurantOrderRepository.find({
+        const orders=await this.restaurantOrderRepository.findAndCount({
             where: {
                 driver_id: null,
                 status: ShipmentStatusEnum.CONFIRMED,
@@ -40,10 +43,11 @@ export class RestaurantOrderService {
                     city_id:driver.city_id
                 }
             },
-            take:query.limit,
-            skip:query.page,
+            take:query.limit*1  ,
+            skip:query.page - 1,
             relations:{user:true,restaurant:true,address:true,}
         })
-        return orders;
+     
+        return {orders:orders[0],total:orders[1]};
     }
 }

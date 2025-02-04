@@ -76,9 +76,10 @@ order.number= generateOrderNumber(count,isoDate)
             throw new BadRequestException('message.cart_empty')}
             order.restaurant_id=cart_meals[0].cart.restaurant_id
             // tranfer cart_meals to order_meals
-            order.restaurant_order_meals= cart_meals.map(cart_meal=>{
+            const restaurant_order_meals= cart_meals.map(cart_meal=>{
                 return plainToInstance(RestaurantOrderMeal,{
                     meal_id: cart_meal.meal_id,
+                    order_id:order.id,
                     quantity: cart_meal.quantity,
                     price: cart_meal.meal.price,
                     total_price: Number(cart_meal.meal.price)+Number(cart_meal.cart_meal_options.map(cart_meal_option=>cart_meal_option.option.price).reduce((a,b)=>a+b,0)),
@@ -86,6 +87,7 @@ order.number= generateOrderNumber(count,isoDate)
                 }
             )  
             })
+            await context.save(restaurant_order_meals)
             await context.remove(cart_meals)
          
        

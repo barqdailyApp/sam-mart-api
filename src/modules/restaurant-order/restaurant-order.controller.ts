@@ -11,6 +11,7 @@ import { ActionResponse } from 'src/core/base/responses/action.response';
 import { RestaurantOrderListResponse } from './dto/response/restaurant-order-list.response';
 import { I18nResponse } from 'src/core/helpers/i18n.helper';
 import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
+import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -35,12 +36,18 @@ export class RestaurantOrderController {
     @Get('driver-requests')
     async getRestaurantOrdersDriverRequests(@Query() query:PaginatedRequest){
       // add pagination
-    
-      const orders=await this.restaurantOrderService.getRestaurantOrdersDriverRequests(query);
+      const {orders,total}=await this.restaurantOrderService.getRestaurantOrdersDriverRequests(query);
+
+
       const response = this._i18nResponse.entity(orders);
       const result=plainToInstance(RestaurantOrderListResponse,response,{
         excludeExtraneousValues: true,
       })
-      return new ActionResponse(result);
+      return new PaginatedResponse(result,{
+        meta:{
+          total,
+          ...query
+        }
+      });
     }
 }
