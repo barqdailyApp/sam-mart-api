@@ -52,6 +52,25 @@ export class RestaurantOrderController {
     }
 
     @Roles(Role.DRIVER)
+    @Get('driver-orders')
+    async getRestaurantOrdersDriverOrders(@Query() query:PaginatedRequest){
+      // add pagination
+      const {orders,total}=await this.restaurantOrderService.getRestaurantOrdersDriverOrders(query);
+
+
+      const response = this._i18nResponse.entity(orders);
+      const result=plainToInstance(RestaurantOrderListResponse,response,{
+        excludeExtraneousValues: true,
+      })
+      return new PaginatedResponse(result,{
+        meta:{
+          total,
+          ...query
+        }
+      });
+    }
+
+    @Roles(Role.DRIVER)
     @Post('driver-accept-order/:id')
     async driverAcceptOrder(@Param('id') id:string){
       return new ActionResponse(await this.restaurantOrderService.driverAcceptOrder(id));

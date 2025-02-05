@@ -5,12 +5,12 @@ import { Unique } from "src/core/validators/unique-constraints.validator";
 export class AddRestaurantCategoryRequest {
     @ApiProperty()
     @IsString()
-    @Unique('restaurant_category')
+
     name_ar: string
 
     @ApiProperty()
     @IsString()
-    @Unique('restaurant_category')
+
     name_en: string
 
     @ApiProperty({required:false})
@@ -34,13 +34,13 @@ export class UpdateRestaurantCategoryRequest {
     @ApiProperty({required:false})
     @IsString()
     @IsOptional()
-    @Unique('restaurant_category')
+  
     name_ar: string
 
     @ApiProperty({required:false})
     @IsString()
     @IsOptional()
-    @Unique('restaurant_category')
+   
     name_en: string
 
     @ApiProperty({required:false})

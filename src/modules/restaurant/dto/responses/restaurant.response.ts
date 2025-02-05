@@ -13,6 +13,8 @@ export class RestaurantCategoryResponse{
     @Expose()
     @Transform((value)=>plainToInstance(MealResponse,value.obj.meals,{excludeExtraneousValues:true}),)
     meals:MealResponse[]
+    @Expose()
+    is_active:boolean
 
 }
 export class RestaurantResponse {
