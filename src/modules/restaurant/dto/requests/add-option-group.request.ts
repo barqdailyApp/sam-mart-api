@@ -38,7 +38,7 @@ export class AddOptionGroupRequest {
 
     @ApiProperty()
     @IsNumber()
-    @Min(1)
+    @Min(0)
     @Transform(({ value }) => Number(value))
     min_selection: number;
 
@@ -77,7 +77,7 @@ export class UpdateOptionGroupRequest {
     @ApiProperty()
     @IsNumber()
     @IsOptional()
-    @Min(1)
+    @Min(0)
     @Transform(({ value }) => Number(value))
     min_selection: number;
 
@@ -120,5 +120,5 @@ export class UpdateOptionRequest{
     @Transform(({ value }) => Number(value))
     price: number;
 
-    
+
 }
