@@ -148,7 +148,13 @@ console.log(restaurant)
     const meal = await this.restaurantService.deleteMeal(id,restaurant_id);
     return new ActionResponse(meal);
   }
-   
+   //get option groups
+   @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
+   @Get('/admin/option-groups/:restaurant_id')
+   async getOptionGroups(@Param('restaurant_id') restaurant_id:string) {
+     const option_groups = await this.restaurantService.getRestaurantOptionGroups(restaurant_id);
+     return new ActionResponse(option_groups);
+   }
   //create option group
   @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
   @Post('/admin/option-group/:restaurant_id')
@@ -156,4 +162,5 @@ console.log(restaurant)
     const option_group = await this.restaurantService.addOptionGroup(req,restaurant_id);
     return new ActionResponse(option_group);
 
-  }}
+  }
+}

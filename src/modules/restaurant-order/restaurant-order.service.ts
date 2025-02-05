@@ -10,6 +10,7 @@ import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { DriverTypeEnum } from 'src/infrastructure/data/enums/driver-type.eum';
 import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
+import { GetDriverRestaurantOrdersQuery } from './dto/query/get-driver-restaurant-order.query';
 @Injectable()
 export class RestaurantOrderService {
     constructor(private readonly makeRestaurantOrderTransaction: MakeRestaurantOrderTransaction,
@@ -68,5 +69,29 @@ export class RestaurantOrderService {
         order.driver_id=driver.id
         await this.restaurantOrderRepository.save(order)
         return order
+    }
+
+    async getRestaurantOrdersDriverOrders(query:GetDriverRestaurantOrdersQuery){
+        // if limit and page are null put default values
+        if (!query.limit) query.limit = 10;
+        if (!query.page) query.page = 1;
+        
+        const driver = await this.driverRepository.findOne({
+            where: {
+                user_id: this._request.user.id,
+                is_receive_orders:true,
+                type:DriverTypeEnum.FOOD
+            }
+        })
+        const orders=await this.restaurantOrderRepository.findAndCount({
+            where: {
+                driver_id: driver.id,
+                status: query.status,
+            },
+            take:query.limit*1  ,
+            skip:query.page - 1,
+            relations:{user:true,restaurant:true,address:true,}
+        })
+        return {orders:orders[0],total:orders[1]};
     }
 }

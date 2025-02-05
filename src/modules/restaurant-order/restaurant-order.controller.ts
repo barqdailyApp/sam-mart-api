@@ -12,6 +12,7 @@ import { RestaurantOrderListResponse } from './dto/response/restaurant-order-lis
 import { I18nResponse } from 'src/core/helpers/i18n.helper';
 import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
+import { GetDriverRestaurantOrdersQuery } from './dto/query/get-driver-restaurant-order.query';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -51,24 +52,24 @@ export class RestaurantOrderController {
       });
     }
 
-    // @Roles(Role.DRIVER)
-    // @Get('driver-orders')
-    // async getRestaurantOrdersDriverOrders(@Query() query:PaginatedRequest){
-    //   // add pagination
-    //   const {orders,total}=await this.restaurantOrderService.getRestaurantOrdersDriverOrders(query);
+    @Roles(Role.DRIVER)
+    @Get('driver-orders')
+    async getRestaurantOrdersDriverOrders(@Query() query:GetDriverRestaurantOrdersQuery){
+      // add pagination
+      const {orders,total}=await this.restaurantOrderService.getRestaurantOrdersDriverOrders(query);
 
 
-    //   const response = this._i18nResponse.entity(orders);
-    //   const result=plainToInstance(RestaurantOrderListResponse,response,{
-    //     excludeExtraneousValues: true,
-    //   })
-    //   return new PaginatedResponse(result,{
-    //     meta:{
-    //       total,
-    //       ...query
-    //     }
-    //   });
-    // }
+      const response = this._i18nResponse.entity(orders);
+      const result=plainToInstance(RestaurantOrderListResponse,response,{
+        excludeExtraneousValues: true,
+      })
+      return new PaginatedResponse(result,{
+        meta:{
+          total,
+          ...query
+        }
+      });
+    }
 
     @Roles(Role.DRIVER)
     @Post('driver-accept-order/:id')

@@ -24,6 +24,7 @@ import { MealResponse } from './dto/responses/meal.response';
 import { AddCuisineRequest } from './dto/requests/add-cuisine.request';
 import { OptionGroup } from 'src/infrastructure/entities/restaurant/option/option-group.entity';
 import { AddOptionGroupRequest } from './dto/requests/add-option-group.request';
+import { Option } from 'src/infrastructure/entities/restaurant/option/option.entity';
 
 @Injectable()
 export class RestaurantService extends BaseService<Restaurant> {
@@ -42,6 +43,8 @@ export class RestaurantService extends BaseService<Restaurant> {
     @Inject(REQUEST) private readonly request: Request,
     @InjectRepository(OptionGroup)
     private readonly optionGroupRepository: Repository<OptionGroup>,
+    @InjectRepository(Option)
+    private readonly optionRepository: Repository<Option>,
   ) {
     super(restaurantRepository);
   }
@@ -293,8 +296,15 @@ export class RestaurantService extends BaseService<Restaurant> {
   }
   // Create option group
   async addOptionGroup(req:AddOptionGroupRequest,restaurant_id:string) {
-    const option_group = plainToInstance(OptionGroup,{...req,restaurant_id:restaurant_id});
-    return await this.optionGroupRepository.save(option_group);
+    const option_group = await this.optionGroupRepository.save( plainToInstance(OptionGroup,{...req,restaurant_id:restaurant_id}));
+
+    if(req.options?.length>0){
+      const options = plainToInstance(Option,req.options);
+   
+      await this.optionRepository.save(options.map(option=>({...option,option_group_id:option_group.id})));
+      
+    }
+    return option_group;
   }
 
 }
