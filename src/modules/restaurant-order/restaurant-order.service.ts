@@ -73,9 +73,10 @@ export class RestaurantOrderService {
 
     async getRestaurantOrdersDriverOrders(query:GetDriverRestaurantOrdersQuery){
         // if limit and page are null put default values
+        
         if (!query.limit) query.limit = 10;
         if (!query.page) query.page = 1;
-        
+
         const driver = await this.driverRepository.findOne({
             where: {
                 user_id: this._request.user.id,

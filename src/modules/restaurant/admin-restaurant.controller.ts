@@ -32,7 +32,7 @@ import { AdminRestaurantDeatailsResponse } from './dto/responses/admin-restauran
 import { AddRestaurantCategoryRequest, UpdateRestaurantCategoryRequest } from './dto/requests/add-restaurant-category.request';
 import { AddMealRequest, UpdateMealRequest } from './dto/requests/add-meal.request';
 import { AddCuisineRequest } from './dto/requests/add-cuisine.request';
-import { AddOptionGroupRequest } from './dto/requests/add-option-group.request';
+import { AddOptionGroupRequest, UpdateOptionGroupRequest, UpdateOptionRequest } from './dto/requests/add-option-group.request';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -163,4 +163,42 @@ console.log(restaurant)
     return new ActionResponse(option_group);
 
   }
+
+  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
+  @Put('/admin/option-group/:restaurant_id')
+  async editOptionGroup(@Body() req:UpdateOptionGroupRequest,@Param('restaurant_id') restaurant_id:string) {
+    const option_group = await this.restaurantService.editOptionGroup(req,restaurant_id);
+    return new ActionResponse(option_group);
+
+  }
+
+  //DELETE 
+  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
+  @Delete('/admin/option-group/:restaurant_id/:id')
+  async deleteOptionGroup(@Param('id') id:string,@Param('restaurant_id') restaurant_id:string) {
+    const option_group = await this.restaurantService.deleteOptionGroup(id,restaurant_id);
+    return new ActionResponse(option_group);
+  }
+
+
+
+
+  //edit option
+  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
+  @Put('/admin/option/:restaurant_id')
+  async editOption(@Body() req:UpdateOptionRequest,@Param('restaurant_id') restaurant_id:string) {
+    const option = await this.restaurantService.editOption(req,restaurant_id);
+    return new ActionResponse(option);
+
+  }
+
+  //DELETE 
+  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
+  @Delete('/admin/option/:restaurant_id/:id')
+  async deleteOption(@Param('id') id:string,@Param('restaurant_id') restaurant_id:string) {
+    const option = await this.restaurantService.deleteOption(id,restaurant_id);
+    return new ActionResponse(option);
+  }
+
+  
 }

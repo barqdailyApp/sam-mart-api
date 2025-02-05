@@ -23,7 +23,7 @@ import { RestaurantCartMeal } from 'src/infrastructure/entities/restaurant/cart/
 import { MealResponse } from './dto/responses/meal.response';
 import { AddCuisineRequest } from './dto/requests/add-cuisine.request';
 import { OptionGroup } from 'src/infrastructure/entities/restaurant/option/option-group.entity';
-import { AddOptionGroupRequest } from './dto/requests/add-option-group.request';
+import { AddOptionGroupRequest, UpdateOptionGroupRequest, UpdateOptionRequest } from './dto/requests/add-option-group.request';
 import { Option } from 'src/infrastructure/entities/restaurant/option/option.entity';
 
 @Injectable()
@@ -305,6 +305,41 @@ export class RestaurantService extends BaseService<Restaurant> {
       
     }
     return option_group;
+  }
+
+  //edit option group
+  async editOptionGroup(req:UpdateOptionGroupRequest,restaurant_id:string) {
+    const option_group = await this.optionGroupRepository.findOne({where:{id:req.id,restaurant_id:restaurant_id}});
+    if(!option_group) throw new NotFoundException('no option group found');
+    option_group.name_ar=req.name_ar;
+    option_group.name_en=req.name_en;
+    option_group.min_selection=req.min_selection;
+    option_group.max_selection=req.max_selection;
+    return await this.optionGroupRepository.save(option_group);
+  }
+
+  //delete option group
+  async deleteOptionGroup(id:string,restaurant_id:string) {
+    const option_group = await this.optionGroupRepository.findOne({where:{id:id,restaurant_id:restaurant_id}});
+    if(!option_group) throw new NotFoundException('no option group found');
+    return await this.optionGroupRepository.softRemove(option_group);
+  }
+
+  //edit option
+  async editOption(req:UpdateOptionRequest,restaurant_id:string) {  
+    const option = await this.optionRepository.findOne({where:{id:req.id,option_group:{restaurant_id:restaurant_id}}});   
+    if(!option) throw new NotFoundException('no option found');
+    option.name_ar=req.name_ar;
+    option.name_en=req.name_en;
+    option.price=req.price;
+    return await this.optionRepository.save(option);
+  }
+
+  //delete option
+  async deleteOption(id:string,restaurant_id:string) {
+    const option = await this.optionRepository.findOne({where:{id:id,option_group:{restaurant_id:restaurant_id}}});
+    if(!option) throw new NotFoundException('no option found');
+    return await this.optionRepository.softRemove(option);
   }
 
 }
