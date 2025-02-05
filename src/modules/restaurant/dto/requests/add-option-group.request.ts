@@ -11,9 +11,13 @@ export class AddOptionRequest{
     @IsString()
     name_en: string;
 
+    //is active
     @ApiProperty()
+    @IsOptional()
     @IsBoolean()
     is_active: boolean;
+
+
 
     @ApiProperty()
     @IsNumber()
@@ -32,9 +36,7 @@ export class AddOptionGroupRequest {
     @IsString()
     name_en: string;
 
-    @ApiProperty()
-    @IsBoolean()
-    is_active: boolean;
+
 
     @ApiProperty()
     @IsNumber()
@@ -69,10 +71,7 @@ export class UpdateOptionGroupRequest {
     @IsString()
     name_en: string;
 
-    @ApiProperty()
-    @IsOptional()
-    @IsBoolean()
-    is_active: boolean;
+
 
     @ApiProperty()
     @IsNumber()
