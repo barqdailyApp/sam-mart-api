@@ -39,6 +39,7 @@ export class UpdateRestaurantCategoryRequest {
 
     @ApiProperty({required:false})
     @IsString()
+    @IsOptional()
     @Unique('restaurant_category')
     name_en: string
 
