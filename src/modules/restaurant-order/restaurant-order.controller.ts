@@ -51,24 +51,24 @@ export class RestaurantOrderController {
       });
     }
 
-    @Roles(Role.DRIVER)
-    @Get('driver-orders')
-    async getRestaurantOrdersDriverOrders(@Query() query:PaginatedRequest){
-      // add pagination
-      const {orders,total}=await this.restaurantOrderService.getRestaurantOrdersDriverOrders(query);
+    // @Roles(Role.DRIVER)
+    // @Get('driver-orders')
+    // async getRestaurantOrdersDriverOrders(@Query() query:PaginatedRequest){
+    //   // add pagination
+    //   const {orders,total}=await this.restaurantOrderService.getRestaurantOrdersDriverOrders(query);
 
 
-      const response = this._i18nResponse.entity(orders);
-      const result=plainToInstance(RestaurantOrderListResponse,response,{
-        excludeExtraneousValues: true,
-      })
-      return new PaginatedResponse(result,{
-        meta:{
-          total,
-          ...query
-        }
-      });
-    }
+    //   const response = this._i18nResponse.entity(orders);
+    //   const result=plainToInstance(RestaurantOrderListResponse,response,{
+    //     excludeExtraneousValues: true,
+    //   })
+    //   return new PaginatedResponse(result,{
+    //     meta:{
+    //       total,
+    //       ...query
+    //     }
+    //   });
+    // }
 
     @Roles(Role.DRIVER)
     @Post('driver-accept-order/:id')
