@@ -33,6 +33,7 @@ import { AddRestaurantCategoryRequest, UpdateRestaurantCategoryRequest } from '.
 import { AddMealRequest, UpdateMealRequest } from './dto/requests/add-meal.request';
 import { AddCuisineRequest } from './dto/requests/add-cuisine.request';
 import { AddOptionGroupRequest, UpdateOptionGroupRequest, UpdateOptionRequest } from './dto/requests/add-option-group.request';
+import { AddMealOptionGroupsRequest } from './dto/requests/add-meal-option-groups.request';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -200,5 +201,12 @@ console.log(restaurant)
     return new ActionResponse(option);
   }
 
+  //add meal option groups
+  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
+  @Post('/admin/meal-option-groups/:restaurant_id')
+  async addMealOptionGroups(@Body() req:AddMealOptionGroupsRequest,@Param('restaurant_id') restaurant_id:string) {
+    const option = await this.restaurantService.addMealOptionGroups(req,restaurant_id);
+    return new ActionResponse(option);
+  }
   
 }

@@ -2,13 +2,13 @@ import { Inject, Injectable, NotFoundException, Res } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/core/base/service/service.base';
 import { Restaurant } from 'src/infrastructure/entities/restaurant/restaurant.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { GetNearResturantsQuery } from './dto/requests/get-near-resturants.query';
 import { plainToInstance } from 'class-transformer';
 import { RestaurantResponse } from './dto/responses/restaurant.response';
 import { CuisineResponse } from './dto/responses/cuisine.response';
 import { Meal } from 'src/infrastructure/entities/restaurant/meal/meal.entity';
-import { json } from 'sequelize';
+import { json, where } from 'sequelize';
 import { RestaurantStatus } from 'src/infrastructure/data/enums/restaurant-status.enum';
 import { RegisterRestaurantRequest } from './dto/requests/register-restaurant.request';
 import { RegisterRestaurantTransaction } from './util/register-restaurant.transaction';
@@ -25,6 +25,8 @@ import { AddCuisineRequest } from './dto/requests/add-cuisine.request';
 import { OptionGroup } from 'src/infrastructure/entities/restaurant/option/option-group.entity';
 import { AddOptionGroupRequest, UpdateOptionGroupRequest, UpdateOptionRequest } from './dto/requests/add-option-group.request';
 import { Option } from 'src/infrastructure/entities/restaurant/option/option.entity';
+import { AddMealOptionGroupsRequest } from './dto/requests/add-meal-option-groups.request';
+import { MealOptionGroup } from 'src/infrastructure/entities/restaurant/meal/meal-option-group';
 
 @Injectable()
 export class RestaurantService extends BaseService<Restaurant> {
@@ -45,6 +47,8 @@ export class RestaurantService extends BaseService<Restaurant> {
     private readonly optionGroupRepository: Repository<OptionGroup>,
     @InjectRepository(Option)
     private readonly optionRepository: Repository<Option>,
+    @InjectRepository(MealOptionGroup)
+    private readonly mealOptionGroupRepository: Repository<MealOptionGroup>,
   ) {
     super(restaurantRepository);
   }
@@ -342,4 +346,15 @@ export class RestaurantService extends BaseService<Restaurant> {
     return await this.optionRepository.softRemove(option);
   }
 
+  //add meal option groups
+  async addMealOptionGroups(req:AddMealOptionGroupsRequest,restaurant_id:string) {
+    const meal = await this.mealRepository.findOne({where:{id:req.meal_id}});
+    if(!meal) throw new NotFoundException('no meal found');
+    for (let index = 0; index < req.option_groups.length; index++) {
+     const option_group = await this.optionGroupRepository.findOne({where:{id:req.option_groups[index].id,restaurant_id:restaurant_id}});
+
+     if(!option_group) throw new NotFoundException('no option group found');
+     await this.mealOptionGroupRepository.save(plainToInstance(MealOptionGroup,{meal_id:meal.id,option_group_id:option_group.id,order_by:req.option_groups[index].order_by,is_active:req.option_groups[index].is_active}));
+    }  
+  }
 }
