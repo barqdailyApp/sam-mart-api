@@ -32,8 +32,9 @@ import { AdminRestaurantDeatailsResponse } from './dto/responses/admin-restauran
 import { AddRestaurantCategoryRequest, UpdateRestaurantCategoryRequest } from './dto/requests/add-restaurant-category.request';
 import { AddMealRequest, UpdateMealRequest } from './dto/requests/add-meal.request';
 import { AddCuisineRequest } from './dto/requests/add-cuisine.request';
-import { AddOptionGroupRequest, UpdateOptionGroupRequest, UpdateOptionRequest } from './dto/requests/add-option-group.request';
+import { AddOptionGroupRequest, CreateOptionRequest, UpdateOptionGroupRequest, UpdateOptionRequest } from './dto/requests/add-option-group.request';
 import { AddMealOptionGroupsRequest } from './dto/requests/add-meal-option-groups.request';
+import { Create } from 'sharp';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -156,6 +157,13 @@ console.log(restaurant)
      const option_groups = await this.restaurantService.getRestaurantOptionGroups(restaurant_id);
      return new ActionResponse(option_groups);
    }
+   // get single option group
+   @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
+   @Get('/admin/option-group/:restaurant_id/:id')
+   async getSingleOptionGroup(@Param('id') id:string,@Param('restaurant_id') restaurant_id:string) {
+     const option_group = await this.restaurantService.getSingleOptionGroup(id,restaurant_id);
+     return new ActionResponse(option_group);
+   }
   //create option group
   @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
   @Post('/admin/option-group/:restaurant_id')
@@ -208,5 +216,13 @@ console.log(restaurant)
     const option = await this.restaurantService.addMealOptionGroups(req,restaurant_id);
     return new ActionResponse(option);
   }
+  // add optiom to option group
+  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
+  @Post('/admin/option/:restaurant_id')
+  async addOption(@Body() req:  CreateOptionRequest,@Param('restaurant_id') restaurant_id:string) {
+    const option = await this.restaurantService.addOptionToOptionGroup(req,restaurant_id);
+    return new ActionResponse(option);
+  }
+
   
 }

@@ -23,7 +23,7 @@ import { RestaurantCartMeal } from 'src/infrastructure/entities/restaurant/cart/
 import { MealResponse } from './dto/responses/meal.response';
 import { AddCuisineRequest } from './dto/requests/add-cuisine.request';
 import { OptionGroup } from 'src/infrastructure/entities/restaurant/option/option-group.entity';
-import { AddOptionGroupRequest, UpdateOptionGroupRequest, UpdateOptionRequest } from './dto/requests/add-option-group.request';
+import { AddOptionGroupRequest, CreateOptionRequest, UpdateOptionGroupRequest, UpdateOptionRequest } from './dto/requests/add-option-group.request';
 import { Option } from 'src/infrastructure/entities/restaurant/option/option.entity';
 import { AddMealOptionGroupsRequest } from './dto/requests/add-meal-option-groups.request';
 import { MealOptionGroup } from 'src/infrastructure/entities/restaurant/meal/meal-option-group';
@@ -357,4 +357,19 @@ export class RestaurantService extends BaseService<Restaurant> {
      await this.mealOptionGroupRepository.save(plainToInstance(MealOptionGroup,{meal_id:meal.id,option_group_id:option_group.id,order_by:req.option_groups[index].order_by,is_active:req.option_groups[index].is_active}));
     }  
   }
+
+  //add option to option group
+  async addOptionToOptionGroup(req:CreateOptionRequest,restaurant_id:string) {
+    const option_group=await this.optionGroupRepository.findOne({where:{id:req.option_group_id,restaurant_id:restaurant_id}});
+    if(!option_group) throw new NotFoundException('no option group found');
+   const option=plainToInstance(Option,req);
+   return await this.optionRepository.save(option);
+    
+    
+}
+// get single option group
+async getSingleOptionGroup(id:string,restaurant_id:string) {
+  const option_group = await this.optionGroupRepository.findOne({where:{id:id,restaurant_id:restaurant_id},relations:{options:true}});
+  if(!option_group) throw new NotFoundException('no option group found');
+  return option_group;}
 }

@@ -121,3 +121,8 @@ export class UpdateOptionRequest{
 
 
 }
+export class CreateOptionRequest extends AddOptionRequest{
+    @ApiProperty()
+    @IsString()
+    option_group_id: string
+}
