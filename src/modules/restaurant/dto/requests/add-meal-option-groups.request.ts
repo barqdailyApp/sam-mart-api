@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsArray, IsBoolean, IsNumber, IsOptional, IsString } from "class-validator";
+import { Type } from "class-transformer";
+import { IsArray, IsBoolean, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
 
 export class OptionGroupMealRequest {
     @ApiProperty({})
@@ -20,9 +21,12 @@ export class OptionGroupMealRequest {
 }
 export class AddMealOptionGroupsRequest {
   //list of option groups
-  @ApiProperty({type: [OptionGroupMealRequest], isArray: true})
-  @IsArray()
-  option_groups: OptionGroupMealRequest[]
+  @ApiProperty({
+    type: [OptionGroupMealRequest]
+  })
+
+ 
+  option_groups: OptionGroupMealRequest[];
 
 @ApiProperty()
 @IsString()
