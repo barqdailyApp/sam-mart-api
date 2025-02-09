@@ -76,4 +76,11 @@ export class RestaurantOrderController {
     async driverAcceptOrder(@Param('id') id:string){
       return new ActionResponse(await this.restaurantOrderService.driverAcceptOrder(id));
     }
+
+    @Roles(Role.DRIVER)
+    @Get('total-driver-orders')
+    async getTotalDriverOrders() {
+      const total = await this.restaurantOrderService.getTotalDriverOrders();
+      return new ActionResponse(total);
+    }
 }

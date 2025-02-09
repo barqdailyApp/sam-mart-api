@@ -3,7 +3,7 @@ import { MakeRestaurantOrderTransaction } from './util/make-restaureant-order.tr
 import { MakeRestaurantOrderRequest } from './dto/request/make-restaurant-order.request';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RestaurantOrder } from 'src/infrastructure/entities/restaurant/order/restaurant_order.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { ShipmentStatusEnum } from 'src/infrastructure/data/enums/shipment_status.enum';
 import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
 import { REQUEST } from '@nestjs/core';
@@ -44,7 +44,7 @@ export class RestaurantOrderService {
                     city_id:driver.city_id
                 }
             },
-            take:query.limit*1  ,
+            take:query.limit*1  ,withDeleted:true,
             skip:query.page - 1,
             relations:{user:true,restaurant:true,address:true,}
         })
@@ -62,11 +62,11 @@ export class RestaurantOrderService {
         }
         )
         const order=await this.restaurantOrderRepository.findOne({
-            where:{id,driver_id:null},
+            where:{id,driver_id:null},withDeleted:true,
             relations:{user:true,restaurant:true,address:true,}
         })
         if(!order) throw new Error('message.order_not_found')
-        order.driver_id=driver.id
+        order.driver_id=driver.id,
         await this.restaurantOrderRepository.save(order)
         return order
     }
@@ -90,9 +90,61 @@ export class RestaurantOrderService {
                 status: query.status,
             },
             take:query.limit*1  ,
-            skip:query.page - 1,
+            skip:query.page - 1,withDeleted:true,
             relations:{user:true,restaurant:true,address:true,}
         })
         return {orders:orders[0],total:orders[1]};
     }
+
+     async getTotalDriverOrders() {
+        const user = this._request.user;
+        const driver = await this.driverRepository.findOne({
+          where: {
+            user_id: user.id,
+          },
+        });
+        const ordersNew = await this.restaurantOrderRepository.count({
+          where: {
+            status: ShipmentStatusEnum.PENDING,
+            
+          
+              restaurant:{city_id:driver.city_id}
+           
+            
+          },
+       
+       
+        });
+        const ordersActive = await this.restaurantOrderRepository.count({
+          where: {
+            status: In([
+              ShipmentStatusEnum.CONFIRMED,
+              ShipmentStatusEnum.PROCESSING,
+              ShipmentStatusEnum.PICKED_UP,
+              ShipmentStatusEnum.READY_FOR_PICKUP,
+            ]),
+            driver_id: driver.id,
+            
+          },
+        
+        });
+    
+        const ordersDelivered = await this.restaurantOrderRepository.count({
+          where: {
+            status: ShipmentStatusEnum.DELIVERED,
+            driver_id: driver.id,
+            
+          },
+         
+        });
+    
+        
+    
+        return {
+          ordersNew,
+          ordersActive,
+          ordersDelivered,
+          
+        };
+      }
 }
