@@ -216,6 +216,13 @@ console.log(restaurant)
     const option = await this.restaurantService.addMealOptionGroups(req,restaurant_id);
     return new ActionResponse(option);
   }
+  // delete meal option group
+  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
+  @Delete('/admin/meal-option-groups/:restaurant_id/:id')
+  async deleteMealOptionGroup(@Param('id') id:string,@Param('restaurant_id') restaurant_id:string) {
+    const option_group = await this.restaurantService.deleteMealOptionGroup(id,restaurant_id);
+    return new ActionResponse(option_group);
+  }
   // add optiom to option group
   @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
   @Post('/admin/option/:restaurant_id')

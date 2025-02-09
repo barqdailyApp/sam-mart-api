@@ -336,6 +336,7 @@ export class RestaurantService extends BaseService<Restaurant> {
     option.name_ar=req.name_ar;
     option.name_en=req.name_en;
     option.price=req.price;
+    option.is_active=req.is_active;
     return await this.optionRepository.save(option);
   }
 
@@ -372,4 +373,10 @@ async getSingleOptionGroup(id:string,restaurant_id:string) {
   const option_group = await this.optionGroupRepository.findOne({where:{id:id,restaurant_id:restaurant_id},relations:{options:true}});
   if(!option_group) throw new NotFoundException('no option group found');
   return option_group;}
+
+  async deleteMealOptionGroup(id:string,restaurant_id:string) {
+    const option_group = await this.mealOptionGroupRepository.findOne({where:{id:id,meal:{restaurant_category:{restaurant_id:restaurant_id}}}});
+    if(!option_group) throw new NotFoundException('no option group found');
+    return await this.mealOptionGroupRepository.softRemove(option_group);
+  }
 }
