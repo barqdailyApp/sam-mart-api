@@ -106,6 +106,7 @@ console.log(restaurant)
   @Get('/admin/category-meals/:restaurant_id/:id')
   async getCategoriesMeals(@Param('restaurant_id') restaurant_id:string, @Param('id') id:string) {
     const categories = await this.restaurantService.getRestaurantCategoryMeals(restaurant_id,id);
+    
     const response= categories as any
     response.meals = plainToInstance(MealResponse, response.meals, {
       excludeExtraneousValues: true,
@@ -118,6 +119,7 @@ console.log(restaurant)
   @Put('/admin/category/:restaurant_id')
   async editCategory(@Body() req: UpdateRestaurantCategoryRequest,@Param('restaurant_id') restaurant_id:string) {
     const category = await this.restaurantService.editRestaurantCategory(req,restaurant_id);
+   
     return new ActionResponse(category);
   }
   //DELTE 
@@ -125,6 +127,7 @@ console.log(restaurant)
   @Delete('/admin/category/:id/:restaurant_id')
   async deleteCategory(@Param('id') id:string,@Param('restaurant_id') restaurant_id:string) {
     const category = await this.restaurantService.deleteCategory(id,restaurant_id);
+   
     return new ActionResponse(category);
   }
   

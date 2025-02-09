@@ -3,6 +3,8 @@ import { RestaurantResponse } from './restaurant.response';
 import { toUrl } from 'src/core/helpers/file.helper';
 import { UserResponse } from 'src/modules/user/dto/responses/user.response';
 import { RestaurantAttachmentEnum } from 'src/infrastructure/data/enums/restaurant-attachment.enum';
+import { MealOptionGroup } from 'src/infrastructure/entities/restaurant/meal/meal-option-group';
+import { OptionGroupResponse } from './option.response';
 
 export class AdminRestaurantDeatailsResponse extends RestaurantResponse {
   @Expose()
@@ -43,4 +45,7 @@ export class AdminRestaurantDeatailsResponse extends RestaurantResponse {
     );
   })
   admins: any;
+
+      
+  
 }

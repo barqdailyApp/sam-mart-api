@@ -36,7 +36,7 @@ export class MealResponse {
       restaurant_category: any;
 
       @Expose()
-      @Transform((value)=>{return value.obj.meal_option_groups?.map((item:MealOptionGroup)=>plainToInstance(OptionGroupResponse,item.option_group,{excludeExtraneousValues:true}))})
+      @Transform((value)=>{return value.obj.meal_option_groups?.map((item:MealOptionGroup)=>plainToInstance(OptionGroupResponse,{...item.option_group,id:item.id},{excludeExtraneousValues:true}))})
       option_groups:OptionGroupResponse[]
 
       @Expose()

@@ -264,7 +264,7 @@ export class RestaurantService extends BaseService<Restaurant> {
   }
 
   async getRestaurantCategoryMeals(restaurant_id:string,category_id:string) {
-    return await this.restaurantCategoryRepository.findOne({where:{restaurant_id:restaurant_id,id:category_id},relations:{meals:true}});
+    return await this.restaurantCategoryRepository.findOne({where:{restaurant_id:restaurant_id,id:category_id},relations:{meals:{meal_option_groups:{option_group:{options:true}}}}});
   }
   // edit meal
 
