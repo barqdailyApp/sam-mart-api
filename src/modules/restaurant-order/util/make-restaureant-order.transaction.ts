@@ -103,7 +103,7 @@ order.total_price=total;
                     restaurant_order_id:order.id,
                     price: cart_meal.meal.price,
                     total_price: Number(cart_meal.meal.price)+Number(cart_meal.cart_meal_options.map(cart_meal_option=>cart_meal_option.option.price).reduce((a,b)=>a+b,0)),
-                    restaurant_order_meal_options:cart_meal.cart_meal_options.map(cart_meal_option=>{return {option_id:cart_meal_option.option_id,price:cart_meal_option.option.price}})
+                    restaurant_order_meal_options:cart_meal?.cart_meal_options?.map(cart_meal_option=>{return {option_id:cart_meal_option.option_id,price:cart_meal_option.option.price}})
                 }
             )  
             })
