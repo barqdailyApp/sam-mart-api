@@ -70,7 +70,7 @@ order.number= generateOrderNumber(count,isoDate)
                     user_id: this.request.user.id
                 },
             },
-            relations:{meal:true,cart_meal_options:{option:true}}
+            relations:{meal:true,cart_meal_options:{option:true},cart:true}
         })
       
         if(cart_meals?.length == 0){
