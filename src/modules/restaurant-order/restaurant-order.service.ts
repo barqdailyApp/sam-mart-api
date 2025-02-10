@@ -52,7 +52,7 @@ export class RestaurantOrderService {
             },
             take:query.limit*1  ,withDeleted:true,
             skip:query.page - 1,
-            relations:{user:true,restaurant:true,address:true,}
+            relations:{user:true,restaurant:true,address:true,payment_method:true,}
         })
      
         return {orders:orders[0],total:orders[1]};

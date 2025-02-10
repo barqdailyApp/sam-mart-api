@@ -49,6 +49,7 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
         const order = plainToInstance(RestaurantOrder, req);
         order.address_id=address.id
         order.user_id = this.request.user.id;
+        order.payment_method_id=req.payment_method.payment_method_id
       
         const date = new Date();
   const isoDate = date.toISOString().slice(0, 10);

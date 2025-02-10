@@ -1,7 +1,8 @@
-import { Expose, Transform, Type } from "class-transformer";
+import { Expose, plainToClass, Transform, Type } from "class-transformer";
 import { PaymentMethod } from "src/infrastructure/entities/payment_method/payment_method.entity";
 import { AddressResponse } from "src/modules/address/dto/responses/address.respone";
 import { SamModuleResponse } from "src/modules/employee/dto/response/sam-modules.response";
+import { RestaurantResponse } from "src/modules/restaurant/dto/responses/restaurant.response";
 import { UserResponse } from "src/modules/user/dto/responses/user.response";
 
 export class RestaurantOrderListResponse {
@@ -10,7 +11,11 @@ export class RestaurantOrderListResponse {
     id: string;
     @Expose()
     number: string;
-   @Type(()=> PaymentMethod) payment_method?: PaymentMethod;  
+
+    @Expose()
+   @Transform(({ value }) => { return { id: value.id, type: value.type } })
+    payment_method?: PaymentMethod;
+  
     @Expose()
     status: string;
     @Expose()
@@ -24,4 +29,6 @@ export class RestaurantOrderListResponse {
     total_price: number;
     @Expose()
     @Type(() => UserResponse) user?: UserResponse;
+    @Expose()
+    @Type(() => RestaurantResponse) restaurant?: RestaurantResponse;
 }
