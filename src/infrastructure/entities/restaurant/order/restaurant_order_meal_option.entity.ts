@@ -14,8 +14,7 @@ export class RestaurantOrderMealOption extends AuditableEntity {
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   price: number;
 
-  @Column()
-  quantity: number;
+
   @ManyToOne(() => Option)
   @JoinColumn()
   option: Option;

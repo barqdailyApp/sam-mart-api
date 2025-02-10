@@ -34,7 +34,7 @@ export class RestaurantOrderMeal extends AuditableEntity {
   @OneToMany(
     () => RestaurantOrderMealOption,
     (restaurantCartMealOption) =>
-      restaurantCartMealOption.restaurant_order_meal,
+      restaurantCartMealOption.restaurant_order_meal,{cascade:true}
   )
   restaurant_order_meal_options: RestaurantOrderMealOption[];
 }
