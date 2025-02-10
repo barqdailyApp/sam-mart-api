@@ -15,15 +15,18 @@ import { OrderGateway } from 'src/integration/gateways/order.gateway';
 import { NotificationService } from '../notification/notification.service';
 import { NotificationTypes } from 'src/infrastructure/data/enums/notification-types.enum';
 import { NotificationEntity } from 'src/infrastructure/entities/notification/notification.entity';
+import { BaseService } from 'src/core/base/service/service.base';
 @Injectable()
-export class RestaurantOrderService {
-    constructor(private readonly makeRestaurantOrderTransaction: MakeRestaurantOrderTransaction,
-        @InjectRepository(RestaurantOrder) private readonly restaurantOrderRepository:Repository<RestaurantOrder>,
+export class RestaurantOrderService extends BaseService<RestaurantOrder> {
+    constructor(
+      @InjectRepository(RestaurantOrder) private readonly restaurantOrderRepository:Repository<RestaurantOrder>,
+      private readonly makeRestaurantOrderTransaction: MakeRestaurantOrderTransaction,
+     
         @InjectRepository(Driver) private readonly driverRepository:Repository<Driver>,
         @Inject(REQUEST) private readonly _request: Request,
          private readonly orderGateway: OrderGateway,
             private readonly notificationService: NotificationService,
-    ) {}
+    ) {super(restaurantOrderRepository)}
 
     async makeRestaurantOrder(req: MakeRestaurantOrderRequest) {
         return await this.makeRestaurantOrderTransaction.run(req);

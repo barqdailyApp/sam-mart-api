@@ -5,9 +5,10 @@ import { MakeRestaurantOrderTransaction } from './util/make-restaureant-order.tr
 import { PaymentMethodService } from '../payment_method/payment_method.service';
 import { OrderGateway } from 'src/integration/gateways/order.gateway';
 import { NotificationModule } from '../notification/notification.module';
+import { AdminRestaurantOrderController } from './admin-restaurant-order.controller';
 
 @Module({
-  controllers: [RestaurantOrderController],
+  controllers: [RestaurantOrderController,AdminRestaurantOrderController],
   providers: [RestaurantOrderService,MakeRestaurantOrderTransaction,PaymentMethodService,OrderGateway,],
   imports:[NotificationModule]
 })
