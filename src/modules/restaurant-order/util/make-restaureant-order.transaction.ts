@@ -104,7 +104,7 @@ order.id=uuidv4();
             })
             await context.save(restaurant_order_meals)
             await context.remove(cart_meals)
-            let total= order.restaurant_order_meals.map(order_meal=>order_meal.total_price).reduce((a,b)=>a+b,0)
+            let total= restaurant_order_meals.map(order_meal=>order_meal.total_price).reduce((a,b)=>a+b,0)
 
             const devliery_fee =0;
             order.delivery_fee = devliery_fee;
