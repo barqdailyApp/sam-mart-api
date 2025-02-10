@@ -112,6 +112,10 @@ export class OrderGateway
 
     await this.server.to(payload.to_rooms).emit("order_status_change", message);
   }
+  async emitOrderConfirmedEvent(order: any,driver_ids?:string[]) {
+    const respone = plainToInstance(ReturnOrderResponse,order)
+    this.server.to(driver_ids).emit("new_restaurant_order", respone);
+  }
 
   async notifyReturnOrder(payload: ReturnOrderPayload) {
     const { body, to_rooms } = payload;

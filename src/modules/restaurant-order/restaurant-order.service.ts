@@ -11,12 +11,18 @@ import { Request } from 'express';
 import { DriverTypeEnum } from 'src/infrastructure/data/enums/driver-type.eum';
 import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 import { GetDriverRestaurantOrdersQuery } from './dto/query/get-driver-restaurant-order.query';
+import { OrderGateway } from 'src/integration/gateways/order.gateway';
+import { NotificationService } from '../notification/notification.service';
+import { NotificationTypes } from 'src/infrastructure/data/enums/notification-types.enum';
+import { NotificationEntity } from 'src/infrastructure/entities/notification/notification.entity';
 @Injectable()
 export class RestaurantOrderService {
     constructor(private readonly makeRestaurantOrderTransaction: MakeRestaurantOrderTransaction,
         @InjectRepository(RestaurantOrder) private readonly restaurantOrderRepository:Repository<RestaurantOrder>,
         @InjectRepository(Driver) private readonly driverRepository:Repository<Driver>,
-        @Inject(REQUEST) private readonly _request: Request
+        @Inject(REQUEST) private readonly _request: Request,
+         private readonly orderGateway: OrderGateway,
+            private readonly notificationService: NotificationService,
     ) {}
 
     async makeRestaurantOrder(req: MakeRestaurantOrderRequest) {
@@ -147,4 +153,42 @@ export class RestaurantOrderService {
           
         };
       }
-}
+
+      async confirmOrder(id:string){
+        const order=await this.restaurantOrderRepository.findOne({
+            where:{id},withDeleted:true,
+            relations:{user:true,restaurant:true,address:true,}
+        })
+        if(!order) throw new Error('message.order_not_found')   
+        order.status=ShipmentStatusEnum.CONFIRMED
+        await this.restaurantOrderRepository.save(order)
+const drivers=await this.driverRepository.find({
+    where: {
+        city_id:order.restaurant.city_id,
+        is_receive_orders:true,
+        type:DriverTypeEnum.FOOD
+    },relations:{user:true}
+})
+        try{
+        await this.orderGateway.emitOrderConfirmedEvent(order,drivers.map(driver=>driver.id))
+            for (let index = 0; index < drivers.length; index++) {
+                   if (drivers[index].user?.fcm_token != null)
+                     await this.notificationService.create(
+                       new NotificationEntity({
+                         user_id: drivers[index].user_id,
+                         url: order.id,
+                         type: NotificationTypes.ORDERS,
+                         title_ar: 'طلب جديد',
+                         title_en: 'new order',
+                         text_ar: 'هل تريد اخذ هذا الطلب ؟',
+                         text_en: 'Do you want to take t`his order?',
+                       }),
+                     );
+                 }
+
+        }catch(e){
+          
+        }
+        return order
+        }
+  }
