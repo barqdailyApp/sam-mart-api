@@ -21,6 +21,7 @@ import { Wallet } from "src/infrastructure/entities/wallet/wallet.entity";
 import { PaymentMethodService } from "src/modules/payment_method/payment_method.service";
 import { PaymentMethod } from "src/infrastructure/entities/payment_method/payment_method.entity";
 import { or } from "sequelize";
+import { v4 as uuidv4 } from 'uuid';
 @Injectable()
 export class MakeRestaurantOrderTransaction extends BaseTransaction<
   MakeRestaurantOrderRequest,
@@ -59,8 +60,7 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
   .getCount();
 order.estimated_delivery_time = date; 
 order.number= generateOrderNumber(count,isoDate)
-
-await context.save(order);
+order.id=uuidv4();
 
 
 // handle cart
@@ -178,7 +178,7 @@ order.total_price=total;
         default:
           break;
       }
-      console.log(order)
+
 await context.save(order)
         return order
      
