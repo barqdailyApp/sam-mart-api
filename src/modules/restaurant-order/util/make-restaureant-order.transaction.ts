@@ -61,7 +61,25 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
 order.estimated_delivery_time = date; 
 order.number= generateOrderNumber(count,isoDate)
 order.id=uuidv4();
+let total= order.restaurant_order_meals.map(order_meal=>order_meal.total_price).reduce((a,b)=>a+b,0)
 
+const devliery_fee =0;
+order.delivery_fee = devliery_fee;
+total += devliery_fee;
+order.total_price=total;
+
+
+  const payment_method = await context.findOne(PaymentMethod, {
+        where: {
+          id: req.payment_method.payment_method_id,
+          is_active: true,
+        },
+      });
+      if (!payment_method) {
+        throw new BadRequestException('message.payment_method_not_found');
+      }
+      order.payment_method_enum = payment_method.type;
+    await context.save(order)
 
 // handle cart
         const cart_meals = await context.find(RestaurantCartMeal, {
@@ -95,25 +113,7 @@ order.id=uuidv4();
        
 
 // handle payment
-let total= order.restaurant_order_meals.map(order_meal=>order_meal.total_price).reduce((a,b)=>a+b,0)
 
-const devliery_fee =0;
-order.delivery_fee = devliery_fee;
-total += devliery_fee;
-order.total_price=total;
-
-
-  const payment_method = await context.findOne(PaymentMethod, {
-        where: {
-          id: req.payment_method.payment_method_id,
-          is_active: true,
-        },
-      });
-      if (!payment_method) {
-        throw new BadRequestException('message.payment_method_not_found');
-      }
-      order.payment_method_enum = payment_method.type;
-      console.log(payment_method.type)
       switch (payment_method.type) {
         case PaymentMethodEnum.JAWALI: {
           const make_payment = await this.paymentService.jawalicashOut(
@@ -179,7 +179,7 @@ order.total_price=total;
           break;
       }
 
-await context.save(order)
+
         return order
      
       } catch (error) {
