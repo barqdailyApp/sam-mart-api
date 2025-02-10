@@ -22,19 +22,19 @@ import { applyQueryIncludes } from 'src/core/helpers/service-related.helper';
 })
 @ApiTags('Restaurant-Order')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.ADMIN)
+@Roles(Role.ADMIN,Role.RESTAURANT_ADMIN)
 @Controller('restaurant-order')
 export class AdminRestaurantOrderController {
     constructor(private readonly restaurantOrderService: RestaurantOrderService
       ,@Inject(I18nResponse) private readonly _i18nResponse: I18nResponse
     ){}
   @Post('/admin/confirm/:id')
-  @Roles(Role.DRIVER)
+
   async confirmOrder(@Param('id') id:string){
     return new ActionResponse(await this.restaurantOrderService.confirmOrder(id));
   }
   @Get('/admin/all')
-  @Roles(Role.ADMIN)
+
   async getRestaurantOrdersAdminRequests(@Query() query:PaginatedRequest){
     applyQueryIncludes(query,"payment_methods");
     applyQueryIncludes(query,"driver");
