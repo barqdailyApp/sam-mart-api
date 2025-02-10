@@ -177,7 +177,7 @@ order.total_price=total;
         default:
           break;
       }
-
+await context.save(order)
         return order
      
       } catch (error) {
