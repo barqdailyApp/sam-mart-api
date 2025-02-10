@@ -28,7 +28,11 @@ export class RestaurantResponse {
     @Expose()
     name_en: string;
     @Expose()
+    name: string;
+    @Expose()
     address_ar: string;
+    @Expose()
+    address: string;
     @Expose()
     address_en: string;
     @Expose()
