@@ -61,12 +61,7 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
 order.estimated_delivery_time = date; 
 order.number= generateOrderNumber(count,isoDate)
 order.id=uuidv4();
-let total= order.restaurant_order_meals.map(order_meal=>order_meal.total_price).reduce((a,b)=>a+b,0)
 
-const devliery_fee =0;
-order.delivery_fee = devliery_fee;
-total += devliery_fee;
-order.total_price=total;
 
 
   const payment_method = await context.findOne(PaymentMethod, {
@@ -109,7 +104,12 @@ order.total_price=total;
             })
             await context.save(restaurant_order_meals)
             await context.remove(cart_meals)
-         
+            let total= order.restaurant_order_meals.map(order_meal=>order_meal.total_price).reduce((a,b)=>a+b,0)
+
+            const devliery_fee =0;
+            order.delivery_fee = devliery_fee;
+            total += devliery_fee;
+            order.total_price=total;
        
 
 // handle payment
@@ -179,7 +179,7 @@ order.total_price=total;
           break;
       }
 
-
+await context.save(order)
         return order
      
       } catch (error) {
