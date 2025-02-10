@@ -113,6 +113,7 @@ order.total_price=total;
         throw new BadRequestException('message.payment_method_not_found');
       }
       order.payment_method_enum = payment_method.type;
+      console.log(payment_method.type)
       switch (payment_method.type) {
         case PaymentMethodEnum.JAWALI: {
           const make_payment = await this.paymentService.jawalicashOut(
@@ -177,6 +178,7 @@ order.total_price=total;
         default:
           break;
       }
+      console.log(order)
 await context.save(order)
         return order
      
