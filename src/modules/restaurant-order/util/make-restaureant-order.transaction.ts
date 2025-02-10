@@ -60,7 +60,7 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
 order.estimated_delivery_time = date; 
 order.number= generateOrderNumber(count,isoDate)
 
-
+await context.save(order);
 
 
 // handle cart
@@ -178,7 +178,7 @@ order.total_price=total;
           break;
       }
 
-        return await context.save(order);
+        return order
      
       } catch (error) {
         throw new BadRequestException(error.message);
