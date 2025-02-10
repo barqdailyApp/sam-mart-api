@@ -9,6 +9,7 @@ import {
 } from 'class-validator';
 import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
 import { DriverStatus } from 'src/infrastructure/data/enums/driver-status.enum';
+import { DriverTypeEnum } from 'src/infrastructure/data/enums/driver-type.eum';
 import { PaymentMethodEnum } from 'src/infrastructure/data/enums/payment-method';
 import { ShipmentStatusEnum } from 'src/infrastructure/data/enums/shipment_status.enum';
 import { UserStatus } from 'src/infrastructure/data/enums/user-status.enum';
@@ -32,6 +33,11 @@ export class DriversDashboardQuery {
   @IsOptional()
   @IsString()
   created_at: string;
+
+  @ApiProperty({enum:DriverTypeEnum})
+  @IsOptional()
+  @IsEnum(DriverTypeEnum)
+  type:DriverTypeEnum
 
   @ApiProperty({
     required: false,

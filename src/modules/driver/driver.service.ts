@@ -148,6 +148,7 @@ export class DriverService {
       country_id,
       region_id,
       vehicle_type,
+      type,
     } = driversDashboardQuery;
     const skip = (page - 1) * limit;
 
@@ -174,6 +175,11 @@ export class DriverService {
       //*using database functions to truncate the time part of the order.created_at timestamp to compare only the date components
       query = query.where('DATE(driver.created_at) = :created_at', {
         created_at,
+      });
+    }
+    if(type){
+      query = query.andWhere('driver.type = :type', {
+        type,
       });
     }
     if (driver_search) {
