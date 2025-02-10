@@ -83,4 +83,11 @@ export class RestaurantOrderController {
       const total = await this.restaurantOrderService.getTotalDriverOrders();
       return new ActionResponse(total);
     }
+    
+    @Get('/details/:id')
+    async getRestaurantOrderDetails(@Param('id') id:string){
+      return new ActionResponse(await this.restaurantOrderService.getRestaurantOrderDetails(id));
+    }
+
+
 }

@@ -194,4 +194,13 @@ const drivers=await this.driverRepository.find({
         }
         return order
         }
-  }
+
+
+        async getRestaurantOrderDetails(id:string){
+            const order=await this.restaurantOrderRepository.findOne({
+                where:{id},withDeleted:true,
+                relations:{user:true,restaurant:true,address:true,restaurant_order_meals:{meal:true,restaurant_order_meal_options:{option:true}}}
+            })
+            if(!order) throw new Error('message.order_not_found')
+            return order
+  } }

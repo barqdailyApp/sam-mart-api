@@ -13,7 +13,7 @@ import { I18nResponse } from 'src/core/helpers/i18n.helper';
 import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 import { GetDriverRestaurantOrdersQuery } from './dto/query/get-driver-restaurant-order.query';
-import { applyQueryIncludes } from 'src/core/helpers/service-related.helper';
+import { applyQueryFilters, applyQueryIncludes } from 'src/core/helpers/service-related.helper';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -33,12 +33,13 @@ export class AdminRestaurantOrderController {
   async confirmOrder(@Param('id') id:string){
     return new ActionResponse(await this.restaurantOrderService.confirmOrder(id));
   }
-  @Get('/admin/all')
+  @Get('/admin/all/:restaurant_id')
 
-  async getRestaurantOrdersAdminRequests(@Query() query:PaginatedRequest){
-    applyQueryIncludes(query,"payment_methods");
+  async getRestaurantOrdersAdminRequests(@Query() query:PaginatedRequest,@Param('restaurant_id') restaurant_id?:string){
+    applyQueryIncludes(query,"payment_method");
     applyQueryIncludes(query,"driver");
     applyQueryIncludes(query,"restaurant");
+    if(restaurant_id) applyQueryFilters(query,`restaurant_id=${restaurant_id}`);
    const orders=await this.restaurantOrderService.findAll(query);
    const total=await this.restaurantOrderService.count(query);
    const response = this._i18nResponse.entity(orders);
