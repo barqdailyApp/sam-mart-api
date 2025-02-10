@@ -132,7 +132,7 @@ export class AuthenticationService {
     });
 
     if (!driver) throw new BadRequestException('driver not found');
-
+      driver.type = req.type;
     driver.status = req.status;
     driver.status_reason = req.status_reason;
 

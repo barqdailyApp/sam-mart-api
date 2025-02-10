@@ -1,6 +1,7 @@
 import { Exclude, Expose, Transform } from 'class-transformer';
 import { toUrl } from 'src/core/helpers/file.helper';
 import { DriverStatus } from 'src/infrastructure/data/enums/driver-status.enum';
+import { DriverTypeEnum } from 'src/infrastructure/data/enums/driver-type.eum';
 import { Gender } from 'src/infrastructure/data/enums/gender.enum';
 import { UserStatus } from 'src/infrastructure/data/enums/user-status.enum';
 import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
@@ -22,13 +23,14 @@ export class DriverDashboardResponse {
   @Expose() readonly idCard: any;
   @Expose() readonly address: any;
   @Expose() readonly warehouse: any;
-
+@Expose() readonly type:DriverTypeEnum
   @Expose() readonly vehicle: any;
   @Expose() readonly wallet_balance: number;
 
   constructor(driver: Driver) {
     this.id = driver.id;
     this.username = driver.user.name;
+    this.type = driver.type;
     this.user_id = driver.user.id;
     this.email = driver.user.email;
     this.phone = driver.user.phone;

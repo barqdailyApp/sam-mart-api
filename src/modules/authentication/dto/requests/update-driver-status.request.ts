@@ -1,6 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator";
 import { DriverStatus } from "src/infrastructure/data/enums/driver-status.enum";
+import { DriverTypeEnum } from "src/infrastructure/data/enums/driver-type.eum";
 
 export class UpdateDriverStatusRequest {
     @ApiProperty()
@@ -27,5 +28,11 @@ export class UpdateDriverStatusRequest {
     @IsOptional()
     @IsString()
     status_reason: string;
+
+      @ApiProperty({default:DriverTypeEnum.MART,enum:DriverTypeEnum})
+    @IsNotEmpty()
+    @IsString()
+    @IsEnum(DriverTypeEnum)
+    type:DriverTypeEnum
 
 }
