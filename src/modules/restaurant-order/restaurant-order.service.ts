@@ -161,7 +161,7 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
       async confirmOrder(id:string){
         const order=await this.restaurantOrderRepository.findOne({
             where:{id},withDeleted:true,
-            relations:{user:true,restaurant:true,address:true,}
+            relations:{user:true,restaurant:true,address:true,payment_method:true,}
         })
         if(!order) throw new Error('message.order_not_found')   
         order.status=ShipmentStatusEnum.CONFIRMED
@@ -173,7 +173,7 @@ const drivers=await this.driverRepository.find({
         type:DriverTypeEnum.FOOD
     },relations:{user:true}
 })
-console.log(drivers)
+
         try{
         await this.orderGateway.emitOrderConfirmedEvent(order,drivers.map(driver=>driver.id))
             for (let index = 0; index < drivers.length; index++) {

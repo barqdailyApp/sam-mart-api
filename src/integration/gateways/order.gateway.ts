@@ -57,7 +57,6 @@ export class OrderGateway
     } else if (client.user?.roles.includes(Role.CLIENT)) {
       client.join(client.user.id)
     }
-    console.log('client connected', client.id);
   }
 
   handleDisconnect(client: Socket) {
@@ -73,7 +72,6 @@ export class OrderGateway
     } else if (client.user?.roles.includes(Role.CLIENT)) {
       client.leave(client.user.id)
     }
-    
   }
 
   async notifyOrderStatusChange(payload: OrderStatusChangePayload) {
@@ -117,7 +115,7 @@ export class OrderGateway
   }
   async emitOrderConfirmedEvent(order: any,driver_ids?:string[]) {
     const respone = plainToInstance(RestaurantOrderListResponse,order,{excludeExtraneousValues:true})
-    this.server.to(driver_ids).emit("new_restaurant_order", "test");
+    this.server.to(driver_ids).emit("new_restaurant_order", respone);
   }
 
   async notifyReturnOrder(payload: ReturnOrderPayload) {
