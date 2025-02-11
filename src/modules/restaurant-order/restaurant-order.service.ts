@@ -159,10 +159,13 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
       }
 
       async confirmOrder(id:string){
-        const order=await this.getRestaurantOrderDetails(id);
+        const order=await this.restaurantOrderRepository.findOne({
+            where:{id},withDeleted:true,
+            relations:{user:true,restaurant:true,address:true,}
+        })
         if(!order) throw new Error('message.order_not_found')   
         order.status=ShipmentStatusEnum.CONFIRMED
-    
+        await this.restaurantOrderRepository.save(order)
 const drivers=await this.driverRepository.find({
     where: {
         city_id:order.restaurant.city_id,
@@ -190,7 +193,6 @@ const drivers=await this.driverRepository.find({
         }catch(e){
           
         }
-        await this.restaurantOrderRepository.save(order)
         return order
         }
 

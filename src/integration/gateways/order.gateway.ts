@@ -25,6 +25,7 @@ import { OrderStatusChangeResponse } from './dto/response/order-status-change.re
 import { ReturnOrderPayload } from './interfaces/order/return-order.payload';
 import { ReturnOrderResponse } from './dto/response/return-order.response';
 import { i18nEntity } from 'src/core/helpers/i18n.helper';
+import { RestaurantOrderListResponse } from 'src/modules/restaurant-order/dto/response/restaurant-order-list.response';
 
 @WebSocketGateway({ namespace: Gateways.Order.Namespace, cors: { origin: '*' } })
 export class OrderGateway
@@ -113,7 +114,7 @@ export class OrderGateway
     await this.server.to(payload.to_rooms).emit("order_status_change", message);
   }
   async emitOrderConfirmedEvent(order: any,driver_ids?:string[]) {
-    const respone = plainToInstance(ReturnOrderResponse,order,{
+    const respone = plainToInstance(RestaurantOrderListResponse,order,{
       excludeExtraneousValues: true,
     })
     this.server.to(driver_ids).emit("new_restaurant_order", respone);
