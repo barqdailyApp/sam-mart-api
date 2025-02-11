@@ -173,6 +173,7 @@ const drivers=await this.driverRepository.find({
         type:DriverTypeEnum.FOOD
     },relations:{user:true}
 })
+console.log(drivers)
         try{
         await this.orderGateway.emitOrderConfirmedEvent(order,drivers.map(driver=>driver.id))
             for (let index = 0; index < drivers.length; index++) {

@@ -115,7 +115,7 @@ export class OrderGateway
   }
   async emitOrderConfirmedEvent(order: any,driver_ids?:string[]) {
     const respone = plainToInstance(RestaurantOrderListResponse,order,{excludeExtraneousValues:true})
-    this.server.to(driver_ids).emit("new_restaurant_order", respone);
+    this.server.to(driver_ids).emit("new_restaurant_order", "test");
   }
 
   async notifyReturnOrder(payload: ReturnOrderPayload) {
