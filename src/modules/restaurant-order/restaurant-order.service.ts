@@ -16,6 +16,7 @@ import { NotificationService } from '../notification/notification.service';
 import { NotificationTypes } from 'src/infrastructure/data/enums/notification-types.enum';
 import { NotificationEntity } from 'src/infrastructure/entities/notification/notification.entity';
 import { BaseService } from 'src/core/base/service/service.base';
+import { I18nResponse } from 'src/core/helpers/i18n.helper';
 @Injectable()
 export class RestaurantOrderService extends BaseService<RestaurantOrder> {
     constructor(
@@ -26,6 +27,7 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
         @Inject(REQUEST) private readonly _request: Request,
          private readonly orderGateway: OrderGateway,
             private readonly notificationService: NotificationService,
+            @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse
     ) {super(restaurantOrderRepository)}
 
     async makeRestaurantOrder(req: MakeRestaurantOrderRequest) {
@@ -173,9 +175,9 @@ const drivers=await this.driverRepository.find({
         type:DriverTypeEnum.FOOD
     },relations:{user:true}
 })
-
+const restult=this._i18nResponse.entity(order);
         try{
-        await this.orderGateway.emitOrderConfirmedEvent(order,drivers.map(driver=>driver.id))
+        await this.orderGateway.emitOrderConfirmedEvent(restult,drivers.map(driver=>driver.id))
             for (let index = 0; index < drivers.length; index++) {
                    if (drivers[index].user?.fcm_token != null)
                      await this.notificationService.create(
