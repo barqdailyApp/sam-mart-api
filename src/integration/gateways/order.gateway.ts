@@ -57,6 +57,7 @@ export class OrderGateway
     } else if (client.user?.roles.includes(Role.CLIENT)) {
       client.join(client.user.id)
     }
+    console.log('client connected', client.id);
   }
 
   handleDisconnect(client: Socket) {
@@ -72,6 +73,7 @@ export class OrderGateway
     } else if (client.user?.roles.includes(Role.CLIENT)) {
       client.leave(client.user.id)
     }
+    c
   }
 
   async notifyOrderStatusChange(payload: OrderStatusChangePayload) {
