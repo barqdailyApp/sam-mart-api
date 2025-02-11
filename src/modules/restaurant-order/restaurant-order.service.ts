@@ -76,6 +76,7 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
         })
         if(!order) throw new Error('message.order_not_found')
         order.driver_id=driver.id,
+      order.status=ShipmentStatusEnum.ACCEPTED
         await this.restaurantOrderRepository.save(order)
         return order
     }
