@@ -73,7 +73,7 @@ export class OrderGateway
     } else if (client.user?.roles.includes(Role.CLIENT)) {
       client.leave(client.user.id)
     }
-    c
+    
   }
 
   async notifyOrderStatusChange(payload: OrderStatusChangePayload) {
