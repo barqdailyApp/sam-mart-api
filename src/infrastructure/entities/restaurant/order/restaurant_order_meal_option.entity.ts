@@ -15,7 +15,7 @@ export class RestaurantOrderMealOption extends AuditableEntity {
   price: number;
 
 
-  @ManyToOne(() => Option)
+  @ManyToOne(() => Option,{cascade:true})
   @JoinColumn()
   option: Option;
 }

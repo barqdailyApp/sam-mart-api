@@ -164,7 +164,7 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
       async confirmOrder(id:string){
         const order=await this.restaurantOrderRepository.findOne({
             where:{id},withDeleted:true,
-            relations:{user:true,restaurant:true,address:true,payment_method:true,}
+            relations:{user:true,restaurant:true,address:true,payment_method:true,driver:true}
         })
         if(!order) throw new Error('message.order_not_found')   
         order.status=ShipmentStatusEnum.CONFIRMED

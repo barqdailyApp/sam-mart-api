@@ -8,6 +8,8 @@ export class OptionRespone{
     @Expose()
     name_ar:string
     @Expose()
+    name:string
+    @Expose()
     name_en:string
     @Expose()
     price:number

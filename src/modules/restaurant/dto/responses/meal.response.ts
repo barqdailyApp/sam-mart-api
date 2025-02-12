@@ -3,7 +3,7 @@ import { toUrl } from "src/core/helpers/file.helper";
 import { MealOptionGroup } from "src/infrastructure/entities/restaurant/meal/meal-option-group";
 import { OptionGroup } from "src/infrastructure/entities/restaurant/option/option-group.entity";
 import { OptionGroupResponse, OptionRespone } from "./option.response";
-
+import { Option } from "src/infrastructure/entities/restaurant/option/option.entity";
 export class MealResponse {
     @Expose()
     id: string;
@@ -51,7 +51,8 @@ export class MealResponse {
       @Expose()
       is_active:boolean
 
-      // @Expose()
-      // @Type(() => OptionRespone[])
-      // options:OptionRespone[]
+
+        @Expose() 
+        @Transform((value)=>{  return value.obj.options?.map((item)=>plainToInstance(OptionRespone,{option_id:item.option_id,...item.option,id:item.id,price:item.price},{excludeExtraneousValues:true}))})
+        options:OptionRespone[]
 }

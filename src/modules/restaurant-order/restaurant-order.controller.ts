@@ -89,7 +89,7 @@ export class RestaurantOrderController {
     async getRestaurantOrderDetails(@Param('id') id:string){
       const order=await this.restaurantOrderService.getRestaurantOrderDetails(id);
       const response = this._i18nResponse.entity(order);
-      
+      console.log(order.restaurant_order_meals[0].restaurant_order_meal_options);
       const result=plainToInstance(RestaurantOrderDetailsResponse,response,{
         excludeExtraneousValues: true,
       })

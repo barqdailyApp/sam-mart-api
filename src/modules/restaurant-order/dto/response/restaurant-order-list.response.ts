@@ -1,6 +1,7 @@
 import { Expose, plainToClass, Transform, Type } from "class-transformer";
 import { PaymentMethod } from "src/infrastructure/entities/payment_method/payment_method.entity";
 import { AddressResponse } from "src/modules/address/dto/responses/address.respone";
+import { DriverResponse } from "src/modules/driver/response/driver.response";
 import { SamModuleResponse } from "src/modules/employee/dto/response/sam-modules.response";
 import { RestaurantResponse } from "src/modules/restaurant/dto/responses/restaurant.response";
 import { UserResponse } from "src/modules/user/dto/responses/user.response";
@@ -31,4 +32,6 @@ export class RestaurantOrderListResponse {
     @Type(() => UserResponse) user?: UserResponse;
     @Expose()
     @Type(() => RestaurantResponse) restaurant?: RestaurantResponse;
+    @Expose()
+    @Type(() => DriverResponse) driver?: DriverResponse
 }
