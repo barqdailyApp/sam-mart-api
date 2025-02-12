@@ -51,7 +51,7 @@ export class MealResponse {
       @Expose()
       is_active:boolean
 
-      @Expose()
-      @Type(() => OptionRespone[])
-      options:OptionRespone[]
+      // @Expose()
+      // @Type(() => OptionRespone[])
+      // options:OptionRespone[]
 }
