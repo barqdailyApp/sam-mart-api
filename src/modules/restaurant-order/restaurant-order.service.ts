@@ -117,7 +117,7 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
         });
         const ordersNew = await this.restaurantOrderRepository.count({
           where: {
-            status: ShipmentStatusEnum.PENDING,
+            status: ShipmentStatusEnum.CONFIRMED,
             
           
               restaurant:{city_id:driver.city_id}
@@ -130,7 +130,7 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
         const ordersActive = await this.restaurantOrderRepository.count({
           where: {
             status: In([
-              ShipmentStatusEnum.CONFIRMED,
+              ShipmentStatusEnum.ACCEPTED,
               ShipmentStatusEnum.PROCESSING,
               ShipmentStatusEnum.PICKED_UP,
               ShipmentStatusEnum.READY_FOR_PICKUP,
