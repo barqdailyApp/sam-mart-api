@@ -5,7 +5,7 @@ import { MealResponse } from "src/modules/restaurant/dto/responses/meal.response
 export class RestaurantOrderDetailsResponse extends RestaurantOrderListResponse{ 
 
     @Expose()
-    @Transform(({ obj }) => obj.restaurant_order_meals.map((meal) => plainToInstance(MealResponse,meal,{excludeExtraneousValues:true})))
+    @Transform(({ obj }) => obj.restaurant_order_meals.map((meal) => plainToInstance(MealResponse,{...meal.meal,price:meal.price,id:meal.id},{excludeExtraneousValues:true})))
     meals:MealResponse[]
     
 }

@@ -13,6 +13,7 @@ import { I18nResponse } from 'src/core/helpers/i18n.helper';
 import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 import { GetDriverRestaurantOrdersQuery } from './dto/query/get-driver-restaurant-order.query';
+import { RestaurantOrderDetailsResponse } from './dto/response/restaurant-order-details.response';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -86,7 +87,13 @@ export class RestaurantOrderController {
     
     @Get('/details/:id')
     async getRestaurantOrderDetails(@Param('id') id:string){
-      return new ActionResponse(await this.restaurantOrderService.getRestaurantOrderDetails(id));
+      const order=await this.restaurantOrderService.getRestaurantOrderDetails(id);
+      const response = this._i18nResponse.entity(order);
+      
+      const result=plainToInstance(RestaurantOrderDetailsResponse,response,{
+        excludeExtraneousValues: true,
+      })
+      return new ActionResponse(result);
     }
 
 

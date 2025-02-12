@@ -13,7 +13,7 @@ export class RestaurantOrderListResponse {
     number: string;
 
     @Expose()
-   @Transform(({ value }) => { return { id: value.id, type: value.type } })
+   @Transform(({ value }) => { return { id: value?.id, type: value?.type } })
     payment_method?: PaymentMethod;
   
     @Expose()

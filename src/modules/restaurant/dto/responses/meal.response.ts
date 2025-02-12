@@ -1,8 +1,8 @@
-import { Expose, plainToInstance, Transform } from "class-transformer";
+import { Expose, plainToInstance, Transform, Type } from "class-transformer";
 import { toUrl } from "src/core/helpers/file.helper";
 import { MealOptionGroup } from "src/infrastructure/entities/restaurant/meal/meal-option-group";
 import { OptionGroup } from "src/infrastructure/entities/restaurant/option/option-group.entity";
-import { OptionGroupResponse } from "./option.response";
+import { OptionGroupResponse, OptionRespone } from "./option.response";
 
 export class MealResponse {
     @Expose()
@@ -50,4 +50,8 @@ export class MealResponse {
 
       @Expose()
       is_active:boolean
+
+      @Expose()
+      @Type(() => OptionRespone[])
+      options:OptionRespone[]
 }

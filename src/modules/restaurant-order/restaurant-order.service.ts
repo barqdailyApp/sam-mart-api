@@ -96,10 +96,11 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
                 type:DriverTypeEnum.FOOD
             }
         })
+      
         const orders=await this.restaurantOrderRepository.findAndCount({
             where: {
                 driver_id: driver.id,
-                status: query.status,
+                status: query?.status==ShipmentStatusEnum.ACTIVE ? In([ShipmentStatusEnum.ACCEPTED,ShipmentStatusEnum.READY_FOR_PICKUP,ShipmentStatusEnum.PICKED_UP, ShipmentStatusEnum.PROCESSING]) : query.status,
             },
             take:query.limit*1  ,
             skip:query.page - 1,withDeleted:true,
@@ -136,7 +137,7 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
               ShipmentStatusEnum.READY_FOR_PICKUP,
             ]),
             driver_id: driver.id,
-            
+
           },
         
         });
@@ -203,7 +204,7 @@ const restult=this._i18nResponse.entity(order);
         async getRestaurantOrderDetails(id:string){
             const order=await this.restaurantOrderRepository.findOne({
                 where:{id},withDeleted:true,
-                relations:{user:true,restaurant:true,address:true,restaurant_order_meals:{meal:true,restaurant_order_meal_options:{option:true}}}
+                relations:{user:true,payment_method:true,restaurant:true,address:true,restaurant_order_meals:{meal:true,restaurant_order_meal_options:{option:true}}}
             })
             if(!order) throw new Error('message.order_not_found')
             return order
