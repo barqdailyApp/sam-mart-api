@@ -14,6 +14,12 @@ export class MealResponse {
     @Expose()
     name_en: string;
     @Expose()
+    name: string;
+    @Expose()
+    description: string;
+    @Expose()
+    quantity: number;
+    @Expose()
     description_ar: string;
     @Expose()
     description_en: string;
