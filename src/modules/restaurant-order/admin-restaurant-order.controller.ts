@@ -28,11 +28,26 @@ export class AdminRestaurantOrderController {
     constructor(private readonly restaurantOrderService: RestaurantOrderService
       ,@Inject(I18nResponse) private readonly _i18nResponse: I18nResponse
     ){}
-  @Post('/admin/confirm/:id')
+  @Post('/admin/confirm/:id/:restaurant_id')
 
-  async confirmOrder(@Param('id') id:string){
+  async confirmOrder(@Param('id') id:string,@Param('restaurant_id') restaurant_id:string){
     return new ActionResponse(await this.restaurantOrderService.confirmOrder(id));
   }
+
+  @Post('/admin/process/:id/:restaurant_id')
+
+  async processOrder(@Param('id') id:string,@Param('restaurant_id') restaurant_id:string){
+    return new ActionResponse(await this.restaurantOrderService.orderProcessing(id));
+  }
+
+  @Post('/admin/ready-for-pickup/:id/:restaurant_id')
+
+  async readyForPickup(@Param('id') id:string,@Param('restaurant_id') restaurant_id:string){
+    return new ActionResponse(await this.restaurantOrderService.readyForPickup(id));
+  }
+
+
+
   @Get('/admin/all/:restaurant_id')
 
   async getRestaurantOrdersAdminRequests(@Query() query:PaginatedRequest,@Param('restaurant_id') restaurant_id?:string){

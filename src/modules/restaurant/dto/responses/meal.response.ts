@@ -2,8 +2,10 @@ import { Expose, plainToInstance, Transform, Type } from "class-transformer";
 import { toUrl } from "src/core/helpers/file.helper";
 import { MealOptionGroup } from "src/infrastructure/entities/restaurant/meal/meal-option-group";
 import { OptionGroup } from "src/infrastructure/entities/restaurant/option/option-group.entity";
-import { OptionGroupResponse, OptionRespone } from "./option.response";
+
 import { Option } from "src/infrastructure/entities/restaurant/option/option.entity";
+import { OptionGroupResponse } from "./option-group.response";
+import { OptionRespone } from "./option.response";
 export class MealResponse {
     @Expose()
     id: string;
@@ -17,6 +19,8 @@ export class MealResponse {
     description_en: string;
     @Expose()
     price: number;
+    @Expose()
+    total_price: number;
     @Expose()
     @Transform(({ value }) => toUrl(value)) 
     image: string;

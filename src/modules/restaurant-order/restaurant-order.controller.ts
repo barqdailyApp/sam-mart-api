@@ -96,5 +96,14 @@ export class RestaurantOrderController {
       return new ActionResponse(result);
     }
 
+    @Post('driver-pickup/:id')
+    async readyForPickup(@Param('id') id:string){
+      return new ActionResponse(await this.restaurantOrderService.pickupOrder(id));
+    }
+
+    @Post('driver-deliver/:id')
+    async deliverOrder(@Param('id') id:string){
+      return new ActionResponse(await this.restaurantOrderService.deliverOrder(id));
+    }
 
 }

@@ -4,7 +4,8 @@ import { toUrl } from 'src/core/helpers/file.helper';
 import { UserResponse } from 'src/modules/user/dto/responses/user.response';
 import { RestaurantAttachmentEnum } from 'src/infrastructure/data/enums/restaurant-attachment.enum';
 import { MealOptionGroup } from 'src/infrastructure/entities/restaurant/meal/meal-option-group';
-import { OptionGroupResponse } from './option.response';
+import { OptionGroupResponse } from './option-group.response';
+import { OptionRespone } from './option.response';
 
 export class AdminRestaurantDeatailsResponse extends RestaurantResponse {
   @Expose()
