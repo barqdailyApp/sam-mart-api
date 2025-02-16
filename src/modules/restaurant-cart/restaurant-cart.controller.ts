@@ -61,6 +61,9 @@ export class RestaurantCartController {
       return new ActionResponse( await this.resturantCartService.deleteCartMeal(cart_meal_id));
     }
 
- 
+    @Get('total')
+    async getCartTotal() {  
+      return new ActionResponse( await this.resturantCartService.getCartTotal());
+    }
 
 }

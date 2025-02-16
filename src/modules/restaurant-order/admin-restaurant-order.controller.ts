@@ -67,4 +67,10 @@ export class AdminRestaurantOrderController {
       ...query
     }
   });
-}}
+}
+@Post('/admin/assign-driver/:id/:driver_id')
+async assignDriverToOrder(@Param('id') id:string,@Param('driver_id') driver_id:string){
+  return new ActionResponse(await this.restaurantOrderService.assignDriverToOrder(id,driver_id));
+}
+
+}

@@ -74,5 +74,14 @@ export class RestaurantCartService {
     })
     return response
   }
+
+  async getCartTotal() {
+    const cart= await this.restaurantCartRepository.findOne({
+      where:{ user_id: this.request.user.id},relations:{restaurant_cart_meals:{meal:true,cart_meal_options:{option:true}}}
+    });
+
+    const data= {meals_count:cart.restaurant_cart_meals.length,total_price:cart.restaurant_cart_meals.reduce((acc,curr)=>acc+(curr.quantity* curr.meal.price+curr.cart_meal_options.reduce((acc,curr)=>acc+curr.option.price,0)),0)};
+    return data;
+  }
   
 }

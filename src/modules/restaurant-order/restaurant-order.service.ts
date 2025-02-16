@@ -349,5 +349,20 @@ await this.notificationService.create(
             return order
   } 
 
+  async assignDriverToOrder(id:string,driver_id:string){
+    const order=await this.restaurantOrderRepository.findOne({
+        where:{id},withDeleted:true,
+        relations:{user:true,payment_method:true,restaurant:true,address:true,driver:true}
+    })
+    if(!order) throw new Error('message.order_not_found')
+      const driver=await this.driverRepository.findOne({
+        where:{id,city_id:order.restaurant.city_id,is_receive_orders:true,type:DriverTypeEnum.FOOD},
+        relations:{user:true}
+    })
+    if(!driver) throw new Error('message.driver_not_found')
+    order.driver_id=driver_id
+    await this.restaurantOrderRepository.save(order)
+    return order
+  }
 
 }
