@@ -25,6 +25,9 @@ export class ConstantSeeder implements Seeder {
     await this.constnant_repo.save([
       new Constant({ variable: '3', type: ConstantType.ORDER_LIMIT }),
       new Constant({ variable: '40', type: ConstantType.DELIVERY_TIME }),
+      new Constant({ variable: '10', type: ConstantType.FIXED_DELIVERY_FEE }),
+      new Constant({ variable: '5', type: ConstantType.FREE_DELIVERY_DISTANCE }),
+      new Constant({ variable: '1', type: ConstantType.DELIVERY_PRICE_PER_KM }),
     ]);
   }
 
