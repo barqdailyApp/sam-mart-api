@@ -47,6 +47,7 @@ export class OrderGateway
   handleConnection(client: Socket) {
     // setup the client to join the rooms
     if (client.user?.roles.includes(Role.DRIVER)) {
+      client.join(client.driver?.city_id)
       client.join(client.driver.warehouse_id)
       client.join(client.driver.id)
     } else if (
@@ -62,7 +63,8 @@ export class OrderGateway
   handleDisconnect(client: Socket) {
     // remove the client from the rooms
     if (client.user?.roles.includes(Role.DRIVER)) {
-      client.leave(client.driver.warehouse_id)
+      client.leave(client.driver?.city_id)
+      client.leave(client.driver?.warehouse_id)
       client.leave(client.driver.id)
     } else if (
       client.user?.roles.includes(Role.ADMIN) ||

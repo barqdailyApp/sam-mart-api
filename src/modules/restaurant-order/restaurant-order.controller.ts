@@ -14,6 +14,7 @@ import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 import { GetDriverRestaurantOrdersQuery } from './dto/query/get-driver-restaurant-order.query';
 import { RestaurantOrderDetailsResponse } from './dto/response/restaurant-order-details.response';
+import { CancelShipmentRequest } from '../order/dto/request/cancel-shipment.request';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -104,6 +105,11 @@ export class RestaurantOrderController {
     @Post('driver-deliver/:id')
     async deliverOrder(@Param('id') id:string){
       return new ActionResponse(await this.restaurantOrderService.deliverOrder(id));
+    }
+
+    @Post('cancel/:id')
+    async cancelOrder(@Param('id') id:string, @Body() req: CancelShipmentRequest,){
+      return new ActionResponse(await this.restaurantOrderService.cancelOrder(id,req));
     }
 
 }
