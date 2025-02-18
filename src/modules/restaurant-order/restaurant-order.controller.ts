@@ -107,7 +107,7 @@ export class RestaurantOrderController {
       return new ActionResponse(await this.restaurantOrderService.deliverOrder(id));
     }
 
-    @Post('cancel/:id')
+    @Post('/cancel/:id')
     async cancelOrder(@Param('id') id:string, @Body() req: CancelShipmentRequest,){
       return new ActionResponse(await this.restaurantOrderService.cancelOrder(id,req));
     }

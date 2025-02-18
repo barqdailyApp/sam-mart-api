@@ -379,7 +379,7 @@ await this.notificationService.create(
   }
   async getDriver(driver_id:string){
     const driver=await this.driverRepository.findOne({
-        where:{id:driver_id},
+        where:{user_id:driver_id},
         relations:{user:true}
     })
     if(!driver) throw new Error('message.driver_not_found')
