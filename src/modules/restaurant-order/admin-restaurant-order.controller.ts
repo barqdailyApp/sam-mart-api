@@ -46,7 +46,26 @@ export class AdminRestaurantOrderController {
     return new ActionResponse(await this.restaurantOrderService.readyForPickup(id));
   }
 
+  @Get('/admin/all')
 
+  async getRestaurantOrdersAdmin(@Query() query:PaginatedRequest,){
+    applyQueryIncludes(query,"payment_method");
+    applyQueryIncludes(query,"driver");
+    applyQueryIncludes(query,"restaurant");
+ 
+   const orders=await this.restaurantOrderService.findAll(query);
+   const total=await this.restaurantOrderService.count(query);
+   const response = this._i18nResponse.entity(orders);
+   const result=plainToInstance(RestaurantOrderListResponse,response,{
+    excludeExtraneousValues: true,
+  })
+  return new PaginatedResponse(result,{
+    meta:{
+      total,
+      ...query
+    }
+  });
+}
 
   @Get('/admin/all/:restaurant_id')
 
