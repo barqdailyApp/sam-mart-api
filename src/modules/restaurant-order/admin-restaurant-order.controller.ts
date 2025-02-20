@@ -13,7 +13,7 @@ import { I18nResponse } from 'src/core/helpers/i18n.helper';
 import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 import { GetDriverRestaurantOrdersQuery } from './dto/query/get-driver-restaurant-order.query';
-import { applyQueryFilters, applyQueryIncludes } from 'src/core/helpers/service-related.helper';
+import { applyQueryFilters, applyQueryIncludes, applyQuerySort } from 'src/core/helpers/service-related.helper';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -52,6 +52,7 @@ export class AdminRestaurantOrderController {
     applyQueryIncludes(query,"payment_method");
     applyQueryIncludes(query,"driver");
     applyQueryIncludes(query,"restaurant");
+    applyQuerySort(query,`created_at=desc`,);
  
    const orders=await this.restaurantOrderService.findAll(query);
    const total=await this.restaurantOrderService.count(query);
