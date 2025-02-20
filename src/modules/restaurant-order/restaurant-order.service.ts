@@ -438,12 +438,12 @@ await this.notificationService.create(
         type: ReasonType.CANCEL_ORDER,
       });
   
-      if (
-        !reason ||
-        !reason.roles.some((role) => currentUserRole.includes(role))
-      ) {
-        throw new BadRequestException('message.reason_not_found');
-      }
+      // if (
+      //   !reason ||
+      //   !reason.roles.some((role) => currentUserRole.includes(role))
+      // ) {
+      //   throw new BadRequestException('message.reason_not_found');
+      // }
   
       if (!reason) {
         throw new BadRequestException('message.reason_not_found');
