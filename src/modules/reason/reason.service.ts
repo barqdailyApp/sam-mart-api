@@ -41,7 +41,7 @@ export class ReasonService extends BaseService<Reason>{
             },
         });
 
-        if (!currentUserRole.includes(Role.ADMIN) && !currentUserRole.includes(Role.EMPLOYEE)) {
+        if (!currentUserRole.includes(Role.ADMIN) && !currentUserRole.includes(Role.EMPLOYEE) && !currentUserRole.includes(Role.RESTAURANT_ADMIN)) {
             reasons = reasons.filter(reason => reason.roles.some(role => currentUserRole.includes(role)));
         }
         total = reasons.length;
