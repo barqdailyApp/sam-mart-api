@@ -374,6 +374,7 @@ await this.notificationService.create(
     })
     if(!driver) throw new Error('message.driver_not_found')
     order.driver_id=driver_id
+  order.status=ShipmentStatusEnum.ACCEPTED
     await this.restaurantOrderRepository.save(order)
     return order
   }
