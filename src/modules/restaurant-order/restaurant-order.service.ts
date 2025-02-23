@@ -369,7 +369,7 @@ await this.notificationService.create(
     })
     if(!order) throw new Error('message.order_not_found')
       const driver=await this.driverRepository.findOne({
-        where:{id,city_id:order.restaurant.city_id,is_receive_orders:true,type:DriverTypeEnum.FOOD},
+        where:{id:driver_id,city_id:order.restaurant.city_id,is_receive_orders:true,type:DriverTypeEnum.FOOD},
         relations:{user:true}
     })
     if(!driver) throw new Error('message.driver_not_found')
