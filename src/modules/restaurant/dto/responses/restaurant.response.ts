@@ -40,6 +40,8 @@ export class RestaurantResponse {
     @Expose()
     closing_time: string;
     @Expose()
+    city_id: string;
+    @Expose()
     @Transform(({ value }) => toUrl(value)) 
     logo: string[];
     @Expose()
