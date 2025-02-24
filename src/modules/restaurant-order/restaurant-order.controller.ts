@@ -78,6 +78,26 @@ export class RestaurantOrderController {
       });
     }
 
+    
+    @Roles(Role.CLIENT)
+    @Get('client-orders')
+    async getRestaurantOrdersClientOrders(@Query() query:GetDriverRestaurantOrdersQuery){
+      // add pagination
+      const {orders,total}=await this.restaurantOrderService.getRestaurantOrdersClientOrders(query);
+
+
+      const response = this._i18nResponse.entity(orders);
+      const result=plainToInstance(RestaurantOrderListResponse,response,{
+        excludeExtraneousValues: true,
+      })
+      return new PaginatedResponse(result,{
+        meta:{
+          total,
+          ...query
+        }
+      });
+    }
+
     @Roles(Role.DRIVER)
     @Post('driver-accept-order/:id')
     async driverAcceptOrder(@Param('id') id:string){
@@ -153,4 +173,3 @@ export class RestaurantOrderController {
         return new ActionResponse<ShipmentMessageResponse[]>(result);
       }
 }
-  
