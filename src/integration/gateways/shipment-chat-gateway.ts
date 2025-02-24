@@ -13,6 +13,7 @@ import { ShipmentPrivacyMiddleware } from "./middlewares/ws-shipment-chat-privac
 import { ShipmentChat } from "src/infrastructure/entities/order/shipment-chat.entity";
 import { toUrl } from "src/core/helpers/file.helper";
 import { UserResponse } from "src/modules/user/dto/responses/user.response";
+import { RestaurantOrder } from "src/infrastructure/entities/restaurant/order/restaurant_order.entity";
 
 @WebSocketGateway({ namespace: Gateways.ShipmentChat.Namespace, cors: { origin: '*' } })
 @UseGuards(WsJwtAuthGuard)
@@ -52,6 +53,32 @@ export class ShipmentChatGateway {
                 socket.user.roles.includes('ADMIN')
             )) {
                 socket.emit(`shipment_chat_${payload.shipment.id}`, payload);
+            }
+        });
+    }
+
+
+    handleRestaurantSendMessage(payload: {
+        order: RestaurantOrder,
+        shipmentChat: ShipmentChat,
+        user: UserResponse,
+        action: string
+    }) {
+        const shipmentOwnerId = payload.order.user_id;
+        const shipmentDriverId = payload.order.driver.user_id;
+        const connectedSockets: any = this.server.sockets
+
+        if (payload.shipmentChat && payload.shipmentChat.attachment) {
+            payload.shipmentChat.attachment.file_url = toUrl(payload.shipmentChat.attachment.file_url);
+        }
+
+        connectedSockets.forEach(socket => {
+            if (socket.user && (
+                socket.user.id === shipmentOwnerId ||
+                socket.user.id === shipmentDriverId ||
+                socket.user.roles.includes('ADMIN')
+            )) {
+                socket.emit(`food_order_chat_${payload.order.id}`, payload);
             }
         });
     }

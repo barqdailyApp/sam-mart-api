@@ -26,21 +26,35 @@ import { CancelShipmentRequest } from '../order/dto/request/cancel-shipment.requ
 import { MakeTransactionRequest } from '../transaction/dto/requests/make-transaction-request';
 import { ReasonService } from '../reason/reason.service';
 import { TransactionService } from '../transaction/transaction.service';
+import { plainToInstance } from 'class-transformer';
+import { FileService } from '../file/file.service';
+import { AddShipmentChatMessageRequest } from '../order/dto/request/add-shipment-chat-message.request';
+import { GetCommentQueryRequest } from '../support-ticket/dto/request/get-comment-query.request';
+import { UserResponse } from '../user/dto/responses/user.response';
+import { ShipmentChatAttachment } from 'src/infrastructure/entities/order/shipment-chat-attachment.entity';
+import { ShipmentChat } from 'src/infrastructure/entities/order/shipment-chat.entity';
+import { AddDriverShipmentOption } from 'src/infrastructure/data/enums/add-driver-shipment-option.enum';
+import { ShipmentChatGateway } from 'src/integration/gateways/shipment-chat-gateway';
 @Injectable()
 export class RestaurantOrderService extends BaseService<RestaurantOrder> {
     constructor(
       @InjectRepository(RestaurantOrder) private readonly restaurantOrderRepository:Repository<RestaurantOrder>,
       private readonly makeRestaurantOrderTransaction: MakeRestaurantOrderTransaction,
-     
+         private readonly shipmentChatGateway: ShipmentChatGateway,
         @InjectRepository(Driver) private readonly driverRepository:Repository<Driver>,
         @Inject(REQUEST) private readonly _request: Request,
          private readonly orderGateway: OrderGateway,
             private readonly notificationService: NotificationService,
             @Inject(TransactionService)
             private readonly transactionService: TransactionService,
+               @InjectRepository(ShipmentChat)
+                private shipmentChatRepository: Repository<ShipmentChat>,
               @Inject(ReasonService)
                 private readonly reasonService: ReasonService,
-            @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse
+                    @Inject(FileService) private _fileService: FileService,
+            @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
+                @InjectRepository(ShipmentChatAttachment)
+                private shipmentChatAttachmentRepository: Repository<ShipmentChatAttachment>,
     ) {super(restaurantOrderRepository)}
 
     async makeRestaurantOrder(req: MakeRestaurantOrderRequest) {
@@ -76,7 +90,7 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
         return {orders:orders[0],total:orders[1]};
     }
 
-    async driverAcceptOrder(id:string){
+    async driverAcceptOrder(id:string,){
         const driver = await this.driverRepository.findOne({
             where: {
                 user_id: this._request.user.id,
@@ -111,6 +125,17 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
       
       order.status=ShipmentStatusEnum.ACCEPTED
         await this.restaurantOrderRepository.save(order)
+
+
+            const intialShipmentMessage = 'order has been accepted by driver';
+        
+            const intialShipmentChat = this.shipmentChatRepository.create({
+              message: `${intialShipmentMessage} ${driver.user.name}`,
+              user_id: this._request.user.id,
+              restaurant_order_id: order.id,
+            });
+            await this.driverRepository.save(driver);
+            await this.shipmentChatRepository.save(intialShipmentChat);
         return order
     }
 
@@ -496,7 +521,119 @@ await this.notificationService.create(
         );
       }
 
-      return order;
     }
-
+      async addChatMessage(
+        order_id: string,
+        req: AddShipmentChatMessageRequest,
+      ) {
+        const order = await this._repo.findOne({
+          where: { id: order_id },
+          relations: {driver:{user:true}},
+        });
+    
+        if (!order) throw new NotFoundException('message.order_not_found');
+    
+        if (
+          order.driver.user_id !== this._request.user.id &&
+          order.user_id !== this._request.user.id &&
+          !this._request.user.roles.includes(Role.ADMIN) &&
+          !this._request.user.roles.includes(Role.EMPLOYEE)
+        ) {
+          throw new UnauthorizedException('message.not_allowed_to_add_chat');
+        }
+    
+        let attachedFile = null;
+        if (req.file) {
+          const tempImage = await this._fileService.upload(
+            req.file,
+            `shipment-chat`,
+          );
+    
+          const createAttachedFile = this.shipmentChatAttachmentRepository.create({
+            file_url: tempImage,
+            file_name: req.file.originalname,
+            file_type: req.file.mimetype,
+          });
+          attachedFile = await this.shipmentChatAttachmentRepository.save(
+            createAttachedFile,
+          );
+        }
+    
+        const newMessage = this.shipmentChatRepository.create({
+          message: req.message,
+          user_id: this._request.user.id,
+          restaurant_order_id: order.id,
+          attachment: attachedFile,
+        });
+        const savedMessage = await this.shipmentChatRepository.save(newMessage);
+    
+        const userInfo = plainToInstance(UserResponse, this._request.user, {
+          excludeExtraneousValues: true,
+        });
+    
+        this.shipmentChatGateway.handleRestaurantSendMessage({
+          order,
+          shipmentChat: savedMessage,
+          user: userInfo,
+          action: 'ADD_MESSAGE',
+        });
+        // if driver send message , send notification to client
+        if (order.driver.user_id === newMessage.user_id) {
+          await this.notificationService.create(
+            new NotificationEntity({
+              user_id: order.user_id,
+              url: newMessage.id,
+              type: NotificationTypes.SHIPMENT_CHAT,
+              title_ar: 'رسالة جديدة',
+              title_en: 'new chat message',
+              text_ar: newMessage.message,
+              text_en: newMessage.message,
+            }),
+          );
+        } else {
+          await this.notificationService.create(
+            new NotificationEntity({
+              user_id: order.driver.user_id,
+              url: newMessage.id,
+              type: NotificationTypes.SHIPMENT_CHAT,
+              title_ar: 'رسالة جديدة',
+              title_en: 'new chat message',
+              text_ar: newMessage.message,
+              text_en: newMessage.message,
+            }),
+          );
+        }
+    
+        return savedMessage;
+      }
+    
+      async getMessagesByShipmentId(
+        order_id: string,
+        query: GetCommentQueryRequest,
+      ) {
+        const { limit = 10, offset = 0 } = query;
+    
+        const order = await this._repo.findOne({
+          where: { id: order_id },
+          relations: ['driver'],
+        });
+        if (!order) throw new NotFoundException('message.shipment_not_found');
+    
+        if (
+          order.driver.user_id !== this._request.user.id &&
+          order.user_id !== this._request.user.id &&
+          !this._request.user.roles.includes(Role.ADMIN) &&
+          !this._request.user.roles.includes(Role.EMPLOYEE)
+        ) {
+          throw new UnauthorizedException('message_not_allowed_to_view_chat');
+        }
+    
+        return await this.shipmentChatRepository.find({
+          where: { restaurant_order_id: order.id },
+          relations: ['user', 'attachment'],
+          order: { created_at: 'DESC' },
+          skip: offset,
+          take: limit,
+        });
+      }
 }

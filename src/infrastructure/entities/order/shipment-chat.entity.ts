@@ -3,6 +3,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from "typeorm";
 import { User } from "../user/user.entity";
 import { ShipmentChatAttachment } from "./shipment-chat-attachment.entity";
 import { Shipment } from "./shipment.entity";
+import { RestaurantOrder } from "../restaurant/order/restaurant_order.entity";
 
 @Entity()
 export class ShipmentChat extends AuditableEntity {
@@ -29,6 +30,13 @@ export class ShipmentChat extends AuditableEntity {
 
     @Column({ nullable: true })
     shipment_id: string;
+
+    @ManyToOne(()=>RestaurantOrder,(restaurantOrder)=>restaurantOrder.chat,{onDelete:'CASCADE'})
+    @JoinColumn({name:'restaurant_order_id'})
+    restaurant_order:RestaurantOrder
+
+    @Column({ nullable: true })
+    restaurant_order_id: string;
 
     @Column({ nullable: true })
     return_order_id: string;

@@ -1,7 +1,7 @@
-import { Body, Controller, Get, Inject, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, ClassSerializerInterceptor, Controller, Get, Inject, Param, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { RestaurantOrderService } from './restaurant-order.service';
 import { MakeRestaurantOrderRequest } from './dto/request/make-restaurant-order.request';
-import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
 import { Roles } from '../authentication/guards/roles.decorator';
@@ -15,6 +15,11 @@ import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 import { GetDriverRestaurantOrdersQuery } from './dto/query/get-driver-restaurant-order.query';
 import { RestaurantOrderDetailsResponse } from './dto/response/restaurant-order-details.response';
 import { CancelShipmentRequest } from '../order/dto/request/cancel-shipment.request';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { UploadValidator } from 'src/core/validators/upload.validator';
+import { AddShipmentChatMessageRequest } from '../order/dto/request/add-shipment-chat-message.request';
+import { ShipmentMessageResponse } from '../order/dto/response/shipment-message.response';
+import { GetCommentQueryRequest } from '../support-ticket/dto/request/get-comment-query.request';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -112,4 +117,40 @@ export class RestaurantOrderController {
       return new ActionResponse(await this.restaurantOrderService.cancelOrder(id,req));
     }
 
+
+      @Post('add-chat-message/:order_id')
+      @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('file'))
+      @ApiConsumes('multipart/form-data')
+      async addChatMessage(
+        @Param('order_id') order_id: string,
+        @Body() req: AddShipmentChatMessageRequest,
+        @UploadedFile(new UploadValidator().build()) file: Express.Multer.File,
+      ): Promise<ActionResponse<ShipmentMessageResponse>> {
+        req.file = file;
+    
+        const createdMesssage = await this.restaurantOrderService.addChatMessage(
+          order_id,
+          req,
+        );
+        const result = plainToInstance(ShipmentMessageResponse, createdMesssage, {
+          excludeExtraneousValues: true,
+        });
+        return new ActionResponse<ShipmentMessageResponse>(result);
+      }
+    
+      @Get('get-messages/:order_id')
+      async getMessagesByShipmentId(
+        @Param('order_id') order_id: string,
+        @Query() query: GetCommentQueryRequest,
+      ): Promise<ActionResponse<ShipmentMessageResponse[]>> {
+        const messages = await this.restaurantOrderService.getMessagesByShipmentId(
+          order_id,
+          query,
+        );
+        const result = plainToInstance(ShipmentMessageResponse, messages, {
+          excludeExtraneousValues: true,
+        });
+        return new ActionResponse<ShipmentMessageResponse[]>(result);
+      }
 }
+  
