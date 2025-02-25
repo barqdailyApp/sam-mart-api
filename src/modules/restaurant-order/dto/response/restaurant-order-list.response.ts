@@ -37,4 +37,6 @@ export class RestaurantOrderListResponse {
     @Type(() => DriverResponse) driver?: DriverResponse
     @Expose()
     @Type(() => SamModuleResponse) cancelShipmentReason?: SamModuleResponse
+    @Expose()
+    canceled_by: string
 }

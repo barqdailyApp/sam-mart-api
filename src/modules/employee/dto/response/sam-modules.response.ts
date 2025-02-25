@@ -5,4 +5,5 @@ export class SamModuleResponse{
     @Expose() id: string;
     @Expose() name_ar: string;
     @Expose() name_en: string;
+    @Expose() name: string;
 }
