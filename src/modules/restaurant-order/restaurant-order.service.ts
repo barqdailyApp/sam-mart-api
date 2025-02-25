@@ -204,7 +204,7 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
       take: query.limit * 1,
       skip: query.page - 1,
       withDeleted: true,
-      relations: { user: true, restaurant: true, address: true,driver:true,cancelShipmentReason:true},
+      relations: { user: true, restaurant: true, address: true,driver:{user:true},cancelShipmentReason:true},
     });
     return { orders: orders[0], total: orders[1] };
   }
