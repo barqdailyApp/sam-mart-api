@@ -7,5 +7,25 @@ export class RestaurantOrderDetailsResponse extends RestaurantOrderListResponse{
     @Expose()
     @Transform(({ obj }) => obj.restaurant_order_meals.map((meal) => plainToInstance(MealResponse,{...meal.meal,price:meal.price,id:meal.id,options:meal.restaurant_order_meal_options,total_price:meal.total_price,quantity:meal.quantity},{excludeExtraneousValues:true})))
     meals:MealResponse[]
+
+
+    @Expose()
+     order_confirmed_at: Date;
+   
+     @Expose()
+     order_on_processed_at: Date;
+   
+     @Expose()
+     order_ready_for_pickup_at: Date;
+   
+     @Expose()
+     order_shipped_at: Date;
+   
+     @Expose()
+     order_delivered_at: Date;
+   
+    @Expose()
+     order_canceled_at: Date;
+    
     
 }

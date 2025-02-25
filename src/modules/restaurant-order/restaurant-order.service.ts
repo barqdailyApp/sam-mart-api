@@ -262,6 +262,7 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
     });
     if (!order) throw new Error('message.order_not_found');
     order.status = ShipmentStatusEnum.CONFIRMED;
+    order.order_confirmed_at = new Date();
     await this.restaurantOrderRepository.save(order);
     const drivers = await this.driverRepository.find({
       where: {
@@ -311,6 +312,7 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
     if (order.status != ShipmentStatusEnum.ACCEPTED)
       throw new Error('message.order_is_not_confirmed');
     order.status = ShipmentStatusEnum.PROCESSING;
+    order.order_on_processed_at = new Date();
     await this.restaurantOrderRepository.save(order);
     //send notification to driver and emit event
     try {
@@ -345,6 +347,7 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
     if (!order) throw new Error('message.order_not_found');
     if (order.status != ShipmentStatusEnum.PROCESSING)
       throw new Error('message.order_is_not_processing');
+    order.order_ready_for_pickup_at = new Date();
     order.status = ShipmentStatusEnum.READY_FOR_PICKUP;
     await this.restaurantOrderRepository.save(order);
     //send notification to driver and emit event
@@ -382,6 +385,7 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
     if (order.status != ShipmentStatusEnum.READY_FOR_PICKUP)
       throw new Error('message.order_is_not_ready_for_pickup');
     order.status = ShipmentStatusEnum.PICKED_UP;
+    order.order_shipped_at = new Date();
     await this.restaurantOrderRepository.save(order);
     //send notification to driver and emit event
     try {
@@ -416,6 +420,7 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
     if (!order) throw new Error('message.order_not_found');
     if (order.status != ShipmentStatusEnum.PICKED_UP)
       throw new Error('message.order_is_not_picked_up');
+    order.order_delivered_at = new Date();
     order.status = ShipmentStatusEnum.DELIVERED;
     await this.restaurantOrderRepository.save(order);
     //send notification to driver and emit event
@@ -445,6 +450,7 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
       relations: {
         user: true,
         payment_method: true,
+        driver:{user:true},
         restaurant: true,
         address: true,
         restaurant_order_meals: {
