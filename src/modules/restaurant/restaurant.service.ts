@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException, Res } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException, Res } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/core/base/service/service.base';
 import { Restaurant } from 'src/infrastructure/entities/restaurant/restaurant.entity';
@@ -27,6 +27,7 @@ import { AddOptionGroupRequest, CreateOptionRequest, UpdateOptionGroupRequest, U
 import { Option } from 'src/infrastructure/entities/restaurant/option/option.entity';
 import { AddMealOptionGroupsRequest } from './dto/requests/add-meal-option-groups.request';
 import { MealOptionGroup } from 'src/infrastructure/entities/restaurant/meal/meal-option-group';
+import { UpdateRestaurantRequest } from './dto/requests/update-restaurant.request';
 
 @Injectable()
 export class RestaurantService extends BaseService<Restaurant> {
@@ -378,5 +379,46 @@ async getSingleOptionGroup(id:string,restaurant_id:string) {
     const option_group = await this.mealOptionGroupRepository.findOne({where:{id:id,meal:{restaurant_category:{restaurant_id:restaurant_id}}}});
     if(!option_group) throw new NotFoundException('no option group found');
     return await this.mealOptionGroupRepository.softRemove(option_group);
+  }
+
+
+  async updateRestaurant(req:UpdateRestaurantRequest,restaurant_id:string) {
+    const restaurant = await this.restaurantRepository.findOne({where:{id:restaurant_id}});
+    
+    if(!restaurant) throw new NotFoundException('no restaurant found');
+    restaurant.name_ar=req.name_ar;
+    restaurant.name_en=req.name_en;
+    restaurant.address_ar=req.address_ar;
+    restaurant.address_en=req.address_en;
+    restaurant.latitude=Number(req.latitude);
+    restaurant.longitude=Number(req.longitude);
+    restaurant.closing_time=req.closing_time;
+    restaurant.opening_time=req.opening_time;
+    restaurant.city_id=req.city_id;
+    restaurant.min_order_price=req.min_order_price;
+    if(req.logo) {
+      //delete old image
+      if(restaurant.logo && fs.existsSync(restaurant.logo)) fs.unlinkSync(restaurant.logo);
+      //check if directory exist
+      if(!fs.existsSync('storage/restaurant-logos/')) fs.mkdirSync('storage/restaurant-logos/');
+      if(fs.existsSync(req.logo)) fs.renameSync(req.logo, req.logo.replace('/tmp/', '/restaurant-logos/'));
+      restaurant.logo= req.logo.replace('/tmp/', '/restaurant-logos/');
+    }
+    if(req.image) {
+      //delete old image
+      if(restaurant.image && fs.existsSync(restaurant.image)) fs.unlinkSync(restaurant.image);
+      //check if directory exist
+      if(!fs.existsSync('storage/restaurant-images/')) fs.mkdirSync('storage/restaurant-images/');
+      if(fs.existsSync(req.image)) fs.renameSync(req.image, req.image.replace('/tmp/', '/restaurant-images/'));
+      restaurant.image= req.image.replace('/tmp/', '/restaurant-images/');
+    }
+    if(req.cuisines_types_ids){
+       const cuisine_types = await this.cuisineTypeRepository.find( {
+            where: { is_active: true, id: In(req.cuisines_types_ids) },
+          });
+          if (!cuisine_types)
+            throw new BadRequestException('cuisine types not found');
+          restaurant.cuisine_types = cuisine_types;}
+    return await this.restaurantRepository.save(restaurant);
   }
 }

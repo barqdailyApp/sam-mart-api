@@ -35,6 +35,7 @@ import { AddCuisineRequest } from './dto/requests/add-cuisine.request';
 import { AddOptionGroupRequest, CreateOptionRequest, UpdateOptionGroupRequest, UpdateOptionRequest } from './dto/requests/add-option-group.request';
 import { AddMealOptionGroupsRequest } from './dto/requests/add-meal-option-groups.request';
 import { Create } from 'sharp';
+import { UpdateRestaurantRequest } from './dto/requests/update-restaurant.request';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -57,6 +58,7 @@ export class AdminRestaurantController {
     const cuisine = await this.restaurantService.addCuisine(req);
     return new ActionResponse(cuisine);
   }
+  
    
   @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
   @Get('admin/all')
@@ -87,6 +89,12 @@ console.log(restaurant)
   @Post('/admin/accept/:id')
   async acceptRestaurant(@Param('id') id: string) {
     const restaurant = await this.restaurantService.acceptRestaurant(id);
+    return new ActionResponse(restaurant);
+  }
+
+  @Put('/admin/update/:restaurant_id')
+  async update(@Param('restaurant_id') restaurant_id: string, @Body() req:UpdateRestaurantRequest) {
+    const restaurant = await this.restaurantService.updateRestaurant(req, restaurant_id);
     return new ActionResponse(restaurant);
   }
   @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)

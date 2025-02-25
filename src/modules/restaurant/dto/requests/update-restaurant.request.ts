@@ -1,68 +1,45 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { isArray, IsNotEmpty, IsNumber, IsString, IsStrongPassword, Matches } from "class-validator";
+import { isArray, IsNotEmpty, IsNumber, IsOptional, IsString, IsStrongPassword, Matches } from "class-validator";
 import { Unique } from "src/core/validators/unique-constraints.validator";
 
-export class RegisterRestaurantRequest {
+export class UpdateRestaurantRequest {
     @ApiProperty()
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
     name_ar: string; 
     @ApiProperty()
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
     name_en: string; 
-    @ApiProperty()
-    @IsNotEmpty()
-    @IsString()
-    user_name: string; 
+
 
     @ApiProperty()
-    @IsNotEmpty()
-    @IsStrongPassword()
-    password: string; 
-    @ApiProperty()
-    @IsNotEmpty()
-    @IsString()
-    @Unique('user')
-    email: string; 
-    @ApiProperty()
-    @IsNotEmpty()
-    @IsString()
-    @Unique('user')
-    phone: string; 
-    @ApiProperty()
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
     address_ar: string;
     @ApiProperty()
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
     address_en: string;
     @ApiProperty()
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
     logo: string;
     @ApiProperty()
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
     image: string;
-    @ApiProperty()
-    @IsNotEmpty()
-    @IsNumber()
-    min_order_price: number;
-
 
     @ApiProperty()
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
     city_id: string;
     @ApiProperty({isArray:true})
-    @IsNotEmpty()
-    
+    @IsOptional()
     cuisines_types_ids: string[];
     
       @ApiProperty()
-      @IsNotEmpty()
+      @IsOptional()
       @IsString()
       @Matches(
         /^(\+|-)?(?:90(?:(?:\.0{1,15})?)|(?:[0-9]|[1-8][0-9])(?:(?:\.[0-9]{1,15})?))$/,
@@ -71,7 +48,7 @@ export class RegisterRestaurantRequest {
       latitude: string;
     
       @ApiProperty()
-      @IsNotEmpty()
+      @IsOptional()
       @IsString()
       @Matches(
         /^(\+|-)?(?:180(?:(?:\.0{1,15})?)|(?:[0-9]|[1-9][0-9]|1[0-7][0-9])(?:(?:\.[0-9]{1,15})?))$/,
@@ -80,19 +57,24 @@ export class RegisterRestaurantRequest {
       longitude: string;
 
     @ApiProperty()
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
     opening_time: string;
+
+    @ApiProperty()
+    @IsOptional()
+    @IsNumber()
+    min_order_price: number;
   
     @ApiProperty()
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
     closing_time: string;    
 
-    @ApiProperty({isArray:true})
-    @IsNotEmpty()
-    menu: string[];  
-    @ApiProperty({isArray:true})
-    @IsNotEmpty()
-    licenses: string[]; 
+    // @ApiProperty({isArray:true})
+    // @IsOptional()
+    // menu: string[];  
+    // @ApiProperty({isArray:true})
+    // @IsOptional()
+    // licenses: string[]; 
 } 
