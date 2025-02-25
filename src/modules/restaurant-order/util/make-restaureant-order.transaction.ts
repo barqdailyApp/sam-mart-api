@@ -161,7 +161,7 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
 
       await context.remove(cart_meals);
       let total = restaurant_order_meals
-        .map((order_meal) => order_meal.total_price)
+        .map((order_meal) => order_meal.total_price * order_meal.quantity)
         .reduce((a, b) => a + b, 0);
 
     
