@@ -23,7 +23,8 @@ export class RestaurantOrderListResponse {
     created_at: Date;
     @Expose()
     @Type(() => AddressResponse) address?: AddressResponse
-  
+    @Expose()
+    delivery_type: string;
     @Expose()
     estimated_delivery_time: number;
     @Expose()
@@ -34,4 +35,6 @@ export class RestaurantOrderListResponse {
     @Type(() => RestaurantResponse) restaurant?: RestaurantResponse;
     @Expose()
     @Type(() => DriverResponse) driver?: DriverResponse
+    @Expose()
+    @Type(() => SamModuleResponse) cancelShipmentReason?: SamModuleResponse
 }
