@@ -70,7 +70,7 @@ export class RestaurantOrder extends AuditableEntity {
   platform: PlatformType;
 
   @ManyToOne(() => PaymentMethod)
-  @JoinColumn()
+  @JoinColumn({name:'payment_method_id'})
   payment_method: PaymentMethod;
 
    @Column()

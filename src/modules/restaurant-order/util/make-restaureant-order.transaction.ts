@@ -93,7 +93,7 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
         throw new BadRequestException('message.payment_method_not_found');
       }
       order.payment_method_enum = payment_method.type;
-      order.payment_method_id = payment_method.id;
+      order.payment_method = payment_method;
       await context.save(order);
 
       // handle cart
