@@ -92,6 +92,7 @@ console.log(restaurant)
     return new ActionResponse(restaurant);
   }
 
+  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
   @Put('/admin/update/:restaurant_id')
   async update(@Param('restaurant_id') restaurant_id: string, @Body() req:UpdateRestaurantRequest) {
     const restaurant = await this.restaurantService.updateRestaurant(req, restaurant_id);
