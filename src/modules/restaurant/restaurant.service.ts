@@ -419,6 +419,9 @@ async getSingleOptionGroup(id:string,restaurant_id:string) {
           if (!cuisine_types)
             throw new BadRequestException('cuisine types not found');
           restaurant.cuisine_types = cuisine_types;}
-    return await this.restaurantRepository.save(restaurant);
+          await this.restaurantRepository.save(restaurant);
+          const resppnse = plainToInstance(RestaurantResponse,await this.getSingleRestaurant(restaurant_id),{excludeExtraneousValues:true});
+
+    return resppnse;
   }
 }
