@@ -10,6 +10,8 @@ export class MealResponse {
     @Expose()
     id: string;
     @Expose()
+    meal_id:string
+    @Expose()
     name: string;
     @Expose()
     name_ar: string;
