@@ -11,8 +11,8 @@ export class OptionRespone{
     name_ar:string
     @Expose()
     name_en:string
-    @Expose()
-    name:string
+    // @Expose()
+    // name:string
     @Expose()
     price:number
     @Expose()
