@@ -164,7 +164,7 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
         .map((order_meal) => order_meal.total_price * order_meal.quantity)
         .reduce((a, b) => a + b, 0);
 
-    
+      order.sub_total=total;
   
       order.total_price = total+delivery_fee;
 

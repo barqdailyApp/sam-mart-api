@@ -39,7 +39,8 @@ export class RestaurantOrder extends AuditableEntity {
 
     @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
     total_price: number;
-  
+    @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+    sub_total: number;
     @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
     delivery_fee: number;
 

@@ -29,6 +29,8 @@ export class RestaurantOrderListResponse {
     @Expose()
     total_price: number;
     @Expose()
+        sub_total: number;
+    @Expose()
     @Type(() => UserResponse) user?: UserResponse;
     @Expose()
     @Type(() => RestaurantResponse) restaurant?: RestaurantResponse;
