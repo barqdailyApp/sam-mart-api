@@ -12,7 +12,7 @@ export class AdminRestaurantDeatailsResponse extends RestaurantResponse {
   @Transform((value) => {
     {
       const attachments = value.obj.attachments.map((item) => {
-        console.log(item);
+      
         item.url = toUrl(item.url);
         return item;
       });

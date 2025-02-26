@@ -6,12 +6,13 @@ export class OptionRespone{
 
     @Expose()
     id:string
-    @Expose()
-    name:string
+   
     @Expose()
     name_ar:string
     @Expose()
     name_en:string
+    @Expose()
+    name:string
     @Expose()
     price:number
     @Expose()

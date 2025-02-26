@@ -42,14 +42,14 @@ export class DriverShipmentGateway
     console.log(`Driver Shipment disconnected ${client.id}`);
     // set the driver as offline
   }
-  async broadcastLocationDriver(driver_shipments: Shipment[]) {
+  async broadcastLocationDriver(driver_shipments: any[]) {
     const connectedSockets: any = this.server.sockets;
     connectedSockets.forEach((socket: any) => {
       for (const shipment of driver_shipments) {
         socket.emit(`${Gateways.DriverShipment.ShipmentId}${shipment.id}`, {
           action: 'DRIVER_LOCATION_UPDATE',
           data: {
-            order_id: shipment.order.id,
+            order_id:  shipment?.order?.id??shipment.id,
             shipment_id: shipment.id,
             driver: {
               latitude: shipment.driver.latitude,

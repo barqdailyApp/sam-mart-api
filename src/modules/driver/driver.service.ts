@@ -24,6 +24,8 @@ import { DriverStatusRequest } from './requests/update-driver-status.request';
 import { DeleteDriverAccountTransaction } from './transactions/delete-driver-account.transaction';
 import { UpdateProfileDriverRequest } from './requests/update-profile-driver.request';
 import { UpdateProfileDriverTransaction } from './transactions/update-profile-driver.transaction';
+import { DriverTypeEnum } from 'src/infrastructure/data/enums/driver-type.eum';
+import { RestaurantOrder } from 'src/infrastructure/entities/restaurant/order/restaurant_order.entity';
 @Injectable()
 export class DriverService {
   constructor(
@@ -33,6 +35,8 @@ export class DriverService {
     private driverShipmentGateway: DriverShipmentGateway,
     @InjectRepository(Shipment)
     private shipmentRepository: Repository<Shipment>,
+    @InjectRepository(RestaurantOrder)
+    private restaurant_order_repo: Repository<RestaurantOrder>,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
     private readonly deleteAccountTransaction: DeleteDriverAccountTransaction,
     @Inject(UpdateProfileDriverTransaction)
@@ -79,6 +83,8 @@ export class DriverService {
     updateDriverLocationRequest: UpdateDriverLocationRequest,
   ): Promise<UpdateResult> {
     const { latitude, longitude } = updateDriverLocationRequest;
+
+    const driver= await this.driverRepository.findOne({where:{user_id:this._request.user.id}})
     const update = await this.driverRepository.update(
       { user_id: this._request.user.id },
       {
@@ -86,7 +92,10 @@ export class DriverService {
         longitude,
       },
     );
-    const driver_shipments = await this.shipmentRepository.find({
+    
+   let driver_shipments=[]
+if(driver.type=DriverTypeEnum.MART)
+     driver_shipments = await this.shipmentRepository.find({
       where: {
         driver: {
           user_id: this._request.user.id,
@@ -104,6 +113,14 @@ export class DriverService {
         order: true,
       },
     });
+    else 
+    driver_shipments=await this.restaurant_order_repo.find({where:{driver_id:driver.id,status: Not(
+      In([
+        ShipmentStatusEnum.PENDING,
+        ShipmentStatusEnum.DELIVERED,
+        ShipmentStatusEnum.CANCELED,
+      ]),
+    ),},relations:{driver:true}})
     this.driverShipmentGateway.broadcastLocationDriver(driver_shipments);
     return update;
   }

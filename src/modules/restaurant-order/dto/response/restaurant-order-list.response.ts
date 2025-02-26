@@ -12,11 +12,10 @@ export class RestaurantOrderListResponse {
     id: string;
     @Expose()
     number: string;
-
     @Expose()
    @Transform(({ value }) => { return { id: value?.id, type: value?.type } })
     payment_method?: PaymentMethod;
-  
+
     @Expose()
     status: string;
     @Expose()
