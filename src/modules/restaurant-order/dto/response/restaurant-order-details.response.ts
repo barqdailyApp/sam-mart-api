@@ -23,9 +23,9 @@ export class RestaurantOrderDetailsResponse extends RestaurantOrderListResponse{
    
      @Expose()
      order_delivered_at: Date;
-     
+
      @Expose()
-     deilvery_fee:number
+ delivery_fee: number
    
     @Expose()
      order_canceled_at: Date;
