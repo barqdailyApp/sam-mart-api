@@ -13,6 +13,10 @@ import { RestaurantCartMealOption } from 'src/infrastructure/entities/restaurant
 import { UpdateCartMealRequest } from './dto/request/update-cart-item.request';
 import { UpdateMealRestaurantCartTransaction } from './util/update-meal-restaurant-cart.transaction';
 import { RestaurantResponse } from '../restaurant/dto/responses/restaurant.response';
+import { Address } from 'src/infrastructure/entities/user/address.entity';
+import { Constant } from 'src/infrastructure/entities/constant/constant.entity';
+import { ConstantType } from 'src/infrastructure/data/enums/constant-type.enum';
+import { calculateDistances } from 'src/core/helpers/geom.helper';
 
 @Injectable()
 export class RestaurantCartService {
@@ -26,6 +30,9 @@ export class RestaurantCartService {
     private readonly restaurantCartMealOptionRepository: Repository<RestaurantCartMealOption>,
     @Inject(REQUEST) private readonly request: Request,
     private readonly updateMealRestaurantCartTransaction: UpdateMealRestaurantCartTransaction,
+    @InjectRepository(Address) 
+    private readonly addressRepository: Repository<Address>,
+    @InjectRepository(Constant) private readonly constantRepository: Repository<Constant>,
   ) {}
 
   async addMealToCart(req: AddMealRestaurantCartRequest) {
@@ -36,12 +43,25 @@ export class RestaurantCartService {
       where: { user_id: this.request.user.id },
       relations: { restaurant_cart_meals:{meal:true,cart_meal_options:{option:true}} , restaurant: true },
     });
+    const default_address=await this.addressRepository.findOne({where:{user_id:this.request.user.id,is_favorite:true}});
+    const settings=await this.constantRepository.find();
+    const fixed_delivery_fee=settings.find((s)=>s.type===ConstantType.FIXED_DELIVERY_FEE).variable;
+    const delivery_price_per_km=settings.find((s)=>s.type===ConstantType.DELIVERY_PRICE_PER_KM).variable;
+    const fixed_delivery_distance=settings.find((s)=>s.type===ConstantType.FREE_DELIVERY_DISTANCE).variable;
+    const distance=calculateDistances([cart.restaurant.latitude,cart.restaurant.longitude],[default_address.latitude,default_address.longitude]);
+    const delivery_fee =
+    Number(fixed_delivery_fee) +
+    (Number(distance) - Number(fixed_delivery_distance) < 0
+      ? 0
+      : Number(distance) - Number(fixed_delivery_distance)) *
+      Number(delivery_price_per_km);
+    
     if (!cart) return null;
     const response = plainToInstance(GetCartMealsResponse, cart.restaurant_cart_meals.map((m) => {const total_unit_price=Number(m.meal.price)+Number(m.cart_meal_options.reduce((acc,curr)=>acc+curr.option.price,0));return {...m.meal,meal_id:m.meal.id,id:m.id,quantity:m.quantity,total_price:total_unit_price}}), {
       excludeExtraneousValues: true,
     }); 
     const restaurant_respone= plainToInstance(RestaurantResponse, cart.restaurant,{excludeExtraneousValues:true});
-    return {  meals: response,restaurant:restaurant_respone};
+    return {  meals: response,restaurant:restaurant_respone,delivery_fee:delivery_fee};
   }
   async clearCart() {
     const cart= await this.restaurantCartRepository.findOne({
