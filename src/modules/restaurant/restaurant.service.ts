@@ -264,9 +264,14 @@ export class RestaurantService extends BaseService<Restaurant> {
     if(!fs.existsSync('storage/cuisine-types/')) fs.mkdirSync('storage/cuisine-types/');
     if(fs.existsSync(req.logo)) fs.renameSync(req.logo, req.logo.replace('/tmp/', '/cuisine-types/'));
     cuisine.logo= req.logo.replace('/tmp/', '/cuisine-types/');
-    return await this.cuisineTypeRepository.save(cuisine);
+    await this.cuisineTypeRepository.save(cuisine);
+    return plainToInstance(CuisineResponse, cuisine, { excludeExtraneousValues: true });
   }
-
+async getSingleCuisine(id: string) {
+  const cuisine = await this.cuisineTypeRepository.findOne({where:{id:id}});
+ 
+  return plainToInstance(CuisineResponse, cuisine, { excludeExtraneousValues: true });
+}
 
 
   async updateCuisine(req:UpdateCuisineRequest) {
@@ -283,7 +288,8 @@ export class RestaurantService extends BaseService<Restaurant> {
     }
     cuisine.is_active=req.is_active;
     cuisine.order_by=req.order_by;
-    return await this.cuisineTypeRepository.save(cuisine);
+    await this.cuisineTypeRepository.save(cuisine);
+    return plainToInstance(CuisineResponse, cuisine, { excludeExtraneousValues: true });
   }
   async deleteCuisine(id:string) {
     const cuisine = await this.cuisineTypeRepository.findOne({where:{id:id}});
