@@ -262,7 +262,7 @@ export class RestaurantService extends BaseService<Restaurant> {
     const cuisine = plainToInstance(CuisineType,{...req});
     //check if directory exist
     if(!fs.existsSync('storage/cuisine-types/')) fs.mkdirSync('storage/cuisine-types/');
-    if(fs.existsSync(req.logo)) fs.renameSync(req.logo, req.logo.replace('/tmp/', 'storage/cuisine-types/'));
+    if(fs.existsSync(req.logo)) fs.renameSync(req.logo, req.logo.replace('/tmp/', '/cuisine-types/'));
     cuisine.logo= req.logo.replace('/tmp/', '/cuisine-types/');
     return await this.cuisineTypeRepository.save(cuisine);
   }
