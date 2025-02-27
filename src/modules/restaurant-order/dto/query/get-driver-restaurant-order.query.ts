@@ -15,5 +15,11 @@ export class GetDriverRestaurantOrdersQuery {
     @ApiProperty()
     @IsOptional()
     page: number
+
+    @ApiProperty()
+    @IsOptional()
+    date:string
+
+
 }
 

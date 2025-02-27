@@ -220,7 +220,7 @@ export class RestaurantService extends BaseService<Restaurant> {
   }
 
   async getCuisineTypes() {
-    return await this.cuisineTypeRepository.find({where:{is_active:true},order:{order_by:"ASC"}});
+    return await this.cuisineTypeRepository.find({order:{order_by:"ASC"}});
   }
 
   async addRestaurantCategory(req:AddRestaurantCategoryRequest,restaurant_id:string) {

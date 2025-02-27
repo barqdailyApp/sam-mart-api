@@ -86,10 +86,8 @@ export class RestaurantController {
   @Get('/cuisines')
   async getCuisineTypes() {
     const cuisines = await this.restaurantService.getCuisineTypes();
-    const response = this._i18nResponse.entity(
-      plainToInstance(CuisineResponse, cuisines, { excludeExtraneousValues: true }),
-    );
-    return new ActionResponse(response);
+ 
+    return new ActionResponse(cuisines);
   }
   
 
