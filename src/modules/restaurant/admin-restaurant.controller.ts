@@ -36,6 +36,7 @@ import { AddOptionGroupRequest, CreateOptionRequest, UpdateOptionGroupRequest, U
 import { AddMealOptionGroupsRequest } from './dto/requests/add-meal-option-groups.request';
 import { Create } from 'sharp';
 import { UpdateRestaurantRequest } from './dto/requests/update-restaurant.request';
+import { UpdateCuisineRequest } from './dto/requests/update-cusisine.request';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -56,6 +57,17 @@ export class AdminRestaurantController {
   @Post('admin/cuisine')
   async addCuisine(@Body() req:AddCuisineRequest){
     const cuisine = await this.restaurantService.addCuisine(req);
+    return new ActionResponse(cuisine);
+  }
+
+  @Put('admin/update-cuisine')
+  async editCuisine(@Body() req:UpdateCuisineRequest){
+    const cuisine = await this.restaurantService.updateCuisine(req);
+    return new ActionResponse(cuisine);
+  }
+  @Delete('admin/delete-cuisine/:id')
+  async deleteCuisine(@Param('id') id:string){
+    const cuisine = await this.restaurantService.deleteCuisine(id);
     return new ActionResponse(cuisine);
   }
   

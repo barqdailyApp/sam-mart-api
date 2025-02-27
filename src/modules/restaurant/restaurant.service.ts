@@ -28,6 +28,7 @@ import { Option } from 'src/infrastructure/entities/restaurant/option/option.ent
 import { AddMealOptionGroupsRequest } from './dto/requests/add-meal-option-groups.request';
 import { MealOptionGroup } from 'src/infrastructure/entities/restaurant/meal/meal-option-group';
 import { UpdateRestaurantRequest } from './dto/requests/update-restaurant.request';
+import { UpdateCuisineRequest } from './dto/requests/update-cusisine.request';
 
 @Injectable()
 export class RestaurantService extends BaseService<Restaurant> {
@@ -260,6 +261,31 @@ export class RestaurantService extends BaseService<Restaurant> {
     return await this.cuisineTypeRepository.save(cuisine);
   }
 
+
+
+  async updateCuisine(req:UpdateCuisineRequest) {
+    const cuisine = await this.cuisineTypeRepository.findOne({where:{id:req.id}});
+    if(!cuisine) throw new NotFoundException('no cuisine found');
+    cuisine.name_ar=req.name_ar;
+    cuisine.name_en=req.name_en;
+    if(req.logo) {
+      //delete old image
+      if(cuisine.logo && fs.existsSync(cuisine.logo)) fs.unlinkSync(cuisine.logo);
+      //check if directory exist
+      if(fs.existsSync(req.logo)) fs.renameSync(req.logo, req.logo.replace('/tmp/', '/cuisine-types/'));
+      cuisine.logo= req.logo.replace('/tmp/', '/cuisine-types/');
+    }
+    cuisine.is_active=req.is_active;
+    cuisine.order_by=req.order_by;
+    return await this.cuisineTypeRepository.save(cuisine);
+  }
+  async deleteCuisine(id:string) {
+    const cuisine = await this.cuisineTypeRepository.findOne({where:{id:id}});
+    if(!cuisine) throw new NotFoundException('no cuisine found');
+    return await this.cuisineTypeRepository.softRemove(cuisine);
+  }
+
+
   async getRestaurantCategories(restaurant_id:string) {
     return await this.restaurantCategoryRepository.find({where:{restaurant_id:restaurant_id}});
   }
@@ -424,4 +450,6 @@ async getSingleOptionGroup(id:string,restaurant_id:string) {
 
     return respone;
   }
+
+  
 }
