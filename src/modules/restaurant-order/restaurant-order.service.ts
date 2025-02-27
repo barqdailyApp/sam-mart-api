@@ -82,6 +82,7 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
         is_receive_orders: true,
         type: DriverTypeEnum.FOOD,
       },
+      order: { created_at: 'DESC' },
     });
     const orders = await this.restaurantOrderRepository.findAndCount({
       where: {
@@ -166,6 +167,7 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
         is_receive_orders: true,
         type: DriverTypeEnum.FOOD,
       },
+      order: { created_at: 'DESC' },
     });
 
     const orders = await this.restaurantOrderRepository.findAndCount({
@@ -205,6 +207,7 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
       skip: query.page - 1,
       withDeleted: true,
       relations: { user: true, restaurant: true, address: true,driver:{user:true},cancelShipmentReason:true},
+      order: { created_at: 'DESC' },
     });
     return { orders: orders[0], total: orders[1] };
   }

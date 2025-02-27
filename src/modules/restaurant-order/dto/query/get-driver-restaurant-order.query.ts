@@ -4,7 +4,7 @@ import { ShipmentStatusEnum } from "src/infrastructure/data/enums/shipment_statu
 import { Shipment } from "src/infrastructure/entities/order/shipment.entity";
 
 export class GetDriverRestaurantOrdersQuery {
-    @ApiProperty({type: ShipmentStatusEnum, required: false, enum: [ShipmentStatusEnum.ACTIVE,ShipmentStatusEnum.READY_FOR_PICKUP,ShipmentStatusEnum.PICKED_UP, ShipmentStatusEnum.DELIVERED, ShipmentStatusEnum.COMPLETED]})    
+    @ApiProperty({type: ShipmentStatusEnum, required: false, enum: [ShipmentStatusEnum.ACTIVE,ShipmentStatusEnum.ACCEPTED,ShipmentStatusEnum.READY_FOR_PICKUP,ShipmentStatusEnum.PICKED_UP, ShipmentStatusEnum.DELIVERED, ShipmentStatusEnum.COMPLETED]})    
     @IsOptional()
     status:ShipmentStatusEnum
 
