@@ -28,6 +28,7 @@ export class ConstantSeeder implements Seeder {
       new Constant({ variable: '10', type: ConstantType.FIXED_DELIVERY_FEE }),
       new Constant({ variable: '5', type: ConstantType.FREE_DELIVERY_DISTANCE }),
       new Constant({ variable: '1', type: ConstantType.DELIVERY_PRICE_PER_KM }),
+      new Constant({ variable: '1', type: ConstantType.DELIVERY_TIME_PER_KM }),
     ]);
   }
 

@@ -29,6 +29,8 @@ import { AddMealOptionGroupsRequest } from './dto/requests/add-meal-option-group
 import { MealOptionGroup } from 'src/infrastructure/entities/restaurant/meal/meal-option-group';
 import { UpdateRestaurantRequest } from './dto/requests/update-restaurant.request';
 import { UpdateCuisineRequest } from './dto/requests/update-cusisine.request';
+import { Constant } from 'src/infrastructure/entities/constant/constant.entity';
+import { ConstantType } from 'src/infrastructure/data/enums/constant-type.enum';
 
 @Injectable()
 export class RestaurantService extends BaseService<Restaurant> {
@@ -51,11 +53,14 @@ export class RestaurantService extends BaseService<Restaurant> {
     private readonly optionRepository: Repository<Option>,
     @InjectRepository(MealOptionGroup)
     private readonly mealOptionGroupRepository: Repository<MealOptionGroup>,
+    @InjectRepository(Constant)
+    private readonly constantRepository: Repository<Constant>,
   ) {
     super(restaurantRepository);
   }
 
   async findAllNearRestaurants(query: GetNearResturantsQuery) {
+    const deliveryTimePerKm= await this.constantRepository.findOne({where: {type: ConstantType.DELIVERY_TIME_PER_KM}})??0
     const restaurants = await this.restaurantRepository
       .createQueryBuilder('restaurant')
       .leftJoinAndSelect('restaurant.cuisine_types', 'cuisine')
@@ -86,6 +91,7 @@ export class RestaurantService extends BaseService<Restaurant> {
       return {
         ...restaurant,
         distance: parseFloat(distance), // Ensure distance is a number
+        estimated_delivery_time: Number(restaurant.average_prep_time)+Number(deliveryTimePerKm)*distance,
       };
     });
 
