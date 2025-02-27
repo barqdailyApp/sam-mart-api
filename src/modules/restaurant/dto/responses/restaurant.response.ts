@@ -65,6 +65,9 @@ export class RestaurantResponse {
     @Expose()
     @Transform((value)=>plainToInstance(RestaurantCategoryResponse,value.obj.categories,{excludeExtraneousValues:true}))
     categories: RestaurantCategoryResponse[];
+
+    @Expose()
+    estimated_delivery_time: number;
 }
 
 
