@@ -15,7 +15,8 @@ export class DriverResponse {
   @Expose() is_receive_orders: boolean;
 
   @Expose() type: DriverTypeEnum;
-
+  @Expose() @Transform(( value ) => value?.obj.user?.name) name: string;
+  @Expose() @Transform(( value ) => value?.obj.user?.phone) phone: string;
   @Transform(({ value }) => plainToClass(UserResponse, value))
   @Expose()
   readonly user: UserResponse;
