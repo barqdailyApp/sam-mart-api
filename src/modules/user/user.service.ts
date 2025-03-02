@@ -143,35 +143,79 @@ export class UserService extends BaseService<User> {
     const skip = (page - 1) * limit;
 
     let query = this.userRepo
-      .createQueryBuilder('user')
-      .leftJoinAndSelect('user.wallet', 'wallet')
-      .leftJoinAndSelect('user.addresses', 'addresses')
-      .where('user.roles = :role', { role: Role.CLIENT })
-      .orderBy('user.created_at', 'DESC')
-      .skip(skip)
-      .take(limit);
+  .createQueryBuilder('user')
+  .leftJoinAndSelect('user.wallet', 'wallet')
+  .leftJoinAndSelect('user.addresses', 'addresses')
+  .leftJoin(
+    (qb) =>
+      qb
+        .select('orders.user_id AS userId') // ✅ Fixed alias
+        .addSelect('COUNT(orders.id) AS completedOrders')
+        .addSelect('MAX(orders.created_at) AS lastOrderDate') // ✅ Get last order date
+        .from('order', 'orders')
+        .innerJoin('shipment', 'shipment', 'shipment.order_id = orders.id')
+        .where('shipment.status = :completedStatus', { completedStatus: 'DELIVERED' }) // ✅ Adjust status
+        .groupBy('orders.user_id'),
+    'completedOrders',
+    'completedOrders.userId = user.id' // ✅ Correct alias reference
+  )
+  .leftJoin(
+    (qb) =>
+      qb
+        .select('restaurant_order.user_id AS userId') // ✅ Fixed alias
+        .addSelect('COUNT(restaurant_order.id) AS restaurantOrdersCount') // ✅ Count restaurant orders
+        .from('restaurant_order', 'restaurant_order')
+        .where('restaurant_order.status = :completedStatus', { completedStatus: 'DELIVERED' })
+        .groupBy('restaurant_order.user_id'),
+    'restaurantOrders',
+    'restaurantOrders.userId = user.id' // ✅ Correct alias reference
+  )
+  .where('user.roles = :role', { role: Role.CLIENT })
+  .orderBy('user.created_at', 'DESC')
+  .skip(skip)
+  .take(limit)
+  .addSelect('COALESCE(completedOrders.completedOrders, 0)', 'total_orders')
+  .addSelect('COALESCE(completedOrders.lastOrderDate, NULL)', 'last_order_date')
+  .addSelect('COALESCE(restaurantOrders.restaurantOrdersCount, 0)', 'total_restaurant_orders');
+  if (created_at) {
+    //*using database functions to truncate the time part of the order.created_at timestamp to compare only the date components
+    query = query.andWhere('DATE(user.created_at) = :created_at', {
+      created_at,
+    });
+  }
+  if (client_search) {
+    query = query.andWhere(
+      '(user.name LIKE :client_search OR user.phone LIKE :client_search OR user.email LIKE :client_search)',
+      { client_search: `%${client_search}%` },
+    );
+  }
 
-    if (created_at) {
-      //*using database functions to truncate the time part of the order.created_at timestamp to compare only the date components
-      query = query.andWhere('DATE(user.created_at) = :created_at', {
-        created_at,
-      });
-    }
-    if (client_search) {
-      query = query.andWhere(
-        '(user.name LIKE :client_search OR user.phone LIKE :client_search OR user.email LIKE :client_search)',
-        { client_search: `%${client_search}%` },
-      );
-    }
+  if (status) {
+    if (status == UserStatus.CustomerPurchase) {
+      query = query.innerJoin('user.orders', 'orders');
+    } else query = query.andWhere('user.user_status = :status', { status });
+  }
 
-    if (status) {
-      if (status == UserStatus.CustomerPurchase) {
-        query = query.innerJoin('user.orders', 'orders');
-      } else query = query.andWhere('user.user_status = :status', { status });
-    }
 
-    const [users, total] = await query.getManyAndCount();
-    return { users, total };
+  // Fetch structured relations
+const [users, total] = await query.getManyAndCount();
+
+// Fetch additional fields separately
+const rawData = await query.getRawMany();
+
+// Merge rawData into users
+const mergedUsers = users.map((user) => {
+  const rawUser = rawData.find((r) => r.user_id === user.id);
+  return {
+    ...user,
+    total_orders: rawUser ? Number(rawUser.total_orders) : 0,
+      last_order_date: rawUser ? rawUser.last_order_date : null,
+    total_restaurant_orders: rawUser ? Number(rawUser.total_restaurant_orders) : 0,
+  };
+});
+ 
+   
+    return { users: mergedUsers, total };
   }
   async getSingleClientDashboard(user_id: string) {
     const user = await this.userRepo.findOne({

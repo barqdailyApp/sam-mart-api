@@ -16,11 +16,13 @@ export class UserDashboardResponse {
   @Expose() readonly birth_date: string;
   @Expose() readonly created_at: Date;
   @Expose() readonly user_status: UserStatus;
-
+  @Expose() readonly total_orders: number;
+  @Expose() readonly total_restaurant_orders: number;
+  @Expose() readonly last_order_date: Date;
   @Expose() readonly wallet_balance: number;
   @Expose() readonly main_address: any;
 
-  constructor(user: User) {
+  constructor(user: any) {
     this.id = user.id;
     this.username = user.name;
     this.email = user.email;
@@ -29,6 +31,9 @@ export class UserDashboardResponse {
     this.birth_date = user.birth_date;
     this.created_at = user.created_at;
     this.user_status = user.user_status;
+    this.total_orders = user.total_orders;
+    this.total_restaurant_orders = user.total_restaurant_orders;
+    this.last_order_date = user.last_order_date;
     this.wallet_balance = user.wallet == undefined ? 0 : user.wallet.balance;
 
     const address = user.addresses.find(
