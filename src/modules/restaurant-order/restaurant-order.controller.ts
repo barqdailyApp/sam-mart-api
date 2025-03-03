@@ -173,7 +173,7 @@ export class RestaurantOrderController {
         });
         return new ActionResponse<ShipmentMessageResponse[]>(result);
       }
-
+      @Roles(Role.CLIENT)
       @Post('add-review/:order_id')
       async addReview(@Param('order_id') order_id: string, @Body() req: AddReviewRequest){
         return new ActionResponse(await this.restaurantOrderService.addReview(order_id,req));

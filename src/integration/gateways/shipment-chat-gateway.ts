@@ -22,6 +22,7 @@ export class ShipmentChatGateway {
         private configService: ConfigService,
         @InjectRepository(User) private userRepository: Repository<User>,
         @InjectRepository(Shipment) private shipmentRepository: Repository<Shipment>
+        ,@InjectRepository(RestaurantOrder) private restaurantOrderService: Repository<RestaurantOrder>
     ) { }
 
     @WebSocketServer()
@@ -29,7 +30,7 @@ export class ShipmentChatGateway {
 
     afterInit(client: Socket) {
         client.use(SocketAuthMiddleware(this.configService, this.userRepository) as any);
-        client.use(ShipmentPrivacyMiddleware(this.shipmentRepository) as any);
+        client.use(ShipmentPrivacyMiddleware(this.shipmentRepository,this.restaurantOrderService) as any);
     }
 
     handleSendMessage(payload: {

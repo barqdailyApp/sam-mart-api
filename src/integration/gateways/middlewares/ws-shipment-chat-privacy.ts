@@ -2,6 +2,8 @@ import { UnauthorizedException } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { Shipment } from "src/infrastructure/entities/order/shipment.entity";
+import { RestaurantOrder } from 'src/infrastructure/entities/restaurant/order/restaurant_order.entity';
+import { Restaurant } from 'src/infrastructure/entities/restaurant/restaurant.entity';
 import { Repository } from "typeorm";
 
 type SocketIOMiddleWare = {
@@ -9,13 +11,19 @@ type SocketIOMiddleWare = {
 };
 
 export const ShipmentPrivacyMiddleware = (
-    shipmentRepository: Repository<Shipment>
+    shipmentRepository: Repository<Shipment>, restaurantOrderRepo:Repository<RestaurantOrder>
 ): SocketIOMiddleWare => {
     return async (client, next) => {
         try {
             const shipment_id: string = Array.isArray(client.handshake.query.shipment_id)
                 ? client.handshake.query.shipment_id.join(',')
                 : client.handshake.query.shipment_id;
+
+                const order = await restaurantOrderRepo.findOne({
+                    where: { id: shipment_id },
+                })
+                if(order)
+                {next();}
 
             const shipment = await shipmentRepository.findOne({
                 where: { id: shipment_id },
