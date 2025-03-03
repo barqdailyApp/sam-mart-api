@@ -20,7 +20,8 @@ import { UploadValidator } from 'src/core/validators/upload.validator';
 import { AddShipmentChatMessageRequest } from '../order/dto/request/add-shipment-chat-message.request';
 import { ShipmentMessageResponse } from '../order/dto/response/shipment-message.response';
 import { GetCommentQueryRequest } from '../support-ticket/dto/request/get-comment-query.request';
-import { AddReviewRequest } from './dto/request/add-review-request';
+import { AddReviewReplyRequest, AddReviewRequest } from './dto/request/add-review-request';
+import { RestaurantOrderReviewResponse } from './dto/response/restaurant-order-review.response';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -178,4 +179,17 @@ export class RestaurantOrderController {
       async addReview(@Param('order_id') order_id: string, @Body() req: AddReviewRequest){
         return new ActionResponse(await this.restaurantOrderService.addReview(order_id,req));
       }
+      @Roles(Role.CLIENT,Role.RESTAURANT_ADMIN)
+      @Post('review-reply/:id')
+      async addReviewReply(@Param('id') id:string,@Body() req: AddReviewReplyRequest){
+        return new ActionResponse(await this.restaurantOrderService.AddReviewReply(id,req));
+      }
+
+      @Get('get-reviews/:restaurant_id')
+      async getReviews(@Param('restaurant_id') restaurant_id:string,@Query() query:PaginatedRequest){
+        const {reviews,total}=await this.restaurantOrderService.getReviews(restaurant_id,query);
+        const response= plainToInstance(RestaurantOrderReviewResponse,reviews,{excludeExtraneousValues:true});
+        return new PaginatedResponse(response,{meta:{total,...query}});
+      }
+
 }

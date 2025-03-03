@@ -33,6 +33,7 @@ import { OrderHistory } from '../order/order-history.entity';
 import { Restaurant } from '../restaurant/restaurant.entity';
 import { RestaurantOrder } from '../restaurant/order/restaurant_order.entity';
 import { RestaurantOrderReview } from '../restaurant/order/restaurant-review.entity';
+import { ReviewReply } from '../restaurant/order/review-reply,entity';
 
 @Entity()
 export class User extends AuditableEntity {
@@ -136,7 +137,8 @@ export class User extends AuditableEntity {
 
   @OneToMany(()=>RestaurantOrder, (restaurantOrder) => restaurantOrder.user)
   restaurant_orders: RestaurantOrder[]
-
+@OneToMany(()=>ReviewReply, (review_replies) => review_replies.user)
+review_replies: ReviewReply[]
 restaurant?:any
 driver?:any
   

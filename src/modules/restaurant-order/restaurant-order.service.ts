@@ -42,9 +42,13 @@ import { ShipmentChatAttachment } from 'src/infrastructure/entities/order/shipme
 import { ShipmentChat } from 'src/infrastructure/entities/order/shipment-chat.entity';
 import { AddDriverShipmentOption } from 'src/infrastructure/data/enums/add-driver-shipment-option.enum';
 import { ShipmentChatGateway } from 'src/integration/gateways/shipment-chat-gateway';
-import { AddReviewRequest } from './dto/request/add-review-request';
+import {
+  AddReviewReplyRequest,
+  AddReviewRequest,
+} from './dto/request/add-review-request';
 import { RestaurantOrderReview } from 'src/infrastructure/entities/restaurant/order/restaurant-review.entity';
 import { Restaurant } from 'src/infrastructure/entities/restaurant/restaurant.entity';
+import { ReviewReply } from 'src/infrastructure/entities/restaurant/order/review-reply,entity';
 @Injectable()
 export class RestaurantOrderService extends BaseService<RestaurantOrder> {
   constructor(
@@ -67,9 +71,13 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
     @InjectRepository(ShipmentChatAttachment)
     private shipmentChatAttachmentRepository: Repository<ShipmentChatAttachment>,
-    @InjectRepository(RestaurantOrderReview) private reviewRepository: Repository<RestaurantOrderReview>,
+    @InjectRepository(RestaurantOrderReview)
+    private reviewRepository: Repository<RestaurantOrderReview>,
+    @InjectRepository(ReviewReply)
+    private replyRepository: Repository<ReviewReply>,
 
-    @InjectRepository(Restaurant) private readonly restaurantRepository: Repository<Restaurant>,
+    @InjectRepository(Restaurant)
+    private readonly restaurantRepository: Repository<Restaurant>,
   ) {
     super(restaurantOrderRepository);
   }
@@ -202,17 +210,20 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
     if (!query.limit) query.limit = 10;
     if (!query.page) query.page = 1;
 
- 
-
     const orders = await this.restaurantOrderRepository.findAndCount({
       where: {
         user_id: this._request.user.id,
-      
       },
-      take: query.limit * 1,
-      skip: query.page - 1,
+      skip: (query.page - 1) * query.limit,
+      take: query.limit,
       withDeleted: true,
-      relations: { user: true, restaurant: true, address: true,driver:{user:true},cancelShipmentReason:true},
+      relations: {
+        user: true,
+        restaurant: true,
+        address: true,
+        driver: { user: true },
+        cancelShipmentReason: true,
+      },
       order: { created_at: 'DESC' },
     });
     return { orders: orders[0], total: orders[1] };
@@ -459,7 +470,7 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
       relations: {
         user: true,
         payment_method: true,
-        driver:{user:true},
+        driver: { user: true },
         restaurant: true,
         address: true,
         restaurant_order_meals: {
@@ -734,20 +745,57 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
   }
 
   async addReview(order_id: string, req: AddReviewRequest) {
-    const order= await this._repo.findOne({
-      where: { id: order_id },relations:{restaurant:true}
-    })
-    if(!order) throw new NotFoundException('message.order_not_found')
-      if(order.status!=ShipmentStatusEnum.DELIVERED) throw new Error('message.order_is_not_delivered')
-const review= await this.reviewRepository.save({...req,restaurant_order_id:order.id,restaurant_id:order.restaurant.id})
-const restaurant = await this.restaurantRepository.findOne({
-  where:{id:order.restaurant.id},
-})
-restaurant.no_of_reviews=restaurant.no_of_reviews+1
-restaurant.total_ratings=restaurant.total_ratings+req.rating
-restaurant.average_rating=restaurant.total_ratings/restaurant.no_of_reviews
-await this.restaurantRepository.save(restaurant)
-return review;
+    const order = await this._repo.findOne({
+      where: { id: order_id },
+      relations: { restaurant: true },
+    });
+    if (!order) throw new NotFoundException('message.order_not_found');
+    if (order.status != ShipmentStatusEnum.DELIVERED)
+      throw new Error('message.order_is_not_delivered');
+    const review = await this.reviewRepository.save({
+      ...req,
+      restaurant_order_id: order.id,
+      restaurant_id: order.restaurant.id,
+      user_id: this._request.user.id,
+    });
+    const restaurant = await this.restaurantRepository.findOne({
+      where: { id: order.restaurant.id },
+    });
+    restaurant.no_of_reviews = restaurant.no_of_reviews + 1;
+    restaurant.total_ratings = restaurant.total_ratings + req.rating;
+    restaurant.average_rating =
+      restaurant.total_ratings / restaurant.no_of_reviews;
+    await this.restaurantRepository.save(restaurant);
+    return review;
   }
 
+  async AddReviewReply(id: string, req: AddReviewReplyRequest) {
+    const review = await this.reviewRepository.findOne({
+      where: { id: id },
+    });
+    if (!review) throw new NotFoundException('message.review_not_found');
+    const reply = await this.replyRepository.save({
+      ...req,
+      review_id: id,
+      user_id: this._request.user.id,
+    });
+    return reply;
+  }
+
+  async getReviews(restaurant_id: string, query: PaginatedRequest) {
+    if (!query.limit) query.limit = 10;
+    if (!query.page) query.page = 1;
+
+    const result = await this.reviewRepository.findAndCount({
+      where: { restaurant_order: { restaurant_id: restaurant_id } },
+      relations: {
+        user: true,
+        replies: true,
+      },
+      order: { created_at: 'DESC' },
+      skip: (query.page - 1) * query.limit,
+      take: query.limit,
+    });
+    return { reviews: result[0], total: result[1] };
+  }
 }

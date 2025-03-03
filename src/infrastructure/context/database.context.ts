@@ -79,6 +79,7 @@ import { RestaurantOrderMeal } from '../entities/restaurant/order/restaurant_ord
 import { FoodBanar } from '../entities/restaurant/banar/food_banar.entity';
 import { RestaurantOrderMealOption } from '../entities/restaurant/order/restaurant_order_meal_option.entity';
 import { RestaurantOrderReview } from '../entities/restaurant/order/restaurant-review.entity';
+import { ReviewReply } from '../entities/restaurant/order/review-reply,entity';
 export const DB_ENTITIES = [
   User,
   Address,
@@ -159,7 +160,8 @@ export const DB_ENTITIES = [
   RestaurantOrder,
   RestaurantOrderMeal,
   RestaurantOrderMealOption,
-  RestaurantOrderReview
+  RestaurantOrderReview,
+  ReviewReply
 ];
 
 export const DB_VIEWS = [];
