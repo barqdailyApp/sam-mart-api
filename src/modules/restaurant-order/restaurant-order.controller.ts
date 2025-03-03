@@ -20,6 +20,7 @@ import { UploadValidator } from 'src/core/validators/upload.validator';
 import { AddShipmentChatMessageRequest } from '../order/dto/request/add-shipment-chat-message.request';
 import { ShipmentMessageResponse } from '../order/dto/response/shipment-message.response';
 import { GetCommentQueryRequest } from '../support-ticket/dto/request/get-comment-query.request';
+import { AddReviewRequest } from './dto/request/add-review-request';
 @ApiBearerAuth()
 @ApiHeader({
   name: 'Accept-Language',
@@ -171,5 +172,10 @@ export class RestaurantOrderController {
           excludeExtraneousValues: true,
         });
         return new ActionResponse<ShipmentMessageResponse[]>(result);
+      }
+
+      @Post('add-review/:order_id')
+      async addReview(@Param('order_id') order_id: string, @Body() req: AddReviewRequest){
+        return new ActionResponse(await this.restaurantOrderService.addReview(order_id,req));
       }
 }

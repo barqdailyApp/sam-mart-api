@@ -32,6 +32,7 @@ import { ShipmentProductHistory } from '../order/shipment-product-history.entity
 import { OrderHistory } from '../order/order-history.entity';
 import { Restaurant } from '../restaurant/restaurant.entity';
 import { RestaurantOrder } from '../restaurant/order/restaurant_order.entity';
+import { RestaurantOrderReview } from '../restaurant/order/restaurant-review.entity';
 
 @Entity()
 export class User extends AuditableEntity {
@@ -101,6 +102,9 @@ export class User extends AuditableEntity {
 
   @OneToMany(() => ShipmentFeedback, (orderFeedback) => orderFeedback.user)
   order_feedbacks: ShipmentFeedback[];
+
+  @OneToMany(() => RestaurantOrderReview, (restaurant) => restaurant.user)
+  restaurant_order_feedbacks: RestaurantOrderReview[];
 
   @OneToMany(() => ProductFavorite, (productFavorite) => productFavorite.user)
   products_favorite: ProductFavorite[];

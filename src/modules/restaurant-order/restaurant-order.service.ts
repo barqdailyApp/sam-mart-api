@@ -42,6 +42,9 @@ import { ShipmentChatAttachment } from 'src/infrastructure/entities/order/shipme
 import { ShipmentChat } from 'src/infrastructure/entities/order/shipment-chat.entity';
 import { AddDriverShipmentOption } from 'src/infrastructure/data/enums/add-driver-shipment-option.enum';
 import { ShipmentChatGateway } from 'src/integration/gateways/shipment-chat-gateway';
+import { AddReviewRequest } from './dto/request/add-review-request';
+import { RestaurantOrderReview } from 'src/infrastructure/entities/restaurant/order/restaurant-review.entity';
+import { Restaurant } from 'src/infrastructure/entities/restaurant/restaurant.entity';
 @Injectable()
 export class RestaurantOrderService extends BaseService<RestaurantOrder> {
   constructor(
@@ -64,6 +67,9 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
     @InjectRepository(ShipmentChatAttachment)
     private shipmentChatAttachmentRepository: Repository<ShipmentChatAttachment>,
+    @InjectRepository(RestaurantOrderReview) private reviewRepository: Repository<RestaurantOrderReview>,
+
+    @InjectRepository(Restaurant) private readonly restaurantRepository: Repository<Restaurant>,
   ) {
     super(restaurantOrderRepository);
   }
@@ -726,4 +732,22 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
       take: limit,
     });
   }
+
+  async addReview(order_id: string, req: AddReviewRequest) {
+    const order= await this._repo.findOne({
+      where: { id: order_id },relations:{restaurant:true}
+    })
+    if(!order) throw new NotFoundException('message.order_not_found')
+      if(order.status!=ShipmentStatusEnum.DELIVERED) throw new Error('message.order_is_not_delivered')
+const review= await this.reviewRepository.save({...req,restaurant_order_id:order.id,restaurant_id:order.restaurant.id})
+const restaurant = await this.restaurantRepository.findOne({
+  where:{id:order.restaurant.id},
+})
+restaurant.no_of_reviews=restaurant.no_of_reviews+1
+restaurant.total_ratings=restaurant.total_ratings+req.rating
+restaurant.average_rating=restaurant.total_ratings/restaurant.no_of_reviews
+await this.restaurantRepository.save(restaurant)
+return review;
+  }
+
 }

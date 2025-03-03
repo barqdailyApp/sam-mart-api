@@ -15,6 +15,7 @@ import { Driver } from '../../driver/driver.entity';
 import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
 import { PaymentMethodEnum } from 'src/infrastructure/data/enums/payment-method';
 import { ShipmentChat } from '../../order/shipment-chat.entity';
+import { RestaurantOrderReview } from './restaurant-review.entity';
 @Entity()
 export class RestaurantOrder extends AuditableEntity {
   @Column({ length: 10 })
@@ -126,4 +127,7 @@ export class RestaurantOrder extends AuditableEntity {
 
   @OneToMany(()=>ShipmentChat, (shipmentChat) => shipmentChat.restaurant_order, {onDelete:'CASCADE'})
   chat: ShipmentChat[]
+
+  @OneToMany(()=>RestaurantOrderReview, (restaurantOrderReview) => restaurantOrderReview.restaurant_order, {onDelete:'CASCADE'})
+  reviews: RestaurantOrderReview[]
 }

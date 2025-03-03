@@ -68,6 +68,11 @@ export class Restaurant extends AuditableEntity {
   @Column({ default: 0 })
   average_rating: number;
 
+  
+  @Column({ default: 0 })
+  total_ratings: number;
+
+
   @Column({ default: 0 })
   average_prep_time: number;
 
