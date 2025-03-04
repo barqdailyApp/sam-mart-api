@@ -43,6 +43,7 @@ export class DriverShipmentGateway
     // set the driver as offline
   }
   async broadcastLocationDriver(driver_shipments: any[]) {
+    console.log('test')
     const connectedSockets: any = this.server.sockets;
     connectedSockets.forEach((socket: any) => {
       for (const shipment of driver_shipments) {

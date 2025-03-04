@@ -121,6 +121,7 @@ if(driver.type=DriverTypeEnum.MART)
         ShipmentStatusEnum.CANCELED,
       ]),
     ),},relations:{driver:true}})
+    console.log(driver_shipments)
     this.driverShipmentGateway.broadcastLocationDriver(driver_shipments);
     return update;
   }
