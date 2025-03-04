@@ -84,7 +84,9 @@ export class DriverService {
   ): Promise<UpdateResult> {
     const { latitude, longitude } = updateDriverLocationRequest;
 
-    const driver= await this.driverRepository.findOne({where:{user_id:this._request.user.id}})
+    const driver = await this.driverRepository.findOne({
+      where: { user_id: this._request.user.id },
+    });
     const update = await this.driverRepository.update(
       { user_id: this._request.user.id },
       {
@@ -92,32 +94,43 @@ export class DriverService {
         longitude,
       },
     );
-    
-   let driver_shipments=[]
-if(driver.type=DriverTypeEnum.MART)
-     driver_shipments = await this.shipmentRepository.find({
-      where: {
-        driver: {
-          user_id: this._request.user.id,
+
+    let driver_shipments = [];
+    if ((driver.type = DriverTypeEnum.MART)) {
+      driver_shipments = await this.shipmentRepository.find({
+        where: {
+          driver: {
+            user_id: this._request.user.id,
+          },
+          status: Not(
+            In([
+              ShipmentStatusEnum.PENDING,
+              ShipmentStatusEnum.DELIVERED,
+              ShipmentStatusEnum.CANCELED,
+            ]),
+          ),
         },
-        status: Not(
-          In([
-            ShipmentStatusEnum.PENDING,
-            ShipmentStatusEnum.DELIVERED,
-            ShipmentStatusEnum.CANCELED,
-          ]),
-        ),
-      },
-      relations: {
-        driver: true,
-        order: true,
-      },
-    });
-    else 
-    driver_shipments=await this.restaurant_order_repo.find({where:{driver_id:driver.id,
-    
-    },relations:{driver:true}})
-    console.log(driver_shipments)
+        relations: {
+          driver: true,
+          order: true,
+        },
+      });
+    } else {
+      driver_shipments = await this.restaurant_order_repo.find({
+        where: {
+          driver_id: driver.id,
+          status: Not(
+            In([
+              ShipmentStatusEnum.PENDING,
+              ShipmentStatusEnum.DELIVERED,
+              ShipmentStatusEnum.CANCELED,
+            ]),
+          ),
+        },
+        relations: { driver: true },
+      });
+    }
+    console.log(driver_shipments);
     this.driverShipmentGateway.broadcastLocationDriver(driver_shipments);
     return update;
   }
@@ -191,7 +204,7 @@ if(driver.type=DriverTypeEnum.MART)
         created_at,
       });
     }
-    if(type){
+    if (type) {
       query = query.andWhere('driver.type = :type', {
         type,
       });
