@@ -14,6 +14,7 @@ import { ShipmentChat } from "src/infrastructure/entities/order/shipment-chat.en
 import { toUrl } from "src/core/helpers/file.helper";
 import { UserResponse } from "src/modules/user/dto/responses/user.response";
 import { RestaurantOrder } from "src/infrastructure/entities/restaurant/order/restaurant_order.entity";
+import { ShipmentMessageResponse } from "src/modules/order/dto/response/shipment-message.response";
 
 @WebSocketGateway({ namespace: Gateways.ShipmentChat.Namespace, cors: { origin: '*' } })
 @UseGuards(WsJwtAuthGuard)
@@ -35,7 +36,7 @@ export class ShipmentChatGateway {
 
     handleSendMessage(payload: {
         shipment: Shipment,
-        shipmentChat: ShipmentChat,
+        message: ShipmentMessageResponse,
         user: UserResponse,
         action: string
     }) {
@@ -43,9 +44,9 @@ export class ShipmentChatGateway {
         const shipmentDriverId = payload.shipment.driver.user_id;
         const connectedSockets: any = this.server.sockets
 
-        if (payload.shipmentChat && payload.shipmentChat.attachment) {
-            payload.shipmentChat.attachment.file_url = toUrl(payload.shipmentChat.attachment.file_url);
-        }
+        // if (payload.message && payload.message.attachment) {
+        //     payload.message.attachment.file_url = toUrl(payload.message.attachment.file_url);
+        // }
 
         connectedSockets.forEach(socket => {
             if (socket.user && (
@@ -53,22 +54,22 @@ export class ShipmentChatGateway {
                 socket.user.id === shipmentDriverId ||
                 socket.user.roles.includes('ADMIN')
             )) {
-                socket.emit(`shipment_chat_${payload.shipment.id}`, payload);
+                socket.emit(`shipment_chat_${payload.shipment.id}`, payload.message);
             }
         });
     }
 
 
     handleRestaurantSendMessage(payload: {
-        message:Mess
+        order: RestaurantOrder,
+        message: ShipmentMessageResponse,
+        user: UserResponse,
+        action: string
     }) {
         const shipmentOwnerId = payload.order.user_id;
         const shipmentDriverId = payload.order.driver.user_id;
         const connectedSockets: any = this.server.sockets
 
-        if (payload.shipmentChat && payload.shipmentChat.attachment) {
-            payload.shipmentChat.attachment.file_url = toUrl(payload.shipmentChat.attachment.file_url);
-        }
 
         connectedSockets.forEach(socket => {
             if (socket.user && (
@@ -76,7 +77,7 @@ export class ShipmentChatGateway {
                 socket.user.id === shipmentDriverId ||
                 socket.user.roles.includes('ADMIN')
             )) {
-                socket.emit(`food_order_chat_${payload.order.id}`, payload);
+                socket.emit(`food_order_chat_${payload.order.id}`, payload.message);
             }
         });
     }

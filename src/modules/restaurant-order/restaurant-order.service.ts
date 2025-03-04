@@ -675,12 +675,15 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
     });
     const savedMessage = await this.shipmentChatRepository.save(newMessage);
 
+    const userInfo = plainToInstance(UserResponse, this._request.user, {
+      excludeExtraneousValues: true,
+    });
 
-const message=plainToInstance(ShipmentMessageResponse, savedMessage, {
-  excludeExtraneousValues: true
-})
     this.shipmentChatGateway.handleRestaurantSendMessage({
-      message:message,
+      order,
+      message:plainToInstance(ShipmentMessageResponse, savedMessage, { excludeExtraneousValues: true }),
+      user: userInfo,
+      action: 'ADD_MESSAGE',
     });
     // if driver send message , send notification to client
     if (order.driver.user_id === newMessage.user_id) {
