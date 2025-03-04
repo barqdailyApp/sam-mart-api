@@ -118,14 +118,6 @@ export class DriverService {
     } else {
       driver_shipments = await this.restaurant_order_repo.find({
         where: {
-          driver_id: driver.id,
-          status: Not(
-            In([
-              ShipmentStatusEnum.PENDING,
-              ShipmentStatusEnum.DELIVERED,
-              ShipmentStatusEnum.CANCELED,
-            ]),
-          ),
         },
         relations: { driver: true },
       });
