@@ -23,7 +23,13 @@ export const ShipmentPrivacyMiddleware = (
                     where: { id: shipment_id },
                 })
                 if(order)
-                {next();}
+                {
+                    const user = client.user;
+                    if (!user) {
+                        throw new Error('User not found');
+                    }
+                    console.log(user);
+                    next();}
 
             const shipment = await shipmentRepository.findOne({
                 where: { id: shipment_id },
