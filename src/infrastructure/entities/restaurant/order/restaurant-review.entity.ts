@@ -20,6 +20,8 @@ export class RestaurantOrderReview extends AuditableEntity {
   @ManyToOne(()=>RestaurantOrder,(restaurantOrder)=>restaurantOrder.reviews,{onDelete:'CASCADE'})
   @JoinColumn({name:'restaurant_order_id'})
   restaurant_order:RestaurantOrder
+  @Column()
+  restaurant_order_id:string
 
   @OneToMany(()=>ReviewReply,(reviewReply)=>reviewReply.review,{onDelete:'CASCADE'})
   replies:ReviewReply[]

@@ -761,6 +761,7 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
     const restaurant = await this.restaurantRepository.findOne({
       where: { id: order.restaurant.id },
     });
+    console.log(restaurant);
     restaurant.no_of_reviews = restaurant.no_of_reviews + 1;
     restaurant.total_ratings = restaurant.total_ratings + req.rating;
     restaurant.average_rating =
