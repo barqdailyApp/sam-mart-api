@@ -114,13 +114,9 @@ if(driver.type=DriverTypeEnum.MART)
       },
     });
     else 
-    driver_shipments=await this.restaurant_order_repo.find({where:{driver_id:driver.id,status: Not(
-      In([
-        ShipmentStatusEnum.PENDING,
-        ShipmentStatusEnum.DELIVERED,
-        ShipmentStatusEnum.CANCELED,
-      ]),
-    ),},relations:{driver:true}})
+    driver_shipments=await this.restaurant_order_repo.find({where:{driver_id:driver.id,
+    
+    },relations:{driver:true}})
     console.log(driver_shipments)
     this.driverShipmentGateway.broadcastLocationDriver(driver_shipments);
     return update;
