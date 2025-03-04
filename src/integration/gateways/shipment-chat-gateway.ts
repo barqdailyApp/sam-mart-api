@@ -36,7 +36,7 @@ export class ShipmentChatGateway {
 
     handleSendMessage(payload: {
         shipment: Shipment,
-        message: ShipmentMessageResponse,
+        shipmentChat: ShipmentChat,
         user: UserResponse,
         action: string
     }) {
@@ -44,9 +44,9 @@ export class ShipmentChatGateway {
         const shipmentDriverId = payload.shipment.driver.user_id;
         const connectedSockets: any = this.server.sockets
 
-        // if (payload.message && payload.message.attachment) {
-        //     payload.message.attachment.file_url = toUrl(payload.message.attachment.file_url);
-        // }
+        if (payload.shipmentChat && payload.shipmentChat.attachment) {
+            payload.shipmentChat.attachment.file_url = toUrl(payload.shipmentChat.attachment.file_url);
+        }
 
         connectedSockets.forEach(socket => {
             if (socket.user && (
@@ -54,7 +54,7 @@ export class ShipmentChatGateway {
                 socket.user.id === shipmentDriverId ||
                 socket.user.roles.includes('ADMIN')
             )) {
-                socket.emit(`shipment_chat_${payload.shipment.id}`, payload.message);
+                socket.emit(`shipment_chat_${payload.shipment.id}`, payload);
             }
         });
     }
