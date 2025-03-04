@@ -60,10 +60,7 @@ export class ShipmentChatGateway {
 
 
     handleRestaurantSendMessage(payload: {
-        order: RestaurantOrder,
-        shipmentChat: ShipmentChat,
-        user: UserResponse,
-        action: string
+        message:Mess
     }) {
         const shipmentOwnerId = payload.order.user_id;
         const shipmentDriverId = payload.order.driver.user_id;

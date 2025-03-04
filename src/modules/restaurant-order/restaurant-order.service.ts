@@ -49,6 +49,7 @@ import {
 import { RestaurantOrderReview } from 'src/infrastructure/entities/restaurant/order/restaurant-review.entity';
 import { Restaurant } from 'src/infrastructure/entities/restaurant/restaurant.entity';
 import { ReviewReply } from 'src/infrastructure/entities/restaurant/order/review-reply,entity';
+import { ShipmentMessageResponse } from '../order/dto/response/shipment-message.response';
 @Injectable()
 export class RestaurantOrderService extends BaseService<RestaurantOrder> {
   constructor(
@@ -674,15 +675,12 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
     });
     const savedMessage = await this.shipmentChatRepository.save(newMessage);
 
-    const userInfo = plainToInstance(UserResponse, this._request.user, {
-      excludeExtraneousValues: true,
-    });
 
+const message=plainToInstance(ShipmentMessageResponse, savedMessage, {
+  excludeExtraneousValues: true
+})
     this.shipmentChatGateway.handleRestaurantSendMessage({
-      order,
-      shipmentChat: savedMessage,
-      user: userInfo,
-      action: 'ADD_MESSAGE',
+      message:message,
     });
     // if driver send message , send notification to client
     if (order.driver.user_id === newMessage.user_id) {
