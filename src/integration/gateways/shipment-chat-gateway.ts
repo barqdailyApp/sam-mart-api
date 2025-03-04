@@ -30,7 +30,7 @@ export class ShipmentChatGateway {
 
     afterInit(client: Socket) {
         client.use(SocketAuthMiddleware(this.configService, this.userRepository) as any);
-        client.use(ShipmentPrivacyMiddleware(this.shipmentRepository,this.restaurantOrderService) as any);
+        // client.use(ShipmentPrivacyMiddleware(this.shipmentRepository,this.restaurantOrderService) as any);
     }
 
     handleSendMessage(payload: {
