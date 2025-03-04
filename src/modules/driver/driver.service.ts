@@ -115,15 +115,25 @@ export class DriverService {
           order: true,
         },
       });
+      this.driverShipmentGateway.broadcastLocationDriver(driver_shipments);
     } else {
-      driver_shipments = await this.restaurant_order_repo.find({
+      console.log("here")
+     const  food_orders = await this.restaurant_order_repo.find({
         where: {
+          driver_id: driver.id,
+          status: Not(
+            In([
+              ShipmentStatusEnum.PENDING,
+              ShipmentStatusEnum.DELIVERED,
+              ShipmentStatusEnum.CANCELED,
+            ]),
+          ),
         },
         relations: { driver: true },
       });
+      this.driverShipmentGateway.broadcastLocationDriver(food_orders);
     }
-    console.log(driver_shipments);
-    this.driverShipmentGateway.broadcastLocationDriver(driver_shipments);
+  
     return update;
   }
 
