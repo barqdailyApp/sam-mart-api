@@ -50,6 +50,7 @@ import { RestaurantOrderReview } from 'src/infrastructure/entities/restaurant/or
 import { Restaurant } from 'src/infrastructure/entities/restaurant/restaurant.entity';
 import { ReviewReply } from 'src/infrastructure/entities/restaurant/order/review-reply,entity';
 import { ShipmentMessageResponse } from '../order/dto/response/shipment-message.response';
+import { ReviewSort } from 'src/infrastructure/data/enums/review-sort.enum';
 @Injectable()
 export class RestaurantOrderService extends BaseService<RestaurantOrder> {
   constructor(
@@ -784,17 +785,36 @@ s
     return reply;
   }
 
-  async getReviews(restaurant_id: string, query: PaginatedRequest) {
+  async getReviews(restaurant_id: string, query: PaginatedRequest,sortBy?: ReviewSort) {
     if (!query.limit) query.limit = 10;
     if (!query.page) query.page = 1;
+    let order={};
+   if(sortBy){
+     switch (sortBy) {
+      case ReviewSort.NEWEST:
+       order = { created_at: 'DESC' };
+        break;
+      case ReviewSort.OLDEST:
+        order = { created_at: 'ASC' };
+        break;
+      case ReviewSort.HIGHEST_RATING:
+        order = { rating: 'DESC' };
+        break;
+        case ReviewSort.LOWEST_RATING:
+        order = { rating: 'ASC' };
+      default:
+        order = { created_at: 'DESC' };
+        break;
+    }
+   }
 
     const result = await this.reviewRepository.findAndCount({
       where: { restaurant_order: { restaurant_id: restaurant_id } },
       relations: {
         user: true,
-        replies: true,
+        replies: {user:true},
       },
-      order: { created_at: 'DESC' },
+      order: order,
       skip: (query.page - 1) * query.limit,
       take: query.limit,
     });
