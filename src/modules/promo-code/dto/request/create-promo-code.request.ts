@@ -1,6 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
-import { IsArray, IsDate, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsArray, IsDate, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { DriverTypeEnum } from "src/infrastructure/data/enums/driver-type.eum";
 
 export class CreatePromoCodeRequest {
     @ApiProperty()
@@ -26,6 +27,12 @@ export class CreatePromoCodeRequest {
     @IsOptional()
     @IsString()
     note:string
+
+   @ApiProperty({default:DriverTypeEnum.MART,enum:DriverTypeEnum})
+ @IsNotEmpty()
+ @IsString()
+ @IsEnum(DriverTypeEnum)
+ type:DriverTypeEnum
 
     
 }

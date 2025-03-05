@@ -45,6 +45,7 @@ import { Wallet } from 'src/infrastructure/entities/wallet/wallet.entity';
 import { Transaction } from 'src/infrastructure/entities/wallet/transaction.entity';
 import { encodeUUID } from 'src/core/helpers/cast.helper';
 import * as uuidv4 from 'uuid';
+import { DriverTypeEnum } from 'src/infrastructure/data/enums/driver-type.eum';
 @Injectable()
 export class MakeOrderTransaction extends BaseTransaction<
   MakeOrderRequest,
@@ -268,7 +269,7 @@ export class MakeOrderTransaction extends BaseTransaction<
           req.promo_code,
           req.payment_method.payment_method_id,
         );
-        if (promo_code) {
+        if (promo_code && promo_code.type == DriverTypeEnum.MART) {
           order.promo_code_id = promo_code.id;
           total -= promo_code.discount;
           order.total_price = total;

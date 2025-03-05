@@ -9,10 +9,11 @@ import { AdminRestaurantOrderController } from './admin-restaurant-order.control
 import { TransactionService } from '../transaction/transaction.service';
 import { ReasonService } from '../reason/reason.service';
 import { ShipmentChatGateway } from 'src/integration/gateways/shipment-chat-gateway';
+import { PromoCodeService } from '../promo-code/promo-code.service';
 
 @Module({
   controllers: [RestaurantOrderController,AdminRestaurantOrderController],
-  providers: [ShipmentChatGateway,RestaurantOrderService,MakeRestaurantOrderTransaction,PaymentMethodService,OrderGateway,TransactionService,ReasonService],
+  providers: [ShipmentChatGateway,PromoCodeService,RestaurantOrderService,MakeRestaurantOrderTransaction,PaymentMethodService,OrderGateway,TransactionService,ReasonService],
   imports:[NotificationModule]
 })
 export class RestaurantOrderModule {}

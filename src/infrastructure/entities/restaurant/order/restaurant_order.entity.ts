@@ -16,6 +16,7 @@ import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
 import { PaymentMethodEnum } from 'src/infrastructure/data/enums/payment-method';
 import { ShipmentChat } from '../../order/shipment-chat.entity';
 import { RestaurantOrderReview } from './restaurant-review.entity';
+import { PromoCode } from '../../promo-code/promo-code.entity';
 @Entity()
 export class RestaurantOrder extends AuditableEntity {
   @Column({ length: 10 })
@@ -130,4 +131,15 @@ export class RestaurantOrder extends AuditableEntity {
 
   @OneToMany(()=>RestaurantOrderReview, (restaurantOrderReview) => restaurantOrderReview.restaurant_order, {onDelete:'CASCADE'})
   reviews: RestaurantOrderReview[]
+
+@ManyToOne(()=>PromoCode, (promoCode) => promoCode.restaurant_orders, {onDelete:'CASCADE'})
+@JoinColumn({name:'promo_code_id'})
+promo_code:PromoCode
+
+@Column({nullable:true})
+promo_code_id:string
+
+@Column({ nullable: true })
+promo_code_discount: number;
+
 }

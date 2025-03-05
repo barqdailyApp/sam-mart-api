@@ -26,6 +26,8 @@ import { Constant } from 'src/infrastructure/entities/constant/constant.entity';
 import { ConstantType } from 'src/infrastructure/data/enums/constant-type.enum';
 import { calculateDistances } from 'src/core/helpers/geom.helper';
 import { de } from '@faker-js/faker';
+import { DriverTypeEnum } from 'src/infrastructure/data/enums/driver-type.eum';
+import { PromoCodeService } from 'src/modules/promo-code/promo-code.service';
 @Injectable()
 export class MakeRestaurantOrderTransaction extends BaseTransaction<
   MakeRestaurantOrderRequest,
@@ -37,6 +39,7 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
     private readonly fileService: FileService,
     @Inject(ConfigService) private readonly _config: ConfigService,
     private readonly paymentService: PaymentMethodService,
+    private readonly promo_code_service: PromoCodeService
   ) {
     super(dataSource);
   }
@@ -167,7 +170,23 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
       order.sub_total=total;
   
       order.total_price = total+delivery_fee;
-
+      if (req.promo_code) {
+        const promo_code = await this.promo_code_service.getValidPromoCodeByCode(
+          req.promo_code,
+          req.payment_method.payment_method_id,
+        );
+        if (promo_code && promo_code.type == DriverTypeEnum.FOOD) {
+          order.promo_code_id = promo_code.id;
+          total -= promo_code.discount;
+          order.total_price = total;
+          order.promo_code = promo_code;
+          order.promo_code_discount = promo_code.discount;
+          promo_code.current_uses++;
+          if (promo_code.user_ids == null) promo_code.user_ids = [];
+          promo_code.user_ids.push(user.id);
+          await context.save(promo_code);
+        }
+      }
       // handle payment
 
       switch (payment_method.type) {

@@ -31,4 +31,12 @@ export class MakeRestaurantOrderRequest {
   @IsOptional()
   @IsEnum(PlatformType)
   @IsNotEmpty()
-  platform: PlatformType;}
+  platform: PlatformType;
+
+  @ApiProperty({required:false})
+  @IsOptional()
+  @IsString()
+  promo_code: string;
+  
+
+}

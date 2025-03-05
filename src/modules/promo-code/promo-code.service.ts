@@ -8,6 +8,7 @@ import { Request } from 'express';
 import { PaymentMethod } from 'src/infrastructure/entities/payment_method/payment_method.entity';
 import { AddPromoCodePaymentMethodRequest } from './dto/request/create-promo-code.request';
 import { Order } from 'src/infrastructure/entities/order/order.entity';
+import { DriverTypeEnum } from 'src/infrastructure/data/enums/driver-type.eum';
 
 @Injectable()
 export class PromoCodeService extends BaseService<PromoCode> {
@@ -72,9 +73,48 @@ export class PromoCodeService extends BaseService<PromoCode> {
     return await this.promoCodeRepository.save(promo_code);
   }
 
+  async getClientValidPromoCodeByCode(code: string,type?: DriverTypeEnum, payment_method_id?: string) {
+    const valid_code = await this.promoCodeRepository.findOne({
+      where: { code, expire_at: MoreThan(new Date()), is_active: true, type },
+      relations: ['payment_methods'],
+    });
+
+    if (!valid_code || valid_code.current_uses >= valid_code.number_of_uses) {
+      throw new BadRequestException('message.invalid_promo_code');
+    }
+    if(valid_code.payment_methods.length>0){
+      const is_exists = valid_code.payment_methods.filter(
+        (payment_method) => payment_method.id == payment_method_id,
+      );
+      if(is_exists.length==0){
+        throw new BadRequestException('message.invalid_promo_code');
+      }
+    }
+
+    if (valid_code.use_once) {
+      if (valid_code.user_ids == null) valid_code.user_ids = [];
+      const used = valid_code.user_ids.filter(
+        (id) => id == this.request.user.id,
+      );
+      if (used.length > 0) {
+        throw new BadRequestException('message.promo_code_used');
+      }
+      const new_user=await this.orderRepository.findOne({
+        where:{user_id:this.request.user.id},
+      })
+      if(new_user){
+        throw new BadRequestException('message.promo_code_new_user');
+      }
+      valid_code.user_ids.push(this.request.user.id);
+    }
+
+    return valid_code;
+  }
+
+
   async getValidPromoCodeByCode(code: string, payment_method_id?: string) {
     const valid_code = await this.promoCodeRepository.findOne({
-      where: { code, expire_at: MoreThan(new Date()), is_active: true },
+      where: { code, expire_at: MoreThan(new Date()), is_active: true,  },
       relations: ['payment_methods'],
     });
 

@@ -23,6 +23,7 @@ import { ActionResponse } from 'src/core/base/responses/action.response';
 import { PromoCodeResponse } from './dto/response/promo-code.response';
 import { applyQueryIncludes } from 'src/core/helpers/service-related.helper';
 import { where } from 'sequelize';
+import { DriverTypeEnum } from 'src/infrastructure/data/enums/driver-type.eum';
 @ApiHeader({
   name: 'Accept-Language',
   required: false,
@@ -79,11 +80,11 @@ export class PromoCodeController {
   }
 
   @Get('valid/:id')
-  async getValidPromoCode(@Query('code') code: string,@Query('payment_method_id') payment_method_id?: string) {
+  async getValidPromoCode(@Query('code') code: string,@Query('type')type?: DriverTypeEnum,@Query('payment_method_id') payment_method_id?: string) {
     return new ActionResponse(
       plainToInstance(
         PromoCodeResponse,
-        await this.promoCodeService.getValidPromoCodeByCode(code,payment_method_id),
+        await this.promoCodeService.getClientValidPromoCodeByCode(code,type,payment_method_id),
         { excludeExtraneousValues: true },
       ),
     );
