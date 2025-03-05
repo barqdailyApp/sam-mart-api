@@ -179,7 +179,7 @@ export class RestaurantOrderController {
       async addReview(@Param('order_id') order_id: string, @Body() req: AddReviewRequest){
         return new ActionResponse(await this.restaurantOrderService.addReview(order_id,req));
       }
-      @Roles(Role.CLIENT,Role.RESTAURANT_ADMIN)
+      @Roles(Role.CLIENT,Role.RESTAURANT_ADMIN,Role.ADMIN)
       @Post('review-reply/:id')
       async addReviewReply(@Param('id') id:string,@Body() req: AddReviewReplyRequest){
         return new ActionResponse(await this.restaurantOrderService.AddReviewReply(id,req));
