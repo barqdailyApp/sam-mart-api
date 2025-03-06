@@ -7,7 +7,7 @@ export class ReviewReplyResponse {
     @Expose() id: string;
 
     @Expose() comment: string;
-
+    @Expose() created_at: Date;
     @Expose()
     @Type(()=>UserResponse)
     user: User

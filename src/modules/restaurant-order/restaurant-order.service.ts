@@ -798,15 +798,15 @@ s
         order = { created_at: 'ASC',replies: { created_at: 'ASC' } };
         break;
       case ReviewSort.HIGHEST_RATING:
-        order = { rating: 'DESC',replies: { rating: 'DESC' } };
+        order = { rating: 'DESC',replies: { created_at: 'DESC' } };
         break;
         case ReviewSort.LOWEST_RATING:
-        order = { rating: 'ASC',replies: { rating: 'DESC' } };
+        order = { rating: 'ASC',replies: { created_at: 'DESC' } };
       default:
         order = { created_at: 'DESC',replies: { created_at: 'DESC' } };
         break;
     }
-   }
+   }else{order={ replies: { created_at: 'DESC' } }}
 
     const result = await this.reviewRepository.findAndCount({
       where: { restaurant_order: { restaurant_id: restaurant_id } },
