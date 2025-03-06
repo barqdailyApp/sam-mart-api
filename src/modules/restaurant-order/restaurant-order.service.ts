@@ -51,6 +51,8 @@ import { Restaurant } from 'src/infrastructure/entities/restaurant/restaurant.en
 import { ReviewReply } from 'src/infrastructure/entities/restaurant/order/review-reply,entity';
 import { ShipmentMessageResponse } from '../order/dto/response/shipment-message.response';
 import { ReviewSort } from 'src/infrastructure/data/enums/review-sort.enum';
+import { Between } from "typeorm";
+import { startOfDay, endOfDay, subHours } from "date-fns";
 @Injectable()
 export class RestaurantOrderService extends BaseService<RestaurantOrder> {
   constructor(
@@ -172,40 +174,56 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
   }
 
   async getRestaurantOrdersDriverOrders(query: GetDriverRestaurantOrdersQuery) {
-    // if limit and page are null put default values
-
-    if (!query.limit) query.limit = 10;
-    if (!query.page) query.page = 1;
-
+    // Set default values for limit and page
+    query.limit = query.limit ?? 10;
+    query.page = query.page ?? 1;
+  
     const driver = await this.driverRepository.findOne({
       where: {
         user_id: this._request.user.id,
-        is_receive_orders: true,
         type: DriverTypeEnum.FOOD,
       },
       order: { created_at: 'DESC' },
     });
-
-    const orders = await this.restaurantOrderRepository.findAndCount({
-      where: {
-        driver_id: driver.id,
-        status:
-          query?.status == ShipmentStatusEnum.ACTIVE
-            ? In([
-                ShipmentStatusEnum.ACCEPTED,
-                ShipmentStatusEnum.READY_FOR_PICKUP,
-                ShipmentStatusEnum.PICKED_UP,
-                ShipmentStatusEnum.PROCESSING,
-              ])
-            : query.status,
-      },
-      take: query.limit * 1,
-      skip: query.page - 1,
+  
+    if (!driver) {
+      throw new Error("Driver not found");
+    }
+  
+    const today = new Date();
+    const startDate = subHours(startOfDay(today), 3);
+    const endDate = subHours(endOfDay(today), 3);
+  
+    // Dynamically build the where condition
+    const whereCondition: any = {
+      driver_id: driver.id,
+      status:
+        query?.status === ShipmentStatusEnum.ACTIVE
+          ? In([
+              ShipmentStatusEnum.ACCEPTED,
+              ShipmentStatusEnum.READY_FOR_PICKUP,
+              ShipmentStatusEnum.PICKED_UP,
+              ShipmentStatusEnum.PROCESSING,
+            ])
+          : query.status,
+    };
+  
+    // Apply date filter only if query.date is provided
+    if (query.completed_today==true) {
+      whereCondition.order_delivered_at = Between(startDate, endDate);
+    }
+  
+    const [orders, total] = await this.restaurantOrderRepository.findAndCount({
+      where: whereCondition,
+      take: query.limit,
+      skip: (query.page - 1) * query.limit,
       withDeleted: true,
       relations: { user: true, restaurant: true, address: true },
     });
-    return { orders: orders[0], total: orders[1] };
+  
+    return { orders, total };
   }
+  
   async getRestaurantOrdersClientOrders(query: GetDriverRestaurantOrdersQuery) {
     // if limit and page are null put default values
 
