@@ -1,4 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { Transform } from "class-transformer";
 import { IsBoolean, IsOptional } from "class-validator";
 import { ShipmentStatusEnum } from "src/infrastructure/data/enums/shipment_status.enum";
 import { Shipment } from "src/infrastructure/entities/order/shipment.entity";
@@ -19,6 +20,7 @@ export class GetDriverRestaurantOrdersQuery {
     @ApiProperty()
     @IsOptional()
     @IsBoolean()
+    @Transform(({ value }) => Boolean(value))
     completed_today:boolean
 
 
