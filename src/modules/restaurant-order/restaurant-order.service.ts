@@ -10,7 +10,7 @@ import { MakeRestaurantOrderTransaction } from './util/make-restaureant-order.tr
 import { MakeRestaurantOrderRequest } from './dto/request/make-restaurant-order.request';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RestaurantOrder } from 'src/infrastructure/entities/restaurant/order/restaurant_order.entity';
-import { Between, In, Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { ShipmentStatusEnum } from 'src/infrastructure/data/enums/shipment_status.enum';
 import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
 import { repl, REQUEST } from '@nestjs/core';
@@ -51,7 +51,6 @@ import { Restaurant } from 'src/infrastructure/entities/restaurant/restaurant.en
 import { ReviewReply } from 'src/infrastructure/entities/restaurant/order/review-reply,entity';
 import { ShipmentMessageResponse } from '../order/dto/response/shipment-message.response';
 import { ReviewSort } from 'src/infrastructure/data/enums/review-sort.enum';
-import { startOfDay, endOfDay, subHours } from "date-fns";
 @Injectable()
 export class RestaurantOrderService extends BaseService<RestaurantOrder> {
   constructor(
@@ -78,7 +77,6 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
     private reviewRepository: Repository<RestaurantOrderReview>,
     @InjectRepository(ReviewReply)
     private replyRepository: Repository<ReviewReply>,
-    
 
     @InjectRepository(Restaurant)
     private readonly restaurantRepository: Repository<Restaurant>,
@@ -172,57 +170,42 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
     await this.shipmentChatRepository.save(intialShipmentChat);
     return order;
   }
+
   async getRestaurantOrdersDriverOrders(query: GetDriverRestaurantOrdersQuery) {
-    // Set default values for limit and page
-    query.limit = query.limit ?? 10;
-    query.page = query.page ?? 1;
-  
+    // if limit and page are null put default values
+
+    if (!query.limit) query.limit = 10;
+    if (!query.page) query.page = 1;
+
     const driver = await this.driverRepository.findOne({
       where: {
         user_id: this._request.user.id,
+        is_receive_orders: true,
         type: DriverTypeEnum.FOOD,
       },
       order: { created_at: 'DESC' },
     });
-  
-    if (!driver) {
-      throw new Error("Driver not found");
-    }
-  
-    const today = new Date();
-    const startDate = subHours(startOfDay(today), 3);
-    const endDate = subHours(endOfDay(today), 3);
-  
-    // Dynamically build the where condition
-    const whereCondition: any = {
-      driver_id: driver.id,
-      status:
-        query?.status === ShipmentStatusEnum.ACTIVE
-          ? In([
-              ShipmentStatusEnum.ACCEPTED,
-              ShipmentStatusEnum.READY_FOR_PICKUP,
-              ShipmentStatusEnum.PICKED_UP,
-              ShipmentStatusEnum.PROCESSING,
-            ])
-          : query.status,
-    };
-  
-    // Apply date filter only if query.date is provided
-    if (query?.completed_today==true) {
-      whereCondition.order_delivered_at = Between(startDate, endDate);
-    }
-  
-    const [orders, total] = await this.restaurantOrderRepository.findAndCount({
-      where: whereCondition,
-      take: query.limit,
-      skip: (query.page - 1) * query.limit,
+
+    const orders = await this.restaurantOrderRepository.findAndCount({
+      where: {
+        driver_id: driver.id,
+        status:
+          query?.status == ShipmentStatusEnum.ACTIVE
+            ? In([
+                ShipmentStatusEnum.ACCEPTED,
+                ShipmentStatusEnum.READY_FOR_PICKUP,
+                ShipmentStatusEnum.PICKED_UP,
+                ShipmentStatusEnum.PROCESSING,
+              ])
+            : query.status,
+      },
+      take: query.limit * 1,
+      skip: query.page - 1,
       withDeleted: true,
       relations: { user: true, restaurant: true, address: true },
     });
-  
-    return { orders, total };
+    return { orders: orders[0], total: orders[1] };
   }
-  
   async getRestaurantOrdersClientOrders(query: GetDriverRestaurantOrdersQuery) {
     // if limit and page are null put default values
 
