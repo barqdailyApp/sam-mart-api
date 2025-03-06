@@ -13,7 +13,7 @@ import { RestaurantOrder } from 'src/infrastructure/entities/restaurant/order/re
 import { In, Repository } from 'typeorm';
 import { ShipmentStatusEnum } from 'src/infrastructure/data/enums/shipment_status.enum';
 import { Driver } from 'src/infrastructure/entities/driver/driver.entity';
-import { REQUEST } from '@nestjs/core';
+import { repl, REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { DriverTypeEnum } from 'src/infrastructure/data/enums/driver-type.eum';
 import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
@@ -792,18 +792,18 @@ s
    if(sortBy){
      switch (sortBy) {
       case ReviewSort.NEWEST:
-       order = { created_at: 'DESC' };
+       order = { created_at: 'DESC',replies: { created_at: 'DESC' } };
         break;
       case ReviewSort.OLDEST:
-        order = { created_at: 'ASC' };
+        order = { created_at: 'ASC',replies: { created_at: 'ASC' } };
         break;
       case ReviewSort.HIGHEST_RATING:
-        order = { rating: 'DESC' };
+        order = { rating: 'DESC',replies: { rating: 'DESC' } };
         break;
         case ReviewSort.LOWEST_RATING:
-        order = { rating: 'ASC' };
+        order = { rating: 'ASC',replies: { rating: 'DESC' } };
       default:
-        order = { created_at: 'DESC' };
+        order = { created_at: 'DESC',replies: { created_at: 'DESC' } };
         break;
     }
    }

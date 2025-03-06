@@ -18,6 +18,8 @@ export class RestaurantOrderReviewResponse {
     @Expose() comment: string;
 
     @Expose() rating: number;
+    @Expose() created_at: Date;
+
 
     @Expose() 
     @Type(()=>UserResponse)
