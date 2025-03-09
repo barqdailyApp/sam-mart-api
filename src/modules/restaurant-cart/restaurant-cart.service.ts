@@ -45,7 +45,7 @@ export class RestaurantCartService {
       relations: {
         restaurant_cart_meals: {
           meal: true,
-          cart_meal_options: { option: true },
+          cart_meal_options: { option: {option_group:true} },
         },
         restaurant: true,
       },
