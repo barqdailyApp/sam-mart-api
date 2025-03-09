@@ -822,6 +822,7 @@ s
         break;
         case ReviewSort.LOWEST_RATING:
         order = { rating: 'ASC',replies: { created_at: 'DESC' } };
+        break;
       default:
         order = { created_at: 'DESC',replies: { created_at: 'DESC' } };
         break;
