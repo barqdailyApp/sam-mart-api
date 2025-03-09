@@ -92,7 +92,8 @@ export class RestaurantCartService {
           id: m.id,
           quantity: m.quantity,
           total_price: total_unit_price,
-          cart_meal_options:m.cart_meal_options
+          options: m.cart_meal_options
+
           
         };
       }),
