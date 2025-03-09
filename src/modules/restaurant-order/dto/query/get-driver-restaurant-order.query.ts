@@ -17,11 +17,10 @@ export class GetDriverRestaurantOrdersQuery {
     @IsOptional()
     page: number
 
-    // @ApiProperty()
-    // @IsOptional()
-    // @IsBoolean()
-    // @Transform(({ value }) => Boolean(value))
-    // completed_today:boolean
+    @ApiProperty()
+    @IsOptional()
+ 
+    date:string
 
 
 }
