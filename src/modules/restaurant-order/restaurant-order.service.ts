@@ -772,8 +772,8 @@ s
       relations: { restaurant: true },
     });
     if (!order) throw new NotFoundException('message.order_not_found');
-    if (order.status != ShipmentStatusEnum.DELIVERED)
-      throw new Error('message.order_is_not_delivered');
+    // if (order.status != ShipmentStatusEnum.DELIVERED)
+    //   throw new Error('message.order_is_not_delivered');
     const review = await this.reviewRepository.save({
       ...req,
       restaurant_order_id: order.id,
