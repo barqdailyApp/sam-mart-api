@@ -92,9 +92,9 @@ export class RestaurantCartService {
           id: m.id,
           quantity: m.quantity,
           total_price: total_unit_price,
-          options: m.cart_meal_options
-
-          
+          options: m.cart_meal_options.map((o) => {
+            return { ...o, price: o.option.price,option_group:o.option.option_group};
+          }),
         };
       }),
       {
