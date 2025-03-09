@@ -21,6 +21,8 @@ export class RestaurantOrderListResponse {
     @Expose()
     created_at: Date;
     @Expose()
+    order_delivered_at: Date;
+    @Expose()
     @Type(() => AddressResponse) address?: AddressResponse
     @Expose()
     delivery_type: string;
