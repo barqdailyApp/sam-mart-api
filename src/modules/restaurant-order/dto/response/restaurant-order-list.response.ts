@@ -42,4 +42,7 @@ export class RestaurantOrderListResponse {
     @Type(() => SamModuleResponse) cancelShipmentReason?: SamModuleResponse
     @Expose()
     canceled_by: string
+    
+    @Expose()
+    delivery_fee: number
 }
