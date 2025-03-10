@@ -1,6 +1,6 @@
 import { Res } from "@nestjs/common";
 import { AuditableEntity } from "src/infrastructure/base/auditable.entity";
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from "typeorm";
 import { RestaurantCategory } from "../restaurant-category.entity";
 import { MealOptionGroup } from "./meal-option-group";
 import { RestaurantCart } from "../cart/restaurant-cart.entity";
@@ -48,8 +48,8 @@ export class Meal extends AuditableEntity{
     @OneToMany(()=>RestaurantCartMeal,restaurantCartMeal=>restaurantCartMeal.meal)
     cart_meals:RestaurantCartMeal[]
     
-    @OneToMany(() => MealOffer, (offer) => offer.meal)
-    offers: MealOffer[];
+    @OneToOne(() => MealOffer, (offer) => offer.meal)
+    offer: MealOffer;
     
 
 

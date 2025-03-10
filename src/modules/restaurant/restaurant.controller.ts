@@ -65,37 +65,41 @@ export class RestaurantController {
   }
 
   @Get('/details/:id')
-  async getSingleRestaurant(@Param('id') id: string,@Query('user_id') user_id?: string) {
-    const restaurant = await this.restaurantService.getSingleRestaurant(id,user_id);
-    const response = this._i18nResponse.entity(
-      restaurant,  
-      );
+  async getSingleRestaurant(
+    @Param('id') id: string,
+    @Query('user_id') user_id?: string,
+  ) {
+    const restaurant = await this.restaurantService.getSingleRestaurant(
+      id,
+      user_id,
+    );
+    const response = this._i18nResponse.entity(restaurant);
     return new ActionResponse(response);
   }
-
 
   @Get('/meal/details/:id')
   async getSingleMeal(@Param('id') id: string) {
     const meal = await this.restaurantService.getSingleMeal(id);
-    const response = this._i18nResponse.entity(
-      meal,
-    );
+    const response = this._i18nResponse.entity(meal);
     return new ActionResponse(response);
   }
-  
+
   @Get('/cuisines')
   async getCuisineTypes() {
     const cuisines = await this.restaurantService.getCuisineTypes();
-    const response= plainToInstance(CuisineResponse,cuisines,{excludeExtraneousValues:true});
+    const response = plainToInstance(CuisineResponse, cuisines, {
+      excludeExtraneousValues: true,
+    });
     return new ActionResponse(response);
   }
-  
-@Get('/meals-offers/:restaurant_id')
+
+  @Get('/meals-offers/:restaurant_id')
   async getMealsOffers(@Param('restaurant_id') restaurant_id: string) {
     const meals = await this.restaurantService.getMealsOffers(restaurant_id);
-    const result=await this._i18nResponse.entity(meals);
-    const response= plainToInstance(MealOfferResponse,result,{excludeExtraneousValues:true});
+    const translatedMeals = await this._i18nResponse.entity(meals);
+    const response = plainToInstance(MealResponse, translatedMeals, {
+      excludeExtraneousValues: true,
+    })
     return new ActionResponse(response);
   }
-  
 }

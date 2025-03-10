@@ -14,7 +14,7 @@ import { plainToInstance } from 'class-transformer';
 import { RestaurantResponse } from './dto/responses/restaurant.response';
 import { CuisineResponse } from './dto/responses/cuisine.response';
 import { Meal } from 'src/infrastructure/entities/restaurant/meal/meal.entity';
-import { json, where } from 'sequelize';
+import { and, json, where } from 'sequelize';
 import { RestaurantStatus } from 'src/infrastructure/data/enums/restaurant-status.enum';
 import { RegisterRestaurantRequest } from './dto/requests/register-restaurant.request';
 import { RegisterRestaurantTransaction } from './util/register-restaurant.transaction';
@@ -159,6 +159,7 @@ export class RestaurantService extends BaseService<Restaurant> {
       .createQueryBuilder('meal')
       .leftJoinAndSelect('meal.restaurant_category', 'category')
       .leftJoinAndSelect('category.restaurant', 'restaurant')
+      .leftJoinAndSelect('meal.offer', 'offer')
       .where('restaurant.status = :status', { status: RestaurantStatus.ACTIVE })
       .andWhere('category.is_active = :is_active', { is_active: true })
       .andWhere('meal.is_active = :is_active', { is_active: true })
@@ -181,7 +182,9 @@ export class RestaurantService extends BaseService<Restaurant> {
     const restaurant = await this._repo.findOne({
       where: { id },
       relations: {
-        categories: { meals: { meal_option_groups: { option_group: true } } },
+        categories: {
+          meals: { meal_option_groups: { option_group: true }, offer: true },
+        },
         cuisine_types: true,
       },
     });
@@ -204,7 +207,7 @@ export class RestaurantService extends BaseService<Restaurant> {
       const cart_meals = await this.cartMealRepository.find({
         where: { cart: { user_id: user_id } },
         relations: {
-          meal: true,
+          meal: {offer:true},
           cart_meal_options: { option: true },
           cart: true,
         },
@@ -249,7 +252,7 @@ export class RestaurantService extends BaseService<Restaurant> {
   async getSingleMeal(id: string) {
     const meal = await this.mealRepository.findOne({
       where: { id },
-      relations: { meal_option_groups: { option_group: { options: true } } },
+      relations: { meal_option_groups: { option_group: { options: true }, },offer:true },
     });
     if (!meal) throw new NotFoundException('no meal found');
     const meal_response = plainToInstance(MealResponse, meal, {
@@ -393,7 +396,7 @@ export class RestaurantService extends BaseService<Restaurant> {
     return await this.restaurantCategoryRepository.findOne({
       where: { restaurant_id: restaurant_id, id: category_id },
       relations: {
-        meals: { meal_option_groups: { option_group: { options: true } } },
+        meals: { meal_option_groups: { option_group: { options: true } },offer:true },
       },
     });
   }
@@ -480,7 +483,7 @@ export class RestaurantService extends BaseService<Restaurant> {
       where: { id: id, restaurant_id: restaurant_id },
     });
     if (!option_group) throw new NotFoundException('no option group found');
-   await this.mealOptionGroupRepository.softDelete({ option_group_id: id });
+    await this.mealOptionGroupRepository.softDelete({ option_group_id: id });
     return await this.optionGroupRepository.softRemove(option_group);
   }
 
@@ -639,43 +642,42 @@ export class RestaurantService extends BaseService<Restaurant> {
     });
     if (!meal) throw new NotFoundException('no meal found');
     const offer = plainToInstance(MealOffer, req);
-    
+
     return await this.mealOfferRepository.save(offer);
   }
 
   async getMealsOffers(restaurant_id: string) {
+    const meals = await this.mealRepository
+      .createQueryBuilder('meal')
+      .leftJoinAndSelect('meal.restaurant_category', 'category')
+      .leftJoinAndSelect('meal.meal_option_groups', 'meal_option_group')
+      .leftJoinAndSelect('meal_option_group.option_group', 'option_group')
+      .leftJoinAndSelect('option_group.options', 'options')
+      .leftJoinAndSelect('meal.offer', 'offer') // Assuming a relation exists: meal.offers
+      .where('category.restaurant_id = :restaurant_id', { restaurant_id })
+      .andWhere('offer.start_date <= DATE_ADD(NOW(), INTERVAL 3 HOUR)') // Yemen Time (UTC+3)
+      .andWhere('offer.end_date > DATE_ADD(NOW(), INTERVAL 3 HOUR)') // Yemen Time (UTC+3)
+      .andWhere('offer.is_active = :is_active', { is_active: true })
+      .andWhere('meal.is_active = :is_active', { is_active: true })
+      .andWhere('category.is_active = :is_active', { is_active: true })
+      .orderBy('offer.order_by', 'ASC')
+      .addOrderBy('meal_option_group.order_by', 'ASC')
+      .getMany();
+
+    return meals;}
+  async getAdminMealsOffers(restaurant_id: string) {
     const meals = await this.mealOfferRepository
-        .createQueryBuilder("offer")
-        .leftJoinAndSelect("offer.meal", "meal")
-        .leftJoinAndSelect("meal.restaurant_category", "category")
-         .leftJoinAndSelect("meal.meal_option_groups", "meal_option_group")
-        .leftJoinAndSelect("meal_option_group.option_group", "option_group")
-        .leftJoinAndSelect("option_group.options", "options")
-        .where("category.restaurant_id = :restaurant_id", { restaurant_id })
-        .andWhere("offer.start_date <= DATE_ADD(NOW(), INTERVAL 3 HOUR)") // Convert to Yemen Time (UTC+3)
-        .andWhere("offer.end_date > DATE_ADD(NOW(), INTERVAL 3 HOUR)") // Convert to Yemen Time (UTC+3)
-        .andWhere("offer.is_active = :is_active", { is_active: true })
-        .orderBy("offer.order_by", "ASC")
-        .orderBy('meal_option_group.order_by', 'ASC')
-       
-        .getMany();
-
-
-
-    return meals;
-}
-async getAdminMealsOffers(restaurant_id: string) {
-  const meals = await this.mealOfferRepository
-      .createQueryBuilder("offer")
-      .leftJoinAndSelect("offer.meal", "meal")
-      .leftJoinAndSelect("meal.restaurant_category", "category")
-       .leftJoinAndSelect("meal.meal_option_groups", "meal_option_group")
-      .leftJoinAndSelect("meal_option_group.option_group", "option_group")
-      .leftJoinAndSelect("option_group.options", "options")
-      .where("category.restaurant_id = :restaurant_id", { restaurant_id })     
-      .orderBy("offer.order_by", "ASC")
+      .createQueryBuilder('offer')
+      .leftJoinAndSelect('offer.meal', 'meal')
+      .leftJoinAndSelect('meal.restaurant_category', 'category')
+      .leftJoinAndSelect('meal.meal_option_groups', 'meal_option_group')
+      .leftJoinAndSelect('meal_option_group.option_group', 'option_group')
+      .leftJoinAndSelect('option_group.options', 'options')
+      .where('category.restaurant_id = :restaurant_id', { restaurant_id })
+      .orderBy('offer.order_by', 'ASC')
       .orderBy('meal_option_group.order_by', 'ASC')
       .getMany();
 
-  return meals; }
+    return meals;
+  }
 }

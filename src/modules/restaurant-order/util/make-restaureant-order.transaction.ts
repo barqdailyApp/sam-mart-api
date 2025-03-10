@@ -107,7 +107,7 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
           },
         },
         relations: {
-          meal: true,
+          meal: {offer:true},
           cart_meal_options: { option: true },
           cart: true,
         },
@@ -137,12 +137,25 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
           
       // tranfer cart_meals to order_meals
       const restaurant_order_meals = cart_meals.map((cart_meal) => {
+        const offer = cart_meal.meal.offer;
+        let discount_percentage = 0;
+        let discounted_price = Number(cart_meal.meal.price);
+    
+        if (
+          offer &&
+          offer.is_active &&
+          new Date(offer.start_date) <= new Date(new Date().setUTCHours(new Date().getUTCHours() + 3)) && // Yemen Time (UTC+3)
+          new Date(offer.end_date) > new Date(new Date().setUTCHours(new Date().getUTCHours() + 3))
+        ) {
+          discount_percentage = Number(offer.discount_percentage);
+          discounted_price = discounted_price - (discounted_price * discount_percentage) / 100;
+        }
         return plainToInstance(RestaurantOrderMeal, {
           meal_id: cart_meal.meal_id,
           order_id: order.id,
           quantity: cart_meal.quantity,
           restaurant_order_id: order.id,
-          price: cart_meal.meal.price,
+          price: discounted_price,
           total_price:
             Number(cart_meal.meal.price) +
             Number(

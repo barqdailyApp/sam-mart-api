@@ -44,7 +44,7 @@ export class RestaurantCartService {
       where: { user_id: this.request.user.id },
       relations: {
         restaurant_cart_meals: {
-          meal: true,
+          meal: {offer:true},
           cart_meal_options: { option: {option_group:true} },
         },
         restaurant: true,
@@ -75,32 +75,55 @@ export class RestaurantCartService {
         Number(delivery_price_per_km);
 
     if (!cart) return null;
+    
     const response = plainToInstance(
       GetCartMealsResponse,
       cart.restaurant_cart_meals.map((m) => {
+        // Check if the meal has a valid offer
+        const offer = m.meal.offer;
+        let discount_percentage = 0;
+        let discounted_price = Number(m.meal.price);
+    
+        if (
+          offer &&
+          offer.is_active &&
+          new Date(offer.start_date) <= new Date(new Date().setUTCHours(new Date().getUTCHours() + 3)) && // Yemen Time (UTC+3)
+          new Date(offer.end_date) > new Date(new Date().setUTCHours(new Date().getUTCHours() + 3))
+        ) {
+          discount_percentage = Number(offer.discount_percentage);
+          discounted_price = discounted_price - (discounted_price * discount_percentage) / 100;
+        }
+    
+        // Calculate total unit price with options
         const total_unit_price =
-          Number(m.meal.price) +
+          discounted_price +
           Number(
             m.cart_meal_options.reduce(
               (acc, curr) => acc + curr.option.price,
               0,
             ),
           );
+    
         return {
           ...m.meal,
           meal_id: m.meal.id,
           id: m.id,
           quantity: m.quantity,
-          total_price: total_unit_price,
-          options: m.cart_meal_options.map((o) => {
-            return { ...o, price: o.option.price,option_group:o.option.option_group};
-          }),
+          total_price: total_unit_price , // Multiply by quantity for final total
+          options: m.cart_meal_options.map((o) => ({
+            ...o,
+            price: o.option.price,
+            option_group: o.option.option_group,
+          })),
+         
+        
         };
       }),
       {
         excludeExtraneousValues: true,
       },
     );
+    
     const restaurant_respone = plainToInstance(
       RestaurantResponse,
       cart.restaurant,

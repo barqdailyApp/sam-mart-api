@@ -16,7 +16,7 @@ export class MealOffer extends AuditableEntity {
     @Column({ default: true }) 
     is_active: boolean;
 
-    @ManyToOne(() => Meal, (meal) => meal.offers, { onDelete: "CASCADE" })
+    @ManyToOne(() => Meal, (meal) => meal.offer, { onDelete: "CASCADE" })
     @JoinColumn({ name: "meal_id" })
     meal: Meal;
 
