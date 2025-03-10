@@ -16,7 +16,7 @@ import { RestaurantService } from './restaurant.service';
 import { I18nResponse } from 'src/core/helpers/i18n.helper';
 import { ActionResponse } from 'src/core/base/responses/action.response';
 import { plainToInstance } from 'class-transformer';
-import { MealResponse } from './dto/responses/meal.response';
+import { MealOfferResponse, MealResponse } from './dto/responses/meal.response';
 import { RestaurantResponse } from './dto/responses/restaurant.response';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
@@ -356,4 +356,12 @@ export class AdminRestaurantController {
     const offer = await this.restaurantService.makeOffer(req, restaurant_id);
     return new ActionResponse(offer);
   }
+  @Get('/admin/meals-offers/:restaurant_id')
+    async getMealsOffers(@Param('restaurant_id') restaurant_id: string) {
+      const meals = await this.restaurantService.getAdminMealsOffers(restaurant_id);
+    
+      const response= plainToInstance(MealOfferResponse,meals,{excludeExtraneousValues:true});
+      return new ActionResponse(response);
+    }
+
 }

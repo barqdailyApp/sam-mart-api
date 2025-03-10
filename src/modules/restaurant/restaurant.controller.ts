@@ -93,7 +93,8 @@ export class RestaurantController {
 @Get('/meals-offers/:restaurant_id')
   async getMealsOffers(@Param('restaurant_id') restaurant_id: string) {
     const meals = await this.restaurantService.getMealsOffers(restaurant_id);
-    const response= plainToInstance(MealOfferResponse,meals,{excludeExtraneousValues:true});
+    const result=await this._i18nResponse.entity(meals);
+    const response= plainToInstance(MealOfferResponse,result,{excludeExtraneousValues:true});
     return new ActionResponse(response);
   }
   

@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsBoolean, IsDate, IsOptional, IsString } from "class-validator";
+import { IsBoolean, IsDate, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class MakeMealOfferRequest {
  @ApiProperty()
@@ -32,4 +32,10 @@ export class MakeMealOfferRequest {
  @IsString()
  @IsOptional()
  description_en:string
+
+
+ @ApiProperty()
+ @IsNumber()
+ @IsOptional()
+ order_by:number
 }

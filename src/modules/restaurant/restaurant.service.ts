@@ -660,10 +660,22 @@ export class RestaurantService extends BaseService<Restaurant> {
        
         .getMany();
 
-    if (!meals || meals.length === 0) {
-        throw new NotFoundException("No meals with active offers found");
-    }
+
 
     return meals;
 }
+async getAdminMealsOffers(restaurant_id: string) {
+  const meals = await this.mealOfferRepository
+      .createQueryBuilder("offer")
+      .leftJoinAndSelect("offer.meal", "meal")
+      .leftJoinAndSelect("meal.restaurant_category", "category")
+       .leftJoinAndSelect("meal.meal_option_groups", "meal_option_group")
+      .leftJoinAndSelect("meal_option_group.option_group", "option_group")
+      .leftJoinAndSelect("option_group.options", "options")
+      .where("category.restaurant_id = :restaurant_id", { restaurant_id })     
+      .orderBy("offer.order_by", "ASC")
+      .orderBy('meal_option_group.order_by', 'ASC')
+      .getMany();
+
+  return meals; }
 }

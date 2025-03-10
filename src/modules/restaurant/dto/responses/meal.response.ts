@@ -79,6 +79,11 @@ export class MealOfferResponse{
     @Expose()
     description: string;
     @Expose()
+    description_en: string;
+    @Expose()
+    description_ar: string;
+
+    @Expose()
     start_date: Date;
     @Expose()
     end_date: Date;
