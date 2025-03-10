@@ -29,14 +29,26 @@ import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 import e from 'express';
 import { RestaurantAdmin } from 'src/infrastructure/entities/restaurant/restaurant-admin.entity';
 import { AdminRestaurantDeatailsResponse } from './dto/responses/admin-restaurant-deatails.response';
-import { AddRestaurantCategoryRequest, UpdateRestaurantCategoryRequest } from './dto/requests/add-restaurant-category.request';
-import { AddMealRequest, UpdateMealRequest } from './dto/requests/add-meal.request';
+import {
+  AddRestaurantCategoryRequest,
+  UpdateRestaurantCategoryRequest,
+} from './dto/requests/add-restaurant-category.request';
+import {
+  AddMealRequest,
+  UpdateMealRequest,
+} from './dto/requests/add-meal.request';
 import { AddCuisineRequest } from './dto/requests/add-cuisine.request';
-import { AddOptionGroupRequest, CreateOptionRequest, UpdateOptionGroupRequest, UpdateOptionRequest } from './dto/requests/add-option-group.request';
+import {
+  AddOptionGroupRequest,
+  CreateOptionRequest,
+  UpdateOptionGroupRequest,
+  UpdateOptionRequest,
+} from './dto/requests/add-option-group.request';
 import { AddMealOptionGroupsRequest } from './dto/requests/add-meal-option-groups.request';
 import { Create } from 'sharp';
 import { UpdateRestaurantRequest } from './dto/requests/update-restaurant.request';
 import { UpdateCuisineRequest } from './dto/requests/update-cusisine.request';
+import { MakeMealOfferRequest } from './dto/requests/make-meal-offer.request';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -46,7 +58,7 @@ import { UpdateCuisineRequest } from './dto/requests/update-cusisine.request';
 })
 @ApiTags('Restaurant')
 @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
+@Roles(Role.ADMIN)
 @Controller('restaurant')
 export class AdminRestaurantController {
   constructor(
@@ -55,27 +67,25 @@ export class AdminRestaurantController {
   ) {}
 
   @Post('admin/cuisine')
-  async addCuisine(@Body() req:AddCuisineRequest){
+  async addCuisine(@Body() req: AddCuisineRequest) {
     const cuisine = await this.restaurantService.addCuisine(req);
     return new ActionResponse(cuisine);
   }
 
   @Put('admin/update-cuisine')
-  async editCuisine(@Body() req:UpdateCuisineRequest){
+  async editCuisine(@Body() req: UpdateCuisineRequest) {
     const cuisine = await this.restaurantService.updateCuisine(req);
     return new ActionResponse(cuisine);
   }
   @Delete('admin/delete-cuisine/:id')
-  async deleteCuisine(@Param('id') id:string){
+  async deleteCuisine(@Param('id') id: string) {
     const cuisine = await this.restaurantService.deleteCuisine(id);
     return new ActionResponse(cuisine);
   }
-  
-   
-  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
+
+  @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
   @Get('admin/all')
   async getRestaurantRequests(@Query() query: PaginatedRequest) {
-    
     const restaurants = await this.restaurantService.findAll(query);
 
     const total = await this.restaurantService.count(query);
@@ -86,11 +96,13 @@ export class AdminRestaurantController {
       { meta: { total, ...query } },
     );
   }
-@Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
+  @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
   @Get('/admin/details/:id')
   async getSingleRestaurant(@Param('id') id: string) {
-    const restaurant = await this.restaurantService.getAdminSingleRestaurant(id);
-console.log(restaurant)
+    const restaurant = await this.restaurantService.getAdminSingleRestaurant(
+      id,
+    );
+    console.log(restaurant);
     const response = plainToInstance(
       AdminRestaurantDeatailsResponse,
       restaurant,
@@ -104,156 +116,244 @@ console.log(restaurant)
     return new ActionResponse(restaurant);
   }
 
-  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
+  @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
   @Put('/admin/update/:restaurant_id')
-  async update(@Param('restaurant_id') restaurant_id: string, @Body() req:UpdateRestaurantRequest) {
-    const restaurant = await this.restaurantService.updateRestaurant(req, restaurant_id);
+  async update(
+    @Param('restaurant_id') restaurant_id: string,
+    @Body() req: UpdateRestaurantRequest,
+  ) {
+    const restaurant = await this.restaurantService.updateRestaurant(
+      req,
+      restaurant_id,
+    );
     return new ActionResponse(restaurant);
   }
-  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
+  @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
   @Post('/admin/category/:restaurant_id')
-  async addCategory(@Body() req: AddRestaurantCategoryRequest,@Param('restaurant_id') restaurant_id:string) {
-    const category = await this.restaurantService.addRestaurantCategory(req,restaurant_id);
+  async addCategory(
+    @Body() req: AddRestaurantCategoryRequest,
+    @Param('restaurant_id') restaurant_id: string,
+  ) {
+    const category = await this.restaurantService.addRestaurantCategory(
+      req,
+      restaurant_id,
+    );
     return new ActionResponse(category);
   }
 
-  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
+  @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
   @Get('/admin/categories/:restaurant_id')
-  async getCategories(@Param('restaurant_id') restaurant_id:string) {
-    const categories = await this.restaurantService.getRestaurantCategories(restaurant_id);
+  async getCategories(@Param('restaurant_id') restaurant_id: string) {
+    const categories = await this.restaurantService.getRestaurantCategories(
+      restaurant_id,
+    );
     return new ActionResponse(categories);
   }
-  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
+  @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
   @Get('/admin/category-meals/:restaurant_id/:id')
-  async getCategoriesMeals(@Param('restaurant_id') restaurant_id:string, @Param('id') id:string) {
-    const categories = await this.restaurantService.getRestaurantCategoryMeals(restaurant_id,id);
-    
-    const response= categories as any
+  async getCategoriesMeals(
+    @Param('restaurant_id') restaurant_id: string,
+    @Param('id') id: string,
+  ) {
+    const categories = await this.restaurantService.getRestaurantCategoryMeals(
+      restaurant_id,
+      id,
+    );
+
+    const response = categories as any;
     response.meals = plainToInstance(MealResponse, response.meals, {
       excludeExtraneousValues: true,
-    })
+    });
     return new ActionResponse(response);
   }
 
-
-  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
+  @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
   @Put('/admin/category/:restaurant_id')
-  async editCategory(@Body() req: UpdateRestaurantCategoryRequest,@Param('restaurant_id') restaurant_id:string) {
-    const category = await this.restaurantService.editRestaurantCategory(req,restaurant_id);
-   
+  async editCategory(
+    @Body() req: UpdateRestaurantCategoryRequest,
+    @Param('restaurant_id') restaurant_id: string,
+  ) {
+    const category = await this.restaurantService.editRestaurantCategory(
+      req,
+      restaurant_id,
+    );
+
     return new ActionResponse(category);
   }
-  //DELTE 
-  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
+  //DELTE
+  @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
   @Delete('/admin/category/:id/:restaurant_id')
-  async deleteCategory(@Param('id') id:string,@Param('restaurant_id') restaurant_id:string) {
-    const category = await this.restaurantService.deleteCategory(id,restaurant_id);
-   
+  async deleteCategory(
+    @Param('id') id: string,
+    @Param('restaurant_id') restaurant_id: string,
+  ) {
+    const category = await this.restaurantService.deleteCategory(
+      id,
+      restaurant_id,
+    );
+
     return new ActionResponse(category);
   }
-  
-  
-  
-  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
+
+  @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
   @Post('/admin/meal/:restaurant_id')
-  async addMeal(@Body() req: AddMealRequest,@Param('restaurant_id') restaurant_id:string) {
-    const meal = await this.restaurantService.addMeal(req,restaurant_id);
+  async addMeal(
+    @Body() req: AddMealRequest,
+    @Param('restaurant_id') restaurant_id: string,
+  ) {
+    const meal = await this.restaurantService.addMeal(req, restaurant_id);
     return new ActionResponse(meal);
   }
 
-  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
+  @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
   @Put('/admin/meal/:restaurant_id')
-  async editMeal(@Body() req: UpdateMealRequest,@Param('restaurant_id') restaurant_id:string) {
-    const meal = await this.restaurantService.editMeal(req,restaurant_id);
+  async editMeal(
+    @Body() req: UpdateMealRequest,
+    @Param('restaurant_id') restaurant_id: string,
+  ) {
+    const meal = await this.restaurantService.editMeal(req, restaurant_id);
     return new ActionResponse(meal);
   }
-  //DELETE 
-  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
+  //DELETE
+  @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
   @Delete('/admin/meal/:restaurant_id/:id')
-  async deleteMeal(@Param('id') id:string,@Param('restaurant_id') restaurant_id:string) {
-    const meal = await this.restaurantService.deleteMeal(id,restaurant_id);
+  async deleteMeal(
+    @Param('id') id: string,
+    @Param('restaurant_id') restaurant_id: string,
+  ) {
+    const meal = await this.restaurantService.deleteMeal(id, restaurant_id);
     return new ActionResponse(meal);
   }
-   //get option groups
-   @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
-   @Get('/admin/option-groups/:restaurant_id')
-   async getOptionGroups(@Param('restaurant_id') restaurant_id:string) {
-     const option_groups = await this.restaurantService.getRestaurantOptionGroups(restaurant_id);
-     return new ActionResponse(option_groups);
-   }
-   // get single option group
-   @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
-   @Get('/admin/option-group/:restaurant_id/:id')
-   async getSingleOptionGroup(@Param('id') id:string,@Param('restaurant_id') restaurant_id:string) {
-     const option_group = await this.restaurantService.getSingleOptionGroup(id,restaurant_id);
-     return new ActionResponse(option_group);
-   }
+  //get option groups
+  @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
+  @Get('/admin/option-groups/:restaurant_id')
+  async getOptionGroups(@Param('restaurant_id') restaurant_id: string) {
+    const option_groups =
+      await this.restaurantService.getRestaurantOptionGroups(restaurant_id);
+    return new ActionResponse(option_groups);
+  }
+  // get single option group
+  @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
+  @Get('/admin/option-group/:restaurant_id/:id')
+  async getSingleOptionGroup(
+    @Param('id') id: string,
+    @Param('restaurant_id') restaurant_id: string,
+  ) {
+    const option_group = await this.restaurantService.getSingleOptionGroup(
+      id,
+      restaurant_id,
+    );
+    return new ActionResponse(option_group);
+  }
   //create option group
-  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
+  @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
   @Post('/admin/option-group/:restaurant_id')
-  async addOptionGroup(@Body() req:AddOptionGroupRequest,@Param('restaurant_id') restaurant_id:string) {
-    const option_group = await this.restaurantService.addOptionGroup(req,restaurant_id);
+  async addOptionGroup(
+    @Body() req: AddOptionGroupRequest,
+    @Param('restaurant_id') restaurant_id: string,
+  ) {
+    const option_group = await this.restaurantService.addOptionGroup(
+      req,
+      restaurant_id,
+    );
     return new ActionResponse(option_group);
-
   }
 
-  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
+  @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
   @Put('/admin/option-group/:restaurant_id')
-  async editOptionGroup(@Body() req:UpdateOptionGroupRequest,@Param('restaurant_id') restaurant_id:string) {
-    const option_group = await this.restaurantService.editOptionGroup(req,restaurant_id);
+  async editOptionGroup(
+    @Body() req: UpdateOptionGroupRequest,
+    @Param('restaurant_id') restaurant_id: string,
+  ) {
+    const option_group = await this.restaurantService.editOptionGroup(
+      req,
+      restaurant_id,
+    );
     return new ActionResponse(option_group);
-
   }
 
-  //DELETE 
-  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
+  //DELETE
+  @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
   @Delete('/admin/option-group/:restaurant_id/:id')
-  async deleteOptionGroup(@Param('id') id:string,@Param('restaurant_id') restaurant_id:string) {
-    const option_group = await this.restaurantService.deleteOptionGroup(id,restaurant_id);
+  async deleteOptionGroup(
+    @Param('id') id: string,
+    @Param('restaurant_id') restaurant_id: string,
+  ) {
+    const option_group = await this.restaurantService.deleteOptionGroup(
+      id,
+      restaurant_id,
+    );
     return new ActionResponse(option_group);
   }
-
-
-
 
   //edit option
-  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
+  @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
   @Put('/admin/option/:restaurant_id')
-  async editOption(@Body() req:UpdateOptionRequest,@Param('restaurant_id') restaurant_id:string) {
-    const option = await this.restaurantService.editOption(req,restaurant_id);
+  async editOption(
+    @Body() req: UpdateOptionRequest,
+    @Param('restaurant_id') restaurant_id: string,
+  ) {
+    const option = await this.restaurantService.editOption(req, restaurant_id);
     return new ActionResponse(option);
-
   }
 
-  //DELETE 
-  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
+  //DELETE
+  @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
   @Delete('/admin/option/:restaurant_id/:id')
-  async deleteOption(@Param('id') id:string,@Param('restaurant_id') restaurant_id:string) {
-    const option = await this.restaurantService.deleteOption(id,restaurant_id);
+  async deleteOption(
+    @Param('id') id: string,
+    @Param('restaurant_id') restaurant_id: string,
+  ) {
+    const option = await this.restaurantService.deleteOption(id, restaurant_id);
     return new ActionResponse(option);
   }
 
   //add meal option groups
-  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
+  @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
   @Post('/admin/meal-option-groups/:restaurant_id')
-  async addMealOptionGroups(@Body() req:AddMealOptionGroupsRequest,@Param('restaurant_id') restaurant_id:string) {
-    const option = await this.restaurantService.addMealOptionGroups(req,restaurant_id);
+  async addMealOptionGroups(
+    @Body() req: AddMealOptionGroupsRequest,
+    @Param('restaurant_id') restaurant_id: string,
+  ) {
+    const option = await this.restaurantService.addMealOptionGroups(
+      req,
+      restaurant_id,
+    );
     return new ActionResponse(option);
   }
   // delete meal option group
-  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
+  @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
   @Delete('/admin/meal-option-groups/:restaurant_id/:id')
-  async deleteMealOptionGroup(@Param('id') id:string,@Param('restaurant_id') restaurant_id:string) {
-    const option_group = await this.restaurantService.deleteMealOptionGroup(id,restaurant_id);
+  async deleteMealOptionGroup(
+    @Param('id') id: string,
+    @Param('restaurant_id') restaurant_id: string,
+  ) {
+    const option_group = await this.restaurantService.deleteMealOptionGroup(
+      id,
+      restaurant_id,
+    );
     return new ActionResponse(option_group);
   }
   // add optiom to option group
-  @Roles(Role.RESTAURANT_ADMIN,Role.ADMIN)
+  @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
   @Post('/admin/option/:restaurant_id')
-  async addOption(@Body() req:  CreateOptionRequest,@Param('restaurant_id') restaurant_id:string) {
-    const option = await this.restaurantService.addOptionToOptionGroup(req,restaurant_id);
+  async addOption(
+    @Body() req: CreateOptionRequest,
+    @Param('restaurant_id') restaurant_id: string,
+  ) {
+    const option = await this.restaurantService.addOptionToOptionGroup(
+      req,
+      restaurant_id,
+    );
     return new ActionResponse(option);
   }
-
- 
+  @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
+  @Post('admin/make-offer/:restaurant_id')
+  async makeOffer(
+    @Body() req: MakeMealOfferRequest,
+    @Param('restaurant_id') restaurant_id: string,
+  ) {
+    const offer = await this.restaurantService.makeOffer(req, restaurant_id);
+    return new ActionResponse(offer);
+  }
 }

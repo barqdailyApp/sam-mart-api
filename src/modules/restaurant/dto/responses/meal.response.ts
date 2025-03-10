@@ -69,3 +69,23 @@ export class MealResponse {
         @Transform((value)=>{  return value.obj.options?.map((item)=>plainToInstance(OptionRespone,{option_id:item.option_id,...item.option,id:item.id,price:item.price},{excludeExtraneousValues:true}))})
         options:OptionRespone[]
 }
+
+export class MealOfferResponse{
+
+    @Expose()
+    id: string;
+    @Expose()
+    meal_id:string
+    @Expose()
+    description: string;
+    @Expose()
+    start_date: Date;
+    @Expose()
+    end_date: Date;
+    @Expose()
+    discount_percentage: number;
+    @Expose()
+    @Type(()=>MealResponse)
+    meal:MealResponse
+
+}

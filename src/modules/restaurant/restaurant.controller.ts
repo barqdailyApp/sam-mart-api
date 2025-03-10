@@ -14,7 +14,7 @@ import { RestaurantService } from './restaurant.service';
 import { I18nResponse } from 'src/core/helpers/i18n.helper';
 import { ActionResponse } from 'src/core/base/responses/action.response';
 import { plainToInstance } from 'class-transformer';
-import { MealResponse } from './dto/responses/meal.response';
+import { MealOfferResponse, MealResponse } from './dto/responses/meal.response';
 import { RestaurantResponse } from './dto/responses/restaurant.response';
 import { RegisterRestaurantRequest } from './dto/requests/register-restaurant.request';
 import { CuisineResponse } from './dto/responses/cuisine.response';
@@ -90,6 +90,11 @@ export class RestaurantController {
     return new ActionResponse(response);
   }
   
-
+@Get('/meals-offers/:restaurant_id')
+  async getMealsOffers(@Param('restaurant_id') restaurant_id: string) {
+    const meals = await this.restaurantService.getMealsOffers(restaurant_id);
+    const response= plainToInstance(MealOfferResponse,meals,{excludeExtraneousValues:true});
+    return new ActionResponse(response);
+  }
   
 }

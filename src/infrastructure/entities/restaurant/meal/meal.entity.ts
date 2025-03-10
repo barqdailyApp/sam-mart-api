@@ -5,6 +5,7 @@ import { RestaurantCategory } from "../restaurant-category.entity";
 import { MealOptionGroup } from "./meal-option-group";
 import { RestaurantCart } from "../cart/restaurant-cart.entity";
 import { RestaurantCartMeal } from "../cart/restaurant-cart-meal.entity";
+import { MealOffer } from "./meal-offer.entity";
 @Entity()
 export class Meal extends AuditableEntity{
 
@@ -47,7 +48,9 @@ export class Meal extends AuditableEntity{
     @OneToMany(()=>RestaurantCartMeal,restaurantCartMeal=>restaurantCartMeal.meal)
     cart_meals:RestaurantCartMeal[]
     
-
+    @OneToMany(() => MealOffer, (offer) => offer.meal)
+    offers: MealOffer[];
+    
 
 
 }
