@@ -48,7 +48,7 @@ import { AddMealOptionGroupsRequest } from './dto/requests/add-meal-option-group
 import { Create } from 'sharp';
 import { UpdateRestaurantRequest } from './dto/requests/update-restaurant.request';
 import { UpdateCuisineRequest } from './dto/requests/update-cusisine.request';
-import { MakeMealOfferRequest } from './dto/requests/make-meal-offer.request';
+import { MakeMealOfferRequest, UpdateMealOfferRequest } from './dto/requests/make-meal-offer.request';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -363,6 +363,18 @@ export class AdminRestaurantController {
     
       const response= plainToInstance(MealOfferResponse,meals,{excludeExtraneousValues:true});
       return new ActionResponse(response);
+    }
+
+
+    @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
+    @Put('/admin/meal-offer/:restaurant_id')
+    async editMealOffer(
+      @Body() req: UpdateMealOfferRequest,
+      @Param('restaurant_id') restaurant_id: string,
+    )
+    {
+      const offer = await this.restaurantService.editMealOffer(req,restaurant_id);
+      return new ActionResponse(offer);
     }
 
 }

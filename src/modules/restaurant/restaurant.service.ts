@@ -49,7 +49,7 @@ import { UpdateCuisineRequest } from './dto/requests/update-cusisine.request';
 import { Constant } from 'src/infrastructure/entities/constant/constant.entity';
 import { ConstantType } from 'src/infrastructure/data/enums/constant-type.enum';
 import { MealOffer } from 'src/infrastructure/entities/restaurant/meal/meal-offer.entity';
-import { MakeMealOfferRequest } from './dto/requests/make-meal-offer.request';
+import { MakeMealOfferRequest, UpdateMealOfferRequest } from './dto/requests/make-meal-offer.request';
 
 @Injectable()
 export class RestaurantService extends BaseService<Restaurant> {
@@ -680,4 +680,22 @@ export class RestaurantService extends BaseService<Restaurant> {
 
     return meals;
   }
+  async editMealOffer(req: UpdateMealOfferRequest, restaurant_id: string) {
+    const offer = await this.mealOfferRepository.findOne({
+      where: { id: req.id },
+    });
+    if (!offer) throw new NotFoundException('no offer found');
+    const meal = await this.mealRepository.findOne({
+      where: {
+        id: offer.meal_id,
+        restaurant_category: { restaurant_id: restaurant_id },
+      },
+    });
+    if (!meal) throw new NotFoundException('no meal found');
+    const offerUpdate = plainToInstance(MealOffer, req);
+
+    return await this.mealOfferRepository.save(offerUpdate);
+  }
+
+
 }
