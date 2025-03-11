@@ -282,7 +282,7 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
       });
       await this.orderGateway.emitRestauarntOrderEvent(
         order,
-        admin_users.map((admin) => admin.user_id),
+       [ ...admin_users.map((admin) => admin.user_id),"admin"],
       );
       return order;
     } catch (error) {
