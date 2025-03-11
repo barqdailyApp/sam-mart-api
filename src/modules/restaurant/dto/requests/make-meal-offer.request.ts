@@ -1,4 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { Transform } from "class-transformer";
 import { IsBoolean, IsDate, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class MakeMealOfferRequest {
@@ -8,10 +9,12 @@ export class MakeMealOfferRequest {
 
  @ApiProperty()
  @IsDate()
+    @Transform(({ value }) => new Date(value))
  start_date:Date
 
  @ApiProperty()
  @IsDate()
+    @Transform(({ value }) => new Date(value))
  end_date:Date
 
  @ApiProperty()
@@ -47,11 +50,13 @@ export class UpdateMealOfferRequest {
 
  @ApiProperty() 
  @IsDate()
+ @Transform(({ value }) => new Date(value))
  @IsOptional()
  start_date:Date
 
  @ApiProperty()
  @IsDate()
+    @Transform(({ value }) => new Date(value))
  @IsOptional()
  end_date:Date
 
