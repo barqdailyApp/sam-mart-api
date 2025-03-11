@@ -356,6 +356,7 @@ export class AdminRestaurantController {
     const offer = await this.restaurantService.makeOffer(req, restaurant_id);
     return new ActionResponse(offer);
   }
+  @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
   @Get('/admin/meals-offers/:restaurant_id')
     async getMealsOffers(@Param('restaurant_id') restaurant_id: string) {
       const meals = await this.restaurantService.getAdminMealsOffers(restaurant_id);
