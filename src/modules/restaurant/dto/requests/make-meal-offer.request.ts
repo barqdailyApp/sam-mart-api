@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
-import { IsBoolean, IsDate, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsBoolean, IsDate, IsNumber, IsOptional, IsString, Max, Min } from "class-validator";
 
 export class MakeMealOfferRequest {
  @ApiProperty()
@@ -19,11 +19,14 @@ export class MakeMealOfferRequest {
 
  @ApiProperty()
  @IsNumber()
+ @Min(1)
+ @Max(100)
  discount_percentage:number
 
  @ApiProperty()
  @IsBoolean()
  @IsOptional()
+ @Transform(({ value }) => Boolean(value))
  is_active: boolean;
 
  @ApiProperty()
@@ -34,6 +37,7 @@ export class MakeMealOfferRequest {
  @ApiProperty()
  @IsString()
  @IsOptional()
+
  description_en:string
 
 
@@ -63,11 +67,14 @@ export class UpdateMealOfferRequest {
  @ApiProperty()
  @IsNumber()
  @IsOptional()
+ @Min(1)
+ @Max(100)
  discount_percentage:number
 
  @ApiProperty()
  @IsBoolean()
  @IsOptional()
+ @Transform(({ value }) => Boolean(value))
  is_active: boolean;
 
  @ApiProperty()
