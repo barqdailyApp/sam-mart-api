@@ -51,8 +51,9 @@ import { Restaurant } from 'src/infrastructure/entities/restaurant/restaurant.en
 import { ReviewReply } from 'src/infrastructure/entities/restaurant/order/review-reply,entity';
 import { ShipmentMessageResponse } from '../order/dto/response/shipment-message.response';
 import { ReviewSort } from 'src/infrastructure/data/enums/review-sort.enum';
-import { Between } from "typeorm";
-import { startOfDay, endOfDay, subHours, parseISO } from "date-fns";
+import { Between } from 'typeorm';
+import { startOfDay, endOfDay, subHours, parseISO } from 'date-fns';
+import { RestaurantAdmin } from 'src/infrastructure/entities/restaurant/restaurant-admin.entity';
 @Injectable()
 export class RestaurantOrderService extends BaseService<RestaurantOrder> {
   constructor(
@@ -79,6 +80,8 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
     private reviewRepository: Repository<RestaurantOrderReview>,
     @InjectRepository(ReviewReply)
     private replyRepository: Repository<ReviewReply>,
+    @InjectRepository(RestaurantAdmin)
+    private readonly restaurantAdminRepository: Repository<RestaurantAdmin>,
 
     @InjectRepository(Restaurant)
     private readonly restaurantRepository: Repository<Restaurant>,
@@ -173,13 +176,11 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
     return order;
   }
 
-
-  
   async getRestaurantOrdersDriverOrders(query: GetDriverRestaurantOrdersQuery) {
     // Set default values for limit and page
     query.limit = query.limit ?? 10;
     query.page = query.page ?? 1;
-  
+
     const driver = await this.driverRepository.findOne({
       where: {
         user_id: this._request.user.id,
@@ -187,11 +188,11 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
       },
       order: { created_at: 'DESC' },
     });
-  
+
     if (!driver) {
-      throw new Error("Driver not found");
+      throw new Error('Driver not found');
     }
-  
+
     // Initialize where condition
     const whereCondition: any = {
       driver_id: driver.id,
@@ -205,16 +206,16 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
             ])
           : query.status,
     };
-  
+
     // If query.date is provided as a string (e.g., "2024-03-01"), parse it
     if (query.date) {
       const date = parseISO(query.date); // Converts "2024-03-01" to a Date object
       const startDate = subHours(startOfDay(date), 3);
       const endDate = subHours(endOfDay(date), 3);
-  
+
       whereCondition.order_delivered_at = Between(startDate, endDate);
     }
-  
+
     const [orders, total] = await this.restaurantOrderRepository.findAndCount({
       where: whereCondition,
       take: query.limit,
@@ -222,10 +223,10 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
       withDeleted: true,
       relations: { user: true, restaurant: true, address: true },
     });
-  
+
     return { orders, total };
   }
-  
+
   async getRestaurantOrdersClientOrders(query: GetDriverRestaurantOrdersQuery) {
     // if limit and page are null put default values
 
@@ -431,7 +432,15 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
     await this.restaurantOrderRepository.save(order);
     //send notification to driver and emit event
     try {
-      this.orderGateway.emitRestauarntOrderEvent(order, [order.user_id]);
+      const restaurant_admins = await this.restaurantAdminRepository.find({
+        where: {
+          restaurant_id: order.restaurant_id,
+        },
+      });
+      this.orderGateway.emitRestauarntOrderEvent(order, [
+        order.user_id,
+        ...restaurant_admins.map((admin) => admin.user_id),
+      ]);
       await this.notificationService.create(
         new NotificationEntity({
           user_id: order.user_id,
@@ -467,7 +476,15 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
     await this.restaurantOrderRepository.save(order);
     //send notification to driver and emit event
     try {
-      this.orderGateway.emitRestauarntOrderEvent(order, [order.user_id]);
+      const restaurant_admins = await this.restaurantAdminRepository.find({
+        where: {
+          restaurant_id: order.restaurant_id,
+        },
+      });
+      this.orderGateway.emitRestauarntOrderEvent(order, [
+        order.user_id,
+        ...restaurant_admins.map((admin) => admin.user_id),
+      ]);
       await this.notificationService.create(
         new NotificationEntity({
           user_id: order.user_id,
@@ -627,7 +644,16 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
     }
 
     await this.restaurantOrderRepository.save(order);
-
+    const restaurant_admins = await this.restaurantAdminRepository.find({
+      where: {
+        restaurant_id: order.restaurant_id,
+      },
+    });
+    this.orderGateway.emitRestauarntOrderEvent(order, [
+      order.user_id,
+      ...restaurant_admins.map((admin) => admin.user_id),
+    ]);
+    to_rooms.push(...restaurant_admins.map((admin) => admin.user_id));
     await this.orderGateway.emitRestauarntOrderEvent(order, to_rooms);
     if (order.payment_method_enum != PaymentMethodEnum.CASH) {
       await this.transactionService.makeTransaction(
@@ -702,7 +728,9 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
 
     this.shipmentChatGateway.handleRestaurantSendMessage({
       order,
-      message:plainToInstance(ShipmentMessageResponse, savedMessage, { excludeExtraneousValues: true }),
+      message: plainToInstance(ShipmentMessageResponse, savedMessage, {
+        excludeExtraneousValues: true,
+      }),
       user: userInfo,
       action: 'ADD_MESSAGE',
     });
@@ -735,7 +763,7 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
 
     return savedMessage;
   }
-s
+  s;
   async getMessagesByShipmentId(
     order_id: string,
     query: GetCommentQueryRequest,
@@ -805,35 +833,41 @@ s
     return reply;
   }
 
-  async getReviews(restaurant_id: string, query: PaginatedRequest,sortBy?: ReviewSort) {
+  async getReviews(
+    restaurant_id: string,
+    query: PaginatedRequest,
+    sortBy?: ReviewSort,
+  ) {
     if (!query.limit) query.limit = 10;
     if (!query.page) query.page = 1;
-    let order={};
-   if(sortBy){
-     switch (sortBy) {
-      case ReviewSort.NEWEST:
-       order = { created_at: 'DESC',replies: { created_at: 'DESC' } };
-        break;
-      case ReviewSort.OLDEST:
-        order = { created_at: 'ASC',replies: { created_at: 'ASC' } };
-        break;
-      case ReviewSort.HIGHEST_RATING:
-        order = { rating: 'DESC',replies: { created_at: 'DESC' } };
-        break;
+    let order = {};
+    if (sortBy) {
+      switch (sortBy) {
+        case ReviewSort.NEWEST:
+          order = { created_at: 'DESC', replies: { created_at: 'DESC' } };
+          break;
+        case ReviewSort.OLDEST:
+          order = { created_at: 'ASC', replies: { created_at: 'ASC' } };
+          break;
+        case ReviewSort.HIGHEST_RATING:
+          order = { rating: 'DESC', replies: { created_at: 'DESC' } };
+          break;
         case ReviewSort.LOWEST_RATING:
-        order = { rating: 'ASC',replies: { created_at: 'DESC' } };
-        break;
-      default:
-        order = { created_at: 'DESC',replies: { created_at: 'DESC' } };
-        break;
+          order = { rating: 'ASC', replies: { created_at: 'DESC' } };
+          break;
+        default:
+          order = { created_at: 'DESC', replies: { created_at: 'DESC' } };
+          break;
+      }
+    } else {
+      order = { replies: { created_at: 'DESC' } };
     }
-   }else{order={ replies: { created_at: 'DESC' } }}
 
     const result = await this.reviewRepository.findAndCount({
       where: { restaurant_order: { restaurant_id: restaurant_id } },
       relations: {
         user: true,
-        replies: {user:true},
+        replies: { user: true },
       },
       order: order,
       skip: (query.page - 1) * query.limit,

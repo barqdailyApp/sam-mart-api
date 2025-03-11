@@ -28,6 +28,8 @@ import { calculateDistances } from 'src/core/helpers/geom.helper';
 import { de } from '@faker-js/faker';
 import { DriverTypeEnum } from 'src/infrastructure/data/enums/driver-type.eum';
 import { PromoCodeService } from 'src/modules/promo-code/promo-code.service';
+import { OrderGateway } from 'src/integration/gateways/order.gateway';
+import { RestaurantAdmin } from 'src/infrastructure/entities/restaurant/restaurant-admin.entity';
 @Injectable()
 export class MakeRestaurantOrderTransaction extends BaseTransaction<
   MakeRestaurantOrderRequest,
@@ -39,7 +41,8 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
     private readonly fileService: FileService,
     @Inject(ConfigService) private readonly _config: ConfigService,
     private readonly paymentService: PaymentMethodService,
-    private readonly promo_code_service: PromoCodeService
+    private readonly promo_code_service: PromoCodeService,
+    private readonly orderGateway: OrderGateway,
   ) {
     super(dataSource);
   }
@@ -107,7 +110,7 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
           },
         },
         relations: {
-          meal: {offer:true},
+          meal: { offer: true },
           cart_meal_options: { option: true },
           cart: true,
         },
@@ -133,22 +136,25 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
           ? 0
           : Number(distance) - Number(fixed_delivery_distance)) *
           Number(delivery_price_per_km);
-          order.delivery_fee = delivery_fee;
-          
+      order.delivery_fee = delivery_fee;
+
       // tranfer cart_meals to order_meals
       const restaurant_order_meals = cart_meals.map((cart_meal) => {
         const offer = cart_meal.meal.offer;
         let discount_percentage = 0;
         let discounted_price = Number(cart_meal.meal.price);
-    
+
         if (
           offer &&
           offer.is_active &&
-          new Date(offer.start_date) <= new Date(new Date().setUTCHours(new Date().getUTCHours() + 3)) && // Yemen Time (UTC+3)
-          new Date(offer.end_date) > new Date(new Date().setUTCHours(new Date().getUTCHours() + 3))
+          new Date(offer.start_date) <=
+            new Date(new Date().setUTCHours(new Date().getUTCHours() + 3)) && // Yemen Time (UTC+3)
+          new Date(offer.end_date) >
+            new Date(new Date().setUTCHours(new Date().getUTCHours() + 3))
         ) {
           discount_percentage = Number(offer.discount_percentage);
-          discounted_price = discounted_price - (discounted_price * discount_percentage) / 100;
+          discounted_price =
+            discounted_price - (discounted_price * discount_percentage) / 100;
         }
         return plainToInstance(RestaurantOrderMeal, {
           meal_id: cart_meal.meal_id,
@@ -180,14 +186,15 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
         .map((order_meal) => order_meal.total_price * order_meal.quantity)
         .reduce((a, b) => a + b, 0);
 
-      order.sub_total=total;
-  
-      order.total_price = total+delivery_fee;
+      order.sub_total = total;
+
+      order.total_price = total + delivery_fee;
       if (req.promo_code) {
-        const promo_code = await this.promo_code_service.getValidPromoCodeByCode(
-          req.promo_code,
-          req.payment_method.payment_method_id,
-        );
+        const promo_code =
+          await this.promo_code_service.getValidPromoCodeByCode(
+            req.promo_code,
+            req.payment_method.payment_method_id,
+          );
         if (promo_code && promo_code.type == DriverTypeEnum.FOOD) {
           order.promo_code_id = promo_code.id;
           total -= promo_code.discount;
@@ -268,6 +275,15 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
       }
 
       await context.save(order);
+
+      const admin_users = await context.find(RestaurantAdmin, {
+        where: { restaurant_id: order.restaurant_id },
+     
+      });
+      await this.orderGateway.emitRestauarntOrderEvent(
+        order,
+        admin_users.map((admin) => admin.user_id),
+      );
       return order;
     } catch (error) {
       throw new BadRequestException(error.message);

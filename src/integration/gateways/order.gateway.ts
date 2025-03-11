@@ -55,7 +55,7 @@ export class OrderGateway
       client.user?.roles.includes(Role.EMPLOYEE)
     ) {
       client.join("admin")
-    } else if (client.user?.roles.includes(Role.CLIENT)) {
+    } else  {
       client.join(client.user.id)
     }
   }
