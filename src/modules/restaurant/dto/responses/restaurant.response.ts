@@ -1,6 +1,7 @@
-import { Expose, plainToInstance, Transform } from "class-transformer";
+import { Expose, plainToInstance, Transform, Type } from "class-transformer";
 import { toUrl } from "src/core/helpers/file.helper";
 import { MealResponse } from "./meal.response";
+import { CuisineResponse } from "./cuisine.response";
 
 
 export class RestaurantCategoryResponse{
@@ -68,6 +69,9 @@ export class RestaurantResponse {
 
     @Expose()
     estimated_delivery_time: number;
+    @Expose()
+    @Type(() => CuisineResponse)
+    cuisine_types: CuisineResponse[];
 }
 
 
