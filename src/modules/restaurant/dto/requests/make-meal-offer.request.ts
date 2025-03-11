@@ -58,7 +58,7 @@ export class UpdateMealOfferRequest {
  @ApiProperty()
  @IsNumber()
  @IsOptional()
- discount_percentage:string
+ discount_percentage:number
 
  @ApiProperty()
  @IsBoolean()
