@@ -142,6 +142,8 @@ export class MealOfferResponse {
   description_en: string;
   @Expose()
   description_ar: string;
+  @Expose()
+  order_by: number;
 
   @Expose()
   start_date: Date;
