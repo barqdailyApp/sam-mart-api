@@ -377,4 +377,26 @@ export class AdminRestaurantController {
       return new ActionResponse(offer);
     }
 
+    @Post('/admin/add-group')
+    async addGroup(@Body() req: AddCuisineRequest) {
+      const group = await this.restaurantService.addRestauntGroup(req);
+      return new ActionResponse(group);
+    }
+
+    @Put('/admin/update-group')
+    async updateGroup(@Body() req: UpdateCuisineRequest) {
+      const group = await this.restaurantService.updateRestauntGroup(req);
+      return new ActionResponse(group);
+    }
+    @Delete('/admin/delete-group/:id')
+    async deleteGroup(@Param('id') id: string) {
+      const group = await this.restaurantService.deleteRestauntGroup(id);
+      return new ActionResponse(group);
+    }
+    @Get('/admin/get-groups')
+    async getGroups() {
+      const groups = await this.restaurantService.getRestaurantGroups();
+      return new ActionResponse(groups);
+    }
+
 }

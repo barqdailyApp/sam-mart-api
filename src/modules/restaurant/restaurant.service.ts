@@ -49,7 +49,11 @@ import { UpdateCuisineRequest } from './dto/requests/update-cusisine.request';
 import { Constant } from 'src/infrastructure/entities/constant/constant.entity';
 import { ConstantType } from 'src/infrastructure/data/enums/constant-type.enum';
 import { MealOffer } from 'src/infrastructure/entities/restaurant/meal/meal-offer.entity';
-import { MakeMealOfferRequest, UpdateMealOfferRequest } from './dto/requests/make-meal-offer.request';
+import {
+  MakeMealOfferRequest,
+  UpdateMealOfferRequest,
+} from './dto/requests/make-meal-offer.request';
+import { RestaurantGroup } from 'src/infrastructure/entities/restaurant/restaurant-group.entity';
 
 @Injectable()
 export class RestaurantService extends BaseService<Restaurant> {
@@ -76,11 +80,13 @@ export class RestaurantService extends BaseService<Restaurant> {
     private readonly constantRepository: Repository<Constant>,
     @InjectRepository(MealOffer)
     private readonly mealOfferRepository: Repository<MealOffer>,
+    @InjectRepository(RestaurantGroup)
+    private readonly restaurantGroupRepository: Repository<RestaurantGroup>,
   ) {
     super(restaurantRepository);
   }
 
-  async findAllNearRestaurants(query: GetNearResturantsQuery) {
+  async findAllNearRestaurantsCusine(query: GetNearResturantsQuery) {
     const deliveryTimePerKm =
       (await this.constantRepository.findOne({
         where: { type: ConstantType.DELIVERY_TIME_PER_KM },
@@ -151,6 +157,52 @@ export class RestaurantService extends BaseService<Restaurant> {
       ],
     };
   }
+  async findAllNearRestaurantsGroup(query: GetNearResturantsQuery) {
+    const deliveryTimePerKm =
+      (await this.constantRepository.findOne({
+        where: { type: ConstantType.DELIVERY_TIME_PER_KM },
+      })) ?? 0;
+
+    const groups = await this.restaurantGroupRepository
+      .createQueryBuilder('restaurant-group')
+      .leftJoinAndSelect('restaurant-group.restaurants', 'restaurant')
+      .addSelect(
+        ` 
+        (6371 * acos( 
+          cos(radians(:latitude)) *  
+          cos(radians(restaurant.latitude)) *  
+          cos(radians(restaurant.longitude) - radians(:longitude)) +  
+          sin(radians(:latitude)) *  
+          sin(radians(restaurant.latitude))  
+        ))`,
+        'distance',
+      )
+      .where('restaurant.status = :status', { status: RestaurantStatus.ACTIVE })
+      .andWhere('restaurant-group.is_active = :is_active', { is_active: true })
+      .having('distance <= :radius', { radius: query.radius })
+      .setParameters({ latitude: query.latitude, longitude: query.longitude })
+      .orderBy('distance', 'ASC')
+      .getRawAndEntities();
+
+    const { raw, entities } = groups;
+
+    const result = entities.map((group) => {
+      const response = plainToInstance(CuisineResponse, group, {
+        excludeExtraneousValues: true,
+      });
+
+      response.restaurants = response.restaurants.map((restaurant, index) => {
+        restaurant.distance = parseFloat(raw[index]?.distance || '0');
+        restaurant.estimated_delivery_time = restaurant.average_prep_time;
+        Number(deliveryTimePerKm) * restaurant.distance;
+        return restaurant;
+      });
+
+      return response;
+    });
+
+    return result;
+  }
 
   async getTopSellerMeals(query: GetNearResturantsQuery) {
     const { latitude, longitude, radius } = query;
@@ -207,7 +259,7 @@ export class RestaurantService extends BaseService<Restaurant> {
       const cart_meals = await this.cartMealRepository.find({
         where: { cart: { user_id: user_id } },
         relations: {
-          meal: {offer:true},
+          meal: { offer: true },
           cart_meal_options: { option: true },
           cart: true,
         },
@@ -252,7 +304,10 @@ export class RestaurantService extends BaseService<Restaurant> {
   async getSingleMeal(id: string) {
     const meal = await this.mealRepository.findOne({
       where: { id },
-      relations: { meal_option_groups: { option_group: { options: true }, },offer:true },
+      relations: {
+        meal_option_groups: { option_group: { options: true } },
+        offer: true,
+      },
     });
     if (!meal) throw new NotFoundException('no meal found');
     const meal_response = plainToInstance(MealResponse, meal, {
@@ -278,6 +333,12 @@ export class RestaurantService extends BaseService<Restaurant> {
 
   async getCuisineTypes() {
     return await this.cuisineTypeRepository.find({
+      order: { order_by: 'ASC' },
+    });
+  }
+
+  async getRestaurantGroups() {
+    return await this.restaurantGroupRepository.find({
       order: { order_by: 'ASC' },
     });
   }
@@ -345,6 +406,20 @@ export class RestaurantService extends BaseService<Restaurant> {
       excludeExtraneousValues: true,
     });
   }
+
+  async addRestauntGroup(req: AddCuisineRequest) {
+    const group = plainToInstance(CuisineType, { ...req });
+    //check if directory exist
+    if (!fs.existsSync('storage/restaurant-groups/'))
+      fs.mkdirSync('storage/restaurant-groups/');
+    if (fs.existsSync(req.logo))
+      fs.renameSync(req.logo, req.logo.replace('/tmp/', '/restaurant-groups/'));
+    group.logo = req.logo.replace('/tmp/', '/restaurant-groups/');
+    await this.restaurantGroupRepository.save(group);
+    return plainToInstance(CuisineResponse, group, {
+      excludeExtraneousValues: true,
+    });
+  }
   async getSingleCuisine(id: string) {
     const cuisine = await this.cuisineTypeRepository.findOne({
       where: { id: id },
@@ -355,6 +430,14 @@ export class RestaurantService extends BaseService<Restaurant> {
     });
   }
 
+  async getSingleRestantGroup(id: string) {
+    const group = await this.restaurantGroupRepository.findOne({
+      where: { id: id },
+    });
+    return plainToInstance(CuisineResponse, group, {
+      excludeExtraneousValues: true,
+    });
+  }
   async updateCuisine(req: UpdateCuisineRequest) {
     const cuisine = await this.cuisineTypeRepository.findOne({
       where: { id: req.id },
@@ -378,12 +461,46 @@ export class RestaurantService extends BaseService<Restaurant> {
       excludeExtraneousValues: true,
     });
   }
+
+  async updateRestauntGroup(req: UpdateCuisineRequest) {
+    const group = await this.restaurantGroupRepository.findOne({
+      where: { id: req.id },
+    });
+    if (!group) throw new NotFoundException('no group found');
+    group.name_ar = req.name_ar;
+    group.name_en = req.name_en;
+    if (req.logo) {
+      //delete old image
+      if (group.logo && fs.existsSync(group.logo)) fs.unlinkSync(group.logo);
+      //check if directory exist
+      if (fs.existsSync(req.logo))
+        fs.renameSync(
+          req.logo,
+          req.logo.replace('/tmp/', '/restaurant-groups/'),
+        );
+      group.logo = req.logo.replace('/tmp/', '/restaurant-groups/');
+    }
+    group.is_active = req.is_active;
+    group.order_by = req.order_by;
+    await this.restaurantGroupRepository.save(group);
+    return plainToInstance(CuisineResponse, group, {
+      excludeExtraneousValues: true,
+    });
+  }
   async deleteCuisine(id: string) {
     const cuisine = await this.cuisineTypeRepository.findOne({
       where: { id: id },
     });
     if (!cuisine) throw new NotFoundException('no cuisine found');
     return await this.cuisineTypeRepository.softRemove(cuisine);
+  }
+
+  async deleteRestauntGroup(id: string) {
+    const group = await this.restaurantGroupRepository.findOne({
+      where: { id: id },
+    });
+    if (!group) throw new NotFoundException('no group found');
+    return await this.restaurantGroupRepository.softRemove(group);
   }
 
   async getRestaurantCategories(restaurant_id: string) {
@@ -396,7 +513,10 @@ export class RestaurantService extends BaseService<Restaurant> {
     return await this.restaurantCategoryRepository.findOne({
       where: { restaurant_id: restaurant_id, id: category_id },
       relations: {
-        meals: { meal_option_groups: { option_group: { options: true } },offer:true },
+        meals: {
+          meal_option_groups: { option_group: { options: true } },
+          offer: true,
+        },
       },
     });
   }
@@ -617,11 +737,18 @@ export class RestaurantService extends BaseService<Restaurant> {
     }
     if (req.cuisines_types_ids) {
       const cuisine_types = await this.cuisineTypeRepository.find({
-        where: { is_active: true, id: In(req.cuisines_types_ids) },
+        where: { id: In(req.cuisines_types_ids) },
       });
       if (!cuisine_types)
         throw new BadRequestException('cuisine types not found');
       restaurant.cuisine_types = cuisine_types;
+    }
+    if (req.groups_ids) {
+      const groups = await this.restaurantGroupRepository.find({
+        where: { id: In(req.groups_ids) },
+      });
+      if (!groups) throw new BadRequestException('groups not found');
+      restaurant.groups = groups;
     }
     await this.restaurantRepository.save(restaurant);
     const respone = await this.getSingleRestaurant(restaurant.id);
@@ -664,7 +791,8 @@ export class RestaurantService extends BaseService<Restaurant> {
       .addOrderBy('meal_option_group.order_by', 'ASC')
       .getMany();
 
-    return meals;}
+    return meals;
+  }
   async getAdminMealsOffers(restaurant_id: string) {
     const meals = await this.mealOfferRepository
       .createQueryBuilder('offer')
@@ -696,6 +824,4 @@ export class RestaurantService extends BaseService<Restaurant> {
 
     return await this.mealOfferRepository.save(offerUpdate);
   }
-
-
 }

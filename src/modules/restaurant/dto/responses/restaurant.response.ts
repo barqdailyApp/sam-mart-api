@@ -57,6 +57,8 @@ export class RestaurantResponse {
     longitude: number;
     @Expose()
     average_rating: number;
+    @Expose()
+    average_prep_time:number
 
     @Expose()
     no_of_reviews: number;

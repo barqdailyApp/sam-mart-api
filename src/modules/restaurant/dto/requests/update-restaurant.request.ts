@@ -37,6 +37,9 @@ export class UpdateRestaurantRequest {
     @ApiProperty({isArray:true})
     @IsOptional()
     cuisines_types_ids: string[];
+
+    @IsOptional()
+    groups_ids: string[];
     
       @ApiProperty()
       @IsOptional()

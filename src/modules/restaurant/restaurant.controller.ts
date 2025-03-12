@@ -46,7 +46,16 @@ export class RestaurantController {
   }
   @Get('/nearby')
   async getNearResturants(@Query() query: GetNearResturantsQuery) {
-    const restaurants = await this.restaurantService.findAllNearRestaurants(
+    const restaurants = await this.restaurantService.findAllNearRestaurantsCusine(
+      query,
+    );
+    const response = this._i18nResponse.entity(restaurants);
+
+    return new ActionResponse(response);
+  }
+  @Get('/nearby-groups')
+  async getNearResturantsGroups(@Query() query: GetNearResturantsQuery) {
+    const restaurants = await this.restaurantService.findAllNearRestaurantsGroup(
       query,
     );
     const response = this._i18nResponse.entity(restaurants);
@@ -88,6 +97,14 @@ export class RestaurantController {
   async getCuisineTypes() {
     const cuisines = await this.restaurantService.getCuisineTypes();
     const response = plainToInstance(CuisineResponse, cuisines, {
+      excludeExtraneousValues: true,
+    });
+    return new ActionResponse(response);
+  }
+  @Get('/groups')
+  async getRestaurantGroups() {
+    const gropus = await this.restaurantService.getCuisineTypes();
+    const response = plainToInstance(CuisineResponse, gropus, {
       excludeExtraneousValues: true,
     });
     return new ActionResponse(response);
