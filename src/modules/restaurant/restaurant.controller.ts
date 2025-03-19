@@ -112,7 +112,7 @@ export class RestaurantController {
   }
   @Get('/groups')
   async getRestaurantGroups() {
-    const gropus = await this.restaurantService.getCuisineTypes();
+    const gropus = await this.restaurantService.getRestaurantGroups();
     const response = plainToInstance(CuisineResponse, gropus, {
       excludeExtraneousValues: true,
     });

@@ -49,6 +49,7 @@ import { Create } from 'sharp';
 import { UpdateRestaurantRequest } from './dto/requests/update-restaurant.request';
 import { UpdateCuisineRequest } from './dto/requests/update-cusisine.request';
 import { MakeMealOfferRequest, UpdateMealOfferRequest } from './dto/requests/make-meal-offer.request';
+import { CuisineResponse } from './dto/responses/cuisine.response';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -396,7 +397,8 @@ export class AdminRestaurantController {
     @Get('/admin/get-groups')
     async getGroups() {
       const groups = await this.restaurantService.getRestaurantGroups();
-      return new ActionResponse(groups);
+      const response= plainToInstance(CuisineResponse,groups,{excludeExtraneousValues:true});
+      return new ActionResponse(response);
     }
 
 }
