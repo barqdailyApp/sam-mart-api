@@ -9,7 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
-import { GetNearResturantsQuery } from './dto/requests/get-near-resturants.query';
+import { GetNearResturantsQuery, GetNearResturantsQuerySearch } from './dto/requests/get-near-resturants.query';
 import { RestaurantService } from './restaurant.service';
 import { I18nResponse } from 'src/core/helpers/i18n.helper';
 import { ActionResponse } from 'src/core/base/responses/action.response';
@@ -47,6 +47,15 @@ export class RestaurantController {
   @Get('/nearby')
   async getNearResturants(@Query() query: GetNearResturantsQuery) {
     const restaurants = await this.restaurantService.findAllNearRestaurantsCusine(
+      query,
+    );
+    const response = this._i18nResponse.entity(restaurants);
+
+    return new ActionResponse(response);
+  }
+  @Get('/search')
+  async getNearResturantsSearch(@Query() query: GetNearResturantsQuerySearch) {
+    const restaurants = await this.restaurantService.findAllNearRestaurantsCusineMeals(
       query,
     );
     const response = this._i18nResponse.entity(restaurants);

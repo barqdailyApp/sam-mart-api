@@ -9,7 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/core/base/service/service.base';
 import { Restaurant } from 'src/infrastructure/entities/restaurant/restaurant.entity';
 import { In, Repository } from 'typeorm';
-import { GetNearResturantsQuery } from './dto/requests/get-near-resturants.query';
+import { GetNearResturantsQuery, GetNearResturantsQuerySearch } from './dto/requests/get-near-resturants.query';
 import { plainToInstance } from 'class-transformer';
 import { RestaurantResponse } from './dto/responses/restaurant.response';
 import { CuisineResponse } from './dto/responses/cuisine.response';
@@ -157,6 +157,76 @@ export class RestaurantService extends BaseService<Restaurant> {
       ],
     };
   }
+
+  async findAllNearRestaurantsCusineMeals(query: GetNearResturantsQuerySearch) {
+    const deliveryTimePerKm =
+      (await this.constantRepository.findOne({
+        where: { type: ConstantType.DELIVERY_TIME_PER_KM },
+      })) ?? 0;
+    const restaurants = await this.restaurantRepository
+      .createQueryBuilder('restaurant')
+      .leftJoinAndSelect('restaurant.cuisine_types', 'cuisine')
+      .leftJoinAndSelect('restaurant.categories', 'category')
+      .leftJoinAndSelect('category.meals', 'meal')
+      .addSelect(
+        `
+        (6371 * acos(
+          cos(radians(:latitude)) * 
+          cos(radians(restaurant.latitude)) * 
+          cos(radians(restaurant.longitude) - radians(:longitude)) + 
+          sin(radians(:latitude)) * 
+          sin(radians(restaurant.latitude))
+        ))`,
+        'distance',
+      )
+      .where('restaurant.status = :status', { status: RestaurantStatus.ACTIVE })
+      .andWhere('cuisine.is_active = :is_active', { is_active: true })
+      .andWhere(
+        '(meal.name_en LIKE :name OR meal.name_ar LIKE :name)',
+        { name: `%${query.name}%` }
+      )
+      .having('distance <= :radius', { radius: query.radius })
+      .setParameters({ latitude: query.latitude, longitude: query.longitude })
+      .orderBy(`CASE 
+                  WHEN meal.name_en = :name OR meal.name_ar = :name THEN 1 
+                  WHEN meal.name_en LIKE :exactMatch OR meal.name_ar LIKE :exactMatch THEN 2 
+                  ELSE 3 
+               END`, 'ASC')
+      .setParameters({ name: `%${query.name}%`, exactMatch: `${query.name}%` })
+      .getRawAndEntities();
+
+    // `getRawAndEntities()` returns { raw: [], entities: [] }
+    const { raw, entities } = restaurants;
+
+    // Map the distance from raw data into the restaurant entities
+    const restaurantsWithDistance = entities.map((restaurant, index) => {
+      const distance = raw[index]?.distance; // Get the corresponding distance value
+      return {
+        ...restaurant,
+        distance: parseFloat(distance), // Ensure distance is a number
+        estimated_delivery_time:
+          Number(restaurant.average_prep_time) +
+          Number(deliveryTimePerKm) * distance,
+        meals: restaurant.categories.flatMap(category =>
+          category.meals.filter(meal =>
+            meal.name_en.includes(query.name) || meal.name_ar.includes(query.name)
+          )
+        )
+      };
+    });
+
+    // Return both restaurants with distance and meals filtered by search
+    return {
+      restaurants: plainToInstance(
+        RestaurantResponse,
+        restaurantsWithDistance,
+        {
+          excludeExtraneousValues: true,
+        },
+      ),
+    };
+  }
+
   async findAllNearRestaurantsGroup(query: GetNearResturantsQuery) {
     const deliveryTimePerKm =
       (await this.constantRepository.findOne({
