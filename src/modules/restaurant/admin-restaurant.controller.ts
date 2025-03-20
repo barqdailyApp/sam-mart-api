@@ -396,7 +396,7 @@ export class AdminRestaurantController {
     }
     @Get('/admin/get-groups')
     async getGroups() {
-      const groups = await this.restaurantService.getRestaurantGroups();
+      const groups = await this.restaurantService.getAdminRestaurantGroups();
       const response= plainToInstance(CuisineResponse,groups,{excludeExtraneousValues:true});
       return new ActionResponse(response);
     }

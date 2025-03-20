@@ -393,6 +393,14 @@ export class RestaurantService extends BaseService<Restaurant> {
 
   async getRestaurantGroups() {
     return await this.restaurantGroupRepository.find({
+      where: { is_active: true },
+      order: { order_by: 'ASC' ,},
+    });
+  }
+
+  async getAdminRestaurantGroups() {
+    return await this.restaurantGroupRepository.find({
+    
       order: { order_by: 'ASC' },
     });
   }
