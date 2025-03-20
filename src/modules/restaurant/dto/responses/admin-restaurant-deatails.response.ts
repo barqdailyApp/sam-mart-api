@@ -1,4 +1,4 @@
-import { Expose, plainToInstance, Transform } from 'class-transformer';
+import { Expose, plainToInstance, Transform, Type } from 'class-transformer';
 import { RestaurantResponse } from './restaurant.response';
 import { toUrl } from 'src/core/helpers/file.helper';
 import { UserResponse } from 'src/modules/user/dto/responses/user.response';
@@ -6,6 +6,7 @@ import { RestaurantAttachmentEnum } from 'src/infrastructure/data/enums/restaura
 import { MealOptionGroup } from 'src/infrastructure/entities/restaurant/meal/meal-option-group';
 import { OptionGroupResponse } from './option-group.response';
 import { OptionRespone } from './option.response';
+import { CuisineResponse } from './cuisine.response';
 
 export class AdminRestaurantDeatailsResponse extends RestaurantResponse {
   @Expose()
@@ -36,6 +37,9 @@ export class AdminRestaurantDeatailsResponse extends RestaurantResponse {
     });
   })
   cuisine_types: any;
+  @Expose()
+  @Type(() => CuisineResponse)
+  groups: CuisineResponse[];
 
   @Expose()
   @Transform((value) => {
