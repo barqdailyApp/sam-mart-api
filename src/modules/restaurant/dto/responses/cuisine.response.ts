@@ -6,6 +6,9 @@ import { RestaurantResponse } from "./restaurant.response";
 export class CuisineResponse {
     @Expose()
     id: string;
+
+    @Expose()
+    is_active: string;
     @Expose()
     name_ar: string;
     @Expose()
