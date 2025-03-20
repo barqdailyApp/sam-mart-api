@@ -8,7 +8,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/core/base/service/service.base';
 import { Restaurant } from 'src/infrastructure/entities/restaurant/restaurant.entity';
-import { In, Repository } from 'typeorm';
+import { DeleteResult, In, Repository } from 'typeorm';
 import { GetNearResturantsQuery, GetNearResturantsQuerySearch } from './dto/requests/get-near-resturants.query';
 import { plainToInstance } from 'class-transformer';
 import { RestaurantResponse } from './dto/responses/restaurant.response';
@@ -483,6 +483,32 @@ export class RestaurantService extends BaseService<Restaurant> {
       excludeExtraneousValues: true,
     });
   }
+
+  async addGroupToRestaurant(group_id: string, restaurant_id: string) {
+    const group = await this.restaurantGroupRepository.findOne({
+      where: { id: group_id },
+    });
+    if (!group) throw new NotFoundException('no group found');
+    const restaurant = await this._repo.findOne({
+      where: { id: restaurant_id },
+    });
+    if (!restaurant) throw new NotFoundException('no restaurant found');
+    restaurant.groups.push(group);
+    return await this._repo.save(restaurant);
+  }
+
+  async unlinkGroupFromRestaurant(group_id: string, restaurant_id: string) {
+    const group = await this.restaurantGroupRepository.findOne({
+      where: { id: group_id },
+    });
+    if (!group) throw new NotFoundException('no group found');
+    const restaurant = await this._repo.findOne({
+      where: { id: restaurant_id },
+    });
+    if (!restaurant) throw new NotFoundException('no restaurant found');
+    restaurant.groups = restaurant.groups.filter((g) => g.id !== group_id);
+    return await this._repo.save(restaurant);
+  }
   async getSingleCuisine(id: string) {
     const cuisine = await this.cuisineTypeRepository.findOne({
       where: { id: id },
@@ -806,13 +832,7 @@ export class RestaurantService extends BaseService<Restaurant> {
         throw new BadRequestException('cuisine types not found');
       restaurant.cuisine_types = cuisine_types;
     }
-    if (req.groups_ids) {
-      const groups = await this.restaurantGroupRepository.find({
-        where: { id: In(req.groups_ids) },
-      });
-      if (!groups) throw new BadRequestException('groups not found');
-      restaurant.groups = groups;
-    }
+  
     await this.restaurantRepository.save(restaurant);
     const respone = await this.getSingleRestaurant(restaurant.id);
 

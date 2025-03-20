@@ -384,6 +384,17 @@ export class AdminRestaurantController {
       return new ActionResponse(group);
     }
 
+    @Post('/admin/add-group-to-restaurant/:group_id/:restaurant_id')
+    async addGrouptoRestaurant(@Param('group_id') group_id: string,@Param('restaurant_id') restaurant_id: string) {
+      const group = await this.restaurantService.addGroupToRestaurant(group_id,restaurant_id);
+      return new ActionResponse(group);
+    }
+    @Delete('/admin/delete-group-from-restaurant/:group_id/:restaurant_id')
+    async deleteGroupFromRestaurant(@Param('group_id') group_id: string,@Param('restaurant_id') restaurant_id: string) {
+      const group = await this.restaurantService.unlinkGroupFromRestaurant(group_id,restaurant_id);
+      return new ActionResponse(group);
+    }
+
     @Put('/admin/update-group')
     async updateGroup(@Body() req: UpdateCuisineRequest) {
       const group = await this.restaurantService.updateRestauntGroup(req);
