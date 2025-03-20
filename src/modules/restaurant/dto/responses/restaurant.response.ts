@@ -59,6 +59,9 @@ export class RestaurantResponse {
     average_rating: number;
     @Expose()
     average_prep_time:number
+    @Expose()
+    @Type(() => MealResponse)
+    meals: MealResponse[];
 
     @Expose()
     no_of_reviews: number;
