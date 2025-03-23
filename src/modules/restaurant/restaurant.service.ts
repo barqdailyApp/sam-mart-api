@@ -164,7 +164,7 @@ export class RestaurantService extends BaseService<Restaurant> {
             where: { type: ConstantType.DELIVERY_TIME_PER_KM },
         })) ?? 0;
 
-    const { raw, entities } = await this.restaurantRepository
+    const restaurantQuery = this.restaurantRepository
         .createQueryBuilder('restaurant')
         .leftJoinAndSelect('restaurant.cuisine_types', 'cuisine')
         .leftJoinAndSelect('restaurant.categories', 'category')
@@ -182,30 +182,44 @@ export class RestaurantService extends BaseService<Restaurant> {
         )
         .where('restaurant.status = :status', { status: RestaurantStatus.ACTIVE })
         .andWhere('cuisine.is_active = :is_active', { is_active: true })
-        .andWhere('(meal.name_en LIKE :name OR meal.name_ar LIKE :name)', {
-            name: `%${query.name}%`,
-        })
         .having('distance <= :radius', { radius: query.radius })
-        .setParameters({ latitude: query.latitude, longitude: query.longitude })
-        .orderBy(
+        .setParameters({ latitude: query.latitude, longitude: query.longitude });
+
+    if (query.is_restaurant) {
+        // Search restaurants by name
+        restaurantQuery.andWhere('(restaurant.name_en LIKE :name OR restaurant.name_ar LIKE :name)', {
+            name: `%${query.name}%`,
+        });
+
+        // Order meals by default sorting
+        restaurantQuery.addOrderBy('meal.sales_count', 'DESC'); // You can change the order criteria if needed
+    } else {
+        // Search meals by name
+        restaurantQuery.andWhere('(meal.name_en LIKE :name OR meal.name_ar LIKE :name)', {
+            name: `%${query.name}%`,
+        });
+
+        // Prioritize the most relevant meals based on similarity
+        restaurantQuery.addOrderBy(
             `CASE 
                 WHEN meal.name_en = :name OR meal.name_ar = :name THEN 1 
                 WHEN meal.name_en LIKE :exactMatch OR meal.name_ar LIKE :exactMatch THEN 2 
                 ELSE 3 
             END`,
             'ASC'
-        )
-        .setParameters({ name: `%${query.name}%`, exactMatch: `${query.name}%` })
-        .getRawAndEntities();
+        );
+    }
 
-    // Remove categories from the response
-    const modifiedRestaurants = entities.map((restaurant) => {
-        return {
-            ...restaurant,
-            categories: undefined, // Remove categories
-            meals: restaurant.categories.flatMap((category) => category.meals), // Extract meals
-        };
-    });
+    restaurantQuery.setParameters({ name: `%${query.name}%`, exactMatch: `${query.name}%` });
+
+    const { raw, entities } = await restaurantQuery.getRawAndEntities();
+
+    // Modify response
+    const modifiedRestaurants = entities.map((restaurant) => ({
+        ...restaurant,
+        categories: undefined, // Remove categories
+        meals: restaurant.categories.flatMap((category) => category.meals), // Extract meals
+    }));
 
     return modifiedRestaurants;
 }

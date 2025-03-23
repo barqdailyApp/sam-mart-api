@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
-import { IsLatitude, IsLongitude, IsNotEmpty, IsNumber, IsString, Max, Min } from "class-validator";
+import { IsBoolean, IsLatitude, IsLongitude, IsNotEmpty, IsNumber, IsString, Max, Min } from "class-validator";
 
 export class GetNearResturantsQuery {
     @ApiProperty()
@@ -26,4 +26,11 @@ export class GetNearResturantsQuerySearch extends GetNearResturantsQuery {
     @IsNotEmpty()
     @IsString()
     name: string;
+
+
+    @ApiProperty()
+    @IsNotEmpty()
+    @Transform(({ value }) => value === 'true')
+    @IsBoolean()
+    is_restaurant: boolean;
 }
