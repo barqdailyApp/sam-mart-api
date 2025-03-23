@@ -128,7 +128,7 @@ export class RestaurantController {
     })
     return new ActionResponse(response);
   }
-  @Roles(Role.CLIENT)
+  // @Roles(Role.CLIENT)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Post('/favorite-meal/:meal_id')
   async favoriteMeal(
@@ -137,7 +137,7 @@ export class RestaurantController {
     const meal = await this.restaurantService.addFavoriteMeal(meal_id,);
     return new ActionResponse(meal);
   }
-  @Roles(Role.CLIENT)
+  // @Roles(Role.CLIENT)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Get('/favorite-meals')
   async getFavoriteMeals() {

@@ -315,15 +315,28 @@ export class RestaurantService extends BaseService<Restaurant> {
     const response = plainToInstance(RestaurantResponse, restaurant, {
       excludeExtraneousValues: true,
     });
-    response.categories.forEach((category) => {
-      category.meals.forEach((meal) => {
-        meal.direct_add = true;
-        //if option group min_selection >0
-        if (meal.option_groups?.length > 0) {
-          meal.direct_add = false;
-        }
-      });
-    });
+    await Promise.all(
+      response.categories.map(async (category) => {
+        await Promise.all(
+          category.meals.map(async (meal) => {
+            meal.direct_add = true;
+    
+            if (user_id) {
+              const favorite_meal = await this.clientFavoriteMealRepository.findOne({
+                where: { user_id: user_id, meal_id: meal.id },
+              });
+              meal.is_favorite = !!favorite_meal;
+            }
+    
+            // If option group min_selection > 0
+            if (meal.option_groups?.length > 0) {
+              meal.direct_add = false;
+            }
+          })
+        );
+      })
+    );
+    
     let cart_details = null;
     if (user_id) {
       const cart_meals = await this.cartMealRepository.find({

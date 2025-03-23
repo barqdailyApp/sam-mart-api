@@ -12,6 +12,8 @@ export class MealResponse {
   @Expose()
   meal_id: string;
   @Expose()
+  is_favorite: boolean;
+  @Expose()
   name: string;
   @Expose()
   name_ar: string;
