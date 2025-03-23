@@ -128,4 +128,20 @@ export class RestaurantController {
     })
     return new ActionResponse(response);
   }
+  @Roles(Role.CLIENT)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Post('/favorite-meal/:meal_id')
+  async favoriteMeal(
+    @Param('meal_id') meal_id: string,
+  ) {
+    const meal = await this.restaurantService.addFavoriteMeal(meal_id,);
+    return new ActionResponse(meal);
+  }
+  @Roles(Role.CLIENT)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Get('/favorite-meals')
+  async getFavoriteMeals() {
+    const favoriteMeals = await this.restaurantService.getFavoriteMeals();
+    return new ActionResponse(this._i18nResponse.entity(favoriteMeals));
+  }
 }

@@ -54,6 +54,7 @@ import {
   UpdateMealOfferRequest,
 } from './dto/requests/make-meal-offer.request';
 import { RestaurantGroup } from 'src/infrastructure/entities/restaurant/restaurant-group.entity';
+import { ClientFavoriteMeal } from 'src/infrastructure/entities/restaurant/meal/client-favorite-meal.entity';
 
 @Injectable()
 export class RestaurantService extends BaseService<Restaurant> {
@@ -82,6 +83,7 @@ export class RestaurantService extends BaseService<Restaurant> {
     private readonly mealOfferRepository: Repository<MealOffer>,
     @InjectRepository(RestaurantGroup)
     private readonly restaurantGroupRepository: Repository<RestaurantGroup>,
+    @InjectRepository(ClientFavoriteMeal) private readonly clientFavoriteMealRepository: Repository<ClientFavoriteMeal>,
   ) {
     super(restaurantRepository);
   }
@@ -920,5 +922,56 @@ export class RestaurantService extends BaseService<Restaurant> {
     const offerUpdate = plainToInstance(MealOffer, req);
 
     return await this.mealOfferRepository.save(offerUpdate);
+  }
+
+  async addFavoriteMeal(meal_id: string) {
+    const meal = await this.mealRepository.findOne({
+      where: { id: meal_id },
+    });
+    if (!meal) throw new NotFoundException('no meal found');
+    //check if meal is already favorite
+    let favorite_meal = await this.clientFavoriteMealRepository.findOne({
+      where: { meal_id: meal.id, user_id: this.request.user.id },
+    });
+    if (favorite_meal)
+      //if meal is already favorite remove it
+      return await this.clientFavoriteMealRepository.remove(favorite_meal);
+else  {
+     favorite_meal = plainToInstance(ClientFavoriteMeal, {
+      meal_id: meal.id,
+      user_id: this.request.user.id,
+    });
+    return await this.clientFavoriteMealRepository.save(favorite_meal);}
+  }
+
+  async getFavoriteMeals() {
+    const favoriteMeals = await this.clientFavoriteMealRepository.find({
+      where: { user_id: this.request.user.id },
+      relations: { meal: { restaurant_category: { restaurant: true } } },
+    });
+    
+    // Group meals by restaurant
+    const groupedByRestaurant = favoriteMeals.reduce((acc, favMeal) => {
+      const restaurant = favMeal.meal.restaurant_category.restaurant;
+      const restaurantId = restaurant.id;
+    
+      if (!acc[restaurantId]) {
+        acc[restaurantId] = {
+          ...restaurant,
+          meals: [],
+        };
+      }
+    
+      acc[restaurantId].meals.push(favMeal.meal);
+    
+      return acc;
+    }, {});
+    
+    // Convert to an array
+    const response = Object.values(groupedByRestaurant);
+    
+    return  plainToInstance(RestaurantResponse, response, {
+      excludeExtraneousValues: true,
+    });
   }
 }
