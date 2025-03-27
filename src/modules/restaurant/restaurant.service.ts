@@ -219,6 +219,10 @@ export class RestaurantService extends BaseService<Restaurant> {
     // Modify response
     const modifiedRestaurants = entities.map((restaurant) => ({
         ...restaurant,
+        distance: parseFloat(raw[entities.indexOf(restaurant)]?.distance), // Ensure distance is a number
+        estimated_delivery_time:
+            Number(restaurant.average_prep_time) +
+            Number(deliveryTimePerKm) * parseFloat(raw[entities.indexOf(restaurant)]?.distance),
         categories: undefined, // Remove categories
         meals: restaurant.categories.flatMap((category) => category.meals), // Extract meals
     }));
