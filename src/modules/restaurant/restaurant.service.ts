@@ -531,6 +531,7 @@ export class RestaurantService extends BaseService<Restaurant> {
     if (!group) throw new NotFoundException('no group found');
     const restaurant = await this._repo.findOne({
       where: { id: restaurant_id },
+      relations: { groups: true },  
     });
     if (!restaurant) throw new NotFoundException('no restaurant found');
     restaurant.groups.push(group);
@@ -544,6 +545,7 @@ export class RestaurantService extends BaseService<Restaurant> {
     if (!group) throw new NotFoundException('no group found');
     const restaurant = await this._repo.findOne({
       where: { id: restaurant_id },
+      relations: { groups: true },
     });
     if (!restaurant) throw new NotFoundException('no restaurant found');
     restaurant.groups = restaurant.groups.filter((g) => g.id !== group_id);
