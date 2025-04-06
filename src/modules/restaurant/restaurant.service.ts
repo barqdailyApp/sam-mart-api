@@ -389,7 +389,7 @@ export class RestaurantService extends BaseService<Restaurant> {
     return restaurant;
   }
 
-  async getSingleMeal(id: string) {
+  async getSingleMeal(id: string, user_id?: string) {
     const meal = await this.mealRepository.findOne({
       where: { id },
       relations: {
@@ -397,10 +397,17 @@ export class RestaurantService extends BaseService<Restaurant> {
         offer: true,
       },
     });
-    if (!meal) throw new NotFoundException('no meal found');
+    if  (!meal) throw new NotFoundException('no meal found');
+  
     const meal_response = plainToInstance(MealResponse, meal, {
       excludeExtraneousValues: true,
     });
+    if(user_id){
+      const favorite_meal = await this.clientFavoriteMealRepository.findOne({
+        where: { user_id: user_id, meal_id: meal.id },
+      });
+      meal_response.is_favorite = !!favorite_meal;
+    }
 
     return meal_response;
   }

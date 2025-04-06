@@ -96,8 +96,8 @@ export class RestaurantController {
   }
 
   @Get('/meal/details/:id')
-  async getSingleMeal(@Param('id') id: string) {
-    const meal = await this.restaurantService.getSingleMeal(id);
+  async getSingleMeal(@Param('id') id: string,@Query('user_id') user_id?: string) { 
+    const meal = await this.restaurantService.getSingleMeal(id,user_id);
     const response = this._i18nResponse.entity(meal);
     return new ActionResponse(response);
   }
