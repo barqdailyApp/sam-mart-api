@@ -87,6 +87,26 @@ export class BanarController {
         }
         return new ActionResponse<BannerResponse[]>(result);
     }
+
+
+       
+    @Get("/guest/general")
+    async getGeneralBanars(
+        @Query() query: PaginatedRequest
+    ): Promise<ActionResponse<BannerResponse[]>> {
+        const banners = await this.banarService.getGeneralBanars(query);
+        const count = await this.banarService.count(query);
+        const result = plainToInstance(BannerResponse, banners, { excludeExtraneousValues: true })
+        if (Object.keys(query).length) {
+            return new PaginatedResponse<BannerResponse[]>(result, {
+                meta: {
+                    total: count,
+                    ...query
+                }
+            });
+        }
+        return new ActionResponse<BannerResponse[]>(result);
+    }
    
     @Get("/Popup/guest")
     async getGuestPopup(

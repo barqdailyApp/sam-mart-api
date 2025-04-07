@@ -46,7 +46,21 @@ export class BanarService extends BaseService<Banar> {
                 is_active: true,
                 started_at: LessThanOrEqual(new Date()),
                 ended_at: MoreThanOrEqual(new Date()),
-                is_popup:false
+                is_popup:false,
+                is_general:false
+            }
+        });
+    }
+
+    
+    async getGeneralBanars(query: PaginatedRequest) {
+        return await this.banarRepository.find({
+            where: {
+                is_active: true,
+                started_at: LessThanOrEqual(new Date()),
+                ended_at: MoreThanOrEqual(new Date()),
+                is_popup:false,
+                is_general:true
             }
         });
     }
@@ -56,7 +70,8 @@ export class BanarService extends BaseService<Banar> {
                 is_active: true,
                 started_at: LessThanOrEqual(new Date()),
                 ended_at: MoreThanOrEqual(new Date()),
-                is_popup:true
+                is_popup:true,
+                is_general:false
             }
         });
     }
