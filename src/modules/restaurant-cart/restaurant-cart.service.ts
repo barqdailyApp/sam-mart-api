@@ -110,10 +110,10 @@ export class RestaurantCartService {
           id: m.id,
           quantity: m.quantity,
           total_price: total_unit_price , // Multiply by quantity for final total
-          option_groups: m.cart_meal_options.map((o) => ({
+          options: m.cart_meal_options.map((o) => ({
             ...o,
             price: o.option.price,
-            options: o.option.option_group,
+            option_group: o.option.option_group,
           })),
          
         
@@ -153,7 +153,7 @@ export class RestaurantCartService {
   }
   async updateCartMeal(req: UpdateCartMealRequest) {
     const response = await this.updateMealRestaurantCartTransaction.run(req);
-    return this.getCartMealDetails(response.id);
+    return this.getCartMealDetails
   }
 
   async getCartMealDetails(cart_meal_id: string) {
