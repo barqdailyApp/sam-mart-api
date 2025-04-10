@@ -153,7 +153,10 @@ export class RestaurantCartService {
   }
   async updateCartMeal(req: UpdateCartMealRequest) {
     const response = await this.updateMealRestaurantCartTransaction.run(req);
-    return this.getCartMealDetails
+    const cart_meals = this.getCartMeals();
+    return (await cart_meals).meals.find(
+      (cart_meal) => cart_meal.id === response.id,
+    );
   }
 
   async getCartMealDetails(cart_meal_id: string) {
