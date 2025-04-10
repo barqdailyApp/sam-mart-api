@@ -134,6 +134,7 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
         is_receive_orders: true,
         type: DriverTypeEnum.FOOD,
       },
+      relations: { user: true },
     });
     const order = await this.restaurantOrderRepository.findOne({
       where: { id, driver_id: null },
