@@ -152,7 +152,8 @@ export class RestaurantCartService {
     });
   }
   async updateCartMeal(req: UpdateCartMealRequest) {
-    return await this.updateMealRestaurantCartTransaction.run(req);
+    const response = await this.updateMealRestaurantCartTransaction.run(req);
+    return this.getCartMealDetails(response.id);
   }
 
   async getCartMealDetails(cart_meal_id: string) {
