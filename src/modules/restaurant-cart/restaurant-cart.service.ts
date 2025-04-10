@@ -110,10 +110,10 @@ export class RestaurantCartService {
           id: m.id,
           quantity: m.quantity,
           total_price: total_unit_price , // Multiply by quantity for final total
-          options: m.cart_meal_options.map((o) => ({
+          option_groups: m.cart_meal_options.map((o) => ({
             ...o,
             price: o.option.price,
-            option_group: o.option.option_group,
+            options: o.option.option_group,
           })),
          
         
