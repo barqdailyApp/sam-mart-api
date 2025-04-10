@@ -127,6 +127,12 @@ export class UpdateMealRestaurantCartTransaction extends BaseTransaction<
           id: cartMeal.id,
           quantity: cartMeal.quantity,
           total_price,
+          options: cartMeal.cart_meal_options.map((o) => ({
+            ...o,
+            price: o.option.price,
+            option_group: o.option.option_group,
+          })),
+
         },
         { excludeExtraneousValues: true },
       );
