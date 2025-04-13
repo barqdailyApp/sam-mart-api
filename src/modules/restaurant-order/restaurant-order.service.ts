@@ -54,6 +54,10 @@ import { ReviewSort } from 'src/infrastructure/data/enums/review-sort.enum';
 import { Between } from 'typeorm';
 import { startOfDay, endOfDay, subHours, parseISO } from 'date-fns';
 import { RestaurantAdmin } from 'src/infrastructure/entities/restaurant/restaurant-admin.entity';
+import { Constant } from 'src/infrastructure/entities/constant/constant.entity';
+import { MAX } from 'class-validator';
+import { ConstantType } from 'src/infrastructure/data/enums/constant-type.enum';
+import { number } from 'joi';
 @Injectable()
 export class RestaurantOrderService extends BaseService<RestaurantOrder> {
   constructor(
@@ -85,6 +89,7 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
 
     @InjectRepository(Restaurant)
     private readonly restaurantRepository: Repository<Restaurant>,
+    @InjectRepository(Constant) private readonly constantRepository: Repository<Constant>,
   ) {
     super(restaurantOrderRepository);
   }
@@ -134,8 +139,15 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
         is_receive_orders: true,
         type: DriverTypeEnum.FOOD,
       },
-      relations: { user: true },
+      relations: { user: {wallet: true} },
     });
+    if (!driver) throw new Error('message.driver_not_found');
+    const max_driver_balance=await this.constantRepository.findOne({
+      where: {type:ConstantType.DRIVER_BALANCE_LIMIT} 
+    })
+    if(Number(driver.user.wallet.balance) <Number(max_driver_balance?.variable??0)){ 
+      throw new Error('message.driver_exceed_balance');
+    }
     const order = await this.restaurantOrderRepository.findOne({
       where: { id, driver_id: null },
       withDeleted: true,
@@ -475,6 +487,16 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
     order.order_delivered_at = new Date();
     order.status = ShipmentStatusEnum.DELIVERED;
     await this.restaurantOrderRepository.save(order);
+    if (order.payment_method_enum == PaymentMethodEnum.CASH) {
+      await this.transactionService.makeTransaction(
+        new MakeTransactionRequest({
+          amount: -order.total_price,
+          type: TransactionTypes.ORDER_DELIVERD,
+          order_id: order.id,
+          user_id: order.driver.user_id,
+        }),
+      );
+    }
     //send notification to driver and emit event
     try {
       const restaurant_admins = await this.restaurantAdminRepository.find({
