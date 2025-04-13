@@ -38,9 +38,10 @@ export class BanarController {
         private readonly banarService: BanarService,
     ) { }
 
-    // @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(JwtAuthGuard, RolesGuard)
     @Post()
-    // @Roles(Role.ADMIN)
+    @ApiBearerAuth()
+    @Roles(Role.ADMIN)
     @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('banar'))
     @ApiConsumes('multipart/form-data')
     async createBanar(
@@ -54,6 +55,7 @@ export class BanarController {
         return new ActionResponse<FoodBannerResponse>(result);
     }
     @Roles(Role.ADMIN)
+    @ApiBearerAuth()
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Get()
     async getBanars(
@@ -109,6 +111,7 @@ export class BanarController {
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Patch(":id")
     @Roles(Role.ADMIN)
+    @ApiBearerAuth()
     @UseInterceptors(ClassSerializerInterceptor, FileInterceptor('banar'))
     @ApiConsumes('multipart/form-data')
     async updateBanar(
@@ -125,6 +128,7 @@ export class BanarController {
 
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Delete(":id")
+    @ApiBearerAuth()
     @Roles(Role.ADMIN)
     async deleteBanar(
         @Param('id') id: string,
