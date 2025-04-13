@@ -492,7 +492,7 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
         new MakeTransactionRequest({
           amount: -order.total_price,
           type: TransactionTypes.ORDER_DELIVERD,
-          order_id: order.id,
+          restaurant_order_id: order.id,
           user_id: order.driver.user_id,
         }),
       );
