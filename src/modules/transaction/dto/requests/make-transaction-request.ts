@@ -15,6 +15,10 @@ export class MakeTransactionRequest {
   @IsOptional()
   @IsString()
   order_id: string;
+  @ApiProperty({required:false})
+  @IsOptional()
+  @IsString()
+  restaurant_order_id: string;
   @ApiPropertyOptional()
   @IsString()
   @IsOptional()

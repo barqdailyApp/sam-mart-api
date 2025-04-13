@@ -27,6 +27,9 @@ export class RestaurantOrderDetailsResponse extends RestaurantOrderListResponse{
    
     @Expose()
      order_canceled_at: Date;
+
+     @Expose()
+     promo_code_discount: number;
     
     
 }

@@ -6,6 +6,7 @@ import { User } from "../user/user.entity";
 import { Wallet } from "./wallet.entity";
 import { Order, } from "../order/order.entity";
 import { randNum } from "src/core/helpers/cast.helper";
+import { RestaurantOrder } from "../restaurant/order/restaurant_order.entity";
 
 
 @Entity()
@@ -26,6 +27,13 @@ export class Transaction extends AuditableEntity {
   @ManyToOne(() => Order, (order) => order.transactions)
   @JoinColumn({ name: 'order_id' })
   order: Order;
+
+  @ManyToOne(() => RestaurantOrder, )
+  @JoinColumn()
+  restaurant_order: Order;
+
+  @Column({nullable:true})
+  restaurant_order_id: string;
 
   @Column({ nullable: true })
   order_id: string;
