@@ -148,6 +148,7 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
     if(Number(driver.user.wallet.balance) <Number(max_driver_balance?.variable??0)){ 
       throw new Error('message.driver_exceed_balance');
     }
+    console.log(Number(driver.user.wallet.balance),Number(max_driver_balance?.variable??0))
     const order = await this.restaurantOrderRepository.findOne({
       where: { id, driver_id: null },
       withDeleted: true,
