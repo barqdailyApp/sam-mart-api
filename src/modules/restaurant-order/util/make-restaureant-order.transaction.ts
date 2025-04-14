@@ -238,7 +238,7 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
           const transaction = plainToInstance(Transaction, {
             amount: -total,
             user_id: user.id,
-            order_id: order.id,
+            restaurant_order_id: order.id,
             type: TransactionTypes.ORDER_PAYMENT,
             wallet_id: wallet.id,
           });
