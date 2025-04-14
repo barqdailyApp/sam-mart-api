@@ -195,6 +195,7 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
         total = total - req.wallet_discount;
       }
       total= total + delivery_fee;
+      order.total_price = total;
       if (req.promo_code) {
         const promo_code =
           await this.promo_code_service.getValidPromoCodeByCode(
