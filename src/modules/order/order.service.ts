@@ -56,6 +56,7 @@ import { MakeTransactionRequest } from '../transaction/dto/requests/make-transac
 import { TransactionTypes } from 'src/infrastructure/data/enums/transaction-types';
 import { Constant } from 'src/infrastructure/entities/constant/constant.entity';
 import { EditSettingsRequest } from './dto/request/edit-settings.request';
+import { DriverTypeEnum } from 'src/infrastructure/data/enums/driver-type.eum';
 @Injectable()
 export class OrderService extends BaseUserService<Order> {
   constructor(
@@ -1186,8 +1187,8 @@ export class OrderService extends BaseUserService<Order> {
   }
 
 
-  async getSettings() {
-    const settings = await this.constantRepository.find();
+  async getSettings(section: DriverTypeEnum) {
+    const settings = await this.constantRepository.find({where: { section }});
     return settings;
   }
 async editSettings(

@@ -13,6 +13,7 @@ import { MeasurementUnit } from 'src/infrastructure/entities/product/measurement
 import { AdditionalService } from 'src/infrastructure/entities/product/additional-service.entity';
 import { Constant } from 'src/infrastructure/entities/constant/constant.entity';
 import { ConstantType } from 'src/infrastructure/data/enums/constant-type.enum';
+import { DriverTypeEnum } from 'src/infrastructure/data/enums/driver-type.eum';
 
 @Injectable()
 export class ConstantSeeder implements Seeder {
@@ -23,15 +24,15 @@ export class ConstantSeeder implements Seeder {
 
   async seed(): Promise<any> {
     await this.constnant_repo.save([
-      new Constant({ variable: '3', type: ConstantType.ORDER_LIMIT }),
-      new Constant({ variable: '40', type: ConstantType.DELIVERY_TIME }),
-      new Constant({ variable: '10', type: ConstantType.FIXED_DELIVERY_FEE }),
-      new Constant({ variable: '5', type: ConstantType.FREE_DELIVERY_DISTANCE }),
-      new Constant({ variable: '1', type: ConstantType.DELIVERY_PRICE_PER_KM }),
-      new Constant({ variable: '1', type: ConstantType.DELIVERY_TIME_PER_KM }),
-      new Constant({ variable: '100', type: ConstantType.DRIVER_BALANCE_LIMIT }),
-      new Constant({ variable: '100', type: ConstantType.MAX_STORAGE_DISTANCE }),
-      new Constant({ variable: '10', type: ConstantType.RESTAURANT_CASHBACK }),
+      new Constant({ variable: '3', type: ConstantType.ORDER_LIMIT , section:DriverTypeEnum.MART}),
+      new Constant({ variable: '40', type: ConstantType.DELIVERY_TIME , section:DriverTypeEnum.MART}),
+      new Constant({ variable: '10', type: ConstantType.FIXED_DELIVERY_FEE , section:DriverTypeEnum.MART}),
+      new Constant({ variable: '5', type: ConstantType.FREE_DELIVERY_DISTANCE , section:DriverTypeEnum.FOOD}),
+      new Constant({ variable: '1', type: ConstantType.DELIVERY_PRICE_PER_KM , section:DriverTypeEnum.FOOD}),
+      new Constant({ variable: '1', type: ConstantType.DELIVERY_TIME_PER_KM , section:DriverTypeEnum.FOOD}),
+      new Constant({ variable: '100', type: ConstantType.DRIVER_BALANCE_LIMIT  , section:DriverTypeEnum.FOOD}),
+      new Constant({ variable: '100', type: ConstantType.MAX_STORAGE_DISTANCE  , section:DriverTypeEnum.FOOD}),
+      new Constant({ variable: '10', type: ConstantType.RESTAURANT_CASHBACK , section:DriverTypeEnum.FOOD}),
       
     ]);
   }

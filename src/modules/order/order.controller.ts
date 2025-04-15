@@ -52,6 +52,7 @@ import { Response } from 'express';
 import { EditDeliveryOrderRequest } from './dto/request/edit-delivery-order.request';
 import { AddNoteRequest } from './dto/request/add-note.request';
 import { EditSettingsRequest } from './dto/request/edit-settings.request';
+import { DriverTypeEnum } from 'src/infrastructure/data/enums/driver-type.eum';
 
 @ApiTags('Order')
 @ApiHeader({
@@ -70,8 +71,8 @@ export class OrderController {
   ) {}
 @Roles(Role.ADMIN)
 @Get('/settings')
-async getSettings() {
-  return new ActionResponse(await this.orderService.getSettings());
+async getSettings(@Query('section') section:DriverTypeEnum) {
+  return new ActionResponse(await this.orderService.getSettings(section));
 }
 
 @Roles(Role.ADMIN)
