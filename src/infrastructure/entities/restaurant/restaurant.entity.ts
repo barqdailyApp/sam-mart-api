@@ -110,4 +110,7 @@ export class Restaurant extends AuditableEntity {
 
    @OneToMany(()=>OptionGroup,optionGroup=>optionGroup.restaurant)
    option_groups:OptionGroup[]
+
+   @Column({nullable:true})
+   cashback:number
 }

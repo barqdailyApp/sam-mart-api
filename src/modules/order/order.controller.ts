@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Put,
   Query,
   Res,
   UseGuards,
@@ -50,6 +51,7 @@ import { GetReturnOrderResponse } from './dto/response/return-order/get-return-o
 import { Response } from 'express';
 import { EditDeliveryOrderRequest } from './dto/request/edit-delivery-order.request';
 import { AddNoteRequest } from './dto/request/add-note.request';
+import { EditSettingsRequest } from './dto/request/edit-settings.request';
 
 @ApiTags('Order')
 @ApiHeader({
@@ -66,6 +68,18 @@ export class OrderController {
     private readonly returnOrderService: ReturnOrderService,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
   ) {}
+@Roles(Role.ADMIN)
+@Get('/settings')
+async getSettings() {
+  return new ActionResponse(await this.orderService.getSettings());
+}
+
+@Roles(Role.ADMIN)
+@Put('/settings')
+async updateSettings(@Body() req: EditSettingsRequest) {
+  return new ActionResponse(await this.orderService.editSettings(req));
+}
+
   @Post()
   async makeOrder(@Body() req: MakeOrderRequest) {
     return new ActionResponse(await this.orderService.makeOrder(req));

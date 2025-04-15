@@ -29,6 +29,10 @@ export class ConstantSeeder implements Seeder {
       new Constant({ variable: '5', type: ConstantType.FREE_DELIVERY_DISTANCE }),
       new Constant({ variable: '1', type: ConstantType.DELIVERY_PRICE_PER_KM }),
       new Constant({ variable: '1', type: ConstantType.DELIVERY_TIME_PER_KM }),
+      new Constant({ variable: '100', type: ConstantType.DRIVER_BALANCE_LIMIT }),
+      new Constant({ variable: '100', type: ConstantType.MAX_STORAGE_DISTANCE }),
+      new Constant({ variable: '10', type: ConstantType.RESTAURANT_CASHBACK }),
+      
     ]);
   }
 

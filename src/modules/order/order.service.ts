@@ -54,6 +54,8 @@ import { PaymentMethodEnum } from 'src/infrastructure/data/enums/payment-method'
 import { TransactionService } from '../transaction/transaction.service';
 import { MakeTransactionRequest } from '../transaction/dto/requests/make-transaction-request';
 import { TransactionTypes } from 'src/infrastructure/data/enums/transaction-types';
+import { Constant } from 'src/infrastructure/entities/constant/constant.entity';
+import { EditSettingsRequest } from './dto/request/edit-settings.request';
 @Injectable()
 export class OrderService extends BaseUserService<Order> {
   constructor(
@@ -72,6 +74,7 @@ export class OrderService extends BaseUserService<Order> {
     private returnOrderProductRepository: Repository<ReturnOrderProduct>,
     @InjectRepository(ReturnProductReason)
     private returnProductReasonRepository: Repository<ReturnProductReason>,
+    @InjectRepository(Constant) private constantRepository: Repository<Constant>,
 
     @InjectRepository(Driver)
     private driverRepository: Repository<Driver>,
@@ -1181,4 +1184,22 @@ export class OrderService extends BaseUserService<Order> {
     order.self_note = request.note;
     return await this.orderRepository.save(order);
   }
+
+
+  async getSettings() {
+    const settings = await this.constantRepository.find();
+    return settings;
+  }
+async editSettings(
+  request: EditSettingsRequest,
+) {
+    const settings = await this.constantRepository.findOne({where: { id: request.id }});
+    if (!settings) throw new NotFoundException('message.settings_not_found');
+
+    settings.variable = request.variable
+
+    return await this.constantRepository.save(settings);
+   
+}
+  
 }

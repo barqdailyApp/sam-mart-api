@@ -19,6 +19,8 @@ import { ProductOffer } from 'src/infrastructure/entities/product/product-offer.
 import { plainToInstance } from 'class-transformer';
 import { ProductResponse } from './dto/response/product.response';
 import { ProductsNewResponse } from './dto/response/response-client/products-new.response';
+import { Constant } from 'src/infrastructure/entities/constant/constant.entity';
+import { ConstantType } from 'src/infrastructure/data/enums/constant-type.enum';
 
 @Injectable()
 export class ProductClientService {
@@ -48,6 +50,7 @@ export class ProductClientService {
     private readonly cart_repo: Repository<Cart>,
 
     @Inject(REQUEST) private readonly request: Request,
+    @InjectRepository(Constant) private readonly constantRepository: Repository<Constant>,
   ) {}
 
   isArabic(text: string): boolean {
@@ -93,16 +96,31 @@ export class ProductClientService {
 
     let warehouse: Warehouse;
     if (latitude && longitude) {
-      warehouse = await this.warehouse_repo
-        .createQueryBuilder('warehouse')
-        .where('is_active = :is_active', { is_active: true })
-        .orderBy(
-          `ST_Distance_Sphere(
-             ST_SRID(point(${latitude}, ${longitude}), 4326),
-             warehouse.location
+      const maxDistanceInMeters = Number((await this.constantRepository.findOne({
+        where: {type:ConstantType.MAX_STORAGE_DISTANCE},
+      })).variable || 0)*1000;
+      const warehouse = await this.warehouse_repo
+      .createQueryBuilder('warehouse')
+      .where('warehouse.is_active = :is_active', { is_active: true })
+      .andWhere(
+        `ST_Distance_Sphere(
+           ST_SRID(point(:latitude, :longitude), 4326),
+           warehouse.location
+         ) <= :distance`,
+        {
+          latitude,
+          longitude,
+          distance: maxDistanceInMeters,
+        },
+      )
+      .orderBy(
+        `ST_Distance_Sphere(
+           ST_SRID(point(:latitude, :longitude), 4326),
+           warehouse.location
          )`,
-        )
-        .getOne();
+      )
+      .setParameters({ latitude, longitude }) // ensure parameters are reused in orderBy
+      .getOne();
     }
 
     // Start building the query
@@ -293,16 +311,31 @@ export class ProductClientService {
     const skip = (page - 1) * limit;
     let warehouse: Warehouse;
     if (latitude && longitude) {
-      warehouse = await this.warehouse_repo
-        .createQueryBuilder('warehouse')
-        .where('is_active = :is_active', { is_active: true })
-        .orderBy(
-          `ST_Distance_Sphere(
-             ST_SRID(point(${latitude}, ${longitude}), 4326),
-             warehouse.location
+      const maxDistanceInMeters = Number((await this.constantRepository.findOne({
+        where: {type:ConstantType.MAX_STORAGE_DISTANCE},
+      })).variable || 0)*1000;
+      const warehouse = await this.warehouse_repo
+      .createQueryBuilder('warehouse')
+      .where('warehouse.is_active = :is_active', { is_active: true })
+      .andWhere(
+        `ST_Distance_Sphere(
+           ST_SRID(point(:latitude, :longitude), 4326),
+           warehouse.location
+         ) <= :distance`,
+        {
+          latitude,
+          longitude,
+          distance: maxDistanceInMeters,
+        },
+      )
+      .orderBy(
+        `ST_Distance_Sphere(
+           ST_SRID(point(:latitude, :longitude), 4326),
+           warehouse.location
          )`,
-        )
-        .getOne();
+      )
+      .setParameters({ latitude, longitude }) // ensure parameters are reused in orderBy
+      .getOne();
     }
     let productsSortField = '';
     let productsSortOrder = 'ASC';
@@ -472,16 +505,31 @@ export class ProductClientService {
     // For guests and individuals, orders are taken from the nearest warehouse
     let warehouse: Warehouse;
     if (latitude && longitude) {
-      warehouse = await this.warehouse_repo
-        .createQueryBuilder('warehouse')
-        .where('is_active = :is_active', { is_active: true })
-        .orderBy(
-          `ST_Distance_Sphere(
-             ST_SRID(point(${latitude}, ${longitude}), 4326),
-             warehouse.location
+      const maxDistanceInMeters = Number((await this.constantRepository.findOne({
+        where: {type:ConstantType.MAX_STORAGE_DISTANCE},
+      })).variable || 0)*1000;
+      const warehouse = await this.warehouse_repo
+      .createQueryBuilder('warehouse')
+      .where('warehouse.is_active = :is_active', { is_active: true })
+      .andWhere(
+        `ST_Distance_Sphere(
+           ST_SRID(point(:latitude, :longitude), 4326),
+           warehouse.location
+         ) <= :distance`,
+        {
+          latitude,
+          longitude,
+          distance: maxDistanceInMeters,
+        },
+      )
+      .orderBy(
+        `ST_Distance_Sphere(
+           ST_SRID(point(:latitude, :longitude), 4326),
+           warehouse.location
          )`,
-        )
-        .getOne();
+      )
+      .setParameters({ latitude, longitude }) // ensure parameters are reused in orderBy
+      .getOne();
     }
 
     // Start building the query
@@ -670,16 +718,31 @@ export class ProductClientService {
     // For guests and individuals, orders are taken from the nearest warehouse
     let warehouse: Warehouse;
     if (latitude && longitude) {
-      warehouse = await this.warehouse_repo
-        .createQueryBuilder('warehouse')
-        .where('is_active = :is_active', { is_active: true })
-        .orderBy(
-          `ST_Distance_Sphere(
-                 ST_SRID(point(${latitude}, ${longitude}), 4326),
-                 warehouse.location
-             )`,
-        )
-        .getOne();
+      const maxDistanceInMeters = Number((await this.constantRepository.findOne({
+        where: {type:ConstantType.MAX_STORAGE_DISTANCE},
+      })).variable || 0)*1000;
+      const warehouse = await this.warehouse_repo
+      .createQueryBuilder('warehouse')
+      .where('warehouse.is_active = :is_active', { is_active: true })
+      .andWhere(
+        `ST_Distance_Sphere(
+           ST_SRID(point(:latitude, :longitude), 4326),
+           warehouse.location
+         ) <= :distance`,
+        {
+          latitude,
+          longitude,
+          distance: maxDistanceInMeters,
+        },
+      )
+      .orderBy(
+        `ST_Distance_Sphere(
+           ST_SRID(point(:latitude, :longitude), 4326),
+           warehouse.location
+         )`,
+      )
+      .setParameters({ latitude, longitude }) // ensure parameters are reused in orderBy
+      .getOne();
     }
     // Start building the query
     let query = this.productRepository
@@ -877,16 +940,31 @@ export class ProductClientService {
 
     let warehouse: Warehouse;
     if (latitude && longitude) {
-      warehouse = await this.warehouse_repo
-        .createQueryBuilder('warehouse')
-        .where('is_active = :is_active', { is_active: true })
-        .orderBy(
-          `ST_Distance_Sphere(
-             ST_SRID(point(${latitude}, ${longitude}), 4326),
-             warehouse.location
+      const maxDistanceInMeters = Number((await this.constantRepository.findOne({
+        where: {type:ConstantType.MAX_STORAGE_DISTANCE},
+      })).variable || 0)*1000;
+      const warehouse = await this.warehouse_repo
+      .createQueryBuilder('warehouse')
+      .where('warehouse.is_active = :is_active', { is_active: true })
+      .andWhere(
+        `ST_Distance_Sphere(
+           ST_SRID(point(:latitude, :longitude), 4326),
+           warehouse.location
+         ) <= :distance`,
+        {
+          latitude,
+          longitude,
+          distance: maxDistanceInMeters,
+        },
+      )
+      .orderBy(
+        `ST_Distance_Sphere(
+           ST_SRID(point(:latitude, :longitude), 4326),
+           warehouse.location
          )`,
-        )
-        .getOne();
+      )
+      .setParameters({ latitude, longitude }) // ensure parameters are reused in orderBy
+      .getOne();
     }
 
     // Start building the query
