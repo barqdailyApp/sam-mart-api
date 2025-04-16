@@ -66,6 +66,17 @@ export class AddressController {
   //     const response = plainToInstance(AddressResponse, result, { excludeExtraneousValues: true });
   //     return new ActionResponse<AddressResponse[]>(response);
   // }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.CLIENT)
+  @Get('/available-sections')
+  async getBarqSections(
+   
+  ) {
+    const result = await this.addressService.getAvailableSections();
+    return new ActionResponse(result);
+  }
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.CLIENT)

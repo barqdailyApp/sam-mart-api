@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Request } from 'express';
+import { query, Request } from 'express';
 import { DeleteResult, EntityManager, Repository } from 'typeorm';
 import { AddressByAccountRequest } from './dto/requests/address-by-account.request';
 import { Address } from 'src/infrastructure/entities/user/address.entity';
@@ -20,6 +20,11 @@ import {
 } from 'src/core/helpers/service-related.helper';
 import { SetFavoriteAddressTransaction } from './utils/transactions/set-favorite-address.transaction';
 import { WorkingArea } from 'src/infrastructure/entities/working-area/working-area.entity';
+import { Restaurant } from 'src/infrastructure/entities/restaurant/restaurant.entity';
+import { RestaurantService } from '../restaurant/restaurant.service';
+import { ProductClientService } from '../product/product-client.service';
+import { ProductClientQuery } from '../product/dto/filter/products-client.query';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable({ scope: Scope.REQUEST })
 export class AddressService extends BaseUserService<Address> {
@@ -32,6 +37,9 @@ export class AddressService extends BaseUserService<Address> {
     private entityRelatedValidator: EntityRelatedValidator,
     @Inject(SetFavoriteAddressTransaction)
     private setFavoriteAddressTransaction: SetFavoriteAddressTransaction,
+    private readonly restaurantService: RestaurantService,
+    private readonly product_client_service: ProductClientService,
+
     private context: EntityManager,
   ) {
     super(_repo, request);
@@ -42,6 +50,34 @@ export class AddressService extends BaseUserService<Address> {
     applyQuerySort(query, `is_favorite=desc`);
 
     return await super.findAll(query);
+  }
+
+  async getAvailableSections() {
+    const user = super.currentUser;
+    const addresss = await this._repo.findOne({
+      where: { user_id: user.id, is_favorite: true },
+    });
+    if (!addresss) throw new NotFoundException('message.address_not_found');
+    const productClientQuery = new ProductClientQuery({
+      user_id: user.id,
+      page: 1,
+      limit: 1,
+    });
+    const barq_mart = await this.product_client_service.getAllProductsForClient(
+      productClientQuery,
+    );
+    const barq_food = await this.restaurantService.findAllNearRestaurantsCusine(
+      {
+        latitude: addresss.latitude,
+        longitude: addresss.longitude,
+        radius: 25,
+      },
+    );
+    return {
+      addresss: plainToInstance(Address, addresss),
+      is_braq_food: barq_food.restaurants?.length > 0,
+      is_barq_mart: barq_mart.products?.length > 0,
+    };
   }
 
   override async findOne(id: string): Promise<Address> {

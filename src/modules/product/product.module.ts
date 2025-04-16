@@ -23,6 +23,6 @@ import { ProductChangesService } from './product-changes.service';
     ProductChangesService
   ],
   imports: [MeasurementUnitModule,NotificationModule],
-  exports: [],
+  exports: [ProductClientService,ProductModule],
 })
 export class ProductModule {}
