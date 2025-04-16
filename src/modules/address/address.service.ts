@@ -25,6 +25,7 @@ import { RestaurantService } from '../restaurant/restaurant.service';
 import { ProductClientService } from '../product/product-client.service';
 import { ProductClientQuery } from '../product/dto/filter/products-client.query';
 import { plainToInstance } from 'class-transformer';
+import { AddressResponse } from './dto/responses/address.respone';
 
 @Injectable({ scope: Scope.REQUEST })
 export class AddressService extends BaseUserService<Address> {
@@ -74,7 +75,7 @@ export class AddressService extends BaseUserService<Address> {
       },
     );
     return {
-      addresss: plainToInstance(Address, addresss),
+      addresss: plainToInstance(AddressResponse, addresss),
       is_braq_food: barq_food.restaurants?.length > 0,
       is_barq_mart: barq_mart.products?.length > 0,
     };
