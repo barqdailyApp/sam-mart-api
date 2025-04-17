@@ -72,9 +72,10 @@ export class AddressController {
   @Roles(Role.CLIENT)
   @Get('/available-sections')
   async getBarqSections(
+    @Query() query: CreateAddressRequest,
    
   ) {
-    const result = await this.addressService.getAvailableSections();
+    const result = await this.addressService.getAvailableSections(query);
     return new ActionResponse(result);
   }
   @ApiBearerAuth()
