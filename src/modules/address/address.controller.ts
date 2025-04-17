@@ -14,7 +14,7 @@ import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 import { DeleteResult } from 'typeorm';
 import { AddressService } from './address.service';
-import { CreateAddressRequest } from './dto/requests/create-address.request';
+import { CreateAddressRequest, CreateOptionalAddressRequest } from './dto/requests/create-address.request';
 import { AddressByAccountRequest } from './dto/requests/address-by-account.request';
 import { UpdateAddressRequest } from './dto/requests/update-address.request';
 import { AddressResponse } from './dto/responses/address.respone';
@@ -69,7 +69,7 @@ export class AddressController {
 
   @Get('/available-sections')
   async getBarqSections(
-    @Query() query: CreateAddressRequest,
+    @Query() query: CreateOptionalAddressRequest,
     @Query("user_id") user_id?: string,
    
   ) {

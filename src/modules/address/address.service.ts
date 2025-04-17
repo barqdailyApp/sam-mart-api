@@ -26,7 +26,7 @@ import { ProductClientService } from '../product/product-client.service';
 import { ProductClientQuery } from '../product/dto/filter/products-client.query';
 import { plainToInstance } from 'class-transformer';
 import { AddressResponse } from './dto/responses/address.respone';
-import { CreateAddressRequest } from './dto/requests/create-address.request';
+import { CreateAddressRequest, CreateOptionalAddressRequest } from './dto/requests/create-address.request';
 
 @Injectable({ scope: Scope.REQUEST })
 export class AddressService extends BaseUserService<Address> {
@@ -54,7 +54,7 @@ export class AddressService extends BaseUserService<Address> {
     return await super.findAll(query);
   }
 
-  async getAvailableSections(guest_address?: CreateAddressRequest,user_id?: string){
+  async getAvailableSections(guest_address?: CreateOptionalAddressRequest,user_id?: string){
 
    
     const addresss = guest_address?plainToInstance(Address,guest_address): await this._repo.findOne({
