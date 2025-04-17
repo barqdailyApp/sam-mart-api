@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import {
   IsBoolean,
   IsNotEmpty,
@@ -37,17 +38,15 @@ export class CreateAddressRequest {
   )
   longitude: string;
 
-  @ApiProperty({required :false})
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsBoolean()
   is_favorite?: boolean;
-
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
   phone: string;
-
 }
 
 export class CreateOptionalAddressRequest {
@@ -79,15 +78,22 @@ export class CreateOptionalAddressRequest {
   )
   longitude: string;
 
-  @ApiProperty({required :false})
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsBoolean()
+  @Transform(({ value }) => {
+    if (value === 'true' || value === true) {
+      return true;
+    } else if (value === 'false' || value === false) {
+      return false;
+    } else {
+      return value;
+    }
+  })
   is_favorite?: boolean;
-
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
   phone: string;
-
 }
