@@ -122,7 +122,7 @@ export class ProductClientService {
       .setParameters({ latitude, longitude }) // ensure parameters are reused in orderBy
       .getOne();
     }
-
+ 
     // Start building the query
     let query = this.productRepository
       .createQueryBuilder('product')
@@ -204,11 +204,11 @@ export class ProductClientService {
       );
     }
     // Modify condition if warehouse is defined
-    if (warehouse) {
+  
       query = query.andWhere('warehousesProduct.warehouse_id = :warehouseId', {
-        warehouseId: warehouse.id,
+        warehouseId: warehouse?.id,
       });
-    }
+    
 
     if (brand_id) {
       query = query.andWhere('brand.id = :brandId', {
@@ -314,7 +314,7 @@ export class ProductClientService {
       const maxDistanceInMeters = Number((await this.constantRepository.findOne({
         where: {type:ConstantType.MAX_STORAGE_DISTANCE},
       })).variable || 0)*1000;
-      const warehouse = await this.warehouse_repo
+       warehouse = await this.warehouse_repo
       .createQueryBuilder('warehouse')
       .where('warehouse.is_active = :is_active', { is_active: true })
       .andWhere(
@@ -337,6 +337,7 @@ export class ProductClientService {
       .setParameters({ latitude, longitude }) // ensure parameters are reused in orderBy
       .getOne();
     }
+
     let productsSortField = '';
     let productsSortOrder = 'ASC';
     
@@ -458,11 +459,11 @@ export class ProductClientService {
       );
     }
     // Modify condition if warehouse is defined
-    if (warehouse) {
+  
       query = query.andWhere('warehousesProduct.warehouse_id = :warehouseId', {
-        warehouseId: warehouse.id,
+        warehouseId: warehouse?.id,
       });
-    }
+    
     const productSubCategories = query.orderBy('categorySubcategory.order_by', 'ASC') .addOrderBy(productsSortField, productsSortOrder as unknown as 'ASC'||'DESC' ).getMany();
     return productSubCategories;
   }
@@ -508,7 +509,7 @@ export class ProductClientService {
       const maxDistanceInMeters = Number((await this.constantRepository.findOne({
         where: {type:ConstantType.MAX_STORAGE_DISTANCE},
       })).variable || 0)*1000;
-      const warehouse = await this.warehouse_repo
+       warehouse = await this.warehouse_repo
       .createQueryBuilder('warehouse')
       .where('warehouse.is_active = :is_active', { is_active: true })
       .andWhere(
@@ -636,11 +637,11 @@ export class ProductClientService {
       );
     }
     // Modify condition if warehouse is defined
-    if (warehouse) {
+ 
       query = query.andWhere('warehousesProduct.warehouse_id = :warehouseId', {
-        warehouseId: warehouse.id,
+        warehouseId: warehouse?.id,
       });
-    }
+    
 
     // Add search term condition if provided
     if (product_name) {
@@ -721,7 +722,7 @@ export class ProductClientService {
       const maxDistanceInMeters = Number((await this.constantRepository.findOne({
         where: {type:ConstantType.MAX_STORAGE_DISTANCE},
       })).variable || 0)*1000;
-      const warehouse = await this.warehouse_repo
+       warehouse = await this.warehouse_repo
       .createQueryBuilder('warehouse')
       .where('warehouse.is_active = :is_active', { is_active: true })
       .andWhere(
@@ -744,6 +745,7 @@ export class ProductClientService {
       .setParameters({ latitude, longitude }) // ensure parameters are reused in orderBy
       .getOne();
     }
+   
     // Start building the query
     let query = this.productRepository
       .createQueryBuilder('product')
@@ -806,11 +808,11 @@ export class ProductClientService {
     // Get single product
     query = query.where('product.id = :product_id', { product_id });
     // Initial condition to ensure product is in at least one warehouse
-    if (warehouse) {
+
       query = query.andWhere('warehousesProduct.warehouse_id = :warehouseId', {
-        warehouseId: warehouse.id,
+        warehouseId: warehouse?.id,
       });
-    }
+    
     if (user_id) {
       const cartUser = await this.cart_repo.findOne({ where: { user_id } });
       if (!cartUser) {
@@ -943,7 +945,7 @@ export class ProductClientService {
       const maxDistanceInMeters = Number((await this.constantRepository.findOne({
         where: {type:ConstantType.MAX_STORAGE_DISTANCE},
       })).variable || 0)*1000;
-      const warehouse = await this.warehouse_repo
+       warehouse = await this.warehouse_repo
       .createQueryBuilder('warehouse')
       .where('warehouse.is_active = :is_active', { is_active: true })
       .andWhere(
@@ -1030,11 +1032,11 @@ export class ProductClientService {
       .take(limit);
 
     // Modify condition if warehouse is defined
-    if (warehouse) {
+  
       query = query.andWhere('warehousesProduct.warehouse_id = :warehouseId', {
-        warehouseId: warehouse.id,
+        warehouseId: warehouse?.id,
       });
-    }
+    
     if (user_id) {
       const cartUser = await this.cart_repo.findOne({ where: { user_id } });
       if (!cartUser) {
