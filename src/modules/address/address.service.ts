@@ -57,7 +57,7 @@ export class AddressService extends BaseUserService<Address> {
   async getAvailableSections(guest_address?: CreateOptionalAddressRequest,user_id?: string){
 
    
-    const addresss = guest_address?plainToInstance(Address,guest_address): await this._repo.findOne({
+    const addresss = guest_address?plainToInstance(AddressResponse,guest_address): await this._repo.findOne({
       where: { user_id: user_id, is_favorite: true },
     });
     if (!addresss) throw new NotFoundException('message.address_not_found');
