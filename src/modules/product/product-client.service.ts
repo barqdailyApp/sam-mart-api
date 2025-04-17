@@ -99,7 +99,7 @@ export class ProductClientService {
       const maxDistanceInMeters = Number((await this.constantRepository.findOne({
         where: {type:ConstantType.MAX_STORAGE_DISTANCE},
       })).variable || 0)*1000;
-      const warehouse = await this.warehouse_repo
+       warehouse = await this.warehouse_repo
       .createQueryBuilder('warehouse')
       .where('warehouse.is_active = :is_active', { is_active: true })
       .andWhere(
