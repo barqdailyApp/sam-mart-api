@@ -54,15 +54,15 @@ export class AddressService extends BaseUserService<Address> {
     return await super.findAll(query);
   }
 
-  async getAvailableSections(guest_address?: CreateAddressRequest){
+  async getAvailableSections(guest_address?: CreateAddressRequest,user_id?: string){
 
-    const user = super.currentUser;
+   
     const addresss = guest_address?plainToInstance(Address,guest_address): await this._repo.findOne({
-      where: { user_id: user.id, is_favorite: true },
+      where: { user_id: user_id, is_favorite: true },
     });
     if (!addresss) throw new NotFoundException('message.address_not_found');
     const productClientQuery = new ProductClientQuery({
-      user_id: user.id,
+      user_id: user_id,
       page: 1,
       limit: 1,
     });

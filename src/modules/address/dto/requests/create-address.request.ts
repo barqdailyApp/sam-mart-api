@@ -49,3 +49,45 @@ export class CreateAddressRequest {
   phone: string;
 
 }
+
+export class CreateOptionalAddressRequest {
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  name: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  address: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  @Matches(
+    /^(\+|-)?(?:90(?:(?:\.0{1,15})?)|(?:[0-9]|[1-8][0-9])(?:(?:\.[0-9]{1,15})?))$/,
+    { message: 'invalid value for latitude' },
+  )
+  latitude: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  @Matches(
+    /^(\+|-)?(?:180(?:(?:\.0{1,15})?)|(?:[0-9]|[1-9][0-9]|1[0-7][0-9])(?:(?:\.[0-9]{1,15})?))$/,
+    { message: 'invalid value for longitude' },
+  )
+  longitude: string;
+
+  @ApiProperty({required :false})
+  @IsOptional()
+  @IsBoolean()
+  is_favorite?: boolean;
+
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  phone: string;
+
+}
