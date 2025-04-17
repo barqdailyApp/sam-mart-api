@@ -66,7 +66,7 @@ export class AddressController {
   //     const response = plainToInstance(AddressResponse, result, { excludeExtraneousValues: true });
   //     return new ActionResponse<AddressResponse[]>(response);
   // }
-)
+
   @Get('/available-sections')
   async getBarqSections(
     @Query() query: CreateAddressRequest,
