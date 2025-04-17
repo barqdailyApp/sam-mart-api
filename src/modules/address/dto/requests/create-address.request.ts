@@ -80,7 +80,7 @@ export class CreateOptionalAddressRequest {
 
   @ApiProperty({ required: false })
   @IsOptional()
-  @IsBoolean()
+
   @Transform(({ value }) => {
     if (value === 'true' || value === true) {
       return true;
@@ -90,6 +90,7 @@ export class CreateOptionalAddressRequest {
       return value;
     }
   })
+  @IsBoolean()
   is_favorite?: boolean;
 
   @ApiPropertyOptional()
