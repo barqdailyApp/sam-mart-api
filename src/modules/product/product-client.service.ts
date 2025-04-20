@@ -122,7 +122,7 @@ export class ProductClientService {
       .setParameters({ latitude, longitude }) // ensure parameters are reused in orderBy
       .getOne();
     }
- 
+  
     // Start building the query
     let query = this.productRepository
       .createQueryBuilder('product')
@@ -745,7 +745,7 @@ export class ProductClientService {
       .setParameters({ latitude, longitude }) // ensure parameters are reused in orderBy
       .getOne();
     }
-   
+
     // Start building the query
     let query = this.productRepository
       .createQueryBuilder('product')

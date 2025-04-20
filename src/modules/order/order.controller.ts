@@ -1,5 +1,6 @@
 import {
   Body,
+  CACHE_MANAGER,
   Controller,
   Delete,
   Get,
@@ -54,6 +55,7 @@ import { AddNoteRequest } from './dto/request/add-note.request';
 import { EditSettingsRequest } from './dto/request/edit-settings.request';
 import { DriverTypeEnum } from 'src/infrastructure/data/enums/driver-type.eum';
 
+import { Cache } from 'cache-manager';
 @ApiTags('Order')
 @ApiHeader({
   name: 'Accept-Language',
@@ -67,6 +69,7 @@ export class OrderController {
   constructor(
     private readonly orderService: OrderService,
     private readonly returnOrderService: ReturnOrderService,
+        @Inject(CACHE_MANAGER) private cacheManager: Cache,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
   ) {}
 @Roles(Role.ADMIN)
@@ -78,6 +81,7 @@ async getSettings(@Query('section') section:DriverTypeEnum) {
 @Roles(Role.ADMIN)
 @Put('/settings')
 async updateSettings(@Body() req: EditSettingsRequest) {
+  this.cacheManager.reset();
   return new ActionResponse(await this.orderService.editSettings(req));
 }
 
