@@ -2,6 +2,7 @@ import { Expose, plainToInstance, Transform, Type } from "class-transformer";
 import { toUrl } from "src/core/helpers/file.helper";
 import { MealResponse } from "./meal.response";
 import { CuisineResponse } from "./cuisine.response";
+import { RestaurantSchedule } from "src/infrastructure/entities/restaurant/order/restaurant_schedule.entity";
 
 
 export class RestaurantCategoryResponse{
@@ -77,6 +78,10 @@ export class RestaurantResponse {
     @Expose()
     @Type(() => CuisineResponse)
     cuisine_types: CuisineResponse[];
+
+    @Expose()
+    @Type(() => RestaurantSchedule)
+    schedules: RestaurantSchedule[];
 }
 
 

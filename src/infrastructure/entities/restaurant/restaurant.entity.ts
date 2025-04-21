@@ -11,6 +11,7 @@ import { City } from '../city/city.entity';
 import { OptionGroup } from './option/option-group.entity';
 import { group } from 'console';
 import { RestaurantGroup } from './restaurant-group.entity';
+import { RestaurantSchedule } from './order/restaurant_schedule.entity';
 @Entity()
 export class Restaurant extends AuditableEntity {
   @Column()
@@ -54,6 +55,10 @@ export class Restaurant extends AuditableEntity {
   @ManyToMany(()=>RestaurantGroup,group=>group.restaurants)
   groups:RestaurantGroup[]
 
+  @OneToMany(() => RestaurantSchedule, (schedule) => schedule.restaurant, {
+    cascade: true,
+  })
+  schedules: RestaurantSchedule[];
   @OneToMany(
     () => RestaurantCategory,
     (restaurantCategory) => restaurantCategory.restaurant,

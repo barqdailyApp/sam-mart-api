@@ -55,6 +55,9 @@ import {
 } from './dto/requests/make-meal-offer.request';
 import { RestaurantGroup } from 'src/infrastructure/entities/restaurant/restaurant-group.entity';
 import { ClientFavoriteMeal } from 'src/infrastructure/entities/restaurant/meal/client-favorite-meal.entity';
+import { RestaurantSchedule } from 'src/infrastructure/entities/restaurant/order/restaurant_schedule.entity';
+import { addRestaurantSchedule } from './dto/requests/add-restaurant-schedule.request';
+import { updateRestaurantScheduleRequest } from './dto/requests/update-restaurant.schedule.request';
 
 @Injectable()
 export class RestaurantService extends BaseService<Restaurant> {
@@ -84,6 +87,8 @@ export class RestaurantService extends BaseService<Restaurant> {
     @InjectRepository(RestaurantGroup)
     private readonly restaurantGroupRepository: Repository<RestaurantGroup>,
     @InjectRepository(ClientFavoriteMeal) private readonly clientFavoriteMealRepository: Repository<ClientFavoriteMeal>,
+    @InjectRepository(RestaurantSchedule)
+    private readonly restaurantScheduleRepository: Repository<RestaurantSchedule>,
   ) {
     super(restaurantRepository);
   }
@@ -308,11 +313,12 @@ export class RestaurantService extends BaseService<Restaurant> {
     const restaurant = await this._repo.findOne({
       where: { id },
       relations: {
+        schedules: true,
         categories: {
           meals: { meal_option_groups: { option_group: true }, offer: true },
         },
         cuisine_types: true,
-      },
+      },order:{schedules:{order_by:'ASC'}}
     });
 
     if (!restaurant) throw new NotFoundException('no resturant found');
@@ -1000,4 +1006,54 @@ else  {
       excludeExtraneousValues: true,
     });
   }
-}
+
+  async addRestaurantSchedule(
+    req: addRestaurantSchedule,
+    restaurant_id: string,
+  ) {
+    const restaurant = await this.restaurantRepository.findOne({
+      where: { id: restaurant_id },
+    });
+    if (!restaurant) throw new NotFoundException('no restaurant found');
+    const schedule = plainToInstance(RestaurantSchedule, {
+      ...req,
+      restaurant_id: restaurant.id,
+    });
+    return await this.restaurantScheduleRepository.save(schedule);
+  }
+async editRestaurantSchedule(
+    req: updateRestaurantScheduleRequest,
+    restaurant_id: string,
+  ) {
+    const schedule = await this.restaurantScheduleRepository.findOne({
+      where: { id: req.id },
+    });
+    if (!schedule) throw new NotFoundException('no schedule found');
+    const scheduleUpdate = plainToInstance(RestaurantSchedule, req);
+    return await this.restaurantScheduleRepository.save(scheduleUpdate);
+  }
+  async deleteRestaurantSchedule(id: string, restaurant_id: string) {
+    const schedule = await this.restaurantScheduleRepository.findOne({
+      where: { id: id, restaurant_id: restaurant_id },
+    });
+    if (!schedule) throw new NotFoundException('no schedule found');
+    return await this.restaurantScheduleRepository.remove(schedule);
+  }
+async IsRestaurantOpen(restaurant_id: string) {
+  const now = new Date();
+  const currentTime = now.toTimeString().split(' ')[0]; // "HH:MM:SS"
+  const dayOfWeek = now.toLocaleString('en-US', { weekday: 'long' });
+  
+  const schedules = await this.restaurantScheduleRepository.find({
+    where: {
+      restaurant_id,
+      day_of_week: dayOfWeek,
+    }
+  });
+  
+  const isOpen = schedules.some(schedule => {
+    return currentTime >= schedule.open_time && currentTime <= schedule.close_time;
+  });
+  
+  return isOpen;
+}}
