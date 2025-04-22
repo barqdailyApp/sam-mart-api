@@ -53,7 +53,7 @@ export class UpdateMealRequest{
     @IsString()
     id: string
        @ApiProperty({required:false})
-       @Transform(({ value }) => value === 'true')
+      
         @IsBoolean()
         @IsOptional()
         is_active: boolean
