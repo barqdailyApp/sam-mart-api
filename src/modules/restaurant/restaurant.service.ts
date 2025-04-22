@@ -9,7 +9,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/core/base/service/service.base';
 import { Restaurant } from 'src/infrastructure/entities/restaurant/restaurant.entity';
 import { DeleteResult, In, Repository } from 'typeorm';
-import { GetNearResturantsQuery, GetNearResturantsQuerySearch } from './dto/requests/get-near-resturants.query';
+import {
+  GetNearResturantsQuery,
+  GetNearResturantsQuerySearch,
+} from './dto/requests/get-near-resturants.query';
 import { plainToInstance } from 'class-transformer';
 import { RestaurantResponse } from './dto/responses/restaurant.response';
 import { CuisineResponse } from './dto/responses/cuisine.response';
@@ -86,7 +89,8 @@ export class RestaurantService extends BaseService<Restaurant> {
     private readonly mealOfferRepository: Repository<MealOffer>,
     @InjectRepository(RestaurantGroup)
     private readonly restaurantGroupRepository: Repository<RestaurantGroup>,
-    @InjectRepository(ClientFavoriteMeal) private readonly clientFavoriteMealRepository: Repository<ClientFavoriteMeal>,
+    @InjectRepository(ClientFavoriteMeal)
+    private readonly clientFavoriteMealRepository: Repository<ClientFavoriteMeal>,
     @InjectRepository(RestaurantSchedule)
     private readonly restaurantScheduleRepository: Repository<RestaurantSchedule>,
   ) {
@@ -101,6 +105,7 @@ export class RestaurantService extends BaseService<Restaurant> {
     const restaurants = await this.restaurantRepository
       .createQueryBuilder('restaurant')
       .leftJoinAndSelect('restaurant.cuisine_types', 'cuisine')
+      .leftJoinAndSelect('restaurant.schedules', 'schedule')
       .addSelect(
         `
         (6371 * acos(
@@ -127,6 +132,7 @@ export class RestaurantService extends BaseService<Restaurant> {
       const distance = raw[index]?.distance; // Get the corresponding distance value
       return {
         ...restaurant,
+        is_open: this.IsRestaurantOpen(restaurant.id, restaurant.schedules),
         distance: parseFloat(distance), // Ensure distance is a number
         estimated_delivery_time:
           Number(restaurant.average_prep_time) +
@@ -167,17 +173,18 @@ export class RestaurantService extends BaseService<Restaurant> {
 
   async findAllNearRestaurantsCusineMeals(query: GetNearResturantsQuerySearch) {
     const deliveryTimePerKm =
-        (await this.constantRepository.findOne({
-            where: { type: ConstantType.DELIVERY_TIME_PER_KM },
-        })) ?? 0;
+      (await this.constantRepository.findOne({
+        where: { type: ConstantType.DELIVERY_TIME_PER_KM },
+      })) ?? 0;
 
     const restaurantQuery = this.restaurantRepository
-        .createQueryBuilder('restaurant')
-        .leftJoinAndSelect('restaurant.cuisine_types', 'cuisine')
-        .leftJoinAndSelect('restaurant.categories', 'category')
-        .leftJoinAndSelect('category.meals', 'meal')
-        .addSelect(
-            ` 
+      .createQueryBuilder('restaurant')
+      .leftJoinAndSelect('restaurant.cuisine_types', 'cuisine')
+      .leftJoinAndSelect('restaurant.categories', 'category')
+      .leftJoinAndSelect('rstaurant.schedules', 'schedule')
+      .leftJoinAndSelect('category.meals', 'meal')
+      .addSelect(
+        ` 
             (6371 * acos(
                 cos(radians(:latitude)) * 
                 cos(radians(restaurant.latitude)) * 
@@ -185,56 +192,66 @@ export class RestaurantService extends BaseService<Restaurant> {
                 sin(radians(:latitude)) * 
                 sin(radians(restaurant.latitude))
             ))`,
-            'distance'
-        )
-        .where('restaurant.status = :status', { status: RestaurantStatus.ACTIVE })
-        .andWhere('cuisine.is_active = :is_active', { is_active: true })
-        .having('distance <= :radius', { radius: query.radius })
-        .setParameters({ latitude: query.latitude, longitude: query.longitude });
+        'distance',
+      )
+      .where('restaurant.status = :status', { status: RestaurantStatus.ACTIVE })
+      .andWhere('cuisine.is_active = :is_active', { is_active: true })
+      .having('distance <= :radius', { radius: query.radius })
+      .setParameters({ latitude: query.latitude, longitude: query.longitude });
 
     if (query.is_restaurant) {
-        // Search restaurants by name
-        restaurantQuery.andWhere('(restaurant.name_en LIKE :name OR restaurant.name_ar LIKE :name)', {
-            name: `%${query.name}%`,
-        });
+      // Search restaurants by name
+      restaurantQuery.andWhere(
+        '(restaurant.name_en LIKE :name OR restaurant.name_ar LIKE :name)',
+        {
+          name: `%${query.name}%`,
+        },
+      );
 
-        // Order meals by default sorting
-        restaurantQuery.addOrderBy('meal.sales_count', 'DESC'); // You can change the order criteria if needed
+      // Order meals by default sorting
+      restaurantQuery.addOrderBy('meal.sales_count', 'DESC'); // You can change the order criteria if needed
     } else {
-        // Search meals by name
-        restaurantQuery.andWhere('(meal.name_en LIKE :name OR meal.name_ar LIKE :name)', {
-            name: `%${query.name}%`,
-        });
+      // Search meals by name
+      restaurantQuery.andWhere(
+        '(meal.name_en LIKE :name OR meal.name_ar LIKE :name)',
+        {
+          name: `%${query.name}%`,
+        },
+      );
 
-        // Prioritize the most relevant meals based on similarity
-        restaurantQuery.addOrderBy(
-            `CASE 
+      // Prioritize the most relevant meals based on similarity
+      restaurantQuery.addOrderBy(
+        `CASE 
                 WHEN meal.name_en = :name OR meal.name_ar = :name THEN 1 
                 WHEN meal.name_en LIKE :exactMatch OR meal.name_ar LIKE :exactMatch THEN 2 
                 ELSE 3 
             END`,
-            'ASC'
-        );
+        'ASC',
+      );
     }
 
-    restaurantQuery.setParameters({ name: `%${query.name}%`, exactMatch: `${query.name}%` });
+    restaurantQuery.setParameters({
+      name: `%${query.name}%`,
+      exactMatch: `${query.name}%`,
+    });
 
     const { raw, entities } = await restaurantQuery.getRawAndEntities();
 
     // Modify response
     const modifiedRestaurants = entities.map((restaurant) => ({
-        ...restaurant,
-        distance: parseFloat(raw[entities.indexOf(restaurant)]?.distance), // Ensure distance is a number
-        estimated_delivery_time:
-            Number(restaurant.average_prep_time) +
-            Number(deliveryTimePerKm) * parseFloat(raw[entities.indexOf(restaurant)]?.distance),
-        categories: undefined, // Remove categories
-        meals: restaurant.categories.flatMap((category) => category.meals), // Extract meals
+      ...restaurant,
+      is_open: this.IsRestaurantOpen(restaurant.id, restaurant.schedules),
+      distance: parseFloat(raw[entities.indexOf(restaurant)]?.distance), // Ensure distance is a number
+      estimated_delivery_time:
+        Number(restaurant.average_prep_time) +
+        Number(deliveryTimePerKm) *
+          parseFloat(raw[entities.indexOf(restaurant)]?.distance),
+      categories: undefined, // Remove categories
+      meals: restaurant.categories.flatMap((category) => category.meals), // Extract meals
     }));
 
     return modifiedRestaurants;
-}
-
+  }
 
   async findAllNearRestaurantsGroup(query: GetNearResturantsQuery) {
     const deliveryTimePerKm =
@@ -318,35 +335,44 @@ export class RestaurantService extends BaseService<Restaurant> {
           meals: { meal_option_groups: { option_group: true }, offer: true },
         },
         cuisine_types: true,
-      },order:{schedules:{order_by:'ASC'}}
+      },
+      order: { schedules: { order_by: 'ASC' } },
     });
 
     if (!restaurant) throw new NotFoundException('no resturant found');
-    const response = plainToInstance(RestaurantResponse, restaurant, {
-      excludeExtraneousValues: true,
-    });
+    const response = plainToInstance(
+      RestaurantResponse,
+      {
+        ...restaurant,
+        is_open: await this.IsRestaurantOpen(id, restaurant.schedules),
+      },
+      {
+        excludeExtraneousValues: true,
+      },
+    );
     await Promise.all(
       response.categories.map(async (category) => {
         await Promise.all(
           category.meals.map(async (meal) => {
             meal.direct_add = true;
-    
+
             if (user_id) {
-              const favorite_meal = await this.clientFavoriteMealRepository.findOne({
-                where: { user_id: user_id, meal_id: meal.id },
-              });
+              const favorite_meal =
+                await this.clientFavoriteMealRepository.findOne({
+                  where: { user_id: user_id, meal_id: meal.id },
+                });
               meal.is_favorite = !!favorite_meal;
             }
-    
+
             // If option group min_selection > 0
             if (meal.option_groups?.length > 0) {
               meal.direct_add = false;
             }
-          })
+          }),
         );
-      })
+      }),
     );
-    
+
     let cart_details = null;
     if (user_id) {
       const cart_meals = await this.cartMealRepository.find({
@@ -387,7 +413,7 @@ export class RestaurantService extends BaseService<Restaurant> {
       relations: {
         categories: { meals: { meal_option_groups: { option_group: true } } },
         cuisine_types: true,
-        groups:true,
+        groups: true,
         admins: { user: true },
         attachments: true,
       },
@@ -403,12 +429,12 @@ export class RestaurantService extends BaseService<Restaurant> {
         offer: true,
       },
     });
-    if  (!meal) throw new NotFoundException('no meal found');
-  
+    if (!meal) throw new NotFoundException('no meal found');
+
     const meal_response = plainToInstance(MealResponse, meal, {
       excludeExtraneousValues: true,
     });
-    if(user_id){
+    if (user_id) {
       const favorite_meal = await this.clientFavoriteMealRepository.findOne({
         where: { user_id: user_id, meal_id: meal.id },
       });
@@ -441,13 +467,12 @@ export class RestaurantService extends BaseService<Restaurant> {
   async getRestaurantGroups() {
     return await this.restaurantGroupRepository.find({
       where: { is_active: true },
-      order: { order_by: 'ASC' ,},
+      order: { order_by: 'ASC' },
     });
   }
 
   async getAdminRestaurantGroups() {
     return await this.restaurantGroupRepository.find({
-    
       order: { order_by: 'ASC' },
     });
   }
@@ -537,7 +562,7 @@ export class RestaurantService extends BaseService<Restaurant> {
     if (!group) throw new NotFoundException('no group found');
     const restaurant = await this._repo.findOne({
       where: { id: restaurant_id },
-      relations: { groups: true },  
+      relations: { groups: true },
     });
     if (!restaurant) throw new NotFoundException('no restaurant found');
     restaurant.groups.push(group);
@@ -840,8 +865,7 @@ export class RestaurantService extends BaseService<Restaurant> {
     restaurant.address_en = req.address_en;
     restaurant.latitude = Number(req.latitude);
     restaurant.longitude = Number(req.longitude);
-    restaurant.closing_time = req.closing_time;
-    restaurant.opening_time = req.opening_time;
+  
     restaurant.city_id = req.city_id;
     restaurant.min_order_price = req.min_order_price;
     if (req.logo) {
@@ -880,7 +904,7 @@ export class RestaurantService extends BaseService<Restaurant> {
         throw new BadRequestException('cuisine types not found');
       restaurant.cuisine_types = cuisine_types;
     }
-  
+
     await this.restaurantRepository.save(restaurant);
     const respone = await this.getSingleRestaurant(restaurant.id);
 
@@ -968,12 +992,13 @@ export class RestaurantService extends BaseService<Restaurant> {
     if (favorite_meal)
       //if meal is already favorite remove it
       return await this.clientFavoriteMealRepository.remove(favorite_meal);
-else  {
-     favorite_meal = plainToInstance(ClientFavoriteMeal, {
-      meal_id: meal.id,
-      user_id: this.request.user.id,
-    });
-    return await this.clientFavoriteMealRepository.save(favorite_meal);}
+    else {
+      favorite_meal = plainToInstance(ClientFavoriteMeal, {
+        meal_id: meal.id,
+        user_id: this.request.user.id,
+      });
+      return await this.clientFavoriteMealRepository.save(favorite_meal);
+    }
   }
 
   async getFavoriteMeals() {
@@ -981,28 +1006,28 @@ else  {
       where: { user_id: this.request.user.id },
       relations: { meal: { restaurant_category: { restaurant: true } } },
     });
-    
+
     // Group meals by restaurant
     const groupedByRestaurant = favoriteMeals.reduce((acc, favMeal) => {
       const restaurant = favMeal.meal.restaurant_category.restaurant;
       const restaurantId = restaurant.id;
-    
+
       if (!acc[restaurantId]) {
         acc[restaurantId] = {
           ...restaurant,
           meals: [],
         };
       }
-    
+
       acc[restaurantId].meals.push(favMeal.meal);
-    
+
       return acc;
     }, {});
-    
+
     // Convert to an array
     const response = Object.values(groupedByRestaurant);
-    
-    return  plainToInstance(RestaurantResponse, response, {
+
+    return plainToInstance(RestaurantResponse, response, {
       excludeExtraneousValues: true,
     });
   }
@@ -1021,7 +1046,7 @@ else  {
     });
     return await this.restaurantScheduleRepository.save(schedule);
   }
-async editRestaurantSchedule(
+  async editRestaurantSchedule(
     req: updateRestaurantScheduleRequest,
     restaurant_id: string,
   ) {
@@ -1039,21 +1064,29 @@ async editRestaurantSchedule(
     if (!schedule) throw new NotFoundException('no schedule found');
     return await this.restaurantScheduleRepository.remove(schedule);
   }
-async IsRestaurantOpen(restaurant_id: string) {
-  const now = new Date();
-  const currentTime = now.toTimeString().split(' ')[0]; // "HH:MM:SS"
-  const dayOfWeek = now.toLocaleString('en-US', { weekday: 'long' });
+   IsRestaurantOpen(
+    restaurant_id: string,
+    schedules?: RestaurantSchedule[],
+  ) {
+    const now = new Date();
+
+    // Add 3 hours to get Yemen time
+    const yemenTime = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+
+    const currentTime = yemenTime.toTimeString().split(' ')[0]; // "HH:MM:SS"
+    const dayOfWeek = yemenTime.toLocaleString('en-US', { weekday: 'long' });
+
   
-  const schedules = await this.restaurantScheduleRepository.find({
-    where: {
-      restaurant_id,
-      day_of_week: dayOfWeek,
-    }
-  });
-  
-  const isOpen = schedules.some(schedule => {
-    return currentTime >= schedule.open_time && currentTime <= schedule.close_time;
-  });
-  
-  return isOpen;
-}}
+    //filter schedules by day of week
+    schedules = schedules.filter(
+      (schedule) => schedule.day_of_week === dayOfWeek,
+    );
+    const isOpen = schedules.some((schedule) => {
+      return (
+        currentTime >= schedule.open_time && currentTime <= schedule.close_time
+      );
+    });
+
+    return isOpen;
+  }
+}

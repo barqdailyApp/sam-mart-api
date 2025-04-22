@@ -26,11 +26,7 @@ export class Restaurant extends AuditableEntity {
   @Column({ nullable: true })
   address_en: string;
 
-  @Column({ nullable: true })
-  opening_time: string;
 
-  @Column({ nullable: true })
-  closing_time: string;
 
   @Column({ default: RestaurantStatus.PENDING })
   status: RestaurantStatus;

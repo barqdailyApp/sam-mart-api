@@ -47,6 +47,9 @@ import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 import { SectionResponse } from './dto/response/section.response';
 import { CACHE_MANAGER, CacheInterceptor, CacheKey } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
+import { DriverTypeEnum } from 'src/infrastructure/data/enums/driver-type.eum';
+import { UpdateSystemScheduleRequest } from './dto/requests/update-system-schedule.request';
+import { AddSyemtemScheduleRequest } from './dto/requests/create-system-schedule.request';
 
 @ApiHeader({
   name: 'Accept-Language',
@@ -232,5 +235,21 @@ export class SectionController {
         },
       },
     );
+  }
+
+  @Get('/system-schedule')
+  async getSystemSchedule(@Query('type') type:DriverTypeEnum) {
+    const schedule = await this.sectionService.getSystemSchedule(type);
+    return new ActionResponse(schedule);
+  }
+  @Post('/system-schedule')
+  async updateSystemSchedule(@Body() req: AddSyemtemScheduleRequest) {
+    const schedule = await this.sectionService.createSystemSchedule(req);
+    return new ActionResponse(schedule);
+  }
+  @Put('/system-schedule')
+  async updateSystemScheduleById(@Body() req: UpdateSystemScheduleRequest) {
+    const schedule = await this.sectionService.updateSystemSchedule(req);
+    return new ActionResponse(schedule);
   }
 }

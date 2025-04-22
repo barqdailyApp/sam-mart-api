@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Section } from 'src/infrastructure/entities/section/section.entity';
@@ -27,6 +27,10 @@ import { ApiProperty } from '@nestjs/swagger';
 import { I18nResponse } from 'src/core/helpers/i18n.helper';
 import { or } from 'sequelize';
 import { fa } from '@faker-js/faker';
+import { DriverTypeEnum } from 'src/infrastructure/data/enums/driver-type.eum';
+import { SystemSchedule } from 'src/infrastructure/entities/constant/system-schedule.entity';
+import { AddSyemtemScheduleRequest } from './dto/requests/create-system-schedule.request';
+import { UpdateSystemScheduleRequest } from './dto/requests/update-system-schedule.request';
 
 @Injectable()
 export class SectionService extends BaseService<Section> {
@@ -40,6 +44,8 @@ export class SectionService extends BaseService<Section> {
     @Inject(ImageManager) private readonly imageManager: ImageManager,
     @Inject(FileService) private _fileService: FileService,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
+    @InjectRepository(SystemSchedule)
+    private readonly system_schedule_repo: Repository<SystemSchedule>,
 
     @Inject(REQUEST) readonly request: Request,
   ) {
@@ -52,8 +58,8 @@ export class SectionService extends BaseService<Section> {
         ? null
         : await this.user_repo.findOne({ where: { id: user_id } });
     const sections = await this.section_repo.find({
-      where: { is_active: true ,section_categories:{is_active:true}},
-      order: { order_by: 'ASC' ,section_categories:{order_by:'ASC'}},
+      where: { is_active: true, section_categories: { is_active: true } },
+      order: { order_by: 'ASC', section_categories: { order_by: 'ASC' } },
       relations: { section_categories: { category: true } },
     });
 
@@ -88,8 +94,8 @@ export class SectionService extends BaseService<Section> {
 
   async updateSection(req: UpdateSectionRequest): Promise<Section> {
     const section = await this._repo.findOne({ where: { id: req.id } });
-console.log(req)
-console.log(typeof(req.delivery_type))
+    console.log(req);
+    console.log(typeof req.delivery_type);
     if (req.logo) {
       await this._fileService.delete(section.logo);
       // resize image to 300x300
@@ -147,7 +153,7 @@ console.log(typeof(req.delivery_type))
     const result = await this.section_category_repo.save({
       ...req,
     });
-    await this.orderItems(req.section_id,true);
+    await this.orderItems(req.section_id, true);
     return result;
   }
 
@@ -159,19 +165,24 @@ console.log(typeof(req.delivery_type))
       throw new BadRequestException('category not found');
     }
     const result = await this.section_category_repo.update(req.id, req);
-    await this.orderItems(section_category.section_id,section_category.order_by>req.order_by?false:true);
+    await this.orderItems(
+      section_category.section_id,
+      section_category.order_by > req.order_by ? false : true,
+    );
     return result;
   }
 
   async deleteSectionCategory(id: string) {
     const section_category = await this.section_category_repo.findOne({
-      where: { id: id },relations:{category_subCategory:true}
+      where: { id: id },
+      relations: { category_subCategory: true },
     });
     if (!section_category) {
       throw new BadRequestException('category not found');
     }
-    if(section_category.category_subCategory.length>0) throw new BadRequestException('message.category_has_subcategories');
-    this.orderItems(section_category.section_id,true);
+    if (section_category.category_subCategory.length > 0)
+      throw new BadRequestException('message.category_has_subcategories');
+    this.orderItems(section_category.section_id, true);
     return await this.section_category_repo.softDelete(id);
   }
 
@@ -241,7 +252,7 @@ console.log(typeof(req.delivery_type))
     await Promise.all(newSections);
   }
 
-  async orderItems(section_id: string,asc:boolean ) {
+  async orderItems(section_id: string, asc: boolean) {
     try {
       const itemsToUpdate = await this.section_category_repo.find({
         where: {
@@ -249,7 +260,7 @@ console.log(typeof(req.delivery_type))
         },
         order: {
           order_by: 'ASC',
-          updated_at :asc?'ASC':'DESC'
+          updated_at: asc ? 'ASC' : 'DESC',
         },
       });
 
@@ -259,9 +270,52 @@ console.log(typeof(req.delivery_type))
       }
 
       await this.section_category_repo.save(itemsToUpdate);
-
     } catch (error) {
       console.error('Error occurred:', error.message);
     }
+  }
+
+  async getSystemSchedule(type: DriverTypeEnum) {
+    const system_schedule = await this.system_schedule_repo.find({
+      where: { type: type },
+      order: { order_by: 'ASC' },
+    });
+
+    return {schedule: system_schedule,is_open: await this.isSystemActive(type)};
+  }
+
+  async isSystemActive(type: DriverTypeEnum) {
+    const now = new Date();
+    const currentTime = now.toTimeString().split(' ')[0]; // "HH:MM:SS"
+    const dayOfWeek = now.toLocaleString('en-US', { weekday: 'long' });
+
+    const schedules = await this.system_schedule_repo.find({
+      where: {
+        type: type,
+        day_of_week: dayOfWeek,
+      },
+    });
+
+    const isOpen = schedules.some((schedule) => {
+      return (
+        currentTime >= schedule.open_time && currentTime <= schedule.close_time
+      );
+    });
+
+    return isOpen;
+  }
+
+  async createSystemSchedule(req: AddSyemtemScheduleRequest) {
+    const system_schedule = this.system_schedule_repo.create(req);
+    await this.system_schedule_repo.save(system_schedule);
+    return system_schedule;
+  }
+  async updateSystemSchedule(req: UpdateSystemScheduleRequest) {
+    const system_schedule = await this.system_schedule_repo.findOne({
+      where: { id: req.id },
+    });
+    if (!system_schedule) throw new NotFoundException('no schedule found');
+    const scheduleUpdate = plainToInstance(SystemSchedule, req);
+    return await this.system_schedule_repo.save(scheduleUpdate);
   }
 }

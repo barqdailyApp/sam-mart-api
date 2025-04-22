@@ -38,9 +38,7 @@ export class RestaurantResponse {
     @Expose()
     address_en: string;
     @Expose()
-    opening_time: string;
-    @Expose()
-    closing_time: string;
+    is_open: boolean;
     @Expose()
     city_id: string;
     @Expose()
