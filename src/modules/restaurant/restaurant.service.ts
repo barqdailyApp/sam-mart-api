@@ -262,6 +262,7 @@ export class RestaurantService extends BaseService<Restaurant> {
     const groups = await this.restaurantGroupRepository
       .createQueryBuilder('restaurant-group')
       .leftJoinAndSelect('restaurant-group.restaurants', 'restaurant')
+      .leftJoinAndSelect('restaurant.schedules', 'schedule')
       .addSelect(
         ` 
         (6371 * acos( 
@@ -288,6 +289,10 @@ export class RestaurantService extends BaseService<Restaurant> {
       });
 
       response.restaurants = response.restaurants.map((restaurant, index) => {
+        restaurant.is_open = this.IsRestaurantOpen(
+          restaurant.id,
+          restaurant.schedules,
+        );
         restaurant.distance = parseFloat(raw[index]?.distance || '0');
         restaurant.estimated_delivery_time = restaurant.average_prep_time;
         Number(deliveryTimePerKm) * restaurant.distance;
