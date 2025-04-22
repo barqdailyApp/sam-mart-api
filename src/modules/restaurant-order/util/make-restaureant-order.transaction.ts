@@ -163,7 +163,7 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
           restaurant_order_id: order.id,
           price: discounted_price,
           total_price:
-            Number(cart_meal.meal.price) +
+           discounted_price+
             Number(
               cart_meal?.cart_meal_options
                 ?.map((cart_meal_option) => cart_meal_option?.option?.price)
