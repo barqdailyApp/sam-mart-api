@@ -1,4 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { Transform } from "class-transformer";
 import { IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class AddMealRequest{
@@ -39,6 +40,7 @@ export class AddMealRequest{
     price: number 
 
     @ApiProperty({required:false})
+    @Transform(({ value }) => value === 'true')
     @IsBoolean()
     @IsOptional()
     is_active: boolean
@@ -51,6 +53,7 @@ export class UpdateMealRequest{
     @IsString()
     id: string
        @ApiProperty({required:false})
+       @Transform(({ value }) => value === 'true')
         @IsBoolean()
         @IsOptional()
         is_active: boolean
