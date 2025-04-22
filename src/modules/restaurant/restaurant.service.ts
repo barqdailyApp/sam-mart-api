@@ -713,6 +713,7 @@ export class RestaurantService extends BaseService<Restaurant> {
     meal.description_ar = req.description_ar;
     meal.description_en = req.description_en;
     meal.price = req.price;
+    meal.is_active = req.is_active;
 
     return await this.mealRepository.save(meal);
   }

@@ -148,6 +148,9 @@ export class MealOfferResponse {
   order_by: number;
 
   @Expose()
+  is_active: boolean;
+
+  @Expose()
   start_date: Date;
   @Expose()
   end_date: Date;
