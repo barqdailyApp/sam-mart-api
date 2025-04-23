@@ -293,7 +293,8 @@ export class SectionService extends BaseService<Section> {
   
     return {
       schedule: system_schedule,
-      is_open: await this.isSystemActive(type),
+      is_mart_open: await this.isSystemActive(DriverTypeEnum.MART),
+      is_food_open: await this.isSystemActive(DriverTypeEnum.FOOD),
     };
   }
   async getAdminSystemSchedule(type: DriverTypeEnum) {
@@ -310,24 +311,27 @@ export class SectionService extends BaseService<Section> {
 
   async isSystemActive(type: DriverTypeEnum) {
     const now = new Date();
+    now.setHours(now.getHours() + 3); // Add 3 hours
+  
     const currentTime = now.toTimeString().split(' ')[0]; // "HH:MM:SS"
     const dayOfWeek = now.toLocaleString('en-US', { weekday: 'long' });
-
+  
     const schedules = await this.system_schedule_repo.find({
       where: {
         type: type,
         day_of_week: dayOfWeek,
       },
     });
-
+  
     const isOpen = schedules.some((schedule) => {
       return (
         currentTime >= schedule.open_time && currentTime <= schedule.close_time
       );
     });
-
+  
     return isOpen;
   }
+  
 
   async createSystemSchedule(req: AddSyemtemScheduleRequest) {
     const system_schedule = this.system_schedule_repo.create(req);
