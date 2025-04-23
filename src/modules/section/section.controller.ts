@@ -67,7 +67,7 @@ export class SectionController {
   ) {}
 
   @Get('/system-schedule')
-  async getSystemSchedule(@Query('type') type:DriverTypeEnum) {
+  async getSystemSchedule(@Query('type') type?:DriverTypeEnum) {
     const schedule = await this.sectionService.getSystemSchedule(type);
     return new ActionResponse(schedule);
     

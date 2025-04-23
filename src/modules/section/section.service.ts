@@ -277,14 +277,14 @@ export class SectionService extends BaseService<Section> {
     }
   }
 
-  async getSystemSchedule(type: DriverTypeEnum) {
+  async getSystemSchedule(type?: DriverTypeEnum) {
     const yemenNow = moment().tz('Asia/Aden'); // Yemen timezone is UTC+3
     const today = yemenNow.format('dddd'); // returns: 'Monday', 'Tuesday', etc.
   
     const system_schedule = await this.system_schedule_repo.find({
       where: {
         type: type,
-        day_of_week: today,
+        // day_of_week: today,
       },
       order: {
         order_by: 'ASC',
