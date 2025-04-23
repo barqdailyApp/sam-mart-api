@@ -11,6 +11,8 @@ import { BaseService } from 'src/core/base/service/service.base';
 import { CreateSectionRequest } from './dto/requests/create-section.request';
 import { ImageManager } from 'src/integration/sharp/image.manager';
 import * as sharp from 'sharp';
+import * as moment from 'moment-timezone'; // make sure you have moment-timezone installed
+
 import { StorageManager } from 'src/integration/storage/storage.manager';
 import { plainToClass, plainToInstance } from 'class-transformer';
 import { SectionCategoryRequest } from './dto/requests/create-section-category.request';
@@ -276,12 +278,34 @@ export class SectionService extends BaseService<Section> {
   }
 
   async getSystemSchedule(type: DriverTypeEnum) {
+    const yemenNow = moment().tz('Asia/Aden'); // Yemen timezone is UTC+3
+    const today = yemenNow.format('dddd'); // returns: 'Monday', 'Tuesday', etc.
+  
     const system_schedule = await this.system_schedule_repo.find({
-      where: { type: type },
-      order: { order_by: 'ASC' },
+      where: {
+        type: type,
+        day_of_week: today,
+      },
+      order: {
+        order_by: 'ASC',
+      },
     });
-
-    return {schedule: system_schedule,is_open: await this.isSystemActive(type)};
+  
+    return {
+      schedule: system_schedule,
+      is_open: await this.isSystemActive(type),
+    };
+  }
+  async getAdminSystemSchedule(type: DriverTypeEnum) {
+    const system_schedule = await this.system_schedule_repo.find({
+      where: {
+        type: type,
+      },
+      order: {
+        order_by: 'ASC',
+      }
+    });
+    return system_schedule;
   }
 
   async isSystemActive(type: DriverTypeEnum) {

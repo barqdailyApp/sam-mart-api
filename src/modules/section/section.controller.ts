@@ -66,6 +66,39 @@ export class SectionController {
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
+  @Get('/system-schedule')
+  async getSystemSchedule(@Query('type') type:DriverTypeEnum) {
+    const schedule = await this.sectionService.getSystemSchedule(type);
+    return new ActionResponse(schedule);
+    
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @Get('admin/system-schedule')
+  async getAdminSystemSchedule(@Query('type') type:DriverTypeEnum) {
+    const schedule = await this.sectionService.getSystemSchedule(type);
+    return new ActionResponse(schedule);
+    
+  }
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @Post('/system-schedule')
+  async updateSystemSchedule(@Body() req: AddSyemtemScheduleRequest) {
+    const schedule = await this.sectionService.createSystemSchedule(req);
+    return new ActionResponse(schedule);
+  }
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @Put('/system-schedule')
+  async updateSystemScheduleById(@Body() req: UpdateSystemScheduleRequest) {
+    const schedule = await this.sectionService.updateSystemSchedule(req);
+    return new ActionResponse(schedule);
+  }
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
@@ -237,19 +270,5 @@ export class SectionController {
     );
   }
 
-  @Get('/system-schedule')
-  async getSystemSchedule(@Query('type') type:DriverTypeEnum) {
-    const schedule = await this.sectionService.getSystemSchedule(type);
-    return new ActionResponse(schedule);
-  }
-  @Post('/system-schedule')
-  async updateSystemSchedule(@Body() req: AddSyemtemScheduleRequest) {
-    const schedule = await this.sectionService.createSystemSchedule(req);
-    return new ActionResponse(schedule);
-  }
-  @Put('/system-schedule')
-  async updateSystemScheduleById(@Body() req: UpdateSystemScheduleRequest) {
-    const schedule = await this.sectionService.updateSystemSchedule(req);
-    return new ActionResponse(schedule);
-  }
+ 
 }
