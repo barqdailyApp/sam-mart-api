@@ -304,6 +304,7 @@ export class SectionService extends BaseService<Section> {
       },
       order: {
         order_by: 'ASC',
+         open_time: 'ASC',
       }
     });
     return system_schedule;
