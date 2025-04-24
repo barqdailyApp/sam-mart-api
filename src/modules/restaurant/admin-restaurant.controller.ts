@@ -435,7 +435,7 @@ export class AdminRestaurantController {
     });
     return new ActionResponse(response);
   }
-
+  @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
   @Post('/admin/schedule/:restaurant_id')
   async addSchedule(
     @Body() req: addRestaurantSchedule,
@@ -446,7 +446,7 @@ export class AdminRestaurantController {
       restaurant_id,
     );
     return new ActionResponse(schedule);
-  }
+  }  @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
   @Put('/admin/schedule/:restaurant_id')
   async editSchedule(
     @Body() req: updateRestaurantScheduleRequest,
@@ -455,7 +455,7 @@ export class AdminRestaurantController {
     const schedule = await this.restaurantService.editRestaurantSchedule(req,
       restaurant_id);
     return new ActionResponse(schedule);
-  }
+  }  @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
   @Delete('/admin/schedule/:restaurant_id/:id')
   async deleteSchedule(
     @Param('id') id: string,
