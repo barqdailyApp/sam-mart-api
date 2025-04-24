@@ -14,6 +14,8 @@ import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 
 import { GetNearResturantsQuery } from '../restaurant/dto/requests/get-near-resturants.query';
 import { FoodBanar } from 'src/infrastructure/entities/restaurant/banar/food_banar.entity';
+import { Constant } from 'src/infrastructure/entities/constant/constant.entity';
+import { ConstantType } from 'src/infrastructure/data/enums/constant-type.enum';
 
 @Injectable()
 export class BanarService extends BaseService<FoodBanar> {
@@ -22,6 +24,7 @@ export class BanarService extends BaseService<FoodBanar> {
     private readonly banarRepository: Repository<FoodBanar>,
     @Inject(FileService) private _fileService: FileService,
     @Inject(REQUEST) private readonly request: Request,
+    @InjectRepository(Constant) private readonly constantRepository: Repository<Constant>,
   ) {
     super(banarRepository);
   }
@@ -45,35 +48,76 @@ export class BanarService extends BaseService<FoodBanar> {
   }
 
   async getGuestBanars(query: GetNearResturantsQuery) {
-    return await this.banarRepository
-    .createQueryBuilder('food_banar')
-    .leftJoinAndSelect('food_banar.restaurant', 'restaurant')
-    .where('food_banar.is_active = :is_active', { is_active: true })
-    .andWhere('food_banar.started_at <= :started_at', {
-      started_at: new Date(),
-    })
-    .andWhere('food_banar.ended_at >= :ended_at', { ended_at: new Date() })
-    .andWhere('food_banar.is_popup = :is_popup', { is_popup: false })
-    .andWhere(
-      new Brackets((qb) => {
-        qb.where(
-          `(6371 * acos(
-            cos(radians(:latitude)) * cos(radians(COALESCE(restaurant.latitude, 0))) *
-            cos(radians(COALESCE(restaurant.longitude, 0)) - radians(:longitude)) +
-            sin(radians(:latitude)) * sin(radians(COALESCE(restaurant.latitude, 0)))
-          )) <= :radius`,
-          {
-            latitude: query.latitude,
-            longitude: query.longitude,
-            radius: query.radius,
-          },
-        ).orWhere('restaurant.id IS NULL');
-      }),
-    )
-    .andWhere('restaurant.status = :status OR restaurant.id IS NULL', { status: 'ACTIVE' })
-    .getMany();
+    const currentDate = new Date();
   
+    const banars = await this.banarRepository
+      .createQueryBuilder('food_banar')
+      .leftJoinAndSelect('food_banar.restaurant', 'restaurant')
+      .addSelect(`
+        6371 * acos(
+          cos(radians(:latitude)) * cos(radians(COALESCE(restaurant.latitude, 0))) *
+          cos(radians(COALESCE(restaurant.longitude, 0)) - radians(:longitude)) +
+          sin(radians(:latitude)) * sin(radians(COALESCE(restaurant.latitude, 0)))
+        )
+      `, 'distance')
+      .where('food_banar.is_active = :is_active', { is_active: true })
+      .andWhere('food_banar.started_at <= :started_at', { started_at: currentDate })
+      .andWhere('food_banar.ended_at >= :ended_at', { ended_at: currentDate })
+      .andWhere('food_banar.is_popup = :is_popup', { is_popup: false })
+      .andWhere(
+        new Brackets((qb) => {
+          qb.where(
+            `(6371 * acos(
+              cos(radians(:latitude)) * cos(radians(COALESCE(restaurant.latitude, 0))) *
+              cos(radians(COALESCE(restaurant.longitude, 0)) - radians(:longitude)) +
+              sin(radians(:latitude)) * sin(radians(COALESCE(restaurant.latitude, 0)))
+            )) <= :radius`,
+            {
+              latitude: query.latitude,
+              longitude: query.longitude,
+              radius: query.radius,
+            }
+          ).orWhere('restaurant.id IS NULL');
+        }),
+      )
+      .andWhere('restaurant.status = :status OR restaurant.id IS NULL', { status: 'ACTIVE' })
+      .setParameters({
+        latitude: query.latitude,
+        longitude: query.longitude,
+      })
+      .getRawAndEntities();
+  
+    // Get delivery time per km
+    const deliveryTimePerKmConstant = await this.constantRepository.findOne({
+      where: { type: ConstantType.DELIVERY_TIME_PER_KM },
+    });
+    
+    const deliveryTimePerKm = deliveryTimePerKmConstant
+      ? Number(deliveryTimePerKmConstant?.variable)
+      : 0;
+  
+    // Attach the distance and estimated time to each result
+    const banarsWithDistance = banars.entities.map((banar, index) => {
+      const raw = banars.raw[index];
+      const rawDistance = parseFloat(raw.distance);
+      const averagePrepTime = Number(banar?.restaurant?.average_prep_time || 0);
+  
+      return {
+        ...banar,
+        restaurant: banar.restaurant == null
+          ? null
+          : {
+              ...banar.restaurant,
+              distance: rawDistance,
+              estimated_delivery_time: averagePrepTime + (deliveryTimePerKm * rawDistance),
+            },
+      };
+    });
+  
+    return banarsWithDistance;
   }
+  
+  
   async getGuestPopup() {
     return await this.banarRepository.findOne({
       where: {
