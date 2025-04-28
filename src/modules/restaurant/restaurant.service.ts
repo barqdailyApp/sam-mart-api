@@ -1011,7 +1011,7 @@ export class RestaurantService extends BaseService<Restaurant> {
   async getFavoriteMeals() {
     const favoriteMeals = await this.clientFavoriteMealRepository.find({
       where: { user_id: this.request.user.id },
-      relations: { meal: { restaurant_category: { restaurant: true } } },
+      relations: { meal: { restaurant_category: { restaurant: true },offer: true } },
     });
 
     // Group meals by restaurant
