@@ -379,6 +379,7 @@ export class RestaurantService extends BaseService<Restaurant> {
     );
 
     let cart_details = null;
+
     if (user_id) {
       const cart_meals = await this.cartMealRepository.find({
         where: { cart: { user_id: user_id } },
@@ -388,29 +389,47 @@ export class RestaurantService extends BaseService<Restaurant> {
           cart: true,
         },
       });
-
-      const total_price = cart_meals.reduce(
-        (acc, curr) =>
-          acc +
-          (curr.quantity * curr.meal.price +
-            curr.cart_meal_options.reduce(
-              (acc, curr) => acc + curr.option.price,
-              0,
-            )),
-        0,
-      );
-      const meals_count = cart_meals?.length;
+    
+      // Prepare Yemen time once
+      const nowUtc = new Date();
+      nowUtc.setHours(nowUtc.getHours() + 3);
+      const nowInYemenTime = nowUtc;
+    
+      const total_price = cart_meals.reduce((acc, cartMeal) => {
+        let mealPrice = cartMeal.meal.price;
+    
+        const offer = cartMeal.meal.offer;
+        if (
+          offer &&
+          offer.is_active &&
+          new Date(offer.start_date) <= nowInYemenTime &&
+          new Date(offer.end_date) > nowInYemenTime
+        ) {
+          const discountPercentage = Number(offer.discount_percentage) || 0;
+          mealPrice = mealPrice - (mealPrice * discountPercentage) / 100;
+        }
+    
+        const optionsTotal = cartMeal.cart_meal_options.reduce(
+          (optionsAcc, optionItem) => optionsAcc + optionItem.option.price,
+          0,
+        );
+    
+        return acc + cartMeal.quantity * (mealPrice + optionsTotal);
+      }, 0);
+    
+      const meals_count = cart_meals.length;
       cart_details = {
         meals_count,
         total_price,
         restaurant_id: cart_meals[0]?.cart?.restaurant_id,
       };
     }
+    
     return {
       restaurant: response,
       cart: restaurant.id == cart_details?.restaurant_id ? cart_details : null,
     };
-  }
+  }    
 
   async getAdminSingleRestaurant(id: string) {
     const restaurant = await this._repo.findOne({
