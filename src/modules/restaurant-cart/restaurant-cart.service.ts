@@ -213,14 +213,15 @@ export class RestaurantCartService {
       if (!cart) {
         return { meals_count: 0, total_price: 0 };
       }
-    
-      const nowInYemenTime = new Date(new Date().setUTCHours(new Date().getUTCHours() + 3));
-    
+      const nowUtc = new Date();
+      nowUtc.setHours(nowUtc.getHours() + 3);
+      const nowInYemenTime = nowUtc;
+      
       const data = {
         meals_count: cart.restaurant_cart_meals.length,
         total_price: cart.restaurant_cart_meals.reduce((acc, cartMeal) => {
           let mealPrice = cartMeal.meal.price;
-    
+      
           const offer = cartMeal.meal.offer;
           if (
             offer &&
@@ -231,18 +232,18 @@ export class RestaurantCartService {
             const discountPercentage = Number(offer.discount_percentage) || 0;
             mealPrice = mealPrice - (mealPrice * discountPercentage) / 100;
           }
-    
+      
           const optionsTotal = cartMeal.cart_meal_options.reduce(
             (optionsAcc, optionItem) => optionsAcc + optionItem.option.price,
             0,
           );
-    
+      
           return acc + cartMeal.quantity * (mealPrice + optionsTotal);
         }, 0),
       };
-    
+      
       return data;
-    }
-    
+      
+    }    
 
   }
