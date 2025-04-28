@@ -163,7 +163,7 @@ export class RestaurantCartService {
     const cart_meal = await this.restaurantCartMealRepository.findOne({
       where: { id: cart_meal_id },
       relations: {
-        meal: { meal_option_groups: { option_group: { options: true } } },
+        meal: { meal_option_groups: { option_group: { options: true }  },offer:true },
         cart_meal_options: { option: true },
       },
     });
