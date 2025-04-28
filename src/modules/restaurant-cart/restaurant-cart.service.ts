@@ -201,25 +201,48 @@ export class RestaurantCartService {
       where: { user_id: this.request.user.id },
       relations: {
         restaurant_cart_meals: {
-          meal: true,
+          meal: { offer: true },
           cart_meal_options: { option: true },
         },
       },
     });
 
-    const data = {
-      meals_count: cart.restaurant_cart_meals.length,
-      total_price: cart.restaurant_cart_meals.reduce(
-        (acc, curr) =>
-          acc +
-          (curr.quantity * curr.meal.price +
-            curr.cart_meal_options.reduce(
-              (acc, curr) => acc + curr.option.price,
-              0,
-            )),
-        0,
-      ),
-    };
-    return data;
+    
+
+    
+      if (!cart) {
+        return { meals_count: 0, total_price: 0 };
+      }
+    
+      const nowInYemenTime = new Date(new Date().setUTCHours(new Date().getUTCHours() + 3));
+    
+      const data = {
+        meals_count: cart.restaurant_cart_meals.length,
+        total_price: cart.restaurant_cart_meals.reduce((acc, cartMeal) => {
+          let mealPrice = cartMeal.meal.price;
+    
+          const offer = cartMeal.meal.offer;
+          if (
+            offer &&
+            offer.is_active &&
+            new Date(offer.start_date) <= nowInYemenTime &&
+            new Date(offer.end_date) > nowInYemenTime
+          ) {
+            const discountPercentage = Number(offer.discount_percentage) || 0;
+            mealPrice = mealPrice - (mealPrice * discountPercentage) / 100;
+          }
+    
+          const optionsTotal = cartMeal.cart_meal_options.reduce(
+            (optionsAcc, optionItem) => optionsAcc + optionItem.option.price,
+            0,
+          );
+    
+          return acc + cartMeal.quantity * (mealPrice + optionsTotal);
+        }, 0),
+      };
+    
+      return data;
+    }
+    
+
   }
-}
