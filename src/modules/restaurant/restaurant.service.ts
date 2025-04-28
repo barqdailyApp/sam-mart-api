@@ -421,6 +421,7 @@ export class RestaurantService extends BaseService<Restaurant> {
         groups: true,
         admins: { user: true },
         attachments: true,
+        schedules: true,
       },
     });
     return restaurant;
