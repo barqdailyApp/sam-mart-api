@@ -181,7 +181,7 @@ export class RestaurantService extends BaseService<Restaurant> {
       .createQueryBuilder('restaurant')
       .leftJoinAndSelect('restaurant.cuisine_types', 'cuisine')
       .leftJoinAndSelect('restaurant.categories', 'category')
-      .leftJoinAndSelect('rstaurant.schedules', 'schedule')
+      .leftJoinAndSelect('restaurant.schedules', 'schedule')
       .leftJoinAndSelect('category.meals', 'meal')
       .addSelect(
         ` 
