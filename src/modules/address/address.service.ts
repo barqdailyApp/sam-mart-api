@@ -63,6 +63,8 @@ export class AddressService extends BaseUserService<Address> {
     if (!addresss) throw new NotFoundException('message.address_not_found');
     const productClientQuery = new ProductClientQuery({
       user_id: user_id,
+      latitude: addresss.latitude?.toString(),
+      longitude: addresss.longitude?.toString(),
       page: 1,
       limit: 1,
     });
