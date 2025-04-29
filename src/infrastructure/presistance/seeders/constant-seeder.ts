@@ -33,6 +33,7 @@ export class ConstantSeeder implements Seeder {
       new Constant({ variable: '100', type: ConstantType.DRIVER_BALANCE_LIMIT  , section:DriverTypeEnum.FOOD}),
       new Constant({ variable: '100', type: ConstantType.MAX_STORAGE_DISTANCE  , section:DriverTypeEnum.FOOD}),
       new Constant({ variable: '10', type: ConstantType.RESTAURANT_CASHBACK , section:DriverTypeEnum.FOOD}),
+      new Constant({ variable: '50', type: ConstantType.MAX_RESTAURANT_DISTANCE , section:DriverTypeEnum.FOOD}),
       
     ]);
   }

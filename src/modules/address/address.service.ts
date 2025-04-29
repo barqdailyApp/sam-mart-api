@@ -26,7 +26,12 @@ import { ProductClientService } from '../product/product-client.service';
 import { ProductClientQuery } from '../product/dto/filter/products-client.query';
 import { plainToInstance } from 'class-transformer';
 import { AddressResponse } from './dto/responses/address.respone';
-import { CreateAddressRequest, CreateOptionalAddressRequest } from './dto/requests/create-address.request';
+import {
+  CreateAddressRequest,
+  CreateOptionalAddressRequest,
+} from './dto/requests/create-address.request';
+import { Constant } from 'src/infrastructure/entities/constant/constant.entity';
+import { ConstantType } from 'src/infrastructure/data/enums/constant-type.enum';
 
 @Injectable({ scope: Scope.REQUEST })
 export class AddressService extends BaseUserService<Address> {
@@ -35,6 +40,8 @@ export class AddressService extends BaseUserService<Address> {
     public _repo: Repository<Address>,
     @InjectRepository(WorkingArea)
     public workingArea_repo: Repository<WorkingArea>,
+    @InjectRepository(Constant)
+    private readonly constantRepository: Repository<Constant>,
     @Inject(REQUEST) request: Request,
     private entityRelatedValidator: EntityRelatedValidator,
     @Inject(SetFavoriteAddressTransaction)
@@ -54,12 +61,22 @@ export class AddressService extends BaseUserService<Address> {
     return await super.findAll(query);
   }
 
-  async getAvailableSections(guest_address?: CreateOptionalAddressRequest,user_id?: string){
+  async getAvailableSections(
+    guest_address?: CreateOptionalAddressRequest,
+    user_id?: string,
+  ) {
+    const restaurant_distance =
+      (
+        await this.constantRepository.findOneBy({
+          type: ConstantType.MAX_RESTAURANT_DISTANCE,
+        })
+      ).variable || 0;
 
-   
-    const addresss = guest_address?.latitude?plainToInstance(Address,guest_address): await this._repo.findOne({
-      where: { user_id: user_id, is_favorite: true },
-    });
+    const addresss = guest_address?.latitude
+      ? plainToInstance(Address, guest_address)
+      : await this._repo.findOne({
+          where: { user_id: user_id, is_favorite: true },
+        });
     if (!addresss) throw new NotFoundException('message.address_not_found');
     const productClientQuery = new ProductClientQuery({
       user_id: user_id,
@@ -75,13 +92,14 @@ export class AddressService extends BaseUserService<Address> {
       {
         latitude: addresss.latitude,
         longitude: addresss.longitude,
-        radius: 25,
+        radius: Number(restaurant_distance),
       },
     );
     return {
       addresss: plainToInstance(AddressResponse, addresss),
       is_braq_food: barq_food.restaurants?.length > 0,
       is_barq_mart: barq_mart.products?.length > 0,
+      max_restaurant_distance: restaurant_distance,
     };
   }
 
