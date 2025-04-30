@@ -1,4 +1,9 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Section } from 'src/infrastructure/entities/section/section.entity';
@@ -33,6 +38,8 @@ import { DriverTypeEnum } from 'src/infrastructure/data/enums/driver-type.eum';
 import { SystemSchedule } from 'src/infrastructure/entities/constant/system-schedule.entity';
 import { AddSyemtemScheduleRequest } from './dto/requests/create-system-schedule.request';
 import { UpdateSystemScheduleRequest } from './dto/requests/update-system-schedule.request';
+import { Constant } from 'src/infrastructure/entities/constant/constant.entity';
+import { ConstantType } from 'src/infrastructure/data/enums/constant-type.enum';
 
 @Injectable()
 export class SectionService extends BaseService<Section> {
@@ -46,6 +53,8 @@ export class SectionService extends BaseService<Section> {
     @Inject(ImageManager) private readonly imageManager: ImageManager,
     @Inject(FileService) private _fileService: FileService,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
+    @InjectRepository(Constant)
+    private readonly constant_repo: Repository<Constant>,
     @InjectRepository(SystemSchedule)
     private readonly system_schedule_repo: Repository<SystemSchedule>,
 
@@ -278,9 +287,12 @@ export class SectionService extends BaseService<Section> {
   }
 
   async getSystemSchedule(type?: DriverTypeEnum) {
+    const max_restaurant_distance = await this.constant_repo.findOne({
+      where: { type: ConstantType.MAX_RESTAURANT_DISTANCE },
+    });
     const yemenNow = moment().tz('Asia/Aden'); // Yemen timezone is UTC+3
     const today = yemenNow.format('dddd'); // returns: 'Monday', 'Tuesday', etc.
-  
+
     const system_schedule = await this.system_schedule_repo.find({
       where: {
         type: type,
@@ -290,11 +302,12 @@ export class SectionService extends BaseService<Section> {
         order_by: 'ASC',
       },
     });
-  
+
     return {
       schedule: system_schedule,
       is_mart_open: await this.isSystemActive(DriverTypeEnum.MART),
       is_food_open: await this.isSystemActive(DriverTypeEnum.FOOD),
+      max_restaurant_distance: Number(max_restaurant_distance?.variable)|| 0,
     };
   }
   async getAdminSystemSchedule(type: DriverTypeEnum) {
@@ -304,8 +317,8 @@ export class SectionService extends BaseService<Section> {
       },
       order: {
         order_by: 'ASC',
-         open_time: 'ASC',
-      }
+        open_time: 'ASC',
+      },
     });
     return system_schedule;
   }
@@ -313,26 +326,25 @@ export class SectionService extends BaseService<Section> {
   async isSystemActive(type: DriverTypeEnum) {
     const now = new Date();
     now.setHours(now.getHours() + 3); // Add 3 hours
-  
+
     const currentTime = now.toTimeString().split(' ')[0]; // "HH:MM:SS"
     const dayOfWeek = now.toLocaleString('en-US', { weekday: 'long' });
-  
+
     const schedules = await this.system_schedule_repo.find({
       where: {
         type: type,
         day_of_week: dayOfWeek,
       },
     });
-  
+
     const isOpen = schedules.some((schedule) => {
       return (
         currentTime >= schedule.open_time && currentTime <= schedule.close_time
       );
     });
-  
+
     return isOpen;
   }
-  
 
   async createSystemSchedule(req: AddSyemtemScheduleRequest) {
     const system_schedule = this.system_schedule_repo.create(req);
