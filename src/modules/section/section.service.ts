@@ -325,7 +325,7 @@ export class SectionService extends BaseService<Section> {
 
   async isSystemActive(type: DriverTypeEnum) {
     const now = new Date();
-    now.setHours(now.getHours() + 3); // Add 3 hours
+    now.setHours(now.getHours() + 2); // Add 3 hours
 
     const currentTime = now.toTimeString().split(' ')[0]; // "HH:MM:SS"
     const dayOfWeek = now.toLocaleString('en-US', { weekday: 'long' });
