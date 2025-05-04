@@ -50,6 +50,12 @@ export class RestaurantCartService {
         restaurant: true,
       },
     });
+
+    // check if meals are active else delete them
+    cart.restaurant_cart_meals = cart.restaurant_cart_meals?.filter(
+      (meal) => meal.meal.is_active,
+    );
+     
     const default_address = await this.addressRepository.findOne({
       where: { user_id: this.request.user.id, is_favorite: true },
     });
