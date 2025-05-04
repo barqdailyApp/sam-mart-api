@@ -5,8 +5,14 @@ import { RegisterRestaurantTransaction } from './util/register-restaurant.transa
 import { AdminRestaurantController } from './admin-restaurant.controller';
 
 @Module({
-  providers: [RestaurantService,RegisterRestaurantTransaction],
-  controllers: [RestaurantController,AdminRestaurantController],
-  exports: [RestaurantModule,RestaurantService],
+  providers: [RestaurantService, RegisterRestaurantTransaction],
+  controllers: [RestaurantController, AdminRestaurantController],
+  exports: [
+    RestaurantModule,
+    RestaurantService,
+    RegisterRestaurantTransaction,
+    RestaurantService,
+    RestaurantModule
+  ],
 })
 export class RestaurantModule {}

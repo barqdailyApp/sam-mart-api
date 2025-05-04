@@ -30,6 +30,8 @@ import { DriverTypeEnum } from 'src/infrastructure/data/enums/driver-type.eum';
 import { PromoCodeService } from 'src/modules/promo-code/promo-code.service';
 import { OrderGateway } from 'src/integration/gateways/order.gateway';
 import { RestaurantAdmin } from 'src/infrastructure/entities/restaurant/restaurant-admin.entity';
+import { RestaurantService } from 'src/modules/restaurant/restaurant.service';
+import { RestaurantStatus } from 'src/infrastructure/data/enums/restaurant-status.enum';
 @Injectable()
 export class MakeRestaurantOrderTransaction extends BaseTransaction<
   MakeRestaurantOrderRequest,
@@ -42,6 +44,7 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
     @Inject(ConfigService) private readonly _config: ConfigService,
     private readonly paymentService: PaymentMethodService,
     private readonly promo_code_service: PromoCodeService,
+    private readonly restaurantService: RestaurantService,
     private readonly orderGateway: OrderGateway,
   ) {
     super(dataSource);
@@ -123,8 +126,22 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
       const restaurant = await context.findOne(Restaurant, {
         where: {
           id: order.restaurant_id,
+          status: RestaurantStatus.ACTIVE,
         },
+        relations: { schedules: true },
       });
+      if (!restaurant) {
+        throw new BadRequestException('message.restaurant_not_found');
+      }
+      const is_system_active = this.restaurantService.IsRestaurantOpen(
+        restaurant.id,
+        restaurant.schedules,
+      );
+
+      if (!is_system_active) {
+        throw new BadRequestException('restaurant is closed');
+      }
+
       const distance = calculateDistances(
         [restaurant.latitude, restaurant.longitude],
         [address.latitude, address.longitude],
@@ -163,7 +180,7 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
           restaurant_order_id: order.id,
           price: discounted_price,
           total_price:
-           discounted_price+
+            discounted_price +
             Number(
               cart_meal?.cart_meal_options
                 ?.map((cart_meal_option) => cart_meal_option?.option?.price)
@@ -187,14 +204,14 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
         .reduce((a, b) => a + b, 0);
 
       order.sub_total = total;
-      if(req?.wallet_discount>0){
+      if (req?.wallet_discount > 0) {
         const wallet = await context.findOneBy(Wallet, { user_id: user.id });
-        if (Number( wallet.balance) < req.wallet_discount) {
+        if (Number(wallet.balance) < req.wallet_discount) {
           throw new BadRequestException('message.insufficient_balance');
         }
         total = total - req.wallet_discount;
       }
-      total= total + delivery_fee;
+      total = total + delivery_fee;
       order.total_price = total;
       if (req.promo_code) {
         const promo_code =
@@ -285,12 +302,11 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
 
       const admin_users = await context.find(RestaurantAdmin, {
         where: { restaurant_id: order.restaurant_id },
-     
       });
-      await this.orderGateway.emitRestauarntOrderEvent(
-        order,
-       [ ...admin_users.map((admin) => admin.user_id),"admin"],
-      );
+      await this.orderGateway.emitRestauarntOrderEvent(order, [
+        ...admin_users.map((admin) => admin.user_id),
+        'admin',
+      ]);
       return order;
     } catch (error) {
       throw new BadRequestException(error.message);

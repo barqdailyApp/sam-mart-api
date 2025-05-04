@@ -413,4 +413,10 @@ if(warehouses_product!=null){
     }
     return await this.cartProductRepository.save(cart_product);
   }
+
+  async clearCart() {
+    const cart = await this.getCart();
+    await this.cartProductRepository.delete({ cart_id: cart.id });
+    return cart;
+  }
 }

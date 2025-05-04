@@ -10,10 +10,27 @@ import { TransactionService } from '../transaction/transaction.service';
 import { ReasonService } from '../reason/reason.service';
 import { ShipmentChatGateway } from 'src/integration/gateways/shipment-chat-gateway';
 import { PromoCodeService } from '../promo-code/promo-code.service';
+import { Section } from 'src/infrastructure/entities/section/section.entity';
+import { SectionService } from '../section/section.service';
+import { RestaurantService } from '../restaurant/restaurant.service';
+import { RestaurantModule } from '../restaurant/restaurant.module';
 
 @Module({
-  controllers: [RestaurantOrderController,AdminRestaurantOrderController],
-  providers: [ShipmentChatGateway,PromoCodeService,RestaurantOrderService,MakeRestaurantOrderTransaction,PaymentMethodService,OrderGateway,TransactionService,ReasonService],
-  imports:[NotificationModule]
+  controllers: [RestaurantOrderController, AdminRestaurantOrderController],
+  providers: [
+    ShipmentChatGateway,
+    RestaurantService,
+    SectionService,
+    PromoCodeService,
+    RestaurantOrderService,
+    MakeRestaurantOrderTransaction,
+    PaymentMethodService,
+    OrderGateway,
+    TransactionService,
+    ReasonService,
+  
+    
+  ],
+  imports: [NotificationModule,RestaurantModule],
 })
 export class RestaurantOrderModule {}

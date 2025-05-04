@@ -58,6 +58,9 @@ import { Constant } from 'src/infrastructure/entities/constant/constant.entity';
 import { MAX } from 'class-validator';
 import { ConstantType } from 'src/infrastructure/data/enums/constant-type.enum';
 import { number } from 'joi';
+import { RestaurantService } from '../restaurant/restaurant.service';
+import { Section } from 'src/infrastructure/entities/section/section.entity';
+import { SectionService } from '../section/section.service';
 @Injectable()
 export class RestaurantOrderService extends BaseService<RestaurantOrder> {
   constructor(
@@ -90,11 +93,18 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
     @InjectRepository(Restaurant)
     private readonly restaurantRepository: Repository<Restaurant>,
     @InjectRepository(Constant) private readonly constantRepository: Repository<Constant>,
+    private readonly sectionService: SectionService,
   ) {
     super(restaurantOrderRepository);
   }
 
   async makeRestaurantOrder(req: MakeRestaurantOrderRequest) {
+  const is_system_active = await this.sectionService.isSystemActive(
+    DriverTypeEnum.FOOD,
+  )
+  if (!is_system_active) {
+    throw new BadRequestException('not available');
+  }
     return await this.makeRestaurantOrderTransaction.run(req);
   }
 

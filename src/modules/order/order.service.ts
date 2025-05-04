@@ -57,6 +57,7 @@ import { TransactionTypes } from 'src/infrastructure/data/enums/transaction-type
 import { Constant } from 'src/infrastructure/entities/constant/constant.entity';
 import { EditSettingsRequest } from './dto/request/edit-settings.request';
 import { DriverTypeEnum } from 'src/infrastructure/data/enums/driver-type.eum';
+import { SectionService } from '../section/section.service';
 @Injectable()
 export class OrderService extends BaseUserService<Order> {
   constructor(
@@ -75,8 +76,9 @@ export class OrderService extends BaseUserService<Order> {
     private returnOrderProductRepository: Repository<ReturnOrderProduct>,
     @InjectRepository(ReturnProductReason)
     private returnProductReasonRepository: Repository<ReturnProductReason>,
-    @InjectRepository(Constant) private constantRepository: Repository<Constant>,
-
+    @InjectRepository(Constant)
+    private constantRepository: Repository<Constant>,
+    private readonly sectionService: SectionService,
     @InjectRepository(Driver)
     private driverRepository: Repository<Driver>,
 
@@ -93,6 +95,12 @@ export class OrderService extends BaseUserService<Order> {
   }
 
   async makeOrder(req: MakeOrderRequest) {
+    const is_system_active = await this.sectionService.isSystemActive(
+      DriverTypeEnum.MART,
+    );
+    if (!is_system_active) {
+      throw new BadRequestException('not available');
+    }
     const order = await this.makeOrdrTransacton.run(req);
     try {
       switch (order.payment_method) {
@@ -1186,21 +1194,18 @@ export class OrderService extends BaseUserService<Order> {
     return await this.orderRepository.save(order);
   }
 
-
   async getSettings(section: DriverTypeEnum) {
-    const settings = await this.constantRepository.find({where: { section }});
+    const settings = await this.constantRepository.find({ where: { section } });
     return settings;
   }
-async editSettings(
-  request: EditSettingsRequest,
-) {
-    const settings = await this.constantRepository.findOne({where: { id: request.id }});
+  async editSettings(request: EditSettingsRequest) {
+    const settings = await this.constantRepository.findOne({
+      where: { id: request.id },
+    });
     if (!settings) throw new NotFoundException('message.settings_not_found');
 
-    settings.variable = request.variable
+    settings.variable = request.variable;
 
     return await this.constantRepository.save(settings);
-   
-}
-  
+  }
 }

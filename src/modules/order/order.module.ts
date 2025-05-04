@@ -12,6 +12,8 @@ import { TransactionService } from '../transaction/transaction.service';
 import { WarehouseOperationTransaction } from '../warehouse/util/warehouse-opreation.transaction';
 import { PaymentMethodService } from '../payment_method/payment_method.service';
 import { PromoCodeService } from '../promo-code/promo-code.service';
+import { Section } from 'src/infrastructure/entities/section/section.entity';
+import { SectionService } from '../section/section.service';
 
 @Module({
   controllers: [OrderController, ShipmentController],
@@ -25,7 +27,8 @@ import { PromoCodeService } from '../promo-code/promo-code.service';
     WarehouseOperationTransaction,
     PaymentMethodService,
     PromoCodeService,
-    TransactionService
+    TransactionService,
+    SectionService
     
   ],
   imports: [GatewaysModule, NotificationModule],

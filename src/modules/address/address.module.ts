@@ -7,17 +7,22 @@ import { ProductClientService } from '../product/product-client.service';
 import { RestaurantService } from '../restaurant/restaurant.service';
 import { RestaurantModule } from '../restaurant/restaurant.module';
 import { ProductModule } from '../product/product.module';
+import { CartService } from '../cart/cart.service';
+import { RestaurantCartService } from '../restaurant-cart/restaurant-cart.service';
+import { AddMealRestaurantCartTransaction } from '../restaurant-cart/util/add-meal-restaurant-cart.transaction';
+import { UpdateMealRestaurantCartTransaction } from '../restaurant-cart/util/update-meal-restaurant-cart.transaction';
 
 @Module({
-    controllers: [
-        AddressController
-    ],
-    providers: [
-        AddressService,
-        
-        SetFavoriteAddressTransaction,
-    ],
-    imports:[
-        RestaurantModule,ProductModule]
+  controllers: [AddressController],
+  providers: [
+    AddressService,
+
+    SetFavoriteAddressTransaction,
+    CartService,
+    RestaurantCartService,
+    AddMealRestaurantCartTransaction,
+    UpdateMealRestaurantCartTransaction
+  ],
+  imports: [RestaurantModule, ProductModule],
 })
-export class AddressModule { }
+export class AddressModule {}

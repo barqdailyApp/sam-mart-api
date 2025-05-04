@@ -32,6 +32,9 @@ import {
 } from './dto/requests/create-address.request';
 import { Constant } from 'src/infrastructure/entities/constant/constant.entity';
 import { ConstantType } from 'src/infrastructure/data/enums/constant-type.enum';
+import { CartService } from '../cart/cart.service';
+import { RestaurantCart } from 'src/infrastructure/entities/restaurant/cart/restaurant-cart.entity';
+import { RestaurantCartService } from '../restaurant-cart/restaurant-cart.service';
 
 @Injectable({ scope: Scope.REQUEST })
 export class AddressService extends BaseUserService<Address> {
@@ -48,7 +51,8 @@ export class AddressService extends BaseUserService<Address> {
     private setFavoriteAddressTransaction: SetFavoriteAddressTransaction,
     private readonly restaurantService: RestaurantService,
     private readonly product_client_service: ProductClientService,
-
+    private readonly cartService: CartService,
+    private readonly restaurantCartService: RestaurantCartService,
     private context: EntityManager,
   ) {
     super(_repo, request);
@@ -57,7 +61,7 @@ export class AddressService extends BaseUserService<Address> {
   override async findAll(query?: PaginatedRequest): Promise<Address[]> {
     applyQueryFilters(query, `user_id=${super.currentUser.id}`);
     applyQuerySort(query, `is_favorite=desc`);
-
+    
     return await super.findAll(query);
   }
 
@@ -183,6 +187,8 @@ export class AddressService extends BaseUserService<Address> {
       .execute();
 
     item.is_favorite = true;
+    await this.restaurantCartService.clearCart();
+    await this.cartService.clearCart();
     return await super.update(item);
   }
 
