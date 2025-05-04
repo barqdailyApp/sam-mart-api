@@ -336,19 +336,19 @@ export class RestaurantService extends BaseService<Restaurant> {
     .createQueryBuilder('restaurant')
     .leftJoinAndSelect('restaurant.schedules', 'schedules')
     .leftJoinAndSelect('restaurant.categories', 'category')
-    .leftJoinAndSelect('category.meals', 'meal')
+    .leftJoinAndSelect('category.meals', 'meal', 'meal.is_active = true')
     .leftJoinAndSelect('meal.meal_option_groups', 'mealOptionGroup')
     .leftJoinAndSelect('mealOptionGroup.option_group', 'optionGroup')
     .leftJoinAndSelect('meal.offer', 'offer')
     .leftJoinAndSelect('restaurant.cuisine_types', 'cuisineType')
     .where('restaurant.id = :id', { id })
     .andWhere('category.is_active = true')
-    .andWhere('meal.is_active = true')
     .orderBy('schedules.order_by', 'ASC')
     .getOne();
   
+  
 
-    // if (!restaurant) throw new NotFoundException('no resturant found');
+    if (!restaurant) throw new NotFoundException('no resturant found');
     //filter inactive meals 
      
     const response = plainToInstance(
