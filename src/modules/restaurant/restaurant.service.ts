@@ -333,7 +333,7 @@ export class RestaurantService extends BaseService<Restaurant> {
 
   async getSingleRestaurant(id: string, user_id?: string) {
     const restaurant = await this._repo.findOne({
-      where: { id },
+      where: { id ,categories: { is_active: true , meals: { is_active: true }}  },
       relations: {
         schedules: true,
         categories: {
@@ -345,11 +345,13 @@ export class RestaurantService extends BaseService<Restaurant> {
     });
 
     if (!restaurant) throw new NotFoundException('no resturant found');
+    //filter inactive meals 
+     
     const response = plainToInstance(
       RestaurantResponse,
       {
         ...restaurant,
-        is_open: await this.IsRestaurantOpen(id, restaurant.schedules),
+        is_open:  this.IsRestaurantOpen(id, restaurant.schedules),
       },
       {
         excludeExtraneousValues: true,
