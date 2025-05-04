@@ -332,17 +332,21 @@ export class RestaurantService extends BaseService<Restaurant> {
   }
 
   async getSingleRestaurant(id: string, user_id?: string) {
-    const restaurant = await this._repo.findOne({
-      where: { id ,categories: { is_active: true , meals: { is_active: true }}  },
-      relations: {
-        schedules: true,
-        categories: {
-          meals: { meal_option_groups: { option_group: true }, offer: true },
-        },
-        cuisine_types: true,
-      },
-      order: { schedules: { order_by: 'ASC' } },
-    });
+    const restaurant = await this._repo
+    .createQueryBuilder('restaurant')
+    .leftJoinAndSelect('restaurant.schedules', 'schedules')
+    .leftJoinAndSelect('restaurant.categories', 'category')
+    .leftJoinAndSelect('category.meals', 'meal')
+    .leftJoinAndSelect('meal.meal_option_groups', 'mealOptionGroup')
+    .leftJoinAndSelect('mealOptionGroup.option_group', 'optionGroup')
+    .leftJoinAndSelect('meal.offer', 'offer')
+    .leftJoinAndSelect('restaurant.cuisine_types', 'cuisineType')
+    .where('restaurant.id = :id', { id })
+    .andWhere('category.is_active = true')
+    .andWhere('meal.is_active = true')
+    .orderBy('schedules.order_by', 'ASC')
+    .getOne();
+  
 
     // if (!restaurant) throw new NotFoundException('no resturant found');
     //filter inactive meals 
