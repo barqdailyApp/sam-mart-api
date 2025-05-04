@@ -155,47 +155,54 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
           Number(delivery_price_per_km);
       order.delivery_fee = delivery_fee;
 
-      // tranfer cart_meals to order_meals
-      const restaurant_order_meals = cart_meals.map((cart_meal) => {
+      const restaurant_order_meals: RestaurantOrderMeal[] = [];
+
+      for (const cart_meal of cart_meals) {
+        if(!cart_meal.meal.is_active){
+          continue;
+        }
         const offer = cart_meal.meal.offer;
         let discount_percentage = 0;
         let discounted_price = Number(cart_meal.meal.price);
 
+        const currentTimeUTC3 = new Date(
+          new Date().setUTCHours(new Date().getUTCHours() + 3),
+        );
+
         if (
           offer &&
           offer.is_active &&
-          new Date(offer.start_date) <=
-            new Date(new Date().setUTCHours(new Date().getUTCHours() + 3)) && // Yemen Time (UTC+3)
-          new Date(offer.end_date) >
-            new Date(new Date().setUTCHours(new Date().getUTCHours() + 3))
+          new Date(offer.start_date) <= currentTimeUTC3 &&
+          new Date(offer.end_date) > currentTimeUTC3
         ) {
           discount_percentage = Number(offer.discount_percentage);
           discounted_price =
             discounted_price - (discounted_price * discount_percentage) / 100;
         }
-        return plainToInstance(RestaurantOrderMeal, {
+
+        const total_option_price =
+          cart_meal?.cart_meal_options
+            ?.map((opt) => opt?.option?.price || 0)
+            .reduce((a, b) => a + b, 0) || 0;
+
+        const order_meal = plainToInstance(RestaurantOrderMeal, {
           meal_id: cart_meal.meal_id,
           order_id: order.id,
           quantity: cart_meal.quantity,
           restaurant_order_id: order.id,
           price: discounted_price,
-          total_price:
-            discounted_price +
-            Number(
-              cart_meal?.cart_meal_options
-                ?.map((cart_meal_option) => cart_meal_option?.option?.price)
-                .reduce((a, b) => a + b, 0),
-            ),
+          total_price: discounted_price + total_option_price,
           restaurant_order_meal_options: cart_meal?.cart_meal_options?.map(
-            (cart_meal_option) => {
-              return {
-                option: cart_meal_option?.option,
-                price: cart_meal_option?.option?.price,
-              };
-            },
+            (opt) => ({
+              option: opt?.option,
+              price: opt?.option?.price,
+            }),
           ),
         });
-      });
+
+        restaurant_order_meals.push(order_meal);
+      }
+
       await context.save(restaurant_order_meals);
 
       await context.remove(cart_meals);

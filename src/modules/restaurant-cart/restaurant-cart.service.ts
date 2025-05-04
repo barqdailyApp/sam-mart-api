@@ -51,10 +51,14 @@ export class RestaurantCartService {
       },
     });
 
-    // check if meals are active else delete them
-    cart.restaurant_cart_meals = cart.restaurant_cart_meals?.filter(
-      (meal) => meal.meal.is_active,
-    );
+    // delete cart meals if not active
+    for (let i = cart.restaurant_cart_meals?.length - 1; i >= 0; i--) {
+      if (!cart.restaurant_cart_meals[i]?.meal?.is_active) {
+        await this.restaurantCartMealRepository.delete({
+          id: cart?.restaurant_cart_meals[i]?.id,
+        });
+      }
+    }
      
     const default_address = await this.addressRepository.findOne({
       where: { user_id: this.request.user.id, is_favorite: true },
