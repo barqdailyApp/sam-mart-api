@@ -344,7 +344,7 @@ export class RestaurantService extends BaseService<Restaurant> {
       order: { schedules: { order_by: 'ASC' } },
     });
 
-    if (!restaurant) throw new NotFoundException('no resturant found');
+    // if (!restaurant) throw new NotFoundException('no resturant found');
     //filter inactive meals 
      
     const response = plainToInstance(
