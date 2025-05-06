@@ -11,6 +11,7 @@ import { CartService } from '../cart/cart.service';
 import { RestaurantCartService } from '../restaurant-cart/restaurant-cart.service';
 import { AddMealRestaurantCartTransaction } from '../restaurant-cart/util/add-meal-restaurant-cart.transaction';
 import { UpdateMealRestaurantCartTransaction } from '../restaurant-cart/util/update-meal-restaurant-cart.transaction';
+import { TransactionModule } from '../transaction/transaction.module';
 
 @Module({
   controllers: [AddressController],
@@ -21,8 +22,9 @@ import { UpdateMealRestaurantCartTransaction } from '../restaurant-cart/util/upd
     CartService,
     RestaurantCartService,
     AddMealRestaurantCartTransaction,
-    UpdateMealRestaurantCartTransaction
+    UpdateMealRestaurantCartTransaction,
   ],
-  imports: [RestaurantModule, ProductModule],
+  imports: [RestaurantModule, ProductModule, TransactionModule],
+  exports: [AddressModule],
 })
 export class AddressModule {}

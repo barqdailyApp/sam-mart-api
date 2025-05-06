@@ -158,7 +158,7 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
       const restaurant_order_meals: RestaurantOrderMeal[] = [];
 
       for (const cart_meal of cart_meals) {
-        if(!cart_meal.meal.is_active){
+        if (!cart_meal.meal.is_active) {
           continue;
         }
         const offer = cart_meal.meal.offer;
@@ -215,6 +215,9 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
         const wallet = await context.findOneBy(Wallet, { user_id: user.id });
         if (Number(wallet.balance) < req.wallet_discount) {
           throw new BadRequestException('message.insufficient_balance');
+        }
+        if (req?.wallet_discount > total) {
+          req.wallet_discount = total;
         }
         total = total - req.wallet_discount;
       }

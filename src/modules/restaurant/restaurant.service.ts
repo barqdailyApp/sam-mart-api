@@ -335,16 +335,24 @@ export class RestaurantService extends BaseService<Restaurant> {
     const restaurant = await this._repo
     .createQueryBuilder('restaurant')
     .leftJoinAndSelect('restaurant.schedules', 'schedules')
-    .leftJoinAndSelect('restaurant.categories', 'category')
-    .leftJoinAndSelect('category.meals', 'meal', 'meal.is_active = true')
+    .leftJoinAndSelect(
+      'restaurant.categories',
+      'category',
+      'category.is_active = true'
+    )
+    .leftJoinAndSelect(
+      'category.meals',
+      'meal',
+      'meal.is_active = true'
+    )
     .leftJoinAndSelect('meal.meal_option_groups', 'mealOptionGroup')
     .leftJoinAndSelect('mealOptionGroup.option_group', 'optionGroup')
     .leftJoinAndSelect('meal.offer', 'offer')
     .leftJoinAndSelect('restaurant.cuisine_types', 'cuisineType')
     .where('restaurant.id = :id', { id })
-    .andWhere('category.is_active = true')
     .orderBy('schedules.order_by', 'ASC')
     .getOne();
+  
   
   
 

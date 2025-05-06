@@ -17,6 +17,7 @@ import { Address } from 'src/infrastructure/entities/user/address.entity';
 import { Constant } from 'src/infrastructure/entities/constant/constant.entity';
 import { ConstantType } from 'src/infrastructure/data/enums/constant-type.enum';
 import { calculateDistances } from 'src/core/helpers/geom.helper';
+import { TransactionService } from '../transaction/transaction.service';
 
 @Injectable()
 export class RestaurantCartService {
@@ -34,6 +35,8 @@ export class RestaurantCartService {
     private readonly addressRepository: Repository<Address>,
     @InjectRepository(Constant)
     private readonly constantRepository: Repository<Constant>,
+    @Inject(TransactionService)
+    private readonly transactionService: TransactionService,
   ) {}
 
   async addMealToCart(req: AddMealRestaurantCartRequest) {
@@ -143,6 +146,7 @@ export class RestaurantCartService {
       meals: response,
       restaurant: restaurant_respone,
       delivery_fee: delivery_fee,
+      wallet:await this.transactionService.getWallet(this.request.user.id)
     };
   }
   async clearCart() {
