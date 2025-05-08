@@ -68,6 +68,9 @@ export class MealResponse {
   @Expose()
   total_price: number;
   @Expose()
+  @Type(() => RestaurantResponse)
+  restaurant: RestaurantResponse;
+  @Expose()
   @Transform(({ value }) => toUrl(value))
   image: string;
   @Expose()
