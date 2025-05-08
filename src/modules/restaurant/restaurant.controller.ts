@@ -140,8 +140,8 @@ export class RestaurantController {
   // @Roles(Role.CLIENT)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Get('/favorite-meals')
-  async getFavoriteMeals() {
-    const favoriteMeals = await this.restaurantService.getFavoriteMeals();
+  async getFavoriteMeals(@Query() query: GetNearResturantsQuery) {
+    const favoriteMeals = await this.restaurantService.getNearbyFavoriteMeals(query);
     return new ActionResponse(this._i18nResponse.entity(favoriteMeals));
   }
 }
