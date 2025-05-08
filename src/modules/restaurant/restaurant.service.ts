@@ -239,7 +239,9 @@ export class RestaurantService extends BaseService<Restaurant> {
 
     // Modify response
     const modifiedRestaurants = entities.map((restaurant) => ({
-      ...restaurant,
+      ...plainToInstance(RestaurantResponse, restaurant, {
+        excludeExtraneousValues: true,
+      }),
       is_open: this.IsRestaurantOpen(restaurant.id, restaurant.schedules),
       distance: parseFloat(raw[entities.indexOf(restaurant)]?.distance), // Ensure distance is a number
       estimated_delivery_time:
