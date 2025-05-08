@@ -6,6 +6,8 @@ import { OptionGroup } from 'src/infrastructure/entities/restaurant/option/optio
 import { Option } from 'src/infrastructure/entities/restaurant/option/option.entity';
 import { OptionGroupResponse } from './option-group.response';
 import { OptionRespone } from './option.response';
+import { Restaurant } from 'src/infrastructure/entities/restaurant/restaurant.entity';
+import { RestaurantResponse } from './restaurant.response';
 export class MealResponse {
   @Expose()
   id: string;
@@ -159,4 +161,7 @@ export class MealOfferResponse {
   @Expose()
   @Type(() => MealResponse)
   meal: MealResponse;
+  @Expose()
+  @Type(() => RestaurantResponse)
+  restaurant: RestaurantResponse;
 }

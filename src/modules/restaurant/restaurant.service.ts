@@ -386,29 +386,58 @@ async findFavoriteNearRestaurantsCusine(query: GetNearResturantsQuery) {
 
   async getTopSellerMeals(query: GetNearResturantsQuery) {
     const { latitude, longitude, radius } = query;
-
-    const meals = await this.mealRepository
+  
+    const deliveryTimePerKm =
+      (await this.constantRepository.findOne({
+        where: { type: ConstantType.DELIVERY_TIME_PER_KM },
+      })) ?? 0;
+  
+    const result = await this.mealRepository
       .createQueryBuilder('meal')
       .leftJoinAndSelect('meal.restaurant_category', 'category')
       .leftJoinAndSelect('category.restaurant', 'restaurant')
       .leftJoinAndSelect('meal.offer', 'offer')
-      .where('restaurant.status = :status', { status: RestaurantStatus.ACTIVE })
-      .andWhere('category.is_active = :is_active', { is_active: true })
-      .andWhere('meal.is_active = :is_active', { is_active: true })
-      .andWhere(
+      .addSelect(
         `(6371 * acos(
           cos(radians(:latitude)) * cos(radians(restaurant.latitude)) *
           cos(radians(restaurant.longitude) - radians(:longitude)) +
           sin(radians(:latitude)) * sin(radians(restaurant.latitude))
-        )) <= :radius`,
-        { latitude, longitude, radius },
+        ))`,
+        'distance',
       )
+      .where('restaurant.status = :status', { status: RestaurantStatus.ACTIVE })
+      .andWhere('category.is_active = :is_active', { is_active: true })
+      .andWhere('meal.is_active = :is_active', { is_active: true })
+      .having('distance <= :radius')
       .orderBy('meal.sales_count', 'DESC')
-      .limit(50) // Example ordering by top sales
-      .getMany();
-
-    return meals;
+      .limit(50)
+      .setParameters({ latitude, longitude, radius })
+      .getRawAndEntities();
+  
+    const { raw, entities: meals } = result;
+  
+    const enrichedMeals = meals.map((meal, index) => {
+      const restaurant = meal.restaurant_category.restaurant;
+      const distance = parseFloat(raw[index]?.distance || '0');
+  
+      return {
+        ...meal,
+        restaurant: {
+          ...restaurant,
+          is_open: this.IsRestaurantOpen(restaurant.id, restaurant.schedules),
+          distance,
+          estimated_delivery_time:
+            Number(restaurant.average_prep_time) +
+            Number(deliveryTimePerKm) * distance,
+        },
+      };
+    });
+  
+    return plainToInstance(MealResponse, enrichedMeals, {
+      excludeExtraneousValues: true,
+    });
   }
+  
 
   async getSingleRestaurant(id: string, user_id?: string) {
     const restaurant = await this._repo
