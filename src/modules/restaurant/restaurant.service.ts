@@ -249,7 +249,7 @@ export class RestaurantService extends BaseService<Restaurant> {
         Number(deliveryTimePerKm) *
           parseFloat(raw[entities.indexOf(restaurant)]?.distance),
       categories: undefined, // Remove categories
-      meals: restaurant.categories.flatMap((category) => category.meals), // Extract meals
+      meals: plainToInstance(MealResponse, restaurant.categories.flatMap((category) => category.meals)), // Extract meals
     }));
 
     return modifiedRestaurants;
