@@ -23,6 +23,7 @@ import { CreateFoodBanarRequest } from './dto/request/create-food-banar.request'
 import { FoodBannerResponse } from './dto/response/food-banner.response';
 import { UpdateFoodBannerRequest } from './dto/request/update-food-banner.request';
 import { GetNearResturantsQuery } from '../restaurant/dto/requests/get-near-resturants.query';
+import { applyQueryIncludes } from 'src/core/helpers/service-related.helper';
 
 // @ApiBearerAuth()
 @ApiHeader({
@@ -61,6 +62,7 @@ export class BanarController {
     async getBanars(
         @Query() query: PaginatedRequest
     ): Promise<ActionResponse<FoodBannerResponse[]>> {
+        applyQueryIncludes(query, 'restaurant');
         const banners = await this.banarService.findAll(query);
         const count = await this.banarService.count(query);
         const result = plainToInstance(FoodBannerResponse, banners, { excludeExtraneousValues: true })
@@ -102,7 +104,7 @@ export class BanarController {
     async getBanar(
         @Param('banar_id') id: string,
     ): Promise<ActionResponse<FoodBannerResponse>> {
-        const banner = await this.banarService.findOne(id);
+        const banner = await this.banarService._repo.findOne({ where: { id },relations:{restaurant:true} });
         const result = plainToInstance(FoodBannerResponse, banner, { excludeExtraneousValues: true })
         return new ActionResponse<FoodBannerResponse>(result);
     }
