@@ -532,7 +532,7 @@ export class RestaurantService extends BaseService<Restaurant> {
         }
 
         const optionsTotal = cartMeal.cart_meal_options.reduce(
-          (optionsAcc, optionItem) => optionsAcc + optionItem.meal_option_price.price,
+          (optionsAcc, optionItem) => optionsAcc + optionItem.meal_option_price?.price,
           0,
         );
 
