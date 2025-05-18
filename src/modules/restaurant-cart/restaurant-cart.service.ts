@@ -48,7 +48,7 @@ export class RestaurantCartService {
       relations: {
         restaurant_cart_meals: {
           meal: {offer:true},
-          cart_meal_options: { option: {option_group:true} },
+          cart_meal_options: { meal_option_price:{option: {option_group:true} }},
         },
         restaurant: true,
       },
@@ -112,7 +112,7 @@ export class RestaurantCartService {
           discounted_price +
           Number(
             m.cart_meal_options.reduce(
-              (acc, curr) => acc + curr.option.price,
+              (acc, curr) => acc + curr.meal_option_price.price,
               0,
             ),
           );
@@ -125,8 +125,8 @@ export class RestaurantCartService {
           total_price: total_unit_price , // Multiply by quantity for final total
           options: m.cart_meal_options.map((o) => ({
             ...o,
-            price: o.option.price,
-            option_group: o.option.option_group,
+            price: o.meal_option_price.price,
+            option_group: o.meal_option_price.option.option_group,
           })),
          
         
@@ -178,7 +178,7 @@ export class RestaurantCartService {
       where: { id: cart_meal_id },
       relations: {
         meal: { meal_option_groups: { option_group: { options: true }  },offer:true },
-        cart_meal_options: { option: true },
+        cart_meal_options: { meal_option_price: { option: true } },
       },
     });
     const response = plainToInstance(
@@ -192,7 +192,7 @@ export class RestaurantCartService {
           Number(cart_meal.meal.price) +
           Number(
             cart_meal.cart_meal_options.reduce(
-              (acc, curr) => acc + curr.option.price,
+              (acc, curr) => acc + curr.meal_option_price?.price,
               0,
             ),
           ),
@@ -203,7 +203,7 @@ export class RestaurantCartService {
     response.option_groups.forEach((option_group) => {
       option_group.options.forEach((option) => {
         option.is_selected = cart_meal.cart_meal_options.some(
-          (cart_meal_option) => cart_meal_option.option.id === option.id,
+          (cart_meal_option) => cart_meal_option.meal_option_price.option.id === option.id,
         );
       });
     });
@@ -216,7 +216,7 @@ export class RestaurantCartService {
       relations: {
         restaurant_cart_meals: {
           meal: { offer: true },
-          cart_meal_options: { option: true },
+          cart_meal_options: { meal_option_price: { option: true } },
         },
       },
     });
@@ -248,7 +248,7 @@ export class RestaurantCartService {
           }
       
           const optionsTotal = cartMeal.cart_meal_options.reduce(
-            (optionsAcc, optionItem) => optionsAcc + optionItem.option.price,
+            (optionsAcc, optionItem) => optionsAcc + optionItem.meal_option_price?.price,
             0,
           );
       

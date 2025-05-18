@@ -44,7 +44,7 @@ import {
   UpdateOptionGroupRequest,
   UpdateOptionRequest,
 } from './dto/requests/add-option-group.request';
-import { AddMealOptionGroupsRequest } from './dto/requests/add-meal-option-groups.request';
+import { AddMealOptionGroupsRequest, UpdateMealOptionPriceRequest } from './dto/requests/add-meal-option-groups.request';
 import { Create } from 'sharp';
 import { UpdateRestaurantRequest } from './dto/requests/update-restaurant.request';
 import { UpdateCuisineRequest } from './dto/requests/update-cusisine.request';
@@ -108,7 +108,7 @@ export class AdminRestaurantController {
     const restaurant = await this.restaurantService.getAdminSingleRestaurant(
       id,
     );
-    console.log(restaurant);
+
     const response = plainToInstance(
       AdminRestaurantDeatailsResponse,
       restaurant,
@@ -326,6 +326,20 @@ export class AdminRestaurantController {
       restaurant_id,
     );
     return new ActionResponse(option);
+  }
+  //update meal option groups 
+  @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
+  @Put('/admin/meal-option-groups/:restaurant_id')
+
+  async updateMealOptionGroups(
+    @Body() req: UpdateMealOptionPriceRequest,
+    @Param('restaurant_id') restaurant_id: string,
+  ) {
+    const option_group = await this.restaurantService.editMealOptionPrices(
+      req,
+      restaurant_id,
+    );
+    return new ActionResponse(option_group);
   }
   // delete meal option group
   @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)

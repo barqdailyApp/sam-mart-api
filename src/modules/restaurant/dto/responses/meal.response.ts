@@ -98,6 +98,7 @@ export class MealResponse {
         {
           ...item.option_group,
           id: item.id,
+          options:item.meal_option_prices?.map((option)=>{return{ ...option.option, id: option.id, price: option.price}}),
           order_by: item.order_by,
           is_active: item.is_active,
           option_group_id: item.option_group_id,

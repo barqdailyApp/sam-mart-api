@@ -45,7 +45,7 @@ import {
   UpdateOptionRequest,
 } from './dto/requests/add-option-group.request';
 import { Option } from 'src/infrastructure/entities/restaurant/option/option.entity';
-import { AddMealOptionGroupsRequest } from './dto/requests/add-meal-option-groups.request';
+import { AddMealOptionGroupsRequest, UpdateMealOptionPriceRequest } from './dto/requests/add-meal-option-groups.request';
 import { MealOptionGroup } from 'src/infrastructure/entities/restaurant/meal/meal-option-group';
 import { UpdateRestaurantRequest } from './dto/requests/update-restaurant.request';
 import { UpdateCuisineRequest } from './dto/requests/update-cusisine.request';
@@ -62,6 +62,7 @@ import { RestaurantSchedule } from 'src/infrastructure/entities/restaurant/order
 import { addRestaurantSchedule } from './dto/requests/add-restaurant-schedule.request';
 import { updateRestaurantScheduleRequest } from './dto/requests/update-restaurant.schedule.request';
 import { calculateDistances } from 'src/core/helpers/geom.helper';
+import { MealOptionPrice } from 'src/infrastructure/entities/restaurant/meal/meal-option-price.entity';
 
 @Injectable()
 export class RestaurantService extends BaseService<Restaurant> {
@@ -94,6 +95,8 @@ export class RestaurantService extends BaseService<Restaurant> {
     private readonly clientFavoriteMealRepository: Repository<ClientFavoriteMeal>,
     @InjectRepository(RestaurantSchedule)
     private readonly restaurantScheduleRepository: Repository<RestaurantSchedule>,
+    @InjectRepository(MealOptionPrice)
+    private readonly mealOptionPriceRepository: Repository<MealOptionPrice>,
   ) {
     super(restaurantRepository);
   }
@@ -504,7 +507,7 @@ export class RestaurantService extends BaseService<Restaurant> {
         where: { cart: { user_id: user_id } },
         relations: {
           meal: { offer: true },
-          cart_meal_options: { option: true },
+          cart_meal_options: { meal_option_price: true },
           cart: true,
         },
       });
@@ -529,7 +532,7 @@ export class RestaurantService extends BaseService<Restaurant> {
         }
 
         const optionsTotal = cartMeal.cart_meal_options.reduce(
-          (optionsAcc, optionItem) => optionsAcc + optionItem.option.price,
+          (optionsAcc, optionItem) => optionsAcc + optionItem.meal_option_price.price,
           0,
         );
 
@@ -569,7 +572,7 @@ export class RestaurantService extends BaseService<Restaurant> {
     const meal = await this.mealRepository.findOne({
       where: { id },
       relations: {
-        meal_option_groups: { option_group: { options: true } },
+        meal_option_groups: { meal_option_prices: true , option_group: {options: true} },
         offer: true,
       },
     });
@@ -951,10 +954,25 @@ export class RestaurantService extends BaseService<Restaurant> {
           id: req.option_groups[index].id,
           restaurant_id: restaurant_id,
         },
+        relations: { options: true },
       });
 
       if (!option_group) throw new NotFoundException('no option group found');
-      await this.mealOptionGroupRepository.save(
+
+      // check if option group is already added to meal
+      const existingMealOptionGroup =
+        await this.mealOptionGroupRepository.findOne({
+          where: {
+            meal_id: meal.id,
+            option_group_id: option_group.id,
+          },
+        });
+      if (existingMealOptionGroup) {
+        throw new BadRequestException('option group already added to meal');
+      }
+        
+
+      const meal_option_group = await this.mealOptionGroupRepository.save(
         plainToInstance(MealOptionGroup, {
           meal_id: meal.id,
           option_group_id: option_group.id,
@@ -962,7 +980,40 @@ export class RestaurantService extends BaseService<Restaurant> {
           is_active: req.option_groups[index].is_active,
         }),
       );
+      // create meal option prices
+      for (let index = 0; index < option_group.options?.length; index++) {
+        const meal_option_price = await this.mealOptionPriceRepository.save(
+          plainToInstance(MealOptionPrice, {
+            meal_id: meal.id,
+            meal_option_group_id: meal_option_group.id,
+            option_id: option_group.options[index].id,
+            price:
+              req.option_prices.find(
+                (option_price) =>
+                  option_price.option_id === option_group.options[index].id,
+              )?.price || 0,
+          }),
+        );
+        await this.mealOptionPriceRepository.save(meal_option_price);
+      }
     }
+    return true;
+  }
+
+  //edit meal option prices 
+  async editMealOptionPrices(
+    req: UpdateMealOptionPriceRequest,
+    restaurant_id: string,
+  ) {
+    const meal_option_price = await this.mealOptionPriceRepository.findOne({
+      where: {
+        id: req.id,
+        meal_option_group: { meal: { restaurant_category: { restaurant_id } } },
+      },
+    });
+    if (!meal_option_price) throw new NotFoundException('no option found');
+    meal_option_price.price = req.price;
+    return await this.mealOptionPriceRepository.save(meal_option_price);
   }
 
   //add option to option group

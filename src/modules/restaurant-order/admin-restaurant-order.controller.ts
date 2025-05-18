@@ -52,6 +52,7 @@ export class AdminRestaurantOrderController {
     applyQueryIncludes(query,"payment_method");
     applyQueryIncludes(query,"driver");
     applyQueryIncludes(query,"restaurant");
+    applyQueryIncludes(query,"user");
     applyQuerySort(query,`created_at=desc`,);
  
    const orders=await this.restaurantOrderService.findAll(query);

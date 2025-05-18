@@ -17,6 +17,7 @@ export class Option extends AuditableEntity{
    option_group_id:string
    @Column({default:true})
    is_active:boolean
+   
 
    
 }

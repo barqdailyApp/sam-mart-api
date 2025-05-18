@@ -19,6 +19,24 @@ export class OptionGroupMealRequest {
 
   
 }
+
+
+export class AddMealOptionPriceRequest {
+  @ApiProperty()
+  @IsString()
+  option_id: string
+  @ApiProperty()
+  @IsNumber()
+  price: number
+}
+export class UpdateMealOptionPriceRequest{
+  @ApiProperty()
+  @IsString()
+  id: string
+  @ApiProperty()
+  @IsNumber()
+  price: number
+}
 export class AddMealOptionGroupsRequest {
   //list of option groups
   @ApiProperty({
@@ -31,5 +49,10 @@ export class AddMealOptionGroupsRequest {
 @ApiProperty()
 @IsString()
 meal_id: string
+//list of option prices
+@ApiProperty({
+  type: [AddMealOptionPriceRequest]
+})
+option_prices: AddMealOptionPriceRequest[]
 
 }

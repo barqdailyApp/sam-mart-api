@@ -44,7 +44,8 @@ export class UpdateMealRestaurantCartTransaction extends BaseTransaction<
         },
       });
 
-      if (!cartMeal) throw new BadRequestException('message.cart_meal_not_found');
+      if (!cartMeal)
+        throw new BadRequestException('message.cart_meal_not_found');
 
       const meal = await context.findOne(Meal, {
         where: { id: cartMeal.meal.id },
@@ -61,7 +62,7 @@ export class UpdateMealRestaurantCartTransaction extends BaseTransaction<
       //   throw new BadRequestException('message.invalid_meal_for_cart');
       // }
 
-      if (edit_options==true)  {
+      if (edit_options == true) {
         // Remove existing options
         await context.delete(RestaurantCartMealOption, {
           cart_meal_id: cartMeal.id,
@@ -69,8 +70,12 @@ export class UpdateMealRestaurantCartTransaction extends BaseTransaction<
 
         // Add new options if provided
         if (options_ids && options_ids.length > 0) {
-          const newCartMealOptions = options_ids.map((option_id) =>
-            new RestaurantCartMealOption({ cart_meal_id: cartMeal.id, option_id }),
+          const newCartMealOptions = options_ids.map(
+            (option_id) =>
+              new RestaurantCartMealOption({
+                cart_meal_id: cartMeal.id,
+                meal_option_price_id: option_id,
+              }),
           );
           await context.save(newCartMealOptions);
 
@@ -84,7 +89,9 @@ export class UpdateMealRestaurantCartTransaction extends BaseTransaction<
             (group) =>
               group.option_group.min_selection > 0 &&
               !options_ids.some((option_id) =>
-                group.option_group.options.some((option) => option.id === option_id),
+                group.option_group.options.some(
+                  (option) => option.id === option_id,
+                ),
               ),
           );
 
@@ -93,8 +100,8 @@ export class UpdateMealRestaurantCartTransaction extends BaseTransaction<
           }
 
           for (const group of allOptionGroupsForMeal) {
-            const providedOptions = group.option_group.options.filter((option) =>
-              options_ids.includes(option.id),
+            const providedOptions = group.option_group.options.filter(
+              (option) => options_ids.includes(option.id),
             );
 
             if (providedOptions.length < group.option_group.min_selection) {
@@ -118,7 +125,10 @@ export class UpdateMealRestaurantCartTransaction extends BaseTransaction<
       // Calculate total price and create response
       const total_price =
         Number(cartMeal.meal.price) +
-        (cartMeal.cart_meal_options || []).reduce((acc, curr) => acc + curr.option?.price || 0, 0);
+        (cartMeal.cart_meal_options || []).reduce(
+          (acc, curr) => acc + curr.meal_option_price?.price || 0,
+          0,
+        );
 
       const response = plainToInstance(
         GetCartMealsResponse,

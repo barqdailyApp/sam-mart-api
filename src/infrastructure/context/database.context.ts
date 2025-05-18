@@ -85,6 +85,7 @@ import { RestaurantGroup } from '../entities/restaurant/restaurant-group.entity'
 import { ClientFavoriteMeal } from '../entities/restaurant/meal/client-favorite-meal.entity';
 import { RestaurantSchedule } from '../entities/restaurant/order/restaurant_schedule.entity';
 import { SystemSchedule } from '../entities/constant/system-schedule.entity';
+import { MealOptionPrice } from '../entities/restaurant/meal/meal-option-price.entity';
 export const DB_ENTITIES = [
   User,
   Address,
@@ -171,7 +172,8 @@ export const DB_ENTITIES = [
   RestaurantGroup,
   ClientFavoriteMeal,
   RestaurantSchedule,
-  SystemSchedule
+  SystemSchedule,
+  MealOptionPrice
 
 ];
 

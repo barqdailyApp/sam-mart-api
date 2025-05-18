@@ -80,6 +80,10 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
         (c) => c.type == ConstantType.FIXED_DELIVERY_FEE,
       )?.variable;
 
+      const delivery_time_per_km = constants.find(
+        (c) => c.type == ConstantType.DELIVERY_TIME_PER_KM,
+      )?.variable;
+
       const date = new Date();
       const isoDate = date.toISOString().slice(0, 10);
       const count = await context
@@ -114,7 +118,7 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
         },
         relations: {
           meal: { offer: true },
-          cart_meal_options: { option: true },
+          cart_meal_options: { meal_option_price: true },
           cart: true,
         },
       });
@@ -146,7 +150,12 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
         [restaurant.latitude, restaurant.longitude],
         [address.latitude, address.longitude],
       );
-
+      const delivery_time =
+        Number(restaurant.average_prep_time || 0) +
+        Number(distance) * Number(delivery_time_per_km || 0);
+      order.estimated_delivery_time = new Date(
+        new Date().getTime() + delivery_time * 60000,
+      );
       const delivery_fee =
         Number(fixed_delivery_fee) +
         (Number(distance) - Number(fixed_delivery_distance) < 0
@@ -182,7 +191,7 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
 
         const total_option_price =
           cart_meal?.cart_meal_options
-            ?.map((opt) => opt?.option?.price || 0)
+            ?.map((opt) => opt?.meal_option_price?.price || 0)
             .reduce((a, b) => a + b, 0) || 0;
 
         const order_meal = plainToInstance(RestaurantOrderMeal, {
@@ -194,8 +203,8 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
           total_price: discounted_price + total_option_price,
           restaurant_order_meal_options: cart_meal?.cart_meal_options?.map(
             (opt) => ({
-              option: opt?.option,
-              price: opt?.option?.price,
+              option: opt?.meal_option_price?.option,
+              price: opt?.meal_option_price?.price,
             }),
           ),
         });
