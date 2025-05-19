@@ -1391,6 +1391,9 @@ export class RestaurantService extends BaseService<Restaurant> {
       return {
         ...group.option_group,
         apply_offer: group.apply_offer,
+        is_active: group.is_active,
+        order_by: group.order_by,
+        
         id: group.id,
         options,
       };
