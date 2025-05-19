@@ -31,38 +31,43 @@ export class MealResponse {
   @Expose()
   description_en: string;
 
-  
-
   @Expose()
   @Transform(({ obj }) => {
     if (!obj.offer || !obj.offer.is_active) {
       return null; // No active offer
     }
-  
+
     // Convert current time to Yemen Time (UTC+3)
     const now = new Date();
     now.setUTCHours(now.getUTCHours() + 3); // Adjust to UTC+3 manually
-  
+
     const startDate = new Date(obj.offer.start_date);
     const endDate = new Date(obj.offer.end_date);
-  
+
     if (!(startDate <= now && endDate > now)) {
       return null; // Offer is not within the valid time range
     }
-  
-    const { discount_percentage, description,decscription_ar,decscription_en } = obj.offer;
-    const price = obj.price ? obj.price - (discount_percentage * obj.price) / 100 : obj.price;
-  
+
+    const {
+      discount_percentage,
+      description,
+      decscription_ar,
+      decscription_en,
+    } = obj.offer;
+    const price = obj.price
+      ? obj.price - (discount_percentage * obj.price) / 100
+      : obj.price;
+
     return {
       price,
       discount_percentage,
       description,
       decscription_ar,
-      decscription_en
+      decscription_en,
     };
   })
   offer: any;
-  
+
   @Expose()
   price: number;
   @Expose()
@@ -98,7 +103,13 @@ export class MealResponse {
         {
           ...item.option_group,
           id: item.id,
-          options:item.meal_option_prices?.map((option)=>{return{ ...option.option, id: option.option_id, price: option.price}}),
+          options: item.meal_option_prices?.map((option) => {
+            return {
+              ...option.option,
+              id: option.option_id,
+              price: option.price,
+            };
+          }),
           order_by: item.order_by,
           is_active: item.is_active,
           option_group_id: item.option_group_id,
@@ -128,9 +139,10 @@ export class MealResponse {
         OptionRespone,
         {
           ...item.option,
+         
           option_id: item.option_id,
-          
-          id: item.option.id,
+
+          id: item.option?.id || item.id,
           price: item.price,
         },
         { excludeExtraneousValues: true },

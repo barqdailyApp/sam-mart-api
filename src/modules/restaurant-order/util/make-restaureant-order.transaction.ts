@@ -118,7 +118,7 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
         },
         relations: {
           meal: { offer: true },
-          cart_meal_options: { meal_option_price: true },
+          cart_meal_options: { meal_option_price: {option: true} },
           cart: true,
         },
       });
@@ -142,9 +142,9 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
         restaurant.schedules,
       );
 
-      if (!is_system_active) {
-        throw new BadRequestException('restaurant is closed');
-      }
+      // if (!is_system_active) {
+      //   throw new BadRequestException('restaurant is closed');
+      // }
 
       const distance = calculateDistances(
         [restaurant.latitude, restaurant.longitude],
@@ -190,7 +190,7 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
 
         const totalOptionsPrice = cart_meal.cart_meal_options.reduce(
           (acc, curr) => {
-            const originalPrice = curr.meal_option_price.option.price;
+            const originalPrice = curr.meal_option_price?.price;
             const groupApplyOffer =
               curr.meal_option_price.meal_option_group?.apply_offer;
 
@@ -208,14 +208,14 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
           Number(cart_meal.meal.price) * (1 - discount_percentage / 100);
 
         const total_option_price =
-          (discountedMealPrice + totalOptionsPrice) * cart_meal.quantity;
+          (Number(discountedMealPrice) + Number(totalOptionsPrice)) 
         const order_meal = plainToInstance(RestaurantOrderMeal, {
           meal_id: cart_meal.meal_id,
           order_id: order.id,
           quantity: cart_meal.quantity,
           restaurant_order_id: order.id,
           price: discountedMealPrice,
-          total_price: discountedMealPrice + total_option_price,
+          total_price:   total_option_price,
           restaurant_order_meal_options: cart_meal?.cart_meal_options?.map(
             (opt) => ({
               option: opt?.meal_option_price?.option,
