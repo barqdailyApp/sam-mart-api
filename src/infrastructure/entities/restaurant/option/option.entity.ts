@@ -8,8 +8,7 @@ export class Option extends AuditableEntity{
     name_ar: string;
     @Column()
     name_en: string;
-    @Column({default:0})
-   price:number
+
    @ManyToOne(()=>OptionGroup,optionGroup=>optionGroup.options)
    @JoinColumn({name:"option_group_id"})
    option_group:OptionGroup

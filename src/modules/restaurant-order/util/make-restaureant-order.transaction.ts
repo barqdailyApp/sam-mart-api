@@ -142,9 +142,9 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
         restaurant.schedules,
       );
 
-      // if (!is_system_active) {
-      //   throw new BadRequestException('restaurant is closed');
-      // }
+      if (!is_system_active) {
+        throw new BadRequestException('restaurant is closed');
+      }
 
       const distance = calculateDistances(
         [restaurant.latitude, restaurant.longitude],

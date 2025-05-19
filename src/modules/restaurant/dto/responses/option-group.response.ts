@@ -24,6 +24,9 @@ export class OptionGroupResponse{
     order_by:number
     @Expose()
     is_active:boolean
+
+    @Expose()
+    apply_offer:boolean
    
     @Expose()
     @Transform((value)=>plainToInstance(OptionRespone,value.obj.options,{excludeExtraneousValues:true}))

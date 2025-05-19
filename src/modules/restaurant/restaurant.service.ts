@@ -1014,7 +1014,7 @@ export class RestaurantService extends BaseService<Restaurant> {
     const meal_option_price = await this.mealOptionPriceRepository.findOne({
       where: {
         id: req.id,
-        meal_option_group: { meal: { restaurant_category: { restaurant_id } } },
+     
       },
     });
     if (!meal_option_price) throw new NotFoundException('no option found');
@@ -1360,14 +1360,42 @@ export class RestaurantService extends BaseService<Restaurant> {
     return isOpen;
   }
 
-  async mealOptionGroupApplyOffer(id:string,) {
+  async mealOptionGroupApplyOffer(id: string) {
     const meal_option_group = await this.mealOptionGroupRepository.findOne({
       where: { id: id },
     });
     if (!meal_option_group)
       throw new NotFoundException('no meal option group found');
- 
+
     meal_option_group.apply_offer = !meal_option_group.apply_offer;
     return await this.mealOptionGroupRepository.save(meal_option_group);
+  }
+  async getMealOptionGroup(id: string) {
+    const meal_option_group = await this.mealOptionGroupRepository.find({
+      where: {
+        meal_option_prices: { meal_option_group: { meal: { id: id } } },
+      },
+      relations: {
+        option_group: { options: true },
+        meal_option_prices: { option: true },
+      },
+    });
+    if (!meal_option_group)
+      throw new NotFoundException('no meal option group found');
+    const result = meal_option_group.map((group) => {
+      const options = group.meal_option_prices.map((option) => ({
+        ...option.option,
+        price: option.price,
+        id: option.id,
+      }));
+      return {
+        ...group.option_group,
+        apply_offer: group.apply_offer,
+        id: group.id,
+        options,
+      };
+    });
+    
+    return result;
   }
 }

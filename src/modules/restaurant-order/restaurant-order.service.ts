@@ -102,9 +102,9 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
   const is_system_active = await this.sectionService.isSystemActive(
     DriverTypeEnum.FOOD,
   )
-  // if (!is_system_active) {
-  //   throw new BadRequestException('not available');
-  // }
+  if (!is_system_active) {
+    throw new BadRequestException('not available');
+  }
     return await this.makeRestaurantOrderTransaction.run(req);
   }
 

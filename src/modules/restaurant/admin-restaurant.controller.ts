@@ -58,6 +58,7 @@ import {
 import { CuisineResponse } from './dto/responses/cuisine.response';
 import { addRestaurantSchedule } from './dto/requests/add-restaurant-schedule.request';
 import { updateRestaurantScheduleRequest } from './dto/requests/update-restaurant.schedule.request';
+import { OptionGroupResponse } from './dto/responses/option-group.response';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -329,6 +330,19 @@ export class AdminRestaurantController {
       restaurant_id,
     );
     return new ActionResponse(option);
+  }
+
+  @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
+  @Get('/admin/meal-option-groups/:meal_id/:restaurant_id')
+  async getMealOptionGroups(
+    @Param('meal_id') meal_id: string,
+    @Param('restaurant_id') restaurant_id: string,
+  ) {
+    const options = await this.restaurantService.getMealOptionGroup(meal_id);
+    const response = plainToInstance(OptionGroupResponse, options, {
+      excludeExtraneousValues: true,
+    });
+    return new ActionResponse(response);
   }
 
   @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
