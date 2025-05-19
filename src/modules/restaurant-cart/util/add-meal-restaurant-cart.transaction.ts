@@ -16,7 +16,9 @@ import { OptionGroup } from 'src/infrastructure/entities/restaurant/option/optio
 import { RestaurantCartMealOption } from 'src/infrastructure/entities/restaurant/cart/restaurant-cart-meal-option.entity';
 import { plainToInstance } from 'class-transformer';
 import { GetCartMealsResponse } from '../dto/response/get-cart-meals.response';
+import { Option } from 'src/infrastructure/entities/restaurant/option/option.entity';
 import { User } from 'src/infrastructure/entities/user/user.entity';
+import { MealOptionPrice } from 'src/infrastructure/entities/restaurant/meal/meal-option-price.entity';
 @Injectable()
 export class AddMealRestaurantCartTransaction extends BaseTransaction<
   AddMealRestaurantCartRequest,
@@ -167,36 +169,99 @@ export class AddMealRestaurantCartTransaction extends BaseTransaction<
         quantity: quantity,
       });
 
+      //get options
+      const meal_option_prices = await context.find(MealOptionPrice, {
+        where: { meal_option_group: { meal_id: meal.id },option_id:In(options_ids) },
+      });
+
       // Add options to the cart meal
-      const cart_meal_options = options_ids.map(
-        (option_id) =>
+      const cart_meal_options = meal_option_prices.map(
+        (meal_option_price) =>
           new RestaurantCartMealOption({
             cart_meal_id: cart_meal.id,
-            meal_option_price_id: option_id,
+            meal_option_price_id: meal_option_price.id,
           }),
       );
+
       await context.save(cart_meal_options);
       const cart_meal_with_options = await context.findOne(RestaurantCartMeal, {
         where: { id: cart_meal.id },
         relations: {
-          meal: { meal_option_groups: { option_group: { options: true } } },
-          cart_meal_options: { meal_option_price: { option: true } },
+          meal: {
+            offer: true,
+            meal_option_groups: { meal_option_prices: { option: true },option_group: { options: true } },
+          },
+          cart_meal_options: {
+            meal_option_price: { option: true, meal_option_group: true },
+          }, // added meal_option_group relation here
         },
       });
+
+      if (!cart_meal_with_options) {
+        throw new BadRequestException('message.cart_meal_not_found');
+      }
+
+      const offer = cart_meal_with_options.meal.offer;
+
+      const now = new Date(
+        new Date().setUTCHours(new Date().getUTCHours() + 3),
+      );
+
+      const isOfferActive =
+        offer &&
+        offer.is_active &&
+        new Date(offer.start_date) <= now &&
+        new Date(offer.end_date) > now;
+
+      let discount_percentage = 0;
+
+      if (isOfferActive) {
+        discount_percentage = Number(offer.discount_percentage);
+      }
+
+      const discountedMealPrice =
+        Number(cart_meal_with_options.meal.price) *
+        (1 - discount_percentage / 100);
+
+      const options = (cart_meal_with_options.cart_meal_options || []).map(
+        (o) => {
+          const original_price = o.meal_option_price.price;
+          let discounted_option_price = original_price;
+
+          const group_apply_offer =
+            o.meal_option_price.meal_option_group?.apply_offer;
+
+          if (isOfferActive && group_apply_offer) {
+            discounted_option_price =
+              original_price * (1 - discount_percentage / 100);
+          }
+
+          return {
+            ...o,
+            original_price,
+            discounted_price: discounted_option_price,
+            price: discounted_option_price,
+            option_group: o.meal_option_price.option.option_group,
+          };
+        },
+      );
+
+      const totalOptionPrice = options.reduce(
+        (acc, o) => acc + o.discounted_price,
+        0,
+      );
+      const total_price = Number(
+        (Number(discountedMealPrice) + Number(totalOptionPrice))) *
+        Number(cart_meal_with_options.quantity);
+
       const response = plainToInstance(
         GetCartMealsResponse,
         {
           ...cart_meal_with_options.meal,
-          id: cart_meal_with_options.meal.id,
+          id: cart_meal_with_options.id,
           quantity: cart_meal_with_options.quantity,
-          total_price:
-            Number(cart_meal_with_options.meal.price) +
-            Number(
-              cart_meal_with_options.cart_meal_options.reduce(
-                (acc, curr) => acc + curr.meal_option_price.option.price,
-                0,
-              ),
-            ),
+          total_price,
+          cart_meal_options: options, // include options with prices if needed
         },
         { excludeExtraneousValues: true },
       );

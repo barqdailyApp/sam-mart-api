@@ -44,7 +44,10 @@ import {
   UpdateOptionGroupRequest,
   UpdateOptionRequest,
 } from './dto/requests/add-option-group.request';
-import { AddMealOptionGroupsRequest, UpdateMealOptionPriceRequest } from './dto/requests/add-meal-option-groups.request';
+import {
+  AddMealOptionGroupsRequest,
+  UpdateMealOptionPriceRequest,
+} from './dto/requests/add-meal-option-groups.request';
 import { Create } from 'sharp';
 import { UpdateRestaurantRequest } from './dto/requests/update-restaurant.request';
 import { UpdateCuisineRequest } from './dto/requests/update-cusisine.request';
@@ -327,10 +330,26 @@ export class AdminRestaurantController {
     );
     return new ActionResponse(option);
   }
-  //update meal option groups 
+
+  @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
+  @Post(
+    '/admin/meal-option-groups/apply-offer/:meal_option_group_id/:restaurant_id',
+  )
+  async applyOfferMealOptionGroups(
+    @Param('meal_option_group_id') meal_option_group_id: string,
+    @Param('restaurant_id') restaurant_id: string,
+  ) {
+    const meal_option_group =
+      await this.restaurantService.mealOptionGroupApplyOffer(
+        meal_option_group_id,
+      );
+
+    return new ActionResponse(meal_option_group);
+  }
+
+  //update meal option groups
   @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
   @Put('/admin/meal-option-groups/:restaurant_id')
-
   async updateMealOptionGroups(
     @Body() req: UpdateMealOptionPriceRequest,
     @Param('restaurant_id') restaurant_id: string,
@@ -460,16 +479,20 @@ export class AdminRestaurantController {
       restaurant_id,
     );
     return new ActionResponse(schedule);
-  }  @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
+  }
+  @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
   @Put('/admin/schedule/:restaurant_id')
   async editSchedule(
     @Body() req: updateRestaurantScheduleRequest,
     @Param('restaurant_id') restaurant_id: string,
   ) {
-    const schedule = await this.restaurantService.editRestaurantSchedule(req,
-      restaurant_id);
+    const schedule = await this.restaurantService.editRestaurantSchedule(
+      req,
+      restaurant_id,
+    );
     return new ActionResponse(schedule);
-  }  @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
+  }
+  @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
   @Delete('/admin/schedule/:restaurant_id/:id')
   async deleteSchedule(
     @Param('id') id: string,

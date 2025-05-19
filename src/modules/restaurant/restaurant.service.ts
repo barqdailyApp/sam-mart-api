@@ -45,7 +45,10 @@ import {
   UpdateOptionRequest,
 } from './dto/requests/add-option-group.request';
 import { Option } from 'src/infrastructure/entities/restaurant/option/option.entity';
-import { AddMealOptionGroupsRequest, UpdateMealOptionPriceRequest } from './dto/requests/add-meal-option-groups.request';
+import {
+  AddMealOptionGroupsRequest,
+  UpdateMealOptionPriceRequest,
+} from './dto/requests/add-meal-option-groups.request';
 import { MealOptionGroup } from 'src/infrastructure/entities/restaurant/meal/meal-option-group';
 import { UpdateRestaurantRequest } from './dto/requests/update-restaurant.request';
 import { UpdateCuisineRequest } from './dto/requests/update-cusisine.request';
@@ -532,7 +535,8 @@ export class RestaurantService extends BaseService<Restaurant> {
         }
 
         const optionsTotal = cartMeal.cart_meal_options.reduce(
-          (optionsAcc, optionItem) => optionsAcc + optionItem.meal_option_price?.price,
+          (optionsAcc, optionItem) =>
+            optionsAcc + optionItem.meal_option_price?.price,
           0,
         );
 
@@ -572,7 +576,10 @@ export class RestaurantService extends BaseService<Restaurant> {
     const meal = await this.mealRepository.findOne({
       where: { id },
       relations: {
-        meal_option_groups: { meal_option_prices: true , option_group: {options: true} },
+        meal_option_groups: {
+          meal_option_prices: { option: true },
+          option_group: { options: true },
+        },
         offer: true,
       },
     });
@@ -925,7 +932,7 @@ export class RestaurantService extends BaseService<Restaurant> {
     if (!option) throw new NotFoundException('no option found');
     option.name_ar = req.name_ar;
     option.name_en = req.name_en;
-    option.price = req.price;
+    // option.price = req.price;
     option.is_active = req.is_active;
     return await this.optionRepository.save(option);
   }
@@ -970,7 +977,6 @@ export class RestaurantService extends BaseService<Restaurant> {
       if (existingMealOptionGroup) {
         throw new BadRequestException('option group already added to meal');
       }
-        
 
       const meal_option_group = await this.mealOptionGroupRepository.save(
         plainToInstance(MealOptionGroup, {
@@ -1000,7 +1006,7 @@ export class RestaurantService extends BaseService<Restaurant> {
     return true;
   }
 
-  //edit meal option prices 
+  //edit meal option prices
   async editMealOptionPrices(
     req: UpdateMealOptionPriceRequest,
     restaurant_id: string,
@@ -1352,5 +1358,16 @@ export class RestaurantService extends BaseService<Restaurant> {
     });
 
     return isOpen;
+  }
+
+  async mealOptionGroupApplyOffer(id:string,) {
+    const meal_option_group = await this.mealOptionGroupRepository.findOne({
+      where: { id: id },
+    });
+    if (!meal_option_group)
+      throw new NotFoundException('no meal option group found');
+ 
+    meal_option_group.apply_offer = !meal_option_group.apply_offer;
+    return await this.mealOptionGroupRepository.save(meal_option_group);
   }
 }

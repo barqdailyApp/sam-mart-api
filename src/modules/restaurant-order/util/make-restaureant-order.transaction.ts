@@ -171,36 +171,51 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
           continue;
         }
         const offer = cart_meal.meal.offer;
-        let discount_percentage = 0;
-        let discounted_price = Number(cart_meal.meal.price);
 
-        const currentTimeUTC3 = new Date(
+        const now = new Date(
           new Date().setUTCHours(new Date().getUTCHours() + 3),
         );
 
-        if (
+        const isOfferActive =
           offer &&
           offer.is_active &&
-          new Date(offer.start_date) <= currentTimeUTC3 &&
-          new Date(offer.end_date) > currentTimeUTC3
-        ) {
+          new Date(offer.start_date) <= now &&
+          new Date(offer.end_date) > now;
+
+        let discount_percentage = 0;
+
+        if (isOfferActive) {
           discount_percentage = Number(offer.discount_percentage);
-          discounted_price =
-            discounted_price - (discounted_price * discount_percentage) / 100;
         }
 
-        const total_option_price =
-          cart_meal?.cart_meal_options
-            ?.map((opt) => opt?.meal_option_price?.price || 0)
-            .reduce((a, b) => a + b, 0) || 0;
+        const totalOptionsPrice = cart_meal.cart_meal_options.reduce(
+          (acc, curr) => {
+            const originalPrice = curr.meal_option_price.option.price;
+            const groupApplyOffer =
+              curr.meal_option_price.meal_option_group?.apply_offer;
 
+            if (isOfferActive && groupApplyOffer) {
+              const discountedPrice =
+                originalPrice * (1 - discount_percentage / 100);
+              return acc + discountedPrice;
+            }
+            return acc + originalPrice;
+          },
+          0,
+        );
+
+        const discountedMealPrice =
+          Number(cart_meal.meal.price) * (1 - discount_percentage / 100);
+
+        const total_option_price =
+          (discountedMealPrice + totalOptionsPrice) * cart_meal.quantity;
         const order_meal = plainToInstance(RestaurantOrderMeal, {
           meal_id: cart_meal.meal_id,
           order_id: order.id,
           quantity: cart_meal.quantity,
           restaurant_order_id: order.id,
-          price: discounted_price,
-          total_price: discounted_price + total_option_price,
+          price: discountedMealPrice,
+          total_price: discountedMealPrice + total_option_price,
           restaurant_order_meal_options: cart_meal?.cart_meal_options?.map(
             (opt) => ({
               option: opt?.meal_option_price?.option,

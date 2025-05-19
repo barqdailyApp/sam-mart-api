@@ -19,11 +19,11 @@ export class AddOptionRequest{
 
 
 
-    @ApiProperty()
-    @IsNumber()
-    @Min(0)
-    @Transform(({ value }) => Number(value))
-    price: number;
+    // @ApiProperty()
+    // @IsNumber()
+    // @Min(0)
+    // @Transform(({ value }) => Number(value))
+    // price: number;
 
 }
 
@@ -112,12 +112,12 @@ export class UpdateOptionRequest{
     @IsBoolean()
     is_active: boolean;
 
-    @ApiProperty()
-    @IsNumber()
-    @IsOptional()
-    @Min(0)
-    @Transform(({ value }) => Number(value))
-    price: number;
+    // @ApiProperty()
+    // @IsNumber()
+    // @IsOptional()
+    // @Min(0)
+    // @Transform(({ value }) => Number(value))
+    // price: number;
 
 
 }

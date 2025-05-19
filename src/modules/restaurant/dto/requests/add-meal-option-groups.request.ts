@@ -17,6 +17,11 @@ export class OptionGroupMealRequest {
     @IsBoolean()
     is_active: boolean
 
+      @ApiProperty()
+    @IsOptional()
+    @IsBoolean()
+    apply_offer: boolean
+
   
 }
 

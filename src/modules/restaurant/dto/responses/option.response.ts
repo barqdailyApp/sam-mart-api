@@ -7,6 +7,8 @@ export class OptionRespone{
     @Expose()
     id:string
     @Expose()
+    option_id:string
+    @Expose()
     name:string
     @Expose()
     name_ar:string
