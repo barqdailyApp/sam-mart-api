@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { isArray, IsNotEmpty, IsNumber, IsString, IsStrongPassword, Matches } from "class-validator";
+import { isArray, IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString, IsStrongPassword, Matches } from "class-validator";
 import { Unique } from "src/core/validators/unique-constraints.validator";
-
+import { Transform } from "class-transformer";
 export class RegisterRestaurantRequest {
     @ApiProperty()
     @IsNotEmpty()
@@ -51,6 +51,11 @@ export class RegisterRestaurantRequest {
     @IsNumber()
     min_order_price: number;
 
+        @ApiProperty()
+    @IsNotEmpty()
+    @IsNumber()
+    average_prep_time: number;
+
 
     @ApiProperty()
     @IsNotEmpty()
@@ -95,4 +100,24 @@ export class RegisterRestaurantRequest {
     @ApiProperty({isArray:true})
     @IsNotEmpty()
     licenses: string[]; 
+
+
+  @ApiProperty({ isArray: true, required: false })
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (isArray(value)) {
+      return value;
+    }
+    return value.split(',');
+  })
+  @IsString({ each: true })
+  contact_numbers: string;
+
+
+    @ApiProperty({required:false})
+    @IsOptional()
+    @IsBoolean()
+    
+    order_pickup:boolean
+
 } 

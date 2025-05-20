@@ -1014,7 +1014,6 @@ export class RestaurantService extends BaseService<Restaurant> {
     const meal_option_price = await this.mealOptionPriceRepository.findOne({
       where: {
         id: req.id,
-     
       },
     });
     if (!meal_option_price) throw new NotFoundException('no option found');
@@ -1061,15 +1060,24 @@ export class RestaurantService extends BaseService<Restaurant> {
     });
 
     if (!restaurant) throw new NotFoundException('no restaurant found');
-    restaurant.name_ar = req.name_ar;
-    restaurant.name_en = req.name_en;
-    restaurant.address_ar = req.address_ar;
-    restaurant.address_en = req.address_en;
-    restaurant.latitude = Number(req.latitude);
-    restaurant.longitude = Number(req.longitude);
 
-    restaurant.city_id = req.city_id;
-    restaurant.min_order_price = req.min_order_price;
+    if (req.name_ar !== undefined) restaurant.name_ar = req.name_ar;
+    if (req.name_en !== undefined) restaurant.name_en = req.name_en;
+    if (req.address_ar !== undefined) restaurant.address_ar = req.address_ar;
+    if (req.address_en !== undefined) restaurant.address_en = req.address_en;
+    if (req.contact_numbers !== undefined)
+      restaurant.contact_numbers = req.contact_numbers;
+    if (req.average_prep_time !== undefined)
+      restaurant.average_prep_time = req.average_prep_time;
+    if (req.order_pickup !== undefined)
+      restaurant.order_pickup = req.order_pickup;
+    if (req.latitude !== undefined) restaurant.latitude = Number(req.latitude);
+    if (req.longitude !== undefined)
+      restaurant.longitude = Number(req.longitude);
+    if (req.city_id !== undefined) restaurant.city_id = req.city_id;
+    if (req.min_order_price !== undefined)
+      restaurant.min_order_price = req.min_order_price;
+
     if (req.logo) {
       //delete old image
       if (restaurant.logo && fs.existsSync(restaurant.logo))
@@ -1393,12 +1401,12 @@ export class RestaurantService extends BaseService<Restaurant> {
         apply_offer: group.apply_offer,
         is_active: group.is_active,
         order_by: group.order_by,
-        
+
         id: group.id,
         options,
       };
     });
-    
+
     return result;
   }
 }
