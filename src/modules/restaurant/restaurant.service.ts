@@ -993,11 +993,7 @@ export class RestaurantService extends BaseService<Restaurant> {
             meal_id: meal.id,
             meal_option_group_id: meal_option_group.id,
             option_id: option_group.options[index].id,
-            price:
-              req.option_prices.find(
-                (option_price) =>
-                  option_price.option_id === option_group.options[index].id,
-              )?.price || 0,
+            price:0
           }),
         );
         await this.mealOptionPriceRepository.save(meal_option_price);
