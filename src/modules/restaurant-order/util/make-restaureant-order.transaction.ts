@@ -119,7 +119,9 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
         },
         relations: {
           meal: { offer: true },
-          cart_meal_options: { meal_option_price: {option: true} },
+          cart_meal_options: {
+            meal_option_price: { meal_option_group: true, option: true },
+          },
           cart: true,
         },
       });
@@ -198,6 +200,7 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
             if (isOfferActive && groupApplyOffer) {
               const discountedPrice =
                 originalPrice * (1 - discount_percentage / 100);
+
               return acc + discountedPrice;
             }
             return acc + originalPrice;
@@ -209,7 +212,7 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
           Number(cart_meal.meal.price) * (1 - discount_percentage / 100);
 
         const total_option_price =
-          (Number(discountedMealPrice) + Number(totalOptionsPrice)) 
+          Number(discountedMealPrice) + Number(totalOptionsPrice);
         const order_meal = plainToInstance(RestaurantOrderMeal, {
           meal_id: cart_meal.meal_id,
           note: cart_meal.note,
@@ -217,12 +220,23 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
           quantity: cart_meal.quantity,
           restaurant_order_id: order.id,
           price: discountedMealPrice,
-          total_price:   total_option_price,
+          total_price: total_option_price,
           restaurant_order_meal_options: cart_meal?.cart_meal_options?.map(
-            (opt) => ({
-              option: opt?.meal_option_price?.option,
-              price: opt?.meal_option_price?.price,
-            }),
+            (opt) => {
+              const originalPrice = opt?.meal_option_price?.price;
+              const groupApplyOffer =
+                opt?.meal_option_price?.meal_option_group?.apply_offer;
+
+              let finalPrice = originalPrice;
+              if (isOfferActive && groupApplyOffer) {
+                finalPrice = originalPrice * (1 - discount_percentage / 100);
+              }
+
+              return {
+                option: opt?.meal_option_price?.option,
+                price: finalPrice,
+              };
+            },
           ),
         });
 

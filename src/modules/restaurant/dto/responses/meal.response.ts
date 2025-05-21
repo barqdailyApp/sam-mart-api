@@ -47,7 +47,7 @@ export class MealResponse {
     if (!(startDate <= now && endDate > now)) {
       return null; // Offer is not within the valid time range
     }
-
+    obj.is_offer = true;
     const {
       discount_percentage,
       description,
@@ -110,7 +110,12 @@ export class MealResponse {
             return {
               ...option.option,
               id: option.option_id,
-              price: option.price,
+              price: Number(option.price),
+              final_price:
+                value.obj.is_offer && item.apply_offer
+                  ? option.price -
+                    (value.obj.offer.discount_percentage * option.price) / 100
+                  : option.price,
             };
           }),
           order_by: item.order_by,
@@ -145,7 +150,7 @@ export class MealResponse {
         OptionRespone,
         {
           ...item.option,
-         
+
           option_id: item.option_id,
 
           id: item.option?.id || item.id,
