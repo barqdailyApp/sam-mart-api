@@ -30,9 +30,10 @@ export class RestaurantOrderMeal extends AuditableEntity {
 
   @Column()
   meal_id: string;
+  @Column({ nullable: true })
+  note: string;
 
-  @Column({nullable:true})
-  wallet_discount:number
+
 
   @OneToMany(
     () => RestaurantOrderMealOption,

@@ -72,6 +72,9 @@ export class MealResponse {
   price: number;
   @Expose()
   total_price: number;
+
+  @Expose()
+  note: string;
   @Expose()
   @Type(() => RestaurantResponse)
   restaurant: RestaurantResponse;

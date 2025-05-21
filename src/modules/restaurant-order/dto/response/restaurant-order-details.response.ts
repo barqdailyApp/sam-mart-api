@@ -16,6 +16,7 @@ export class RestaurantOrderDetailsResponse extends RestaurantOrderListResponse 
           options: meal.restaurant_order_meal_options,
           total_price: meal.total_price,
           quantity: meal.quantity,
+          note: meal.note,
         },
         { excludeExtraneousValues: true },
       ),

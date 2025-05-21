@@ -18,6 +18,9 @@ export class RestaurantCartMeal extends AuditableEntity {
     meal_id: string
     @Column({default:1})
     quantity: number
+
+    @Column({nullable:true})
+    note:string
     @OneToMany(()=>RestaurantCartMealOption,restaurantCartMealOption=>restaurantCartMealOption.cart_meal,{onDelete:"CASCADE"})
     cart_meal_options:RestaurantCartMealOption[]
 

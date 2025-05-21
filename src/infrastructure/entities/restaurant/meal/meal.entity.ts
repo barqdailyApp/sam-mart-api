@@ -41,6 +41,9 @@ export class Meal extends AuditableEntity{
     @Column({nullable:true})
     restaurant_category_id:string
 
+    @Column({default:true})
+    add_note:boolean
+
     @OneToMany(()=>MealOptionGroup,mealOptionGroup=>mealOptionGroup.meal)
     meal_option_groups:MealOptionGroup[]
 
