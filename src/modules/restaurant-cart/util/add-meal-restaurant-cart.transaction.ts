@@ -167,6 +167,7 @@ export class AddMealRestaurantCartTransaction extends BaseTransaction<
         cart_id: restaurant_cart.id,
         meal_id: meal_id,
         quantity: quantity,
+        note: req.note,
       });
 
       //get options

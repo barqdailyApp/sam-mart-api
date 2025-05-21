@@ -133,6 +133,9 @@ export class MealResponse {
   direct_add: boolean;
 
   @Expose()
+  add_note: boolean;
+
+  @Expose()
   is_active: boolean;
 
   @Expose()

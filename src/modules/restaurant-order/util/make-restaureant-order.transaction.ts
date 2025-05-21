@@ -32,6 +32,7 @@ import { OrderGateway } from 'src/integration/gateways/order.gateway';
 import { RestaurantAdmin } from 'src/infrastructure/entities/restaurant/restaurant-admin.entity';
 import { RestaurantService } from 'src/modules/restaurant/restaurant.service';
 import { RestaurantStatus } from 'src/infrastructure/data/enums/restaurant-status.enum';
+import { not } from 'joi';
 @Injectable()
 export class MakeRestaurantOrderTransaction extends BaseTransaction<
   MakeRestaurantOrderRequest,
@@ -211,6 +212,7 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
           (Number(discountedMealPrice) + Number(totalOptionsPrice)) 
         const order_meal = plainToInstance(RestaurantOrderMeal, {
           meal_id: cart_meal.meal_id,
+          note: cart_meal.note,
           order_id: order.id,
           quantity: cart_meal.quantity,
           restaurant_order_id: order.id,

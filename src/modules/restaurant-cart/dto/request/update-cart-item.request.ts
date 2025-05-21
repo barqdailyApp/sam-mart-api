@@ -20,6 +20,11 @@ export class UpdateCartMealRequest {
     @IsOptional()
     
     edit_options: boolean
+
+
+      @ApiProperty({required: false})
+        @IsOptional()
+        note: string
     
 }
 

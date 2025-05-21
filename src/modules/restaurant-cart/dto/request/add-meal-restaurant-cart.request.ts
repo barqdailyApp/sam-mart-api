@@ -14,6 +14,11 @@ export class AddMealRestaurantCartRequest  {
     @Min(1)
     quantity: number
 
+
+    @ApiProperty({required: false})
+    @IsOptional()
+    note: string
+
     // list of meal option group ids
     @ApiProperty({isArray: true})
     @IsOptional()
