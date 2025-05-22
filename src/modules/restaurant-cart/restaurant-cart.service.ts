@@ -18,6 +18,7 @@ import { Constant } from 'src/infrastructure/entities/constant/constant.entity';
 import { ConstantType } from 'src/infrastructure/data/enums/constant-type.enum';
 import { calculateDistances } from 'src/core/helpers/geom.helper';
 import { TransactionService } from '../transaction/transaction.service';
+import { or } from 'sequelize';
 
 @Injectable()
 export class RestaurantCartService {
@@ -103,6 +104,7 @@ export class RestaurantCartService {
         const offer = m.meal.offer;
         let discount_percentage = 0;
         let discounted_price = Number(m.meal.price);
+        let price= Number(m.meal.price);
         const isOfferActive =
           offer &&
           offer.is_active &&
@@ -143,9 +145,11 @@ export class RestaurantCartService {
         const total_unit_price =
           discounted_price +
           Number(options.reduce((acc, o) => acc + o.discounted_price, 0));
+          price = price + Number(options.reduce((acc, o) => acc + o.original_price, 0));
 
         return {
           ...m.meal,
+          price,
           meal_id: m.meal.id,
           id: m.id,
           quantity: m.quantity,
