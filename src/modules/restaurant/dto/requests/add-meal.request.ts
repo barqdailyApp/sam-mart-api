@@ -50,7 +50,8 @@ export class AddMealRequest {
   @IsOptional()
   is_active: boolean;
 
-  @ApiProperty({ required: false })
+   @ApiProperty({ required: false })
+  @Transform(({ value }) => value === 'true')
   @IsBoolean()
   @IsOptional()
   add_note: boolean;
@@ -65,8 +66,8 @@ export class UpdateMealRequest {
   @IsBoolean()
   @IsOptional()
   is_active: boolean;
-
   @ApiProperty({ required: false })
+  @Transform(({ value }) => value === 'true')
   @IsBoolean()
   @IsOptional()
   add_note: boolean;
