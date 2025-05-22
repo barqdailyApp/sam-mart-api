@@ -45,32 +45,33 @@ export class AddMealRequest {
   price: number;
 
   @ApiProperty({ required: false })
-  @Transform(({ value }) => value === 'true')
+  @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean()
   @IsOptional()
   is_active: boolean;
 
-   @ApiProperty({ required: false })
-  @Transform(({ value }) => value === 'true')
+  @ApiProperty({ required: false })
+  @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean()
   @IsOptional()
-  add_note: boolean;
+  add_note?: boolean;
 }
-
 export class UpdateMealRequest {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
   id: string;
   @ApiProperty({ required: false })
+  @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean()
   @IsOptional()
   is_active: boolean;
   @ApiProperty({ required: false })
-  @Transform(({ value }) => value === 'true')
+  @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean()
   @IsOptional()
-  add_note: boolean;
+  add_note?: boolean;
+
 
   @ApiProperty()
   @IsOptional()
