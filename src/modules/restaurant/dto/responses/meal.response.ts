@@ -110,12 +110,14 @@ export class MealResponse {
             return {
               ...option.option,
               id: option.option_id,
+              has_offer: value.obj.is_offer && item.apply_offer,
               price: Number(option.price),
-              final_price:
+              final_price: Number(
                 value.obj.is_offer && item.apply_offer
                   ? option.price -
-                    (value.obj.offer.discount_percentage * option.price) / 100
+                      (value.obj.offer.discount_percentage * option.price) / 100
                   : option.price,
+              ),
             };
           }),
           order_by: item.order_by,
