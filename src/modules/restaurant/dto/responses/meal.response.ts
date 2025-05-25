@@ -9,14 +9,14 @@ import { OptionRespone } from './option.response';
 import { Restaurant } from 'src/infrastructure/entities/restaurant/restaurant.entity';
 import { RestaurantResponse } from './restaurant.response';
 export class MealResponse {
+ 
   @Expose()
   id: string;
   @Expose()
   meal_id: string;
   @Expose()
   is_favorite: boolean;
-  @Expose()
-  name: string;
+
   @Expose()
   name_ar: string;
   @Expose()
@@ -163,6 +163,7 @@ export class MealResponse {
     );
   })
   options: OptionRespone[];
+
 }
 
 export class MealOfferResponse {
