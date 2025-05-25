@@ -148,12 +148,13 @@ export class RestaurantOrderController {
     const order = await this.restaurantOrderService.getRestaurantOrderDetails(
       id,
     );
-    const response = this._i18nResponse.entity(order);
+  
     console.log(order.restaurant_order_meals[0]?.restaurant_order_meal_options);
-    const result = plainToInstance(RestaurantOrderDetailsResponse, response, {
+    const result = plainToInstance(RestaurantOrderDetailsResponse, order, {
       excludeExtraneousValues: true,
     });
-    return new ActionResponse(result);
+      const response = this._i18nResponse.entity(result);
+    return new ActionResponse(response);
   }
 
   @Post('driver-pickup/:id')
