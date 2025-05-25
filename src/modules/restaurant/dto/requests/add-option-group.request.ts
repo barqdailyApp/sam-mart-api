@@ -71,11 +71,7 @@ export class UpdateOptionGroupRequest {
     @IsString()
     name_en: string;
 
-    @ApiProperty()
-    @IsNumber()
-    @Min(0)
-    @Transform(({ value }) => Number(value))
-    default_price: number;
+   
 
     @ApiProperty()
     @IsNumber()
@@ -105,6 +101,13 @@ export class UpdateOptionRequest{
     @IsOptional()
     @IsString()
     name_ar: string;
+
+     @ApiProperty({required: false})
+    @IsOptional()
+    @IsNumber()
+    @Min(0)
+    @Transform(({ value }) => Number(value))
+    default_price: number;
 
     @ApiProperty()
     @IsOptional()

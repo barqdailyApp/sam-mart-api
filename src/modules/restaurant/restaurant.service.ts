@@ -932,7 +932,7 @@ export class RestaurantService extends BaseService<Restaurant> {
     if (!option) throw new NotFoundException('no option found');
     option.name_ar = req.name_ar;
     option.name_en = req.name_en;
-    // option.price = req.price;
+    option.default_price = req.default_price;
     option.is_active = req.is_active;
     return await this.optionRepository.save(option);
   }
