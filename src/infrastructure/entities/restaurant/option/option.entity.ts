@@ -17,6 +17,7 @@ export class Option extends AuditableEntity{
    @Column({default:true})
    is_active:boolean
    
-
+ @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  default_price: number;
    
 }

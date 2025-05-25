@@ -16,6 +16,8 @@ export class OptionRespone {
   @Expose()
   name_en: string;
   @Expose()
+  default_price: number;
+  @Expose()
   price: number;
   @Expose()
   final_price: number;
