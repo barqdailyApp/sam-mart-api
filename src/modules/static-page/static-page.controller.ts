@@ -47,6 +47,12 @@ export class StaticPageController {
     return new ActionResponse<StaticPage>(result);
   }
  
+
+
+  @Get('health')
+  async health(){
+    return true;
+  }
   @Get('whats-app')
   @UseInterceptors(CacheInterceptor)
   async getWhatsAppStaticPage() {
