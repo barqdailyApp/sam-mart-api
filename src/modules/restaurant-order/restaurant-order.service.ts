@@ -61,6 +61,8 @@ import { number } from 'joi';
 import { RestaurantService } from '../restaurant/restaurant.service';
 import { Section } from 'src/infrastructure/entities/section/section.entity';
 import { SectionService } from '../section/section.service';
+import { User } from 'src/infrastructure/entities/user/user.entity';
+import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
 @Injectable()
 export class RestaurantOrderService extends BaseService<RestaurantOrder> {
   constructor(
@@ -89,22 +91,24 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
     private replyRepository: Repository<ReviewReply>,
     @InjectRepository(RestaurantAdmin)
     private readonly restaurantAdminRepository: Repository<RestaurantAdmin>,
-
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     @InjectRepository(Restaurant)
     private readonly restaurantRepository: Repository<Restaurant>,
-    @InjectRepository(Constant) private readonly constantRepository: Repository<Constant>,
+    @InjectRepository(Constant)
+    private readonly constantRepository: Repository<Constant>,
     private readonly sectionService: SectionService,
   ) {
     super(restaurantOrderRepository);
   }
 
   async makeRestaurantOrder(req: MakeRestaurantOrderRequest) {
-  const is_system_active = await this.sectionService.isSystemActive(
-    DriverTypeEnum.FOOD,
-  )
-  if (!is_system_active) {
-    throw new BadRequestException('not available');
-  }
+    const is_system_active = await this.sectionService.isSystemActive(
+      DriverTypeEnum.FOOD,
+    );
+    if (!is_system_active) {
+      throw new BadRequestException('not available');
+    }
     return await this.makeRestaurantOrderTransaction.run(req);
   }
 
@@ -149,16 +153,22 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
         is_receive_orders: true,
         type: DriverTypeEnum.FOOD,
       },
-      relations: { user: {wallet: true} },
+      relations: { user: { wallet: true } },
     });
     if (!driver) throw new Error('message.driver_not_found');
-    const max_driver_balance=await this.constantRepository.findOne({
-      where: {type:ConstantType.DRIVER_BALANCE_LIMIT} 
-    })
-    if(Number(driver.user.wallet.balance) <Number(max_driver_balance?.variable??0)){ 
+    const max_driver_balance = await this.constantRepository.findOne({
+      where: { type: ConstantType.DRIVER_BALANCE_LIMIT },
+    });
+    if (
+      Number(driver.user.wallet.balance) <
+      Number(max_driver_balance?.variable ?? 0)
+    ) {
       throw new Error('message.driver_exceed_balance');
     }
-    console.log(Number(driver.user.wallet.balance),Number(max_driver_balance?.variable??0))
+    console.log(
+      Number(driver.user.wallet.balance),
+      Number(max_driver_balance?.variable ?? 0),
+    );
     const order = await this.restaurantOrderRepository.findOne({
       where: { id, driver_id: null },
       withDeleted: true,
@@ -498,7 +508,10 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
     order.order_delivered_at = new Date();
     order.status = ShipmentStatusEnum.DELIVERED;
     await this.restaurantOrderRepository.save(order);
-    if (order.payment_method_enum == PaymentMethodEnum.CASH) {
+    if (
+      order.payment_method_enum == PaymentMethodEnum.CASH &&
+      order.delivery_type == DeliveryType.FAST
+    ) {
       await this.transactionService.makeTransaction(
         new MakeTransactionRequest({
           amount: -order.total_price,
@@ -508,6 +521,12 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
         }),
       );
     }
+    await this.userRepository
+      .createQueryBuilder()
+      .update()
+      .set({ orders_completed: () => 'orders_completed + 1' })
+      .where('id = :id', { id: order.user_id })
+      .execute();
     //send notification to driver and emit event
     try {
       const restaurant_admins = await this.restaurantAdminRepository.find({

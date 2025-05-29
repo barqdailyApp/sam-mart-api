@@ -8,10 +8,13 @@ export class UserResponse {
   @Expose() readonly username: string;
   @Expose() readonly email: string;
   @Expose() readonly phone: string;
+  @Expose()
+  @Transform((value) => value.obj.orders_completed > 3)
+  readonly is_vip: boolean;
   @Transform(({ value }) => toUrl(value))
   @Expose()
   readonly avatar: string;
   @Expose() readonly birth_date: string;
   @Expose() readonly gender: Gender;
-  @Expose() readonly name:string;
+  @Expose() readonly name: string;
 }

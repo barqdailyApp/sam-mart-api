@@ -13,6 +13,8 @@ export class UserInfoResponse {
   email: string;
   birth_date: string;
   gender: string;
+  is_vip?: boolean;
+  orders_completed: number;
 
   constructor(partial: Partial<UserInfoResponse>) {
     this.id = partial.id;
@@ -23,7 +25,7 @@ export class UserInfoResponse {
     this.allow_notification = partial.allow_notification;
     this.birth_date = partial.birth_date;
     this.gender = partial.gender;
-
+    this.is_vip = partial.orders_completed > 3 ? true : false;
     if (this.avatar) {
       if (this.avatar.includes('assets')) {
         this.avatar = toUrl(this.avatar, true);
@@ -41,7 +43,7 @@ export class ProfileResponse {
   vehicles_count: number;
   points: number;
   notifications_is_read: boolean;
-  points_per_wash: number
+  points_per_wash: number;
   IdLastOrderHaveReview?: string;
   constructor(partial: Partial<ProfileResponse>) {
     Object.assign(this, partial);

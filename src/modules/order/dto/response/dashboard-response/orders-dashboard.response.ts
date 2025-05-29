@@ -20,7 +20,7 @@ export class OrdersDashboardResponse {
 
   @Expose() total_price: number;
   @Expose() payment_method: PaymentMethodEnum;
-  @Expose() payment_info:PaymentMethod
+  @Expose() payment_info: PaymentMethod;
 
   @Expose() is_paid: boolean;
   @Expose() delivery_day: string;
@@ -33,7 +33,7 @@ export class OrdersDashboardResponse {
   @Expose() shipments: any;
   @Expose() promo_code_discount: number;
   @Expose() estimated_delivery_time: Date;
-  @Expose() products_price:number;
+  @Expose() products_price: number;
 
   constructor(order: Order) {
     this.order_id = order.id;
@@ -45,14 +45,14 @@ export class OrdersDashboardResponse {
     this.transaction_number = order.transaction_number;
     this.order_products = order.shipments[0].shipment_products.length;
     this.total_price = order.total_price;
-    this.products_price=order.products_price;
+    this.products_price = order.products_price;
     this.payment_method = order.payment_method;
     this.is_paid = order.is_paid;
     this.estimated_delivery_time = order.estimated_delivery_time;
     this.delivery_day = order.delivery_day;
     this.delivery_type = order.delivery_type;
     this.delivery_fee = order.delivery_fee;
-    this.payment_info=order.paymentMethod
+    this.payment_info = order.paymentMethod;
     this.warehouse = {
       id: order.warehouse.id,
       name_ar: order.warehouse.name_ar,
@@ -65,6 +65,7 @@ export class OrdersDashboardResponse {
       username: order.user.name,
       email: order.user.email,
       phone: order.user.phone,
+      is_vip: order.user.orders_completed > 3 ? true : false,
     };
     this.address = {
       id: order.address.id,
@@ -91,7 +92,7 @@ export class OrdersDashboardResponse {
       order_delivered_at: order.shipments[0].order_delivered_at,
       order_canceled_at: order.shipments[0].order_canceled_at,
       canceled_by: order.shipments[0]?.canceled_by,
-      cancel_reason:order.shipments[0]?.cancelShipmentReason
+      cancel_reason: order.shipments[0]?.cancelShipmentReason,
     };
   }
 }

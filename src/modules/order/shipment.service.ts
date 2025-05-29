@@ -55,6 +55,7 @@ import { AddProductOrderRequest } from './dto/request/add-product-order.request'
 import { ShipmentProductHistory } from 'src/infrastructure/entities/order/shipment-product-history.entity';
 import { ShipmentProductActionType } from 'src/infrastructure/data/enums/shipment-product-action-type.enum';
 import { OrderHistory } from 'src/infrastructure/entities/order/order-history.entity';
+import { User } from 'src/infrastructure/entities/user/user.entity';
 @Injectable()
 export class ShipmentService extends BaseService<Shipment> {
   constructor(
@@ -102,6 +103,7 @@ export class ShipmentService extends BaseService<Shipment> {
 
     private readonly notificationService: NotificationService,
     private readonly warehouseOperationTransaction: WarehouseOperationTransaction,
+    @InjectRepository(User) private readonly userRepo: Repository<User>,
   ) {
     super(shipmentRepository);
   }
@@ -120,6 +122,7 @@ export class ShipmentService extends BaseService<Shipment> {
     if (!driver) {
       throw new NotFoundException('message.driver_not_found');
     }
+
     driver.current_orders = driver.current_orders - 1;
     const shipment = await this.shipmentRepository.findOne({
       where: {
@@ -142,6 +145,7 @@ export class ShipmentService extends BaseService<Shipment> {
       },
       relations: ['address'],
     });
+
     order.is_paid = true;
     if (shipment.order.payment_method == PaymentMethodEnum.CASH) {
       await this.transactionService.makeTransaction(
@@ -157,6 +161,12 @@ export class ShipmentService extends BaseService<Shipment> {
     await this.driverRepository.save(driver);
     await this.orderRepository.save(order);
 
+    await this.userRepo
+      .createQueryBuilder()
+      .update()
+      .set({ orders_completed: () => 'orders_completed + 1' })
+      .where('id = :id', { id: order.user_id })
+      .execute();
     await this.orderGateway.notifyOrderStatusChange({
       action: ShipmentStatusEnum.DELIVERED,
       to_rooms: ['admin', shipment.order.user_id],
@@ -208,7 +218,12 @@ export class ShipmentService extends BaseService<Shipment> {
     await this.shipmentRepository.save(shipment);
 
     await this.orderRepository.save(order);
-
+    await this.userRepo
+      .createQueryBuilder()
+      .update()
+      .set({ orders_completed: () => 'orders_completed + 1' })
+      .where('id = :id', { id: order.user_id })
+      .execute();
     await this.orderGateway.notifyOrderStatusChange({
       action: ShipmentStatusEnum.DELIVERED,
       to_rooms: ['admin', shipment.order.user_id],
@@ -1208,16 +1223,16 @@ export class ShipmentService extends BaseService<Shipment> {
       withDeleted: true,
       relations: {
         modified_by: true,
-product_category_price:{
-  product_measurement: {measurement_unit:true},  
-  product_sub_category: {
-    product:{product_images:true},
-    category_subCategory: {
-      section_category: { category: true },
-      subcategory: true,
-    },
-  },
-}
+        product_category_price: {
+          product_measurement: { measurement_unit: true },
+          product_sub_category: {
+            product: { product_images: true },
+            category_subCategory: {
+              section_category: { category: true },
+              subcategory: true,
+            },
+          },
+        },
         // shipment_product: {
         //   main_measurement_unit: true,
         //   product: {

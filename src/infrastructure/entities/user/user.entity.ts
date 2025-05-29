@@ -52,6 +52,9 @@ export class User extends AuditableEntity {
   @Column({ nullable: true })
   email_verified_at: Date;
 
+  @Column({default:0})
+  orders_completed: number
+
 
 
   @OneToOne(() => Wallet, (wallet) => wallet.user)

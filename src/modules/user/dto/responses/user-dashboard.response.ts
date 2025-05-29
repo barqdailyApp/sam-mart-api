@@ -10,6 +10,9 @@ export class UserDashboardResponse {
   @Expose() readonly username: string;
   @Expose() readonly email: string;
   @Expose() readonly phone: string;
+  @Expose()
+  @Transform((value) => value.obj.orders_completed > 3)
+  readonly is_vip: boolean;
   @Transform(({ value }) => toUrl(value))
   @Expose()
   readonly avatar: string;
@@ -29,6 +32,7 @@ export class UserDashboardResponse {
     this.phone = user.phone;
     this.avatar = user.avatar;
     this.birth_date = user.birth_date;
+    this.is_vip = user.is_vip;
     this.created_at = user.created_at;
     this.user_status = user.user_status;
     this.total_orders = user.total_orders;

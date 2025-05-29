@@ -25,6 +25,9 @@ import { UserStatusRequest } from './dto/requests/update-user-status.request';
 import { Role } from 'src/infrastructure/data/enums/role.enum';
 import { DeleteClientAccountTransaction } from './transactions/delete-client-account.transaction';
 import { Order } from 'src/infrastructure/entities/order/order.entity';
+import { Restaurant } from 'src/infrastructure/entities/restaurant/restaurant.entity';
+import { RestaurantOrder } from 'src/infrastructure/entities/restaurant/order/restaurant_order.entity';
+import { ShipmentStatusEnum } from 'src/infrastructure/data/enums/shipment_status.enum';
 
 @Injectable({ scope: Scope.REQUEST })
 export class UserService extends BaseService<User> {
@@ -40,10 +43,35 @@ export class UserService extends BaseService<User> {
     private readonly sendOtpTransaction: SendOtpTransaction,
     @Inject(DeleteClientAccountTransaction)
     private readonly deleteAccountTransaction: DeleteClientAccountTransaction,
+    @InjectRepository(RestaurantOrder)
+    private readonly restaurantOrderRepo: Repository<RestaurantOrder>,
   ) {
     super(userRepo);
   }
 
+  async isUserVip(id: string) {
+    const user = await this.userRepo.findOne({
+      where: {
+        id: id,
+      },
+    });
+    const barq_order_count = await this.orderRepo.count({
+      where: {
+        user_id: id,
+        shipments: { status: ShipmentStatusEnum.DELIVERED },
+      },
+    });
+    const restaurant_order = await this.restaurantOrderRepo.count({
+      where: {
+        user_id: id,
+        status: ShipmentStatusEnum.DELIVERED,
+      },
+    });
+
+    user.orders_completed = barq_order_count + restaurant_order;
+    await this.userRepo.save(user);
+    return user;
+  }
   async allowNotification(allow_notification: boolean) {
     await this.userRepo.update(
       { id: this.currentUser.id },
@@ -143,78 +171,88 @@ export class UserService extends BaseService<User> {
     const skip = (page - 1) * limit;
 
     let query = this.userRepo
-  .createQueryBuilder('user')
-  .leftJoinAndSelect('user.wallet', 'wallet')
-  .leftJoinAndSelect('user.addresses', 'addresses')
-  .leftJoin(
-    (qb) =>
-      qb
-        .select('orders.user_id AS userId') // ✅ Fixed alias
-        .addSelect('COUNT(orders.id) AS completedOrders')
-        .addSelect('MAX(orders.created_at) AS lastOrderDate') // ✅ Get last order date
-        .from('order', 'orders')
-        .innerJoin('shipment', 'shipment', 'shipment.order_id = orders.id')
-        .where('shipment.status = :completedStatus', { completedStatus: 'DELIVERED' }) // ✅ Adjust status
-        .groupBy('orders.user_id'),
-    'completedOrders',
-    'completedOrders.userId = user.id' // ✅ Correct alias reference
-  )
-  .leftJoin(
-    (qb) =>
-      qb
-        .select('restaurant_order.user_id AS userId') // ✅ Fixed alias
-        .addSelect('COUNT(restaurant_order.id) AS restaurantOrdersCount') // ✅ Count restaurant orders
-        .from('restaurant_order', 'restaurant_order')
-        .where('restaurant_order.status = :completedStatus', { completedStatus: 'DELIVERED' })
-        .groupBy('restaurant_order.user_id'),
-    'restaurantOrders',
-    'restaurantOrders.userId = user.id' // ✅ Correct alias reference
-  )
-  .where('user.roles = :role', { role: Role.CLIENT })
-  .orderBy('user.created_at', 'DESC')
-  .skip(skip)
-  .take(limit)
-  .addSelect('COALESCE(completedOrders.completedOrders, 0)', 'total_orders')
-  .addSelect('COALESCE(completedOrders.lastOrderDate, NULL)', 'last_order_date')
-  .addSelect('COALESCE(restaurantOrders.restaurantOrdersCount, 0)', 'total_restaurant_orders');
-  if (created_at) {
-    //*using database functions to truncate the time part of the order.created_at timestamp to compare only the date components
-    query = query.andWhere('DATE(user.created_at) = :created_at', {
-      created_at,
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.wallet', 'wallet')
+      .leftJoinAndSelect('user.addresses', 'addresses')
+      .leftJoin(
+        (qb) =>
+          qb
+            .select('orders.user_id AS userId') // ✅ Fixed alias
+            .addSelect('COUNT(orders.id) AS completedOrders')
+            .addSelect('MAX(orders.created_at) AS lastOrderDate') // ✅ Get last order date
+            .from('order', 'orders')
+            .innerJoin('shipment', 'shipment', 'shipment.order_id = orders.id')
+            .where('shipment.status = :completedStatus', {
+              completedStatus: 'DELIVERED',
+            }) // ✅ Adjust status
+            .groupBy('orders.user_id'),
+        'completedOrders',
+        'completedOrders.userId = user.id', // ✅ Correct alias reference
+      )
+      .leftJoin(
+        (qb) =>
+          qb
+            .select('restaurant_order.user_id AS userId') // ✅ Fixed alias
+            .addSelect('COUNT(restaurant_order.id) AS restaurantOrdersCount') // ✅ Count restaurant orders
+            .from('restaurant_order', 'restaurant_order')
+            .where('restaurant_order.status = :completedStatus', {
+              completedStatus: 'DELIVERED',
+            })
+            .groupBy('restaurant_order.user_id'),
+        'restaurantOrders',
+        'restaurantOrders.userId = user.id', // ✅ Correct alias reference
+      )
+      .where('user.roles = :role', { role: Role.CLIENT })
+      .orderBy('user.created_at', 'DESC')
+      .skip(skip)
+      .take(limit)
+      .addSelect('COALESCE(completedOrders.completedOrders, 0)', 'total_orders')
+      .addSelect(
+        'COALESCE(completedOrders.lastOrderDate, NULL)',
+        'last_order_date',
+      )
+      .addSelect(
+        'COALESCE(restaurantOrders.restaurantOrdersCount, 0)',
+        'total_restaurant_orders',
+      );
+    if (created_at) {
+      //*using database functions to truncate the time part of the order.created_at timestamp to compare only the date components
+      query = query.andWhere('DATE(user.created_at) = :created_at', {
+        created_at,
+      });
+    }
+    if (client_search) {
+      query = query.andWhere(
+        '(user.name LIKE :client_search OR user.phone LIKE :client_search OR user.email LIKE :client_search)',
+        { client_search: `%${client_search}%` },
+      );
+    }
+
+    if (status) {
+      if (status == UserStatus.CustomerPurchase) {
+        query = query.innerJoin('user.orders', 'orders');
+      } else query = query.andWhere('user.user_status = :status', { status });
+    }
+
+    // Fetch structured relations
+    const [users, total] = await query.getManyAndCount();
+
+    // Fetch additional fields separately
+    const rawData = await query.getRawMany();
+
+    // Merge rawData into users
+    const mergedUsers = users.map((user) => {
+      const rawUser = rawData.find((r) => r.user_id === user.id);
+      return {
+        ...user,
+        total_orders: rawUser ? Number(rawUser.total_orders) : 0,
+        last_order_date: rawUser ? rawUser.last_order_date : null,
+        total_restaurant_orders: rawUser
+          ? Number(rawUser.total_restaurant_orders)
+          : 0,
+      };
     });
-  }
-  if (client_search) {
-    query = query.andWhere(
-      '(user.name LIKE :client_search OR user.phone LIKE :client_search OR user.email LIKE :client_search)',
-      { client_search: `%${client_search}%` },
-    );
-  }
 
-  if (status) {
-    if (status == UserStatus.CustomerPurchase) {
-      query = query.innerJoin('user.orders', 'orders');
-    } else query = query.andWhere('user.user_status = :status', { status });
-  }
-
-
-  // Fetch structured relations
-const [users, total] = await query.getManyAndCount();
-
-// Fetch additional fields separately
-const rawData = await query.getRawMany();
-
-// Merge rawData into users
-const mergedUsers = users.map((user) => {
-  const rawUser = rawData.find((r) => r.user_id === user.id);
-  return {
-    ...user,
-    total_orders: rawUser ? Number(rawUser.total_orders) : 0,
-      last_order_date: rawUser ? rawUser.last_order_date : null,
-    total_restaurant_orders: rawUser ? Number(rawUser.total_restaurant_orders) : 0,
-  };
-});
- 
-   
     return { users: mergedUsers, total };
   }
   async getSingleClientDashboard(user_id: string) {
