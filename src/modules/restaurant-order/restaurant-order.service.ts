@@ -502,15 +502,22 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
         driver: { user: true },
       },
     });
+
     if (!order) throw new Error('message.order_not_found');
-    if (order.status != ShipmentStatusEnum.PICKED_UP)
-      throw new Error('message.order_is_not_picked_up');
+    const is_admin = this._request.user.roles.some(
+      (role) => role == Role.ADMIN || role == Role.RESTAURANT_ADMIN,
+    );
+    if (!is_admin) {
+      if (order.status != ShipmentStatusEnum.PICKED_UP)
+        throw new Error('message.order_is_not_picked_up');
+    }
     order.order_delivered_at = new Date();
     order.status = ShipmentStatusEnum.DELIVERED;
     await this.restaurantOrderRepository.save(order);
     if (
       order.payment_method_enum == PaymentMethodEnum.CASH &&
-      order.delivery_type == DeliveryType.FAST
+      order.delivery_type == DeliveryType.FAST &&
+      order.driver
     ) {
       await this.transactionService.makeTransaction(
         new MakeTransactionRequest({
