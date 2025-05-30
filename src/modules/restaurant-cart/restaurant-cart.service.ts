@@ -116,11 +116,11 @@ export class RestaurantCartService {
         if (isOfferActive) {
           discount_percentage = Number(offer.discount_percentage);
           discounted_price =
-            discounted_price - (discounted_price * discount_percentage) / 100;
+            discounted_price - (Number(discounted_price) * Number( discount_percentage)) / 100;
         }
 
         const options = m.cart_meal_options.map((o) => {
-          const original_price = o.meal_option_price.price;
+          const original_price = Number(o.meal_option_price.price);
           let discounted_option_price = original_price;
 
           const group_apply_offer =

@@ -507,6 +507,8 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
     const is_admin = this._request.user.roles.some(
       (role) => role == Role.ADMIN || role == Role.RESTAURANT_ADMIN,
     );
+    if (order.status == ShipmentStatusEnum.COMPLETED)
+      throw new Error('message.order_is_completed');
     if (!is_admin) {
       if (order.status != ShipmentStatusEnum.PICKED_UP)
         throw new Error('message.order_is_not_picked_up');
