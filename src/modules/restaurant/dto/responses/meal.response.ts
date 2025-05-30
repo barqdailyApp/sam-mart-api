@@ -9,7 +9,6 @@ import { OptionRespone } from './option.response';
 import { Restaurant } from 'src/infrastructure/entities/restaurant/restaurant.entity';
 import { RestaurantResponse } from './restaurant.response';
 export class MealResponse {
- 
   @Expose()
   id: string;
   @Expose()
@@ -54,9 +53,10 @@ export class MealResponse {
       decscription_ar,
       decscription_en,
     } = obj.offer;
-    const price = obj.price
-      ? obj.price - (discount_percentage * obj.price) / 100
-      : obj.price;
+    const price = Number(obj.price)
+      ? Number(obj.price) -
+        (Number(discount_percentage) * Number(obj.price)) / 100
+      : Number(obj.price);
 
     return {
       price,
@@ -163,7 +163,6 @@ export class MealResponse {
     );
   })
   options: OptionRespone[];
-
 }
 
 export class MealOfferResponse {
