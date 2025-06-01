@@ -259,7 +259,7 @@ export class AddMealRestaurantCartTransaction extends BaseTransaction<
         GetCartMealsResponse,
         {
           ...cart_meal_with_options.meal,
-          price: discountedMealPrice,
+          price: Number(discountedMealPrice),
           id: cart_meal_with_options.id,
           quantity: cart_meal_with_options.quantity,
           total_price,
