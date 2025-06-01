@@ -145,6 +145,7 @@ export class AddMealRestaurantCartTransaction extends BaseTransaction<
             GetCartMealsResponse,
             {
               ...existingCartMeal.meal,
+              price: Number(existingCartMeal.meal.price),
               meal_id: existingCartMeal.meal.id,
               quantity: existingCartMeal.quantity,
               total_price:
@@ -241,7 +242,7 @@ export class AddMealRestaurantCartTransaction extends BaseTransaction<
             ...o,
             original_price,
             discounted_price: discounted_option_price,
-            price: discounted_option_price,
+            price:Number( discounted_option_price),
             option_group: o.meal_option_price.option.option_group,
           };
         },
