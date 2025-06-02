@@ -10,7 +10,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiHeader, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { GetNearResturantsQuery } from './dto/requests/get-near-resturants.query';
 import { RestaurantService } from './restaurant.service';
 import { I18nResponse } from 'src/core/helpers/i18n.helper';
@@ -517,5 +517,22 @@ export class AdminRestaurantController {
       restaurant_id,
     );
     return new ActionResponse(schedule);
+  }
+
+  @Roles(Role.ADMIN)
+  @Put('/admin/change-status')
+  @ApiQuery({
+  name: 'status',
+  enum: RestaurantStatus,
+  required: true,
+  description: 'New status for the restaurant',
+})
+  async changeStatus(
+    @Param('id') id: string,
+    @Param('restaurant_id') restaurant_id: string,
+    @Query('status') status: RestaurantStatus,
+  ) {
+    const result = await this.restaurantService.changeStatus(id, status);
+    return new ActionResponse(result);
   }
 }

@@ -994,7 +994,7 @@ export class RestaurantService extends BaseService<Restaurant> {
             meal_id: meal.id,
             meal_option_group_id: meal_option_group.id,
             option_id: option_group.options[index].id,
-            price:option_group.options[index].default_price || 0,
+            price: option_group.options[index].default_price || 0,
           }),
         );
         await this.mealOptionPriceRepository.save(meal_option_price);
@@ -1405,5 +1405,12 @@ export class RestaurantService extends BaseService<Restaurant> {
     });
 
     return result;
+  }
+
+  async changeStatus(id: string, status: RestaurantStatus) {
+    const restaurant = await this._repo.findOne({ where: { id } });
+    if (!restaurant) throw new NotFoundException();
+    restaurant.status = status;
+    return await this._repo.save(restaurant);
   }
 }
