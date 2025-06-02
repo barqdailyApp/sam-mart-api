@@ -520,7 +520,7 @@ export class AdminRestaurantController {
   }
 
   @Roles(Role.ADMIN)
-  @Put('/admin/change-status')
+  @Put('/admin/change-status/:id')
   @ApiQuery({
   name: 'status',
   enum: RestaurantStatus,
@@ -529,7 +529,6 @@ export class AdminRestaurantController {
 })
   async changeStatus(
     @Param('id') id: string,
-    @Param('restaurant_id') restaurant_id: string,
     @Query('status') status: RestaurantStatus,
   ) {
     const result = await this.restaurantService.changeStatus(id, status);
