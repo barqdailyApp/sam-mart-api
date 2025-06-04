@@ -302,7 +302,7 @@ export class RestaurantCartService {
     const now = new Date(new Date().setUTCHours(new Date().getUTCHours() + 3));
 
     const total_price = cart.restaurant_cart_meals.reduce((acc, cartMeal) => {
-      let mealPrice = cartMeal.meal.price;
+      let mealPrice = Number(cartMeal.meal.price);
       const offer = cartMeal.meal.offer;
       let discount = 0;
 
@@ -317,7 +317,7 @@ export class RestaurantCartService {
       }
 
       const optionsTotal = cartMeal.cart_meal_options.reduce((optAcc, opt) => {
-        let optionPrice = opt.meal_option_price.price;
+        let optionPrice =Number( opt.meal_option_price.price);
 
         if (
           discount > 0 &&

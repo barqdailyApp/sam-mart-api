@@ -521,7 +521,7 @@ export class RestaurantService extends BaseService<Restaurant> {
       const nowInYemenTime = nowUtc;
 
       const total_price = cart_meals.reduce((acc, cartMeal) => {
-        let mealPrice = cartMeal.meal.price;
+        let mealPrice = Number(cartMeal.meal.price);
 
         const offer = cartMeal.meal.offer;
         if (
@@ -536,7 +536,7 @@ export class RestaurantService extends BaseService<Restaurant> {
 
         const optionsTotal = cartMeal.cart_meal_options.reduce(
           (optionsAcc, optionItem) =>
-            optionsAcc + optionItem.meal_option_price?.price,
+           Number( optionsAcc) +Number( optionItem.meal_option_price?.price),
           0,
         );
 
