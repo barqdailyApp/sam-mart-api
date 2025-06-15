@@ -1347,7 +1347,7 @@ export class RestaurantService extends BaseService<Restaurant> {
     const now = new Date();
 
     // Add 3 hours to get Yemen time
-    const yemenTime = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+    const yemenTime = new Date(now.getTime() + 2 * 60 * 60 * 1000);
 
     const currentTime = yemenTime.toTimeString().split(' ')[0]; // "HH:MM:SS"
     const dayOfWeek = yemenTime.toLocaleString('en-US', { weekday: 'long' });
