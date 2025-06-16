@@ -2,6 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
 import { OptionGroup } from "./option-group.entity";
 import { AuditableEntity } from "src/infrastructure/base/auditable.entity";
 import { RestaurantCartMealOption } from "../cart/restaurant-cart-meal-option.entity";
+import { MealOptionPrice } from "../meal/meal-option-price.entity";
 @Entity()
 export class Option extends AuditableEntity{
     @Column()
@@ -19,5 +20,8 @@ export class Option extends AuditableEntity{
    
  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   default_price: number;
+  
+   @OneToMany(() => MealOptionPrice, (mealOptionPrice) => mealOptionPrice.option)
+   meal_option_prices: MealOptionPrice[];
    
 }

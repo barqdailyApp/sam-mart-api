@@ -4,6 +4,7 @@ import { OptionGroup } from '../option/option-group.entity';
 import { Meal } from './meal.entity';
 import { Option } from '../option/option.entity';
 import { MealOptionGroup } from './meal-option-group';
+import { options } from 'joi';
 @Entity()
 export class MealOptionPrice extends AuditableEntity {
   @ManyToOne(
@@ -17,7 +18,7 @@ export class MealOptionPrice extends AuditableEntity {
   meal_option_group: MealOptionGroup;
     @Column({ nullable: true })
   meal_option_group_id: string;
-  @ManyToOne(() => Option)
+  @ManyToOne(() => Option,options =>options.meal_option_prices)
     @JoinColumn({ name: 'option_id' })
   option: Option;
   @Column({ nullable: true })

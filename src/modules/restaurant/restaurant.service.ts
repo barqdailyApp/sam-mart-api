@@ -941,9 +941,15 @@ export class RestaurantService extends BaseService<Restaurant> {
   //delete option
   async deleteOption(id: string, restaurant_id: string) {
     const option = await this.optionRepository.findOne({
-      where: { id: id, option_group: { restaurant_id: restaurant_id } },
+      where: { id: id, option_group: { restaurant_id: restaurant_id }, },
+      relations:{meal_option_prices:true}
     });
     if (!option) throw new NotFoundException('no option found');
+    if (option.meal_option_prices?.length > 0) {
+      throw new BadRequestException(
+        'This option is already used in meal option prices',
+      );
+    }
     return await this.optionRepository.softRemove(option);
   }
 
