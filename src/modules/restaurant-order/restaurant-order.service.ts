@@ -608,6 +608,7 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
     });
     if (!driver) throw new Error('message.driver_not_found');
     order.driver_id = driver_id;
+    if(order.status != ShipmentStatusEnum.CONFIRMED)
     order.status = ShipmentStatusEnum.ACCEPTED;
     await this.restaurantOrderRepository.save(order);
     return order;
