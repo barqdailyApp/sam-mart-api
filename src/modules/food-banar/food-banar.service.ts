@@ -16,6 +16,7 @@ import { GetNearResturantsQuery } from '../restaurant/dto/requests/get-near-rest
 import { FoodBanar } from 'src/infrastructure/entities/restaurant/banar/food_banar.entity';
 import { Constant } from 'src/infrastructure/entities/constant/constant.entity';
 import { ConstantType } from 'src/infrastructure/data/enums/constant-type.enum';
+import { or } from 'sequelize';
 
 @Injectable()
 export class BanarService extends BaseService<FoodBanar> {
@@ -42,6 +43,7 @@ export class BanarService extends BaseService<FoodBanar> {
       is_active: banar.is_active,
       is_popup: banar?.is_popup,
       restaurant_id: banar?.restaurant_id,
+      order_by: banar?.order_by,
     });
 
     return await this.banarRepository.save(createdBanar);
@@ -85,6 +87,7 @@ export class BanarService extends BaseService<FoodBanar> {
         latitude: query.latitude,
         longitude: query.longitude,
       })
+      .orderBy('food_banar.order_by', 'ASC')
       .getRawAndEntities();
   
     // Get delivery time per km
@@ -126,6 +129,8 @@ export class BanarService extends BaseService<FoodBanar> {
         ended_at: MoreThanOrEqual(new Date()),
         is_popup: true,
       },
+      order: {
+        order_by: 'ASC',}
     });
   }
 
@@ -147,6 +152,8 @@ export class BanarService extends BaseService<FoodBanar> {
       is_active:
         banar.is_active != null ? banar.is_active : banarEntity.is_active,
       restaurant_id: banar?.restaurant_id,
+      order_by: banar?.order_by,
+      
     });
 
     return await this.banarRepository.save(banarEntity);

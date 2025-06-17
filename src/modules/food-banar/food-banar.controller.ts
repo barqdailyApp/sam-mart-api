@@ -23,7 +23,7 @@ import { CreateFoodBanarRequest } from './dto/request/create-food-banar.request'
 import { FoodBannerResponse } from './dto/response/food-banner.response';
 import { UpdateFoodBannerRequest } from './dto/request/update-food-banner.request';
 import { GetNearResturantsQuery } from '../restaurant/dto/requests/get-near-resturants.query';
-import { applyQueryIncludes } from 'src/core/helpers/service-related.helper';
+import { applyQueryIncludes, applyQuerySort } from 'src/core/helpers/service-related.helper';
 
 // @ApiBearerAuth()
 @ApiHeader({
@@ -63,6 +63,7 @@ export class BanarController {
         @Query() query: PaginatedRequest
     ): Promise<ActionResponse<FoodBannerResponse[]>> {
         applyQueryIncludes(query, 'restaurant');
+        applyQuerySort(query, `order_by=asc`);
         const banners = await this.banarService.findAll(query);
         const count = await this.banarService.count(query);
         const result = plainToInstance(FoodBannerResponse, banners, { excludeExtraneousValues: true })

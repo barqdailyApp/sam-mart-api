@@ -98,6 +98,15 @@ export class SectionController {
     const schedule = await this.sectionService.updateSystemSchedule(req);
     return new ActionResponse(schedule);
   }
+  //delete system schedule
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @Delete('/system-schedule/:id')
+  async deleteSystemSchedule(@Param('id') id: string) {
+    this.cacheManager.reset();
+    return new ActionResponse(await this.sectionService.deleteSystemSchedule(id));
+  } 
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
@@ -270,5 +279,5 @@ export class SectionController {
     );
   }
 
- 
+
 }

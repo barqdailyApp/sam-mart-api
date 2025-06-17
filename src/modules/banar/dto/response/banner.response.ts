@@ -8,4 +8,5 @@ export class BannerResponse{
     @Expose() ended_at: Date;
     @Expose() is_active: boolean;
     @Expose() is_popup: boolean;
+    @Expose() order_by: number;
 }

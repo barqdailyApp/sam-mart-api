@@ -29,6 +29,8 @@ export class RestaurantOrderDetailsResponse extends RestaurantOrderListResponse 
 
   @Expose()
   order_on_processed_at: Date;
+  @Expose()
+  note: string;
 
   @Expose()
   order_ready_for_pickup_at: Date;

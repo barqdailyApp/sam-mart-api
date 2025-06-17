@@ -359,4 +359,11 @@ export class SectionService extends BaseService<Section> {
     const scheduleUpdate = plainToInstance(SystemSchedule, req);
     return await this.system_schedule_repo.save(scheduleUpdate);
   }
+  async deleteSystemSchedule(id: string) {
+    const system_schedule = await this.system_schedule_repo.findOne({
+      where: { id: id },
+    });
+    if (!system_schedule) throw new NotFoundException('no schedule found');
+    return await this.system_schedule_repo.delete(id);
+  }
 }

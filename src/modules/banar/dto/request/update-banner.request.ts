@@ -1,4 +1,4 @@
-import { IsBoolean, IsDateString, IsOptional } from "class-validator";
+import { IsBoolean, IsDateString, IsNumber, IsOptional } from "class-validator";
 import { CreateBanarRequest } from "./create-banar.request";
 import { ApiProperty } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
@@ -10,6 +10,11 @@ export class UpdateBannerRequest {
     @ApiProperty({ default: new Date().toISOString().split('T')[0], required: false })
     @IsOptional()
     started_at: Date;
+
+      @ApiProperty({ nullable: true, required: false })
+        @IsOptional()
+        @IsNumber()
+        order_by: number
 
     @ApiProperty({ default: new Date().toISOString().split('T')[0], required: false })
     @IsOptional()
