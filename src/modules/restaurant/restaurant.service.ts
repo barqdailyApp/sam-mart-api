@@ -469,6 +469,15 @@ export class RestaurantService extends BaseService<Restaurant> {
 
     if (!restaurant) throw new NotFoundException('no resturant found');
     //filter inactive meals
+    let cart_meals = [];
+    cart_meals = await this.cartMealRepository.find({
+      where: { cart: { user_id: user_id } },
+      relations: {
+        meal: { offer: true },
+        cart_meal_options: { meal_option_price: true },
+        cart: true,
+      },
+    });
 
     const response = plainToInstance(
       RestaurantResponse,
@@ -487,6 +496,9 @@ export class RestaurantService extends BaseService<Restaurant> {
             meal.direct_add = true;
 
             if (user_id) {
+              meal.cart_quantity = cart_meals.reduce((sum, cm) => {
+                return cm.meal_id === meal.id ? sum + cm.quantity : sum;
+              }, 0);
               const favorite_meal =
                 await this.clientFavoriteMealRepository.findOne({
                   where: { user_id: user_id, meal_id: meal.id },
@@ -506,15 +518,6 @@ export class RestaurantService extends BaseService<Restaurant> {
     let cart_details = null;
 
     if (user_id) {
-      const cart_meals = await this.cartMealRepository.find({
-        where: { cart: { user_id: user_id } },
-        relations: {
-          meal: { offer: true },
-          cart_meal_options: { meal_option_price: true },
-          cart: true,
-        },
-      });
-
       // Prepare Yemen time once
       const nowUtc = new Date();
       nowUtc.setHours(nowUtc.getHours() + 3);
@@ -536,7 +539,7 @@ export class RestaurantService extends BaseService<Restaurant> {
 
         const optionsTotal = cartMeal.cart_meal_options.reduce(
           (optionsAcc, optionItem) =>
-           Number( optionsAcc) +Number( optionItem.meal_option_price?.price),
+            Number(optionsAcc) + Number(optionItem.meal_option_price?.price),
           0,
         );
 
@@ -941,8 +944,8 @@ export class RestaurantService extends BaseService<Restaurant> {
   //delete option
   async deleteOption(id: string, restaurant_id: string) {
     const option = await this.optionRepository.findOne({
-      where: { id: id, option_group: { restaurant_id: restaurant_id }, },
-      relations:{meal_option_prices:true}
+      where: { id: id, option_group: { restaurant_id: restaurant_id } },
+      relations: { meal_option_prices: true },
     });
     if (!option) throw new NotFoundException('no option found');
     if (option.meal_option_prices?.length > 0) {
