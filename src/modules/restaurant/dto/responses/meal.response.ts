@@ -29,8 +29,7 @@ export class MealResponse {
   description_ar: string;
   @Expose()
   description_en: string;
-  @Expose()
-  cart_quantity: number;
+ 
 
   @Expose()
   @Transform(({ obj }) => {
