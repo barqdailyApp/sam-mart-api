@@ -85,7 +85,9 @@ export class RestaurantCartService {
     const fixed_delivery_distance = settings.find(
       (s) => s.type === ConstantType.FREE_DELIVERY_DISTANCE,
     ).variable;
-
+    const DELIVERY_TIME_PER_KM = settings.find(
+      (s) => s.type === ConstantType.DELIVERY_TIME_PER_KM,
+    ).variable;
     const distance = calculateDistances(
       [cart.restaurant.latitude, cart.restaurant.longitude],
       [default_address.latitude, default_address.longitude],
@@ -97,14 +99,16 @@ export class RestaurantCartService {
         ? 0
         : Number(distance) - Number(fixed_delivery_distance)) *
         Number(delivery_price_per_km);
-
+    const estimated_delivery_time =
+      Number(cart.restaurant.average_prep_time) +
+      Number(delivery_price_per_km) * distance;
     const response = plainToInstance(
       GetCartMealsResponse,
       cart.restaurant_cart_meals.map((m) => {
         const offer = m.meal.offer;
         let discount_percentage = 0;
         let discounted_price = Number(m.meal.price);
-        let price= Number(m.meal.price);
+        let price = Number(m.meal.price);
         const isOfferActive =
           offer &&
           offer.is_active &&
@@ -116,7 +120,8 @@ export class RestaurantCartService {
         if (isOfferActive) {
           discount_percentage = Number(offer.discount_percentage);
           discounted_price =
-            discounted_price - (Number(discounted_price) * Number( discount_percentage)) / 100;
+            discounted_price -
+            (Number(discounted_price) * Number(discount_percentage)) / 100;
         }
 
         const options = m.cart_meal_options.map((o) => {
@@ -145,7 +150,8 @@ export class RestaurantCartService {
         const total_unit_price =
           discounted_price +
           Number(options.reduce((acc, o) => acc + o.discounted_price, 0));
-          price = price + Number(options.reduce((acc, o) => acc + o.original_price, 0));
+        price =
+          price + Number(options.reduce((acc, o) => acc + o.original_price, 0));
 
         return {
           ...m.meal,
@@ -162,7 +168,11 @@ export class RestaurantCartService {
 
     const restaurant_response = plainToInstance(
       RestaurantResponse,
-      cart.restaurant,
+      {
+        ...cart.restaurant,
+        distance: distance,
+        estimated_delivery_time: estimated_delivery_time,
+      },
       { excludeExtraneousValues: true },
     );
 
@@ -317,7 +327,7 @@ export class RestaurantCartService {
       }
 
       const optionsTotal = cartMeal.cart_meal_options.reduce((optAcc, opt) => {
-        let optionPrice =Number( opt.meal_option_price.price);
+        let optionPrice = Number(opt.meal_option_price.price);
 
         if (
           discount > 0 &&
