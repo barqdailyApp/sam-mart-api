@@ -16,6 +16,9 @@ export class CreateBanarRequest {
 
     @ApiProperty({ nullable: true, required: false })
     @IsOptional()
+    @Transform(({ value }) => {
+        return Number(value);
+    })
     @IsNumber()
     order_by: number
 
