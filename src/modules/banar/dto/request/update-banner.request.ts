@@ -13,6 +13,9 @@ export class UpdateBannerRequest {
 
       @ApiProperty({ nullable: true, required: false })
         @IsOptional()
+            @Transform(({ value }) => {
+                return Number(value);
+            })
         @IsNumber()
         order_by: number
 
