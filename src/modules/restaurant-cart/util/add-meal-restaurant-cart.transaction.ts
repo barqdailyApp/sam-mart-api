@@ -117,31 +117,32 @@ export class AddMealRestaurantCartTransaction extends BaseTransaction<
         }
       }
 
-      // ابحث عن الوجبة الموجودة في السلة لنفس الوجبة والخيارات
-      const existingCartMeal = await context.findOne(RestaurantCartMeal, {
-        where:
-          options_ids?.length > 0
-            ? {
-                cart_id: restaurant_cart.id,
-                meal_id: meal_id,
-                cart_meal_options: {
-                  meal_option_price: { option_id: In(options_ids) },
-                },
-              }
-            : {
-                cart_id: restaurant_cart.id,
-                meal_id: meal_id,
-             
-              },
-        relations: {
-          meal: true,
-          cart_meal_options: { meal_option_price: { option: true } },
-        },
-      });
+   // ابحث عن الوجبة الموجودة في السلة لنفس الوجبة
+const existingCartMeal = await context.findOne(RestaurantCartMeal, {
+  where: {
+    cart_id: restaurant_cart.id,
+    meal_id: meal_id,
+  },
+  relations: {
+    meal: true,
+    cart_meal_options: {
+      meal_option_price: { option: true },
+    },
+  },
+});
 
-      // تحقق مزدوج لمنع الأخطاء في الترتيب
+// تحقق من تطابق الخيارات (لو موجودة)
+if (existingCartMeal) {
+  const existingOptionIds = existingCartMeal.cart_meal_options.map(
+    (cmo) => cmo.meal_option_price?.option?.id,
+  );
 
-      if (existingCartMeal) {
+  const sameOptions =
+    existingOptionIds.length === options_ids.length &&
+    existingOptionIds.every((id) => options_ids.includes(id));
+
+  if (sameOptions) {
+ 
         existingCartMeal.quantity += quantity;
         await context.save(existingCartMeal);
         const response = plainToInstance(
