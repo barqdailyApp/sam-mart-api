@@ -119,13 +119,20 @@ export class AddMealRestaurantCartTransaction extends BaseTransaction<
 
       // ابحث عن الوجبة الموجودة في السلة لنفس الوجبة والخيارات
       const existingCartMeal = await context.findOne(RestaurantCartMeal, {
-        where: {
-          cart_id: restaurant_cart.id,
-          meal_id: meal_id,
-          cart_meal_options: {
-            meal_option_price: { option_id: In(options_ids) },
-          },
-        },
+        where:
+          options_ids?.length > 0
+            ? {
+                cart_id: restaurant_cart.id,
+                meal_id: meal_id,
+                cart_meal_options: {
+                  meal_option_price: { option_id: In(options_ids) },
+                },
+              }
+            : {
+                cart_id: restaurant_cart.id,
+                meal_id: meal_id,
+             
+              },
         relations: {
           meal: true,
           cart_meal_options: { meal_option_price: { option: true } },
