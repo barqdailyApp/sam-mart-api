@@ -117,57 +117,45 @@ export class AddMealRestaurantCartTransaction extends BaseTransaction<
         }
       }
 
-    // ابحث عن الوجبة الموجودة في السلة لنفس الوجبة والخيارات
-const existingCartMeal = await context.findOne(RestaurantCartMeal, {
-  where: {
-    cart_id: restaurant_cart.id,
-    meal_id: meal_id,
-  },
-  relations: {
-    meal: true,
-    cart_meal_options: { meal_option_price: { option: true } },
-  },
-});
+      // ابحث عن الوجبة الموجودة في السلة لنفس الوجبة والخيارات
+      const existingCartMeal = await context.findOne(RestaurantCartMeal, {
+        where: {
+          cart_id: restaurant_cart.id,
+          meal_id: meal_id,
+          cart_meal_options: {
+            meal_option_price: { option_id: In(options_ids) },
+          },
+        },
+        relations: {
+          meal: true,
+          cart_meal_options: { meal_option_price: { option: true } },
+        },
+      });
 
-if (existingCartMeal) {
-  // استخرج كل option.id الموجودة في السلة
-  const existingOptionIds = existingCartMeal.cart_meal_options
-    .map((cart_meal_option) => cart_meal_option.meal_option_price?.option?.id)
-    .filter(Boolean); // تجنب القيم null أو undefined
+      // تحقق مزدوج لمنع الأخطاء في الترتيب
 
-  // تحقق من التماثل التام بين الخيارات
-  const areOptionsEqual =
-    existingOptionIds.length === options_ids.length &&
-    existingOptionIds.every((id) => options_ids.includes(id)) &&
-    options_ids.every((id) => existingOptionIds.includes(id)); // تحقق مزدوج لمنع الأخطاء في الترتيب
-
-  if (areOptionsEqual) {
-    // 👈 هنا الكود الخاص بالتعامل مع الوجبة المكررة
-  
-
-          // If identical meal exists, update quantity
-          existingCartMeal.quantity += quantity;
-          await context.save(existingCartMeal);
-          const response = plainToInstance(
-            GetCartMealsResponse,
-            {
-              ...existingCartMeal.meal,
-              price: Number(existingCartMeal.meal.price),
-              meal_id: existingCartMeal.meal.id,
-              quantity: existingCartMeal.quantity,
-              total_price:
-                Number(existingCartMeal.meal.price) +
-                Number(
-                  existingCartMeal.cart_meal_options.reduce(
-                    (acc, curr) => acc + curr.meal_option_price?.price,
-                    0,
-                  ),
+      if (existingCartMeal) {
+        existingCartMeal.quantity += quantity;
+        await context.save(existingCartMeal);
+        const response = plainToInstance(
+          GetCartMealsResponse,
+          {
+            ...existingCartMeal.meal,
+            price: Number(existingCartMeal.meal.price),
+            meal_id: existingCartMeal.meal.id,
+            quantity: existingCartMeal.quantity,
+            total_price:
+              Number(existingCartMeal.meal.price) +
+              Number(
+                existingCartMeal.cart_meal_options.reduce(
+                  (acc, curr) => acc + curr.meal_option_price?.price,
+                  0,
                 ),
-            },
-            { excludeExtraneousValues: true },
-          );
-          return response;
-        }
+              ),
+          },
+          { excludeExtraneousValues: true },
+        );
+        return response;
       }
 
       // Create a new cart meal entry
@@ -180,7 +168,10 @@ if (existingCartMeal) {
 
       //get options
       const meal_option_prices = await context.find(MealOptionPrice, {
-        where: { meal_option_group: { meal_id: meal.id },option_id:In(options_ids) },
+        where: {
+          meal_option_group: { meal_id: meal.id },
+          option_id: In(options_ids),
+        },
       });
 
       // Add options to the cart meal
@@ -198,7 +189,10 @@ if (existingCartMeal) {
         relations: {
           meal: {
             offer: true,
-            meal_option_groups: { meal_option_prices: { option: true },option_group: { options: true } },
+            meal_option_groups: {
+              meal_option_prices: { option: true },
+              option_group: { options: true },
+            },
           },
           cart_meal_options: {
             meal_option_price: { option: true, meal_option_group: true },
@@ -249,7 +243,7 @@ if (existingCartMeal) {
             ...o,
             original_price,
             discounted_price: discounted_option_price,
-            price:Number( discounted_option_price),
+            price: Number(discounted_option_price),
             option_group: o.meal_option_price.option.option_group,
           };
         },
@@ -259,8 +253,8 @@ if (existingCartMeal) {
         (acc, o) => acc + o.discounted_price,
         0,
       );
-      const total_price = Number(
-        (Number(discountedMealPrice) + Number(totalOptionPrice))) *
+      const total_price =
+        Number(Number(discountedMealPrice) + Number(totalOptionPrice)) *
         Number(cart_meal_with_options.quantity);
 
       const response = plainToInstance(
