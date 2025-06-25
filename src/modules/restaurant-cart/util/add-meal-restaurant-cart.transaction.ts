@@ -165,7 +165,7 @@ if (existingCartMeal) {
         );
         return response;
       }
-
+    }
       // Create a new cart meal entry
       const cart_meal = await context.save(RestaurantCartMeal, {
         cart_id: restaurant_cart.id,
