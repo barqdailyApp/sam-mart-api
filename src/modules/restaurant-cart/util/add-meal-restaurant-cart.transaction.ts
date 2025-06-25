@@ -117,27 +117,34 @@ export class AddMealRestaurantCartTransaction extends BaseTransaction<
         }
       }
 
-      // Check if the meal with the same options already exists in the cart
-      const existingCartMeal = await context.findOne(RestaurantCartMeal, {
-        where: {
-          cart_id: restaurant_cart.id,
-          meal_id: meal_id,
-        },
-        relations: {
-          meal: true,
-          cart_meal_options: { meal_option_price: { option: true } },
-        },
-      });
+    // ابحث عن الوجبة الموجودة في السلة لنفس الوجبة والخيارات
+const existingCartMeal = await context.findOne(RestaurantCartMeal, {
+  where: {
+    cart_id: restaurant_cart.id,
+    meal_id: meal_id,
+  },
+  relations: {
+    meal: true,
+    cart_meal_options: { meal_option_price: { option: true } },
+  },
+});
 
-      if (existingCartMeal) {
-        const existingOptionIds = existingCartMeal.cart_meal_options.map(
-          (cart_meal_option) => cart_meal_option.meal_option_price?.option.id,
-        );
+if (existingCartMeal) {
+  // استخرج كل option.id الموجودة في السلة
+  const existingOptionIds = existingCartMeal.cart_meal_options
+    .map((cart_meal_option) => cart_meal_option.meal_option_price?.option?.id)
+    .filter(Boolean); // تجنب القيم null أو undefined
 
-        if (
-          existingOptionIds.length === options_ids.length &&
-          existingOptionIds.every((id) => options_ids.includes(id))
-        ) {
+  // تحقق من التماثل التام بين الخيارات
+  const areOptionsEqual =
+    existingOptionIds.length === options_ids.length &&
+    existingOptionIds.every((id) => options_ids.includes(id)) &&
+    options_ids.every((id) => existingOptionIds.includes(id)); // تحقق مزدوج لمنع الأخطاء في الترتيب
+
+  if (areOptionsEqual) {
+    // 👈 هنا الكود الخاص بالتعامل مع الوجبة المكررة
+  
+
           // If identical meal exists, update quantity
           existingCartMeal.quantity += quantity;
           await context.save(existingCartMeal);
