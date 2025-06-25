@@ -117,8 +117,7 @@ export class AddMealRestaurantCartTransaction extends BaseTransaction<
         }
       }
 
-   // ابحث عن الوجبة الموجودة في السلة لنفس الوجبة
-const existingCartMeal = await context.findOne(RestaurantCartMeal, {
+ const existingCartMeals = await context.find(RestaurantCartMeal, {
   where: {
     cart_id: restaurant_cart.id,
     meal_id: meal_id,
@@ -131,17 +130,18 @@ const existingCartMeal = await context.findOne(RestaurantCartMeal, {
   },
 });
 
-// تحقق من تطابق الخيارات (لو موجودة)
-if (existingCartMeal) {
-  const existingOptionIds = existingCartMeal.cart_meal_options.map(
+const existingCartMeal = existingCartMeals.find((cartMeal) => {
+  const existingOptionIds = cartMeal.cart_meal_options.map(
     (cmo) => cmo.meal_option_price?.option?.id,
   );
 
-  const sameOptions =
+  return (
     existingOptionIds.length === options_ids.length &&
-    existingOptionIds.every((id) => options_ids.includes(id));
+    existingOptionIds.every((id) => options_ids.includes(id))
+  );
+});
 
-  if (sameOptions) {
+if (existingCartMeal) {
  
         existingCartMeal.quantity += quantity;
         await context.save(existingCartMeal);
@@ -165,7 +165,7 @@ if (existingCartMeal) {
         );
         return response;
       }
-    }
+    
       // Create a new cart meal entry
       const cart_meal = await context.save(RestaurantCartMeal, {
         cart_id: restaurant_cart.id,
