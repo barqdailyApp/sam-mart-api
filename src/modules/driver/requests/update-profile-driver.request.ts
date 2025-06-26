@@ -1,3 +1,4 @@
+import { DriverType } from '@codebrew/nestjs-storage';
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
@@ -7,6 +8,7 @@ import {
   IsString,
 } from 'class-validator';
 import { DriverStatus } from 'src/infrastructure/data/enums/driver-status.enum';
+import { DriverTypeEnum } from 'src/infrastructure/data/enums/driver-type.eum';
 import { Language } from 'src/infrastructure/data/enums/language.enum';
 import { UserStatus } from 'src/infrastructure/data/enums/user-status.enum';
 import { vehicle_types } from 'src/infrastructure/data/enums/vehicle_type.enum';
@@ -89,4 +91,12 @@ export class UpdateProfileDriverRequest {
   })
   @IsOptional()
   vehicle_type: vehicle_types;
+
+    @ApiProperty({
+    nullable: true,
+    required: false,
+    enum: [DriverTypeEnum.FOOD, DriverTypeEnum.MART],
+  })
+  @IsOptional()
+  type: DriverTypeEnum;
 }

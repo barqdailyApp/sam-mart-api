@@ -60,6 +60,7 @@ export class UpdateProfileDriverTransaction extends BaseTransaction<
         license_number,
         vehicle_color,
         vehicle_model,
+        type,
         vehicle_type,
       } = req;
       //* -------------------- Update User Driver ----------------------------
@@ -68,7 +69,6 @@ export class UpdateProfileDriverTransaction extends BaseTransaction<
         where: { id: driver_id },
         relations: { user: true },
       });
-      
 
       if (!driver) {
         throw new BadRequestException('message.driver_not_found');
@@ -100,7 +100,7 @@ export class UpdateProfileDriverTransaction extends BaseTransaction<
           throw new BadRequestException('message.phone_exists');
         }
         driver.user.phone = phone;
-        driver.user.username=phone;
+        driver.user.username = phone;
       }
 
       if (avatarFile) {
@@ -112,11 +112,14 @@ export class UpdateProfileDriverTransaction extends BaseTransaction<
         //* set avatar path
         driver.user.avatar = pathAvatar;
       }
-    
+
       if (birth_date) {
         driver.user.birth_date = birth_date;
       }
 
+      if (type) {
+        driver.type = type;
+      }
       await context.update(User, driver.user_id, {
         username: driver.user.username,
         email: driver.user.email,
@@ -130,8 +133,6 @@ export class UpdateProfileDriverTransaction extends BaseTransaction<
 
       //* check country
       if (country_id) {
-
-
         const country = await context.findOne(Country, {
           where: {
             id: country_id,
@@ -184,7 +185,6 @@ export class UpdateProfileDriverTransaction extends BaseTransaction<
           { path: 'id_card_images' },
         );
 
-
         driver.id_card_image = pathIdCardImage;
       }
 
@@ -211,10 +211,10 @@ export class UpdateProfileDriverTransaction extends BaseTransaction<
       if (vehicle_model) {
         driver.vehicle_model = vehicle_model;
       }
-      if(license_number){
+      if (license_number) {
         driver.license_number = license_number;
       }
-      if(id_card_number){
+      if (id_card_number) {
         driver.id_card_number = id_card_number;
       }
       await context.update(Driver, driver_id, {
