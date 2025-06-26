@@ -127,6 +127,7 @@ export class UpdateProfileDriverTransaction extends BaseTransaction<
         birth_date: driver.user.birth_date,
         name: name,
         avatar: driver.user.avatar,
+        
       });
 
       //* -------------------- Update Driver ----------------------------
@@ -227,6 +228,7 @@ export class UpdateProfileDriverTransaction extends BaseTransaction<
         vehicle_type: driver.vehicle_type,
         country_id: driver.country_id,
         city_id: driver.city_id,
+        type: driver.type,
         region_id: driver.region_id,
       });
       // return user
