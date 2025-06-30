@@ -188,6 +188,7 @@ export class RestaurantCartService {
     const cart = await this.restaurantCartRepository.findOne({
       where: { user_id: this.request.user.id },
     });
+    if(!cart) return null
 
     const cart_items = await this.restaurantCartMealRepository.find({
       where: { cart_id: cart.id },
