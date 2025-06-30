@@ -26,12 +26,12 @@ export class ConstantSeeder implements Seeder {
     await this.constnant_repo.save([
       new Constant({ variable: '3', type: ConstantType.ORDER_LIMIT , section:DriverTypeEnum.MART}),
       new Constant({ variable: '40', type: ConstantType.DELIVERY_TIME , section:DriverTypeEnum.MART}),
-      new Constant({ variable: '10', type: ConstantType.FIXED_DELIVERY_FEE , section:DriverTypeEnum.MART}),
+      new Constant({ variable: '10', type: ConstantType.FIXED_DELIVERY_FEE , section:DriverTypeEnum.FOOD}),
       new Constant({ variable: '5', type: ConstantType.FREE_DELIVERY_DISTANCE , section:DriverTypeEnum.FOOD}),
       new Constant({ variable: '1', type: ConstantType.DELIVERY_PRICE_PER_KM , section:DriverTypeEnum.FOOD}),
       new Constant({ variable: '1', type: ConstantType.DELIVERY_TIME_PER_KM , section:DriverTypeEnum.FOOD}),
       new Constant({ variable: '100', type: ConstantType.DRIVER_BALANCE_LIMIT  , section:DriverTypeEnum.FOOD}),
-      new Constant({ variable: '100', type: ConstantType.MAX_STORAGE_DISTANCE  , section:DriverTypeEnum.FOOD}),
+      new Constant({ variable: '100', type: ConstantType.MAX_STORAGE_DISTANCE  , section:DriverTypeEnum.MART}),
       new Constant({ variable: '10', type: ConstantType.RESTAURANT_CASHBACK , section:DriverTypeEnum.FOOD}),
       new Constant({ variable: '50', type: ConstantType.MAX_RESTAURANT_DISTANCE , section:DriverTypeEnum.FOOD}),
       

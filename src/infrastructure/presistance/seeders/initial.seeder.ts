@@ -30,7 +30,7 @@ export const DB_SEEDERS = [
   // WareHouseSeeder,
   // WareHouseProductsSeeder,
   // SupportTicketSubjectSeeder,
-  // ConstantSeeder,
+  ConstantSeeder,
   // // PaymentSeeder,
   // SamModulesSeeder,
   // WalletSeeder
