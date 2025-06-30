@@ -64,8 +64,9 @@ export class FirebaseAdminService {
         imageUrl
       },
       android: {
+         ttl: 3600 * 1000, // 1 hour in milliseconds
         notification: {
-          ttl: 3600 * 1000, // 1 hour in milliseconds
+         
           sound: 'default', // Allow sound on Android
         },
       },
