@@ -98,8 +98,8 @@ export class OrderService extends BaseUserService<Order> {
     const is_system_active = await this.sectionService.isSystemActive(
       DriverTypeEnum.MART,
     );
-    if (!is_system_active) {
-      throw new BadRequestException('not available');
+    if (!is_system_active && req.delivery_type === DeliveryType.FAST) {
+      throw new BadRequestException('message.mart_not_available');
     }
     const order = await this.makeOrdrTransacton.run(req);
     try {
