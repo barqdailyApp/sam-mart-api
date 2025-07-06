@@ -1012,9 +1012,7 @@ export class RestaurantService extends BaseService<Restaurant> {
             meal_id: meal.id,
             meal_option_group_id: meal_option_group.id,
             option_id: option_group.options[index].id,
-            price: option_group.options[index].default_price || 0,
-            is_default: req.option_groups[index].foi,
-            order_by: option_group.options[index].order_by,
+            price: option_group.options[index].default_price || 0
           }),
         );
         await this.mealOptionPriceRepository.save(meal_option_price);
