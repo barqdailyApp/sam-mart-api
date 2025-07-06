@@ -465,6 +465,9 @@ export class RestaurantService extends BaseService<Restaurant> {
       .leftJoinAndSelect('restaurant.cuisine_types', 'cuisineType')
       .where('restaurant.id = :id', { id })
       .orderBy('schedules.order_by', 'ASC')
+      .addOrderBy('category.order_by', 'ASC')
+      .addOrderBy('meal.order_by', 'ASC')
+
       .getOne();
 
     if (!restaurant) throw new NotFoundException('no resturant found');
@@ -837,6 +840,7 @@ export class RestaurantService extends BaseService<Restaurant> {
           offer: true,
         },
       },
+      order: { order_by: 'ASC' },
     });
   }
   // edit meal
@@ -860,6 +864,7 @@ export class RestaurantService extends BaseService<Restaurant> {
         );
       meal.image = req.image.replace('/tmp/', '/restaurant-meals/');
     }
+    meal.order_by = req.order_by;
     meal.name_ar = req.name_ar;
     meal.name_en = req.name_en;
     meal.description_ar = req.description_ar;

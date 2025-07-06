@@ -44,6 +44,11 @@ export class AddMealRequest {
   @IsNumber()
   price: number;
 
+    @ApiProperty({required: false})
+  @IsOptional()
+  @IsNumber()
+  order_by: number;
+
   @ApiProperty({ required: false })
   @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean()
@@ -55,6 +60,8 @@ export class AddMealRequest {
   @IsBoolean()
   @IsOptional()
   add_note?: boolean;
+
+
 }
 export class UpdateMealRequest {
   @ApiProperty()
@@ -72,6 +79,10 @@ export class UpdateMealRequest {
   @IsOptional()
   add_note?: boolean;
 
+    @ApiProperty({required: false})
+  @IsOptional()
+  @IsNumber()
+  order_by: number;
 
   @ApiProperty()
   @IsOptional()

@@ -33,7 +33,9 @@ export class Meal extends AuditableEntity{
     @Column({default:0})
     sales_count :number
 
-
+    @Column({nullable:true})
+    order_by:number
+    
     @ManyToOne(()=>RestaurantCategory,restaurantCategory=>restaurantCategory.meals)
     @JoinColumn({name:"restaurant_category_id"})
     restaurant_category:RestaurantCategory
