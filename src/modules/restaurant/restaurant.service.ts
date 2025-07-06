@@ -588,6 +588,9 @@ export class RestaurantService extends BaseService<Restaurant> {
         },
         offer: true,
       },
+      order: {
+        meal_option_groups: { meal_option_prices: { order_by: 'ASC' } },
+      },
     });
     if (!meal) throw new NotFoundException('no meal found');
 
@@ -1027,11 +1030,20 @@ export class RestaurantService extends BaseService<Restaurant> {
       where: {
         id: req.id,
       },
+      relations: { meal_option_group: { option_group: true } },
     });
     if (!meal_option_price) throw new NotFoundException('no option found');
     meal_option_price.price = req.price;
-    if(req.is_default) meal_option_price.is_default = req.is_default
-    if(req.order_by) meal_option_price.order_by = req.order_by
+    if (req.is_default) {
+      // fetch all default option prices and set them to false
+      // await this.mealOptionPriceRepository.update(
+      //   { meal_option_group_id: meal_option_price.meal_option_group.id },
+      //   { is_default: false },
+      // );
+
+      meal_option_price.is_default = req.is_default;
+    }
+    if (req.order_by) meal_option_price.order_by = req.order_by;
     return await this.mealOptionPriceRepository.save(meal_option_price);
   }
 
@@ -1401,6 +1413,7 @@ export class RestaurantService extends BaseService<Restaurant> {
         option_group: { options: true },
         meal_option_prices: { option: true },
       },
+      order: { order_by: 'ASC' },
     });
     if (!meal_option_group)
       throw new NotFoundException('no meal option group found');

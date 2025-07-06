@@ -20,6 +20,11 @@ export class OptionRespone {
   @Expose()
   price: number;
   @Expose()
+  is_default: boolean;
+  @Expose()
+  order_by: number;
+
+  @Expose()
   final_price: number;
   @Expose()
   is_active: boolean;
