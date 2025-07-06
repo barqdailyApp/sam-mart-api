@@ -56,17 +56,6 @@ export class AddMealRestaurantCartTransaction extends BaseTransaction<
         relations: { restaurant_category: { restaurant: true } },
       });
       if (!meal) throw new BadRequestException('message.meal_not_found');
-
-      if (!restaurant_cart) {
-        restaurant_cart = await context.save(RestaurantCart, {
-          user: user,
-          restaurant: meal.restaurant_category.restaurant,
-        });
-      } else {
-        restaurant_cart.restaurant = meal.restaurant_category.restaurant;
-        await context.save(restaurant_cart);
-      }
-
       // Check if the meal belongs to another restaurant
       const is_another_cart = await context.findOne(RestaurantCartMeal, {
         where: {
@@ -79,6 +68,15 @@ export class AddMealRestaurantCartTransaction extends BaseTransaction<
         },
       });
       if (is_another_cart) return null;
+      if (!restaurant_cart) {
+        restaurant_cart = await context.save(RestaurantCart, {
+          user: user,
+          restaurant: meal.restaurant_category.restaurant,
+        });
+      } else {
+        restaurant_cart.restaurant = meal.restaurant_category.restaurant;
+        await context.save(restaurant_cart);
+      }
 
       // Fetch all option groups for the meal
       const allOptionGroupsForMeal = await context.find(MealOptionGroup, {
@@ -117,32 +115,31 @@ export class AddMealRestaurantCartTransaction extends BaseTransaction<
         }
       }
 
- const existingCartMeals = await context.find(RestaurantCartMeal, {
-  where: {
-    cart_id: restaurant_cart.id,
-    meal_id: meal_id,
-  },
-  relations: {
-    meal: true,
-    cart_meal_options: {
-      meal_option_price: { option: true },
-    },
-  },
-});
+      const existingCartMeals = await context.find(RestaurantCartMeal, {
+        where: {
+          cart_id: restaurant_cart.id,
+          meal_id: meal_id,
+        },
+        relations: {
+          meal: true,
+          cart_meal_options: {
+            meal_option_price: { option: true },
+          },
+        },
+      });
 
-const existingCartMeal = existingCartMeals.find((cartMeal) => {
-  const existingOptionIds = cartMeal.cart_meal_options.map(
-    (cmo) => cmo.meal_option_price?.option?.id,
-  );
+      const existingCartMeal = existingCartMeals.find((cartMeal) => {
+        const existingOptionIds = cartMeal.cart_meal_options.map(
+          (cmo) => cmo.meal_option_price?.option?.id,
+        );
 
-  return (
-    existingOptionIds.length === options_ids.length &&
-    existingOptionIds.every((id) => options_ids.includes(id))
-  );
-});
+        return (
+          existingOptionIds.length === options_ids.length &&
+          existingOptionIds.every((id) => options_ids.includes(id))
+        );
+      });
 
-if (existingCartMeal) {
- 
+      if (existingCartMeal) {
         existingCartMeal.quantity += quantity;
         await context.save(existingCartMeal);
         const response = plainToInstance(
@@ -165,7 +162,7 @@ if (existingCartMeal) {
         );
         return response;
       }
-    
+
       // Create a new cart meal entry
       const cart_meal = await context.save(RestaurantCartMeal, {
         cart_id: restaurant_cart.id,
@@ -269,6 +266,7 @@ if (existingCartMeal) {
         GetCartMealsResponse,
         {
           ...cart_meal_with_options.meal,
+          meal_id: cart_meal_with_options.meal.id,
           price: Number(discountedMealPrice),
           id: cart_meal_with_options.id,
           quantity: cart_meal_with_options.quantity,
