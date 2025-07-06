@@ -33,6 +33,17 @@ export class AddMealOptionPriceRequest {
   @ApiProperty()
   @IsNumber()
   price: number
+
+  @ApiProperty()
+  @IsNumber()
+  @IsOptional()
+  order_by: number
+
+  @ApiProperty()
+  @IsOptional()
+  @IsBoolean()
+  is_default: boolean
+
 }
 export class UpdateMealOptionPriceRequest{
   @ApiProperty()
@@ -41,6 +52,16 @@ export class UpdateMealOptionPriceRequest{
   @ApiProperty()
   @IsNumber()
   price: number
+
+    @ApiProperty()
+  @IsNumber()
+  @IsOptional()
+  order_by: number
+
+  @ApiProperty()
+  @IsOptional()
+  @IsBoolean()
+  is_default: boolean
 }
 export class AddMealOptionGroupsRequest {
   //list of option groups

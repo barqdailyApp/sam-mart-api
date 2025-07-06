@@ -16,13 +16,19 @@ export class MealOptionPrice extends AuditableEntity {
   )
   @JoinColumn({ name: 'meal_option_group_id' })
   meal_option_group: MealOptionGroup;
-    @Column({ nullable: true })
+  @Column({ nullable: true })
   meal_option_group_id: string;
-  @ManyToOne(() => Option,options =>options.meal_option_prices)
-    @JoinColumn({ name: 'option_id' })
+  @ManyToOne(() => Option, (options) => options.meal_option_prices)
+  @JoinColumn({ name: 'option_id' })
   option: Option;
   @Column({ nullable: true })
   option_id: string;
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   price: number;
+
+  @Column({ nullable: true })
+  order_by: number;
+
+  @Column({ default: false })
+  is_default: boolean;
 }

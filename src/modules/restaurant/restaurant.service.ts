@@ -828,6 +828,7 @@ export class RestaurantService extends BaseService<Restaurant> {
   async getRestaurantCategories(restaurant_id: string) {
     return await this.restaurantCategoryRepository.find({
       where: { restaurant_id: restaurant_id },
+      order: { order_by: 'ASC' },
     });
   }
 
@@ -1029,6 +1030,8 @@ export class RestaurantService extends BaseService<Restaurant> {
     });
     if (!meal_option_price) throw new NotFoundException('no option found');
     meal_option_price.price = req.price;
+    if(req.is_default) meal_option_price.is_default = req.is_default
+    if(req.order_by) meal_option_price.order_by = req.order_by
     return await this.mealOptionPriceRepository.save(meal_option_price);
   }
 
@@ -1406,6 +1409,8 @@ export class RestaurantService extends BaseService<Restaurant> {
         ...option.option,
         price: option.price,
         id: option.id,
+        order_by: option.order_by,
+        is_default: option.is_default,
       }));
       return {
         ...group.option_group,
