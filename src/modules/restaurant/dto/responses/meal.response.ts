@@ -29,6 +29,9 @@ export class MealResponse {
   description_ar: string;
   @Expose()
   description_en: string;
+
+  @Expose()
+  order_by: number;
  
 
   @Expose()
