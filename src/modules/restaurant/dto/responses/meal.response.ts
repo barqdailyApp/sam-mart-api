@@ -113,6 +113,8 @@ export class MealResponse {
           options: item.meal_option_prices?.map((option) => {
             return {
               ...option.option,
+              is_default: option.is_default,
+              order_by: option.order_by,
               id: option.option_id,
               has_offer: value.obj.is_offer && item.apply_offer,
               price: Number(option.price),
