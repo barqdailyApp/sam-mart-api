@@ -10,9 +10,10 @@ import {
 } from 'typeorm';
 import { Order } from '../order/order.entity';
 import { Expose } from 'class-transformer';
+import { AuditableEntity } from 'src/infrastructure/base/auditable.entity';
 
 @Entity()
-export class Slot extends BaseEntity {
+export class Slot extends AuditableEntity {
   @Column()
   start_time: string;
 
