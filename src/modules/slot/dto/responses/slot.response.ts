@@ -9,5 +9,6 @@ export class SlotResponse {
   @Expose() readonly end_time: string;
   @Expose() readonly time_zone: TimeZone;
   @Expose() readonly order_by: string;
-
+  @Expose() readonly is_active: boolean;
+  @Expose() readonly day_of_week: string;
 }

@@ -48,9 +48,21 @@ export class SlotController {
     const slotResponse = plainToClass(SlotResponse, slot);
     return new ActionResponse(this._i18nResponse.entity(slotResponse));
   }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @Get('all')
+  async findAll() {
+    const slots = await this.slotService.findAll();
+    const slotsResponse = slots.map((slot) => plainToClass(SlotResponse, slot));
+    return new ActionResponse(this._i18nResponse.entity(slotsResponse));
+  }
+
+
+
   @Get(':delivery_day/all-slots')
   async allCountries(@Param('delivery_day') delivery_day: string) {
-    const slots = await this.slotService.findAll(delivery_day);
+    const slots = await this.slotService.findAllDay(delivery_day);
     const slotsResponse = slots.map((slot) => plainToClass(SlotResponse, slot));
     return new ActionResponse(this._i18nResponse.entity(slotsResponse));
   }

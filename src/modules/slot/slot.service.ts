@@ -25,30 +25,55 @@ export class SlotService {
     }
     return slot;
   }
-  async findAll(delivery_day: string): Promise<Slot[]> {
+  async findAllDay(delivery_day: string): Promise<Slot[]> {
+    const now = new Date();
+    now.setHours(now.getHours() + 3); // KSA offset if needed
+
+    const currentTime = now.toTimeString().split(' ')[0]; // "HH:MM:SS"
+    const dayOfWeek = now.toLocaleString('en-US', { weekday: 'long' });
+
     const slots = await this.slotRepository.find({
+      where: { day_of_week: dayOfWeek, is_active: true },
       relations: { orders: true },
       order: {
         order_by: 'ASC',
+        start_time: 'ASC',
       },
     });
-    const availableSlots = [];
-    for (let i = 0; i < slots.length; i++) {
-      const ordersDay = slots[i].orders.filter(
+
+    const availableSlots: Slot[] = [];
+
+    for (const slot of slots) {
+      const ordersForThisDay = slot.orders.filter(
         (order) => order.delivery_day === delivery_day,
       );
-      
-      
-      const delivery_date= new Date(new Date(delivery_day).setUTCHours(Number(slots[i].start_time.split(":")[0])-3,Number( slots[i].start_time.split(":")[1]), 0, 0));
 
-      
-      if (ordersDay.length < 10 && delivery_date>new Date() )  {
+      const [hour, minute] = slot.start_time.split(':').map(Number);
 
-        availableSlots.push(slots[i]);
+      const slotStart = new Date(delivery_day);
+      slotStart.setHours(hour, minute, 0, 0); // Slot datetime on delivery_day
+
+      // If delivery day is today, exclude past time slots
+      if (
+        new Date(delivery_day).toDateString() === now.toDateString() &&
+        slotStart <= now
+      ) {
+        continue; // skip past time slots for today
+      }
+
+      // Allow if not full and in the future
+      if (ordersForThisDay.length < 10 && slotStart > now) {
+        availableSlots.push(slot);
       }
     }
 
     return availableSlots;
+  }
+
+  async findAll() {
+    return await this.slotRepository.find({
+      order: { order_by: 'ASC', start_time: 'ASC' },
+    });
   }
   // async findAll(delivery_day: string): Promise<Slot[]> {
   //   return await this.slotRepository

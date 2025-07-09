@@ -18,7 +18,7 @@ import { Wallet } from 'src/infrastructure/entities/wallet/wallet.entity';
 import { WalletSeeder } from './wallet-seeder';
 
 export const DB_SEEDERS = [
-  UsersSeeder,
+  // UsersSeeder,
   // CountryCityRegionSeeder,
   // MeasurementUnitSeeder,
   // AdditionalServiceSeeder,
@@ -26,11 +26,11 @@ export const DB_SEEDERS = [
   // ProductSeeder,
   // BanarSeeder,
   // StaticPageSeeder,
-  // SlotSeeder,
+  SlotSeeder,
   // WareHouseSeeder,
   // WareHouseProductsSeeder,
   // SupportTicketSubjectSeeder,
-  ConstantSeeder,
+  // ConstantSeeder,
   // // PaymentSeeder,
   // SamModulesSeeder,
   // WalletSeeder
