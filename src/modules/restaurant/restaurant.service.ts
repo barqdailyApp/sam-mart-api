@@ -679,6 +679,7 @@ export class RestaurantService extends BaseService<Restaurant> {
       restaurant_id: restaurant_id,
     });
     //check if directory exist
+    if(req?.image){
     if (!fs.existsSync('storage/restaurant-meals/'))
       fs.mkdirSync('storage/restaurant-meals/');
     if (fs.existsSync(req.image))
@@ -686,7 +687,7 @@ export class RestaurantService extends BaseService<Restaurant> {
         req.image,
         req.image.replace('/tmp/', '/restaurant-meals/'),
       );
-    meal.image = req.image.replace('/tmp/', '/restaurant-meals/');
+    meal.image = req.image.replace('/tmp/', '/restaurant-meals/');}
     return await this.mealRepository.save(meal);
   }
 

@@ -25,7 +25,7 @@ export class AddMealRequest {
   restaurant_category_id: string;
 
   @ApiProperty()
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   image: string;
 
