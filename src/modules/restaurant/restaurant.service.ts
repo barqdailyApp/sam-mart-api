@@ -844,7 +844,7 @@ export class RestaurantService extends BaseService<Restaurant> {
           offer: true,
         },
       },
-      order: { order_by: 'ASC' },
+      order: { order_by: 'ASC',meals:{order_by:'ASC'} },
     });
   }
   // edit meal
