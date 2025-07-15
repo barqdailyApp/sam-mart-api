@@ -1,5 +1,5 @@
 import {
-    BadRequestException,
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -14,7 +14,10 @@ import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 import { DeleteResult } from 'typeorm';
 import { AddressService } from './address.service';
-import { CreateAddressRequest, CreateOptionalAddressRequest } from './dto/requests/create-address.request';
+import {
+  CreateAddressRequest,
+  CreateOptionalAddressRequest,
+} from './dto/requests/create-address.request';
 import { AddressByAccountRequest } from './dto/requests/address-by-account.request';
 import { UpdateAddressRequest } from './dto/requests/update-address.request';
 import { AddressResponse } from './dto/responses/address.respone';
@@ -70,10 +73,12 @@ export class AddressController {
   @Get('/available-sections')
   async getBarqSections(
     @Query() query: CreateOptionalAddressRequest,
-    @Query("user_id") user_id?: string,
-   
+    @Query('user_id') user_id?: string,
   ) {
-    const result = await this.addressService.getAvailableSections(query, user_id);
+    const result = await this.addressService.getAvailableSections(
+      query,
+      user_id,
+    );
     return new ActionResponse(result);
   }
   @ApiBearerAuth()
@@ -114,7 +119,7 @@ export class AddressController {
       data.longitude,
     );
     if (result == false)
-        throw new BadRequestException('message.invalid_location');
+      throw new BadRequestException('message.invalid_location');
     const response = plainToInstance(AddressResponse, result, {
       excludeExtraneousValues: true,
     });
@@ -168,5 +173,13 @@ export class AddressController {
     const result = await this.addressService.delete(id);
     const response = plainToInstance(DeleteResult, result);
     return new ActionResponse<DeleteResult>(response);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.CLIENT)
+  @Get('/check-cart')
+  async checkCart() {
+    return new ActionResponse(await this.addressService.checkCart());
   }
 }

@@ -61,7 +61,7 @@ export class AddressService extends BaseUserService<Address> {
   override async findAll(query?: PaginatedRequest): Promise<Address[]> {
     applyQueryFilters(query, `user_id=${super.currentUser.id}`);
     applyQuerySort(query, `is_favorite=desc`);
-    
+
     return await super.findAll(query);
   }
 
@@ -172,6 +172,16 @@ export class AddressService extends BaseUserService<Address> {
     this.entityRelatedValidator.ownership(item, super.currentUser);
     // delete the entity
     return await super.delete(id);
+  }
+
+  async checkCart() {
+    const food_cart = await this.restaurantCartService.getCartMeals();
+    if (food_cart?.meals?.length > 0) return true;
+
+    const mart_cart = await this.cartService.getCart();
+    const cart_products = await this.cartService.getCartProducts(mart_cart.id);
+    if (cart_products?.products?.length > 0) return true;
+    return false;
   }
 
   async setFavorite(id: string): Promise<Address> {
