@@ -14,6 +14,8 @@ export class OptionGroupResponse{
     name_ar:string
     @Expose()
     name_en:string
+    @Expose()
+    description:string
 
     @Expose()
     min_selection:number

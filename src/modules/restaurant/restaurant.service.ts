@@ -923,6 +923,7 @@ export class RestaurantService extends BaseService<Restaurant> {
     if (!option_group) throw new NotFoundException('no option group found');
     option_group.name_ar = req.name_ar;
     option_group.name_en = req.name_en;
+    option_group.description = req.description;
     option_group.min_selection = req.min_selection;
     option_group.max_selection = req.max_selection;
     return await this.optionGroupRepository.save(option_group);
