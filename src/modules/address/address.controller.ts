@@ -81,6 +81,14 @@ export class AddressController {
     );
     return new ActionResponse(result);
   }
+
+    @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.CLIENT)
+  @Get('/check-cart')
+  async checkCart() {
+    return new ActionResponse(await this.addressService.checkCart());
+  }
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.CLIENT)
@@ -175,11 +183,5 @@ export class AddressController {
     return new ActionResponse<DeleteResult>(response);
   }
 
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.CLIENT)
-  @Get('/check-cart')
-  async checkCart() {
-    return new ActionResponse(await this.addressService.checkCart());
-  }
+
 }
