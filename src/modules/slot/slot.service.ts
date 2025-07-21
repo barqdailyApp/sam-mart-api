@@ -30,7 +30,9 @@ export class SlotService {
     now.setHours(now.getHours() + 3); // KSA offset if needed
 
     const currentTime = now.toTimeString().split(' ')[0]; // "HH:MM:SS"
-    const dayOfWeek = now.toLocaleString('en-US', { weekday: 'long' });
+    const dayOfWeek = new Date(delivery_day).toLocaleString('en-US', {
+      weekday: 'long',
+    });
 
     const slots = await this.slotRepository.find({
       where: { day_of_week: dayOfWeek, is_active: true },
