@@ -197,8 +197,8 @@ export class AddressService extends BaseUserService<Address> {
       .execute();
 
     item.is_favorite = true;
-    // await this.restaurantCartService.clearCart();
-    // await this.cartService.clearCart();
+    await this.restaurantCartService.clearCart();
+    await this.cartService.clearCart();
     return await super.update(item);
   }
 
