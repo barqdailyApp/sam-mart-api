@@ -171,7 +171,7 @@ export class AdminRestaurantController {
     );
 
     const response = categories as any;
-    response.meals = plainToInstance(MealResponse, response.meals, {
+    response.meals = plainToInstance(MealResponse, response?.meals, {
       excludeExtraneousValues: true,
     });
     return new ActionResponse(response);

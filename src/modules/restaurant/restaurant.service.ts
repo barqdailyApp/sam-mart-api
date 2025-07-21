@@ -466,6 +466,7 @@ export class RestaurantService extends BaseService<Restaurant> {
       .where('restaurant.id = :id', { id })
       .orderBy('schedules.order_by', 'ASC')
       .addOrderBy('category.order_by', 'ASC')
+      .orderBy('meal.order_by IS NULL', 'ASC') // false (0) for numbers → comes first
       .addOrderBy('meal.order_by', 'ASC')
 
       .getOne();
@@ -589,7 +590,10 @@ export class RestaurantService extends BaseService<Restaurant> {
         offer: true,
       },
       order: {
-        meal_option_groups: { meal_option_prices: { order_by: 'ASC' } },
+        meal_option_groups: {
+          order_by: 'ASC',
+          meal_option_prices: { order_by: 'ASC' },
+        },
       },
     });
     if (!meal) throw new NotFoundException('no meal found');
@@ -679,15 +683,16 @@ export class RestaurantService extends BaseService<Restaurant> {
       restaurant_id: restaurant_id,
     });
     //check if directory exist
-    if(req?.image){
-    if (!fs.existsSync('storage/restaurant-meals/'))
-      fs.mkdirSync('storage/restaurant-meals/');
-    if (fs.existsSync(req.image))
-      fs.renameSync(
-        req.image,
-        req.image.replace('/tmp/', '/restaurant-meals/'),
-      );
-    meal.image = req.image.replace('/tmp/', '/restaurant-meals/');}
+    if (req?.image) {
+      if (!fs.existsSync('storage/restaurant-meals/'))
+        fs.mkdirSync('storage/restaurant-meals/');
+      if (fs.existsSync(req.image))
+        fs.renameSync(
+          req.image,
+          req.image.replace('/tmp/', '/restaurant-meals/'),
+        );
+      meal.image = req.image.replace('/tmp/', '/restaurant-meals/');
+    }
     return await this.mealRepository.save(meal);
   }
 
@@ -837,16 +842,20 @@ export class RestaurantService extends BaseService<Restaurant> {
   }
 
   async getRestaurantCategoryMeals(restaurant_id: string, category_id: string) {
-    return await this.restaurantCategoryRepository.findOne({
-      where: { restaurant_id: restaurant_id, id: category_id },
-      relations: {
-        meals: {
-          meal_option_groups: { option_group: { options: true } },
-          offer: true,
-        },
-      },
-      order: { order_by: 'ASC',meals:{order_by:'ASC'} },
-    });
+  return await this.restaurantCategoryRepository
+  .createQueryBuilder('category')
+  .leftJoinAndSelect('category.meals', 'meal')
+  .leftJoinAndSelect('meal.offer', 'offer')
+  .leftJoinAndSelect('meal.meal_option_groups', 'mog')
+  .leftJoinAndSelect('mog.option_group', 'option_group')
+  .leftJoinAndSelect('option_group.options', 'option')
+  .where('category.restaurant_id = :restaurant_id', { restaurant_id })
+  .andWhere('category.id = :category_id', { category_id })
+  .orderBy('category.order_by IS NULL', 'ASC')  // NULLs last
+  .addOrderBy('category.order_by', 'ASC')
+  .addOrderBy('meal.order_by IS NULL', 'ASC')
+  .addOrderBy('meal.order_by', 'ASC')
+  .getOne();
   }
   // edit meal
 
@@ -1014,7 +1023,7 @@ export class RestaurantService extends BaseService<Restaurant> {
             meal_id: meal.id,
             meal_option_group_id: meal_option_group.id,
             option_id: option_group.options[index].id,
-            price: option_group.options[index].default_price || 0
+            price: option_group.options[index].default_price || 0,
           }),
         );
         await this.mealOptionPriceRepository.save(meal_option_price);
@@ -1415,7 +1424,7 @@ export class RestaurantService extends BaseService<Restaurant> {
         option_group: { options: true },
         meal_option_prices: { option: true },
       },
-      order: { order_by: 'ASC',meal_option_prices: { order_by: 'ASC' } },
+      order: { order_by: 'ASC', meal_option_prices: { order_by: 'ASC' } },
     });
     if (!meal_option_group)
       throw new NotFoundException('no meal option group found');
