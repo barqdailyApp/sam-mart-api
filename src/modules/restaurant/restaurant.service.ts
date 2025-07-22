@@ -127,6 +127,7 @@ async findAllNearRestaurantsCusine(query: GetNearResturantsQuery) {
       ))`,
       'distance',
     )
+    .addSelect('restaurant.id', 'restaurant_id') // ✅ explicitly select ID
     .where('restaurant.status = :status', { status: RestaurantStatus.ACTIVE })
     .andWhere('cuisine.is_active = :is_active', { is_active: true })
     .having('distance <= :radius', { radius: query.radius })
@@ -140,8 +141,15 @@ async findAllNearRestaurantsCusine(query: GetNearResturantsQuery) {
 
   const { raw, entities } = restaurants;
 
-  const restaurantsWithDistance = entities.map((restaurant, index) => {
-    const distance = parseFloat(raw[index]?.distance);
+  // ✅ Build a map of restaurant_id => distance
+  const distanceMap = new Map<string, number>();
+  raw.forEach((row) => {
+    distanceMap.set((row.restaurant_id), parseFloat(row.distance));
+  });
+
+  // ✅ Match distance using restaurant.id
+  const restaurantsWithDistance = entities.map((restaurant) => {
+    const distance = distanceMap.get(restaurant.id) ?? 0;
     return {
       ...restaurant,
       is_open: this.IsRestaurantOpen(restaurant.id, restaurant.schedules),
@@ -152,7 +160,7 @@ async findAllNearRestaurantsCusine(query: GetNearResturantsQuery) {
     };
   });
 
-  // Extract and sort unique cuisines by order_by
+  // ✅ Unique & sorted cuisine types
   const cuisineMap = new Map<string, any>();
   restaurantsWithDistance.forEach((restaurant) => {
     restaurant.cuisine_types.forEach((cuisine) => {
