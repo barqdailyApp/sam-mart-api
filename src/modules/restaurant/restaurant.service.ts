@@ -104,20 +104,20 @@ export class RestaurantService extends BaseService<Restaurant> {
     super(restaurantRepository);
   }
 
-async findAllNearRestaurantsCusine(query: GetNearResturantsQuery) {
-  const deliveryTimePerKm =
-    (
-      await this.constantRepository.findOne({
-        where: { type: ConstantType.DELIVERY_TIME_PER_KM },
-      })
-    )?.variable ?? 0;
+  async findAllNearRestaurantsCusine(query: GetNearResturantsQuery) {
+    const deliveryTimePerKm =
+      (
+        await this.constantRepository.findOne({
+          where: { type: ConstantType.DELIVERY_TIME_PER_KM },
+        })
+      )?.variable ?? 0;
 
-  const restaurants = await this.restaurantRepository
-    .createQueryBuilder('restaurant')
-    .leftJoinAndSelect('restaurant.cuisine_types', 'cuisine')
-    .leftJoinAndSelect('restaurant.schedules', 'schedule')
-    .addSelect(
-      `
+    const restaurants = await this.restaurantRepository
+      .createQueryBuilder('restaurant')
+      .leftJoinAndSelect('restaurant.cuisine_types', 'cuisine')
+      .leftJoinAndSelect('restaurant.schedules', 'schedule')
+      .addSelect(
+        `
       (6371 * acos(
         cos(radians(:latitude)) * 
         cos(radians(restaurant.latitude)) * 
@@ -125,71 +125,75 @@ async findAllNearRestaurantsCusine(query: GetNearResturantsQuery) {
         sin(radians(:latitude)) * 
         sin(radians(restaurant.latitude))
       ))`,
-      'distance',
-    )
-    .addSelect('restaurant.id', 'restaurant_id') // ✅ explicitly select ID
-    .where('restaurant.status = :status', { status: RestaurantStatus.ACTIVE })
-    .andWhere('cuisine.is_active = :is_active', { is_active: true })
-    .having('distance <= :radius', { radius: query.radius })
-    .setParameters({
-      latitude: query.latitude,
-      longitude: query.longitude,
-    })
-    .orderBy('cuisine.order_by', 'ASC')
-    .addOrderBy('distance', 'ASC')
-    .getRawAndEntities();
+        'distance',
+      )
+      .addSelect('restaurant.id', 'restaurant_id') // ✅ explicitly select ID
+      .where('restaurant.status = :status', { status: RestaurantStatus.ACTIVE })
+      .andWhere('cuisine.is_active = :is_active', { is_active: true })
+      .having('distance <= :radius', { radius: query.radius })
+      .setParameters({
+        latitude: query.latitude,
+        longitude: query.longitude,
+      })
+      .orderBy('distance', 'ASC') // ✅ PRIMARY sort by nearest
+      .addOrderBy('cuisine.order_by', 'ASC')
+      .getRawAndEntities();
 
-  const { raw, entities } = restaurants;
+    const { raw, entities } = restaurants;
 
-  // ✅ Build a map of restaurant_id => distance
-  const distanceMap = new Map<string, number>();
-  raw.forEach((row) => {
-    distanceMap.set((row.restaurant_id), parseFloat(row.distance));
-  });
-
-  // ✅ Match distance using restaurant.id
-  const restaurantsWithDistance = entities.map((restaurant) => {
-    const distance = distanceMap.get(restaurant.id) ?? 0;
-    return {
-      ...restaurant,
-      is_open: this.IsRestaurantOpen(restaurant.id, restaurant.schedules),
-      distance,
-      estimated_delivery_time:
-        Number(restaurant.average_prep_time) +
-        Number(deliveryTimePerKm) * distance,
-    };
-  });
-
-  // ✅ Unique & sorted cuisine types
-  const cuisineMap = new Map<string, any>();
-  restaurantsWithDistance.forEach((restaurant) => {
-    restaurant.cuisine_types.forEach((cuisine) => {
-      if (!cuisineMap.has(cuisine.id)) {
-        cuisineMap.set(cuisine.id, cuisine);
-      }
+    // ✅ Build a map of restaurant_id => distance
+    const distanceMap = new Map<string, number>();
+    raw.forEach((row) => {
+      distanceMap.set(row.restaurant_id, parseFloat(row.distance));
     });
-  });
 
-  const sortedCuisines = Array.from(cuisineMap.values()).sort(
-    (a, b) => a.order_by - b.order_by,
-  );
+    // ✅ Match distance using restaurant.id
+    const restaurantsWithDistance = entities.map((restaurant) => {
+      const distance = distanceMap.get(restaurant.id) ?? 0;
+      return {
+        ...restaurant,
+        is_open: this.IsRestaurantOpen(restaurant.id, restaurant.schedules),
+        distance,
+        estimated_delivery_time:
+          Number(restaurant.average_prep_time) +
+          Number(deliveryTimePerKm) * distance,
+      };
+    });
 
-  return {
-    restaurants: plainToInstance(RestaurantResponse, restaurantsWithDistance, {
-      excludeExtraneousValues: true,
-    }),
-    cuisines: plainToInstance(CuisineResponse, sortedCuisines, {
-      excludeExtraneousValues: true,
-    }),
-    sorting: [
-      { type: 'top', keys: [{ average_rating: 'desc' }] },
-      {
-        type: 'popular',
-        keys: [{ no_of_reviews: 'desc' }, { average_rating: 'desc' }],
-      },
-    ],
-  };
-}
+    // ✅ Unique & sorted cuisine types
+    const cuisineMap = new Map<string, any>();
+    restaurantsWithDistance.forEach((restaurant) => {
+      restaurant.cuisine_types.forEach((cuisine) => {
+        if (!cuisineMap.has(cuisine.id)) {
+          cuisineMap.set(cuisine.id, cuisine);
+        }
+      });
+    });
+
+    const sortedCuisines = Array.from(cuisineMap.values()).sort(
+      (a, b) => a.order_by - b.order_by,
+    );
+
+    return {
+      restaurants: plainToInstance(
+        RestaurantResponse,
+        restaurantsWithDistance,
+        {
+          excludeExtraneousValues: true,
+        },
+      ),
+      cuisines: plainToInstance(CuisineResponse, sortedCuisines, {
+        excludeExtraneousValues: true,
+      }),
+      sorting: [
+        { type: 'top', keys: [{ average_rating: 'desc' }] },
+        {
+          type: 'popular',
+          keys: [{ no_of_reviews: 'desc' }, { average_rating: 'desc' }],
+        },
+      ],
+    };
+  }
 
   //find all favorite near restaurants with cuisine and meals
 
@@ -857,20 +861,20 @@ async findAllNearRestaurantsCusine(query: GetNearResturantsQuery) {
   }
 
   async getRestaurantCategoryMeals(restaurant_id: string, category_id: string) {
-  return await this.restaurantCategoryRepository
-  .createQueryBuilder('category')
-  .leftJoinAndSelect('category.meals', 'meal')
-  .leftJoinAndSelect('meal.offer', 'offer')
-  .leftJoinAndSelect('meal.meal_option_groups', 'mog')
-  .leftJoinAndSelect('mog.option_group', 'option_group')
-  .leftJoinAndSelect('option_group.options', 'option')
-  .where('category.restaurant_id = :restaurant_id', { restaurant_id })
-  .andWhere('category.id = :category_id', { category_id })
-  .orderBy('category.order_by IS NULL', 'ASC')  // NULLs last
-  .addOrderBy('category.order_by', 'ASC')
-  .addOrderBy('meal.order_by IS NULL', 'ASC')
-  .addOrderBy('meal.order_by', 'ASC')
-  .getOne();
+    return await this.restaurantCategoryRepository
+      .createQueryBuilder('category')
+      .leftJoinAndSelect('category.meals', 'meal')
+      .leftJoinAndSelect('meal.offer', 'offer')
+      .leftJoinAndSelect('meal.meal_option_groups', 'mog')
+      .leftJoinAndSelect('mog.option_group', 'option_group')
+      .leftJoinAndSelect('option_group.options', 'option')
+      .where('category.restaurant_id = :restaurant_id', { restaurant_id })
+      .andWhere('category.id = :category_id', { category_id })
+      .orderBy('category.order_by IS NULL', 'ASC') // NULLs last
+      .addOrderBy('category.order_by', 'ASC')
+      .addOrderBy('meal.order_by IS NULL', 'ASC')
+      .addOrderBy('meal.order_by', 'ASC')
+      .getOne();
   }
   // edit meal
 
