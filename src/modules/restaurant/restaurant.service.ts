@@ -128,7 +128,8 @@ export class RestaurantService extends BaseService<Restaurant> {
       .andWhere('cuisine.is_active = :is_active', { is_active: true })
       .having('distance <= :radius', { radius: query.radius })
       .setParameters({ latitude: query.latitude, longitude: query.longitude })
-      .orderBy('distance', 'ASC')
+      .orderBy('cuisine.order_by', 'ASC')
+      .addOrderBy('distance', 'ASC')
       .getRawAndEntities(); // This will return both raw fields and entity objects
 
     // `getRawAndEntities()` returns { raw: [], entities: [] }
