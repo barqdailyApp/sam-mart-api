@@ -465,6 +465,7 @@ export class RestaurantService extends BaseService<Restaurant> {
       .leftJoinAndSelect('restaurant.cuisine_types', 'cuisineType')
       .where('restaurant.id = :id', { id })
       .orderBy('schedules.order_by', 'ASC')
+      .orderBy('category.order_by IS NULL', 'ASC')
       .addOrderBy('category.order_by', 'ASC')
       .orderBy('meal.order_by IS NULL', 'ASC') // false (0) for numbers → comes first
       .addOrderBy('meal.order_by', 'ASC')
