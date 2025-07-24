@@ -16,6 +16,8 @@ export class RegisterRestaurantRequest {
     @IsString()
     user_name: string; 
 
+    
+
     @ApiProperty()
     @IsNotEmpty()
     @IsStrongPassword()

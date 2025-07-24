@@ -126,4 +126,7 @@ export class Restaurant extends AuditableEntity {
 
   @Column({ default: false })
   order_pickup: boolean;
+
+  @Column({default:0, nullable:true, type:'float', precision: 10, scale: 6})
+  ownership_percentage: number;
 }

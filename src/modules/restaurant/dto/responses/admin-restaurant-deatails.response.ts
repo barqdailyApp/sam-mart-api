@@ -9,6 +9,9 @@ import { OptionRespone } from './option.response';
 import { CuisineResponse } from './cuisine.response';
 
 export class AdminRestaurantDeatailsResponse extends RestaurantResponse {
+
+  @Expose()
+  ownership_percentage: number;
   @Expose()
   @Transform((value) => {
     {

@@ -9,6 +9,8 @@ import {
   IsString,
   IsStrongPassword,
   Matches,
+  Max,
+  Min,
 } from 'class-validator';
 import { Unique } from 'src/core/validators/unique-constraints.validator';
 
@@ -109,6 +111,13 @@ export class UpdateRestaurantRequest {
   @IsOptional()
   @IsNumber()
   average_prep_time: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  ownership_percentage: number;
 
   // @ApiProperty({isArray:true})
   // @IsOptional()
