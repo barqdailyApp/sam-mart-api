@@ -300,7 +300,7 @@ async findAllNearRestaurantsCusineMeals(
       await this.constantRepository.findOne({
         where: { type: ConstantType.DELIVERY_TIME_PER_KM },
       })
-    )?.value ?? 0,
+    )?.variable ?? 0,
   );
 
   const restaurantQuery = this.restaurantRepository
