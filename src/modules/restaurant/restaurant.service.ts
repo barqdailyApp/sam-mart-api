@@ -302,7 +302,8 @@ export class RestaurantService extends BaseService<Restaurant> {
 
     const restaurants = await this.restaurantRepository
       .createQueryBuilder('restaurant')
-      .leftJoinAndSelect('restaurant.meals', 'meal')
+        .leftJoinAndSelect('restaurant.categories', 'category')
+      .leftJoinAndSelect('category.meals', 'meal')
       .leftJoinAndSelect('restaurant.cuisine_types', 'cuisine')
       .leftJoinAndSelect('restaurant.schedules', 'schedule')
       .addSelect(
