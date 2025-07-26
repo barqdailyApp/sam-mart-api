@@ -1340,7 +1340,7 @@ async findAllNearRestaurantsCusineMeals(
         where: { type: ConstantType.DELIVERY_TIME_PER_KM },
       })) ?? 0;
 
-  const favoriteMeals = await this.clientFavoriteMealRepository
+const favoriteMeals = await this.clientFavoriteMealRepository
   .createQueryBuilder('favorite')
   .leftJoinAndSelect('favorite.meal', 'meal')
   .leftJoinAndSelect('meal.offer', 'offer')
@@ -1349,9 +1349,10 @@ async findAllNearRestaurantsCusineMeals(
   .leftJoinAndSelect('restaurant.cuisine_types', 'cuisine_types')
   .leftJoinAndSelect('restaurant.schedules', 'schedules')
   .where('favorite.user_id = :userId', { userId })
-  .andWhere('category.is_deleted = false')
-  .andWhere('restaurant.is_deleted = false')
+  .andWhere('category.deleted_at IS NULL')
+  .andWhere('restaurant.deleted_at IS NULL')
   .getMany();
+
 
     // Group meals by restaurant and filter by distance
     const groupedByRestaurant: Record<string, any> = {};
