@@ -306,9 +306,9 @@ async findAllNearRestaurantsCusineMeals(
   const restaurantQuery = this.restaurantRepository
     .createQueryBuilder('restaurant')
     .innerJoinAndSelect('restaurant.cuisine_types', 'cuisine', 'cuisine.is_active = true')
-    .innerJoinAndSelect('restaurant.categories', 'category', 'category.is_deleted = false')
+    .innerJoinAndSelect('restaurant.categories', 'category', 'category.deleted_at IS NULL')
     .innerJoinAndSelect('restaurant.schedules', 'schedule')
-    .innerJoinAndSelect('category.meals', 'meal', 'meal.is_deleted = false')
+    .innerJoinAndSelect('category.meals', 'meal', 'meal.deleted_at IS NULL')
     .addSelect(
       `
       (
@@ -333,14 +333,12 @@ async findAllNearRestaurantsCusineMeals(
 
   if (query.name) {
     if (query.is_restaurant) {
-      // Search by restaurant name
       restaurantQuery.andWhere(
         '(restaurant.name_en LIKE :name OR restaurant.name_ar LIKE :name)',
         { name: `%${query.name}%` },
       );
       restaurantQuery.addOrderBy('meal.sales_count', 'DESC');
     } else {
-      // Search by meal name
       restaurantQuery.andWhere(
         '(meal.name_en LIKE :name OR meal.name_ar LIKE :name)',
         { name: `%${query.name}%` },
@@ -385,6 +383,7 @@ async findAllNearRestaurantsCusineMeals(
     };
   });
 }
+
 
 
 async findAllNearRestaurantsGroup(query: GetNearResturantsQuery) {
