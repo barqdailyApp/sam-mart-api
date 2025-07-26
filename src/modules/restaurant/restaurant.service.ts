@@ -1342,15 +1342,13 @@ async findAllNearRestaurantsCusineMeals(
 
 const favoriteMeals = await this.clientFavoriteMealRepository
   .createQueryBuilder('favorite')
-  .leftJoinAndSelect('favorite.meal', 'meal')
+  .innerJoinAndSelect('favorite.meal', 'meal')
+  .innerJoinAndSelect('meal.restaurant_category', 'category')
+  .innerJoinAndSelect('category.restaurant', 'restaurant')
   .leftJoinAndSelect('meal.offer', 'offer')
-  .leftJoinAndSelect('meal.restaurant_category', 'category')
-  .leftJoinAndSelect('category.restaurant', 'restaurant')
   .leftJoinAndSelect('restaurant.cuisine_types', 'cuisine_types')
   .leftJoinAndSelect('restaurant.schedules', 'schedules')
   .where('favorite.user_id = :userId', { userId })
-  .andWhere('category.deleted_at IS NULL')
-  .andWhere('restaurant.deleted_at IS NULL')
   .getMany();
 
 
