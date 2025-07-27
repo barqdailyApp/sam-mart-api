@@ -305,10 +305,10 @@ async findAllNearRestaurantsCusineMeals(
 
   const restaurantQuery = this.restaurantRepository
     .createQueryBuilder('restaurant')
-    .innerJoinAndSelect('restaurant.cuisine_types', 'cuisine', 'cuisine.is_active = true')
-    .innerJoinAndSelect('restaurant.categories', 'category', 'category.deleted_at IS NULL')
-    .innerJoinAndSelect('restaurant.schedules', 'schedule')
-    .innerJoinAndSelect('category.meals', 'meal', 'meal.deleted_at IS NULL')
+    .leftJoinAndSelect('restaurant.cuisine_types', 'cuisine', 'cuisine.is_active = true')
+    .leftJoinAndSelect('restaurant.categories', 'category', )
+    .leftJoinAndSelect('restaurant.schedules', 'schedule')
+    .leftJoinAndSelect('category.meals', 'meal', )
     .addSelect(
       `
       (

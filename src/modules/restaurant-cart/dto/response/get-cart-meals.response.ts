@@ -38,4 +38,6 @@ export class GetCartMealsResponse extends MealResponse {
   meal_id: string;
   @Expose()
   quantity: number;
+  @Expose()
+  note: string;
 }
