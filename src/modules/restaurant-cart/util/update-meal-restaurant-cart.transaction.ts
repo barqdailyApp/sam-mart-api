@@ -63,49 +63,55 @@ export class UpdateMealRestaurantCartTransaction extends BaseTransaction<
       //   throw new BadRequestException('message.invalid_meal_for_cart');
       // }
 
-      if (edit_options) {
-        // Delete previous options
-        await context.delete(RestaurantCartMealOption, {
+if (edit_options) {
+  // Step 1: Delete all existing options for this cart meal
+  await context.delete(RestaurantCartMealOption, {
+    cart_meal_id: cartMeal.id,
+  });
+
+  if (options_ids?.length) {
+    // Step 2: Make sure we only work with unique option_ids
+    const uniqueOptionIds = [...new Set(options_ids)];
+
+    // Step 3: Load prices using only unique option ids
+    const meal_option_prices = await context.find(MealOptionPrice, {
+      where: { option_id: In(uniqueOptionIds) },
+    });
+
+    // Step 4: Insert only unique cart meal options
+    const newCartMealOptions = meal_option_prices.map(
+      (meal_option_price) =>
+        new RestaurantCartMealOption({
           cart_meal_id: cartMeal.id,
-        });
+          meal_option_price_id: meal_option_price.id,
+        }),
+    );
+    await context.save(newCartMealOptions);
 
-        if (options_ids?.length) {
-          const meal_option_prices = await context.find(MealOptionPrice, {
-            where: { option_id: In(options_ids) },
-          });
-          const newCartMealOptions = meal_option_prices.map(
-            (meal_option_price) =>
-              new RestaurantCartMealOption({
-                cart_meal_id: cartMeal.id,
-                meal_option_price_id: meal_option_price.id,
-              }),
-          );
-          await context.save(newCartMealOptions);
+    // Step 5: Validate using unique options
+    const allOptionGroupsForMeal = await context.find(MealOptionGroup, {
+      where: { meal_id: meal.id },
+      relations: { option_group: { options: true } },
+    });
 
-          // Validate new options
-          const allOptionGroupsForMeal = await context.find(MealOptionGroup, {
-            where: { meal_id: meal.id },
-            relations: { option_group: { options: true } },
-          });
+    for (const group of allOptionGroupsForMeal) {
+      const selectedOptions = group.option_group.options.filter((opt) =>
+        uniqueOptionIds.includes(opt.id),
+      );
 
-          for (const group of allOptionGroupsForMeal) {
-            const selectedOptions = group.option_group.options.filter((opt) =>
-              options_ids.includes(opt.id),
-            );
-
-            if (selectedOptions.length < group.option_group.min_selection) {
-              throw new BadRequestException('message.missing_required_options');
-            }
-
-            if (
-              group.option_group.max_selection !== null &&
-              selectedOptions.length > group.option_group.max_selection
-            ) {
-              throw new BadRequestException('message.too_many_options');
-            }
-          }
-        }
+      if (selectedOptions.length < group.option_group.min_selection) {
+        throw new BadRequestException('message.missing_required_options');
       }
+
+      if (
+        group.option_group.max_selection !== null &&
+        selectedOptions.length > group.option_group.max_selection
+      ) {
+        throw new BadRequestException('message.too_many_options');
+      }
+    }
+  }
+}
 
       // Update quantity
       cartMeal.quantity = quantity;
