@@ -75,7 +75,7 @@ if (edit_options) {
 
     // Load corresponding MealOptionPrice records
     const mealOptionPrices = await context.find(MealOptionPrice, {
-      where: { option_id: In(uniqueOptionIds) },
+      where: { option_id: In(uniqueOptionIds) ,meal_option_group:{meal_id: meal.id}},
     });
 
     // Check if any matching cart meal options already exist (in case of race condition or fallback)
