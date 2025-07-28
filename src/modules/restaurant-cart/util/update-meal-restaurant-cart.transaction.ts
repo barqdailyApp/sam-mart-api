@@ -63,7 +63,7 @@ export class UpdateMealRestaurantCartTransaction extends BaseTransaction<
       //   throw new BadRequestException('message.invalid_meal_for_cart');
       // }
 
-    if (edit_options) {
+if (edit_options) {
   // Delete previous options for this cart meal
   await context.delete(RestaurantCartMealOption, {
     cart_meal_id: cartMeal.id,
@@ -74,19 +74,35 @@ export class UpdateMealRestaurantCartTransaction extends BaseTransaction<
     const uniqueOptionIds = [...new Set(options_ids)];
 
     // Load corresponding MealOptionPrice records
-    const meal_option_prices = await context.find(MealOptionPrice, {
+    const mealOptionPrices = await context.find(MealOptionPrice, {
       where: { option_id: In(uniqueOptionIds) },
     });
 
-    // Map and save new cart meal options
-    const newCartMealOptions = meal_option_prices.map(mp => {
-      return new RestaurantCartMealOption({
-        cart_meal: cartMeal,
-        meal_option_price: mp,
-      });
+    // Check if any matching cart meal options already exist (in case of race condition or fallback)
+    const existingCartMealOptions = await context.find(RestaurantCartMealOption, {
+      where: {
+        cart_meal_id: cartMeal.id,
+        meal_option_price_id: In(mealOptionPrices.map((mp) => mp.id)),
+      },
     });
 
-    await context.save(newCartMealOptions);
+    // Filter out mealOptionPrices that already have an existing cart meal option
+    const existingPriceIds = new Set(
+      existingCartMealOptions.map((opt) => opt.meal_option_price_id),
+    );
+
+    const newCartMealOptions = mealOptionPrices
+      .filter((mp) => !existingPriceIds.has(mp.id))
+      .map((mp) => {
+        return new RestaurantCartMealOption({
+          cart_meal: cartMeal,
+          meal_option_price: mp,
+        });
+      });
+
+    if (newCartMealOptions.length) {
+      await context.save(newCartMealOptions);
+    }
 
     // Validate options per group
     const allOptionGroupsForMeal = await context.find(MealOptionGroup, {
@@ -112,6 +128,7 @@ export class UpdateMealRestaurantCartTransaction extends BaseTransaction<
     }
   }
 }
+
 
       // Update quantity
       cartMeal.quantity = quantity;
