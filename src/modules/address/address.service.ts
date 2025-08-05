@@ -171,7 +171,7 @@ export class AddressService extends BaseUserService<Address> {
     this.entityRelatedValidator.isExist(item);
     this.entityRelatedValidator.ownership(item, super.currentUser);
     // delete the entity
-    return await super.delete(id);
+    return await super.softDelete(id);
   }
 
   async checkCart() {

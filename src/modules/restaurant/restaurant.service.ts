@@ -66,6 +66,8 @@ import { addRestaurantSchedule } from './dto/requests/add-restaurant-schedule.re
 import { updateRestaurantScheduleRequest } from './dto/requests/update-restaurant.schedule.request';
 import { calculateDistances } from 'src/core/helpers/geom.helper';
 import { MealOptionPrice } from 'src/infrastructure/entities/restaurant/meal/meal-option-price.entity';
+import { CreateRestaurantKeywords,  } from './dto/requests/create-resturant-keywords.request';
+import { RestaurantKeywords } from 'src/infrastructure/entities/restaurant/keywords/restaurant-keywords';
 
 @Injectable()
 export class RestaurantService extends BaseService<Restaurant> {
@@ -100,10 +102,19 @@ export class RestaurantService extends BaseService<Restaurant> {
     private readonly restaurantScheduleRepository: Repository<RestaurantSchedule>,
     @InjectRepository(MealOptionPrice)
     private readonly mealOptionPriceRepository: Repository<MealOptionPrice>,
+    @InjectRepository(RestaurantKeywords) private readonly keywordsRepository: Repository<RestaurantKeywords>,
   ) {
     super(restaurantRepository);
   }
 
+  async getKeywords() {
+    return await this.keywordsRepository.find({
+      take:50
+    });
+  }
+  async createKeywords(data: CreateRestaurantKeywords) {
+    return await this.keywordsRepository.save(data);
+  }
   async findAllNearRestaurantsCusine(query: GetNearResturantsQuery) {
     const deliveryTimePerKm =
       (

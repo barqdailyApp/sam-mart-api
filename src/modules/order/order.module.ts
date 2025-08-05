@@ -32,5 +32,6 @@ import { SectionService } from '../section/section.service';
     
   ],
   imports: [GatewaysModule, NotificationModule],
+  exports: [OrderService],
 })
 export class OrderModule {}

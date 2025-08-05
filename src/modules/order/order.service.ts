@@ -56,8 +56,9 @@ import { MakeTransactionRequest } from '../transaction/dto/requests/make-transac
 import { TransactionTypes } from 'src/infrastructure/data/enums/transaction-types';
 import { Constant } from 'src/infrastructure/entities/constant/constant.entity';
 import { EditSettingsRequest } from './dto/request/edit-settings.request';
-import { DriverTypeEnum } from 'src/infrastructure/data/enums/driver-type.eum';
+import { DriverTypeEnum, SectionType } from 'src/infrastructure/data/enums/driver-type.eum';
 import { SectionService } from '../section/section.service';
+import { ConstantType } from 'src/infrastructure/data/enums/constant-type.enum';
 @Injectable()
 export class OrderService extends BaseUserService<Order> {
   constructor(
@@ -1194,8 +1195,12 @@ export class OrderService extends BaseUserService<Order> {
     return await this.orderRepository.save(order);
   }
 
-  async getSettings(section: DriverTypeEnum) {
+  async getSettings(section: SectionType) {
     const settings = await this.constantRepository.find({ where: { section } });
+    return settings;
+  }
+  async getHomePageSettings() {
+    const settings = await this.constantRepository.find({ where: { section: SectionType.global } });
     return settings;
   }
   async editSettings(request: EditSettingsRequest) {

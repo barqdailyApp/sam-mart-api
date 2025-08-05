@@ -59,6 +59,7 @@ import { CuisineResponse } from './dto/responses/cuisine.response';
 import { addRestaurantSchedule } from './dto/requests/add-restaurant-schedule.request';
 import { updateRestaurantScheduleRequest } from './dto/requests/update-restaurant.schedule.request';
 import { OptionGroupResponse } from './dto/responses/option-group.response';
+import { CreateRestaurantKeywords } from './dto/requests/create-resturant-keywords.request';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -75,6 +76,13 @@ export class AdminRestaurantController {
     private readonly restaurantService: RestaurantService,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
   ) {}
+
+  @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
+  @Post('/admin/keywords')
+  async createKeywords(@Body() req: CreateRestaurantKeywords) {
+    const keywords = await this.restaurantService.createKeywords(req);
+    return new ActionResponse(keywords);
+  }
 
   @Post('admin/cuisine')
   async addCuisine(@Body() req: AddCuisineRequest) {
@@ -522,11 +530,11 @@ export class AdminRestaurantController {
   @Roles(Role.ADMIN)
   @Put('/admin/change-status/:id')
   @ApiQuery({
-  name: 'status',
-  enum: RestaurantStatus,
-  required: true,
-  description: 'New status for the restaurant',
-})
+    name: 'status',
+    enum: RestaurantStatus,
+    required: true,
+    description: 'New status for the restaurant',
+  })
   async changeStatus(
     @Param('id') id: string,
     @Query('status') status: RestaurantStatus,

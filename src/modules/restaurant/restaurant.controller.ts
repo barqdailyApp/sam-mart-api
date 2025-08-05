@@ -38,6 +38,13 @@ export class RestaurantController {
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
   ) {}
 
+@Get('/keywords')
+async getKeywords() {
+  const keywords = await this.restaurantService.getKeywords();
+  const response = this._i18nResponse.entity(keywords);
+  return new ActionResponse(response);
+}
+
   @Post('/register')
   async register(@Body() req: RegisterRestaurantRequest) {
     const restaurant = await this.restaurantService.register(req);
@@ -53,6 +60,7 @@ export class RestaurantController {
 
     return new ActionResponse(response);
   }
+
   @Get('/search')
   async getNearResturantsSearch(@Query() query: GetNearResturantsQuerySearch) {
     const restaurants = await this.restaurantService.findAllNearRestaurantsCusineMeals(

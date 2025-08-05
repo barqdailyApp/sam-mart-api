@@ -45,11 +45,22 @@ import { Roles } from '../authentication/guards/roles.decorator';
 import { ImportCategoryRequest } from '../category/dto/requests/import-category-request';
 import { PaginatedResponse } from 'src/core/base/responses/paginated.response';
 import { SectionResponse } from './dto/response/section.response';
-import { CACHE_MANAGER, CacheInterceptor, CacheKey } from '@nestjs/cache-manager';
+import {
+  CACHE_MANAGER,
+  CacheInterceptor,
+  CacheKey,
+} from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import { DriverTypeEnum } from 'src/infrastructure/data/enums/driver-type.eum';
+import {
+  DriverTypeEnum,
+  SectionType,
+} from 'src/infrastructure/data/enums/driver-type.eum';
 import { UpdateSystemScheduleRequest } from './dto/requests/update-system-schedule.request';
 import { AddSyemtemScheduleRequest } from './dto/requests/create-system-schedule.request';
+import { OrderService } from '../order/order.service';
+import { REQUEST } from '@nestjs/core';
+import { fi } from '@faker-js/faker';
+import { filter } from 'rxjs';
 
 @ApiHeader({
   name: 'Accept-Language',
@@ -58,29 +69,28 @@ import { AddSyemtemScheduleRequest } from './dto/requests/create-system-schedule
 })
 @ApiTags('Section')
 @Controller('section')
-
 export class SectionController {
   constructor(
     private readonly sectionService: SectionService,
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private readonly orderService: OrderService,
+    @Inject(REQUEST) private request: Request,
   ) {}
 
   @Get('/system-schedule')
-  async getSystemSchedule(@Query('type') type?:DriverTypeEnum) {
+  async getSystemSchedule(@Query('type') type?: DriverTypeEnum) {
     const schedule = await this.sectionService.getSystemSchedule(type);
     return new ActionResponse(schedule);
-    
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
   @Get('admin/system-schedule')
-  async getAdminSystemSchedule(@Query('type') type:DriverTypeEnum) {
+  async getAdminSystemSchedule(@Query('type') type: DriverTypeEnum) {
     const schedule = await this.sectionService.getSystemSchedule(type);
     return new ActionResponse(schedule);
-    
   }
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
@@ -105,8 +115,10 @@ export class SectionController {
   @Delete('/system-schedule/:id')
   async deleteSystemSchedule(@Param('id') id: string) {
     this.cacheManager.reset();
-    return new ActionResponse(await this.sectionService.deleteSystemSchedule(id));
-  } 
+    return new ActionResponse(
+      await this.sectionService.deleteSystemSchedule(id),
+    );
+  }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
@@ -122,6 +134,21 @@ export class SectionController {
     this.cacheManager.reset();
     req.logo = logo;
     return new ActionResponse(await this.sectionService.createSection(req));
+  }
+
+  @Get('/home')
+  async getHome() {
+    const language = this.request.headers['accept-language'] || 'en';
+    
+    const settings = await this.orderService.getSettings(SectionType.global);
+    const filterd = [];
+    settings.map((setting) => {
+      if (setting.type.includes('LOGO'))
+        setting.variable = toUrl(setting.variable);
+      if (setting.type.endsWith("_"+language.toUpperCase())) filterd.push(setting);
+    });
+
+    return new ActionResponse(this._i18nResponse.entity(filterd));
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -278,6 +305,4 @@ export class SectionController {
       },
     );
   }
-
-
 }

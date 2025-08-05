@@ -86,6 +86,7 @@ import { ClientFavoriteMeal } from '../entities/restaurant/meal/client-favorite-
 import { RestaurantSchedule } from '../entities/restaurant/order/restaurant_schedule.entity';
 import { SystemSchedule } from '../entities/constant/system-schedule.entity';
 import { MealOptionPrice } from '../entities/restaurant/meal/meal-option-price.entity';
+import { RestaurantKeywords } from '../entities/restaurant/keywords/restaurant-keywords';
 export const DB_ENTITIES = [
   User,
   Address,
@@ -111,6 +112,7 @@ export const DB_ENTITIES = [
   ProductSubCategory,
   Banar,
   MostHitSubcategory,
+  RestaurantKeywords,
   WarehouseProducts,
   WarehouseOperations,
   Warehouse,

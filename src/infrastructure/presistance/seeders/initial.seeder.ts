@@ -26,11 +26,11 @@ export const DB_SEEDERS = [
   // ProductSeeder,
   // BanarSeeder,
   // StaticPageSeeder,
-  SlotSeeder,
+  // SlotSeeder,
   // WareHouseSeeder,
   // WareHouseProductsSeeder,
   // SupportTicketSubjectSeeder,
-  // ConstantSeeder,
+  ConstantSeeder,
   // // PaymentSeeder,
   // SamModulesSeeder,
   // WalletSeeder
