@@ -99,7 +99,7 @@ async getBarqSections(
 
     if (setting.type.endsWith(`_${language}`)) {
       // Remove _AR or _EN from the variable string (if at the end)
-      setting.variable = setting.variable.replace(/_(AR|EN)$/, '');
+      setting.type = setting.type.replace(/_(AR|EN)$/, '');
       filtered.push(setting);
     }
   });
