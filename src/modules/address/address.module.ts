@@ -12,9 +12,12 @@ import { RestaurantCartService } from '../restaurant-cart/restaurant-cart.servic
 import { AddMealRestaurantCartTransaction } from '../restaurant-cart/util/add-meal-restaurant-cart.transaction';
 import { UpdateMealRestaurantCartTransaction } from '../restaurant-cart/util/update-meal-restaurant-cart.transaction';
 import { TransactionModule } from '../transaction/transaction.module';
+import { SectionService } from '../section/section.service';
+import { OrderService } from '../order/order.service';
+import { OrderModule } from '../order/order.module';
 
 @Module({
-  controllers: [AddressController],
+  controllers: [AddressController,],
   providers: [
     AddressService,
 
@@ -24,7 +27,7 @@ import { TransactionModule } from '../transaction/transaction.module';
     AddMealRestaurantCartTransaction,
     UpdateMealRestaurantCartTransaction,
   ],
-  imports: [RestaurantModule, ProductModule, TransactionModule],
+  imports: [OrderModule, RestaurantModule, ProductModule, TransactionModule],
   exports: [AddressModule],
 })
 export class AddressModule {}

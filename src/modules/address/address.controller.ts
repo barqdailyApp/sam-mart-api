@@ -4,6 +4,7 @@ import {
   Controller,
   Delete,
   Get,
+  Inject,
   Param,
   Post,
   Put,
@@ -30,6 +31,12 @@ import { ActionResponse } from 'src/core/base/responses/action.response';
 import { PaginatedRequest } from 'src/core/base/requests/paginated.request';
 import { Address } from 'src/infrastructure/entities/user/address.entity';
 import { Router } from 'src/core/base/router';
+import { SectionService } from '../section/section.service';
+import { toUrl } from 'src/core/helpers/file.helper';
+import { OrderService } from '../order/order.service';
+import { REQUEST } from '@nestjs/core';
+import { Request } from 'express';
+import { SectionType } from 'src/infrastructure/data/enums/driver-type.eum';
 
 @ApiTags(Router.Addresses.ApiTag)
 @ApiHeader({
@@ -39,7 +46,11 @@ import { Router } from 'src/core/base/router';
 })
 @Controller(Router.Addresses.Base)
 export class AddressController {
-  constructor(private addressService: AddressService) {}
+  constructor(
+    private addressService: AddressService,
+    private readonly orderService: OrderService,
+    @Inject(REQUEST) private request: Request,
+  ) {}
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.CLIENT)
@@ -70,19 +81,34 @@ export class AddressController {
   //     return new ActionResponse<AddressResponse[]>(response);
   // }
 
-  @Get('/available-sections')
-  async getBarqSections(
-    @Query() query: CreateOptionalAddressRequest,
-    @Query('user_id') user_id?: string,
-  ) {
-    const result = await this.addressService.getAvailableSections(
-      query,
-      user_id,
-    );
-    return new ActionResponse(result);
-  }
+@Get('/available-sections')
+async getBarqSections(
+  @Query() query: CreateOptionalAddressRequest,
+  @Query('user_id') user_id?: string,
+) {
+  const result = await this.addressService.getAvailableSections(query, user_id);
+  const language = (this.request.headers['accept-language'] || 'en').toUpperCase();
 
-    @ApiBearerAuth()
+  const settings = await this.orderService.getSettings(SectionType.global);
+  const filtered = [];
+
+  settings.forEach((setting) => {
+    if (setting.type.includes('LOGO')) {
+      setting.variable = toUrl(setting.variable);
+    }
+
+    if (setting.type.endsWith(`_${language}`)) {
+      // Remove _AR or _EN from the variable string (if at the end)
+      setting.variable = setting.variable.replace(/_(AR|EN)$/, '');
+      filtered.push(setting);
+    }
+  });
+
+  return new ActionResponse({ ...result, home: filtered });
+}
+
+
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.CLIENT)
   @Get('/check-cart')
@@ -182,6 +208,4 @@ export class AddressController {
     const response = plainToInstance(DeleteResult, result);
     return new ActionResponse<DeleteResult>(response);
   }
-
-
 }
