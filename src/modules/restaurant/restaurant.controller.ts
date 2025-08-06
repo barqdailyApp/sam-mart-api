@@ -9,7 +9,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
-import { GetNearResturantsQuery, GetNearResturantsQuerySearch } from './dto/requests/get-near-resturants.query';
+import {
+  GetNearResturantsQuery,
+  GetNearResturantsQuerySearch,
+} from './dto/requests/get-near-resturants.query';
 import { RestaurantService } from './restaurant.service';
 import { I18nResponse } from 'src/core/helpers/i18n.helper';
 import { ActionResponse } from 'src/core/base/responses/action.response';
@@ -38,12 +41,19 @@ export class RestaurantController {
     @Inject(I18nResponse) private readonly _i18nResponse: I18nResponse,
   ) {}
 
-@Get('/keywords')
-async getKeywords() {
-  const keywords = await this.restaurantService.getKeywords();
-  const response = this._i18nResponse.entity(keywords);
-  return new ActionResponse(response);
-}
+  @Get('/keywords')
+  async getKeywords() {
+    const keywords = await this.restaurantService.getKeywords();
+    const response = this._i18nResponse.entity(keywords);
+    return new ActionResponse(
+      keywords.map((keyword) => ({
+        name_ar: keyword.name_ar,
+        name_en: keyword.name_en,
+        name: response.find((item) => item.id === keyword.id)?.name,
+        id: keyword.id,
+      })),
+    );
+  }
 
   @Post('/register')
   async register(@Body() req: RegisterRestaurantRequest) {
@@ -53,9 +63,8 @@ async getKeywords() {
   }
   @Get('/nearby')
   async getNearResturants(@Query() query: GetNearResturantsQuery) {
-    const restaurants = await this.restaurantService.findAllNearRestaurantsCusine(
-      query,
-    );
+    const restaurants =
+      await this.restaurantService.findAllNearRestaurantsCusine(query);
     const response = this._i18nResponse.entity(restaurants);
 
     return new ActionResponse(response);
@@ -63,18 +72,16 @@ async getKeywords() {
 
   @Get('/search')
   async getNearResturantsSearch(@Query() query: GetNearResturantsQuerySearch) {
-    const restaurants = await this.restaurantService.findAllNearRestaurantsCusineMeals(
-      query,
-    );
+    const restaurants =
+      await this.restaurantService.findAllNearRestaurantsCusineMeals(query);
     const response = this._i18nResponse.entity(restaurants);
 
     return new ActionResponse(response);
   }
   @Get('/nearby-groups')
   async getNearResturantsGroups(@Query() query: GetNearResturantsQuery) {
-    const restaurants = await this.restaurantService.findAllNearRestaurantsGroup(
-      query,
-    );
+    const restaurants =
+      await this.restaurantService.findAllNearRestaurantsGroup(query);
     const response = this._i18nResponse.entity(restaurants);
 
     return new ActionResponse(response);
@@ -104,8 +111,11 @@ async getKeywords() {
   }
 
   @Get('/meal/details/:id')
-  async getSingleMeal(@Param('id') id: string,@Query('user_id') user_id?: string) { 
-    const meal = await this.restaurantService.getSingleMeal(id,user_id);
+  async getSingleMeal(
+    @Param('id') id: string,
+    @Query('user_id') user_id?: string,
+  ) {
+    const meal = await this.restaurantService.getSingleMeal(id, user_id);
     const response = this._i18nResponse.entity(meal);
     return new ActionResponse(response);
   }
@@ -133,23 +143,23 @@ async getKeywords() {
     const translatedMeals = await this._i18nResponse.entity(meals);
     const response = plainToInstance(MealResponse, translatedMeals, {
       excludeExtraneousValues: true,
-    })
+    });
     return new ActionResponse(response);
   }
   // @Roles(Role.CLIENT)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Post('/favorite-meal/:meal_id')
-  async favoriteMeal(
-    @Param('meal_id') meal_id: string,
-  ) {
-    const meal = await this.restaurantService.addFavoriteMeal(meal_id,);
+  async favoriteMeal(@Param('meal_id') meal_id: string) {
+    const meal = await this.restaurantService.addFavoriteMeal(meal_id);
     return new ActionResponse(meal);
   }
   // @Roles(Role.CLIENT)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Get('/favorite-meals')
   async getFavoriteMeals(@Query() query: GetNearResturantsQuery) {
-    const favoriteMeals = await this.restaurantService.getNearbyFavoriteMeals(query);
+    const favoriteMeals = await this.restaurantService.getNearbyFavoriteMeals(
+      query,
+    );
     return new ActionResponse(this._i18nResponse.entity(favoriteMeals));
   }
 }

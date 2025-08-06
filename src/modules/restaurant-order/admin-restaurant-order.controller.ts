@@ -135,4 +135,11 @@ export class AdminRestaurantOrderController {
       await this.restaurantOrderService.assignDriverToOrder(id, driver_id),
     );
   }
+
+  @Get('/admin/orders-status-numbers')
+  async getOrdersStatusNumbers() {
+    return new ActionResponse(
+      await this.restaurantOrderService.getOrderStatusNumbers(),
+    );
+  }
 }

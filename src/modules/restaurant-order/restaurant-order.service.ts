@@ -938,4 +938,32 @@ export class RestaurantOrderService extends BaseService<RestaurantOrder> {
     });
     return { reviews: result[0], total: result[1] };
   }
+
+  async getOrderStatusNumbers(){
+const ordersCount = await this._repo
+  .createQueryBuilder('order')
+  .select('order.status', 'status')
+  .addSelect('COUNT(*)', 'count')
+  .groupBy('order.status')
+  .orderBy(`
+    CASE order.status
+      WHEN '${ShipmentStatusEnum.ACTIVE}' THEN 1
+      WHEN '${ShipmentStatusEnum.PENDING}' THEN 2
+      WHEN '${ShipmentStatusEnum.CONFIRMED}' THEN 3
+      WHEN '${ShipmentStatusEnum.ACCEPTED}' THEN 4
+      WHEN '${ShipmentStatusEnum.PROCESSING}' THEN 5
+      WHEN '${ShipmentStatusEnum.READY_FOR_PICKUP}' THEN 6
+      WHEN '${ShipmentStatusEnum.PICKED_UP}' THEN 7
+      WHEN '${ShipmentStatusEnum.DELIVERED}' THEN 8
+      WHEN '${ShipmentStatusEnum.COMPLETED}' THEN 9
+      WHEN '${ShipmentStatusEnum.CANCELED}' THEN 10
+      WHEN '${ShipmentStatusEnum.RETRUNED}' THEN 11
+      WHEN '${ShipmentStatusEnum.WITHOUT_NEW}' THEN 12
+      ELSE 99
+    END
+  `, 'ASC')
+  .getRawMany();
+
+return ordersCount
+  }
 }

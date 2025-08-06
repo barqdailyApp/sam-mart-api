@@ -59,7 +59,7 @@ import { CuisineResponse } from './dto/responses/cuisine.response';
 import { addRestaurantSchedule } from './dto/requests/add-restaurant-schedule.request';
 import { updateRestaurantScheduleRequest } from './dto/requests/update-restaurant.schedule.request';
 import { OptionGroupResponse } from './dto/responses/option-group.response';
-import { CreateRestaurantKeywords } from './dto/requests/create-resturant-keywords.request';
+import { CreateRestaurantKeywords, UpdateRestaurantKeywords } from './dto/requests/create-resturant-keywords.request';
 
 @ApiBearerAuth()
 @ApiHeader({
@@ -83,6 +83,20 @@ export class AdminRestaurantController {
     const keywords = await this.restaurantService.createKeywords(req);
     return new ActionResponse(keywords);
   }
+   // update keywords
+   @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
+   @Put('/admin/keywords')  
+   async updateKeywords(@Body() req: UpdateRestaurantKeywords) {
+     const keywords = await this.restaurantService.editKeywords(req);
+     return new ActionResponse(keywords);
+   }
+    // delete keywords
+    @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
+    @Delete('/admin/keywords/:id')
+    async deleteKeywords(@Param('id') id: string) {
+      const keywords = await this.restaurantService.deleteKeywords(id);
+      return new ActionResponse(keywords);
+    }
 
   @Post('admin/cuisine')
   async addCuisine(@Body() req: AddCuisineRequest) {

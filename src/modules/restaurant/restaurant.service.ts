@@ -66,7 +66,7 @@ import { addRestaurantSchedule } from './dto/requests/add-restaurant-schedule.re
 import { updateRestaurantScheduleRequest } from './dto/requests/update-restaurant.schedule.request';
 import { calculateDistances } from 'src/core/helpers/geom.helper';
 import { MealOptionPrice } from 'src/infrastructure/entities/restaurant/meal/meal-option-price.entity';
-import { CreateRestaurantKeywords,  } from './dto/requests/create-resturant-keywords.request';
+import { CreateRestaurantKeywords, UpdateRestaurantKeywords,  } from './dto/requests/create-resturant-keywords.request';
 import { RestaurantKeywords } from 'src/infrastructure/entities/restaurant/keywords/restaurant-keywords';
 
 @Injectable()
@@ -109,9 +109,17 @@ export class RestaurantService extends BaseService<Restaurant> {
 
   async getKeywords() {
     return await this.keywordsRepository.find({
-      take:50
+ 
     });
   }
+
+  async deleteKeywords(id: string) {
+    return await this.keywordsRepository.delete(id);
+  }
+  async editKeywords(data: UpdateRestaurantKeywords) {
+    return await this.keywordsRepository.update(data.id, data);
+  }
+
   async createKeywords(data: CreateRestaurantKeywords) {
     return await this.keywordsRepository.save(data);
   }
@@ -207,6 +215,8 @@ export class RestaurantService extends BaseService<Restaurant> {
   }
 
   //find all favorite near restaurants with cuisine and meals
+
+  
 
   async findFavoriteNearRestaurantsCusine(
     query: GetNearResturantsQuery,
