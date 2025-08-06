@@ -37,6 +37,7 @@ import { OrderService } from '../order/order.service';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { SectionType } from 'src/infrastructure/data/enums/driver-type.eum';
+import { ConstantType } from 'src/infrastructure/data/enums/constant-type.enum';
 
 @ApiTags(Router.Addresses.ApiTag)
 @ApiHeader({
@@ -99,7 +100,7 @@ async getBarqSections(
 
     if (setting.type.endsWith(`_${language}`)) {
       // Remove _AR or _EN from the variable string (if at the end)
-      setting.type = setting.type.replace(/_(AR|EN)$/, '');
+      setting.type = setting.type.replace(/_(AR|EN)$/, '') as unknown as ConstantType; 
       filtered.push(setting);
     }
   });
