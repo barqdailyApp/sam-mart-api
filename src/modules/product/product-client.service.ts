@@ -95,6 +95,7 @@ export class ProductClientService {
     // For guests and individuals, orders are taken from the nearest warehouse
 
     let warehouse: Warehouse;
+      warehouse=await this.warehouse_repo.findOne({where:{is_active:true}});
     if (latitude && longitude) {
       const maxDistanceInMeters = Number((await this.constantRepository.findOne({
         where: {type:ConstantType.MAX_STORAGE_DISTANCE},
@@ -310,6 +311,7 @@ export class ProductClientService {
     } = productClientQuery;
     const skip = (page - 1) * limit;
     let warehouse: Warehouse;
+      warehouse=await this.warehouse_repo.findOne({where:{is_active:true}});
     if (latitude && longitude) {
       const maxDistanceInMeters = Number((await this.constantRepository.findOne({
         where: {type:ConstantType.MAX_STORAGE_DISTANCE},
