@@ -54,19 +54,21 @@ export class StaticPageController {
     return true;
   }
   @Get('whats-app')
-  @UseInterceptors(CacheInterceptor)
+
   async getWhatsAppStaticPage() {
     return new ActionResponse({ support: '+967734220888', shein: null });
   }
 
   @Get('/:static_page_type')
-  @UseInterceptors(CacheInterceptor)
+
   async getStaticPage(
     @Param() param: GetStaticPage,
   ): Promise<ActionResponse<StaticPageResponse>> {
     let staticPage = await this.staticPageService.getStaticPageByType(
       param.static_page_type,
     );
+    console.log(staticPage);
+  
     staticPage = this._i18nResponse.entity(staticPage);
 
     const result = plainToInstance(StaticPageResponse, staticPage, {
