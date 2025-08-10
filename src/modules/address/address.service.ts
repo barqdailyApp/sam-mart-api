@@ -35,6 +35,7 @@ import { ConstantType } from 'src/infrastructure/data/enums/constant-type.enum';
 import { CartService } from '../cart/cart.service';
 import { RestaurantCart } from 'src/infrastructure/entities/restaurant/cart/restaurant-cart.entity';
 import { RestaurantCartService } from '../restaurant-cart/restaurant-cart.service';
+import { Role } from 'src/infrastructure/data/enums/role.enum';
 
 @Injectable({ scope: Scope.REQUEST })
 export class AddressService extends BaseUserService<Address> {
@@ -130,7 +131,7 @@ export class AddressService extends BaseUserService<Address> {
 
   override async create(entity: Address): Promise<Address> {
     // if entity has property user_id, set it to the current user
-    entity.user_id = super.currentUser.id;
+    entity.user_id = entity.user_id || super.currentUser.id;
     entity.location = `POINT(${entity.latitude} ${entity.longitude})`;
     const valid_location = await this.isLocationWithinWorkingArea(
       entity.latitude,
@@ -158,6 +159,7 @@ export class AddressService extends BaseUserService<Address> {
     if (valid_location == false)
       throw new BadRequestException('message.invalid_location');
     this.entityRelatedValidator.isExist(item);
+    if(user.roles.includes(Role.CLIENT))
     this.entityRelatedValidator.ownership(item, super.currentUser);
 
     // update the entity
@@ -169,6 +171,7 @@ export class AddressService extends BaseUserService<Address> {
     const item = await super.findOne(id);
     if (!item) throw new NotFoundException();
     this.entityRelatedValidator.isExist(item);
+    if(this.currentUser.roles.includes(Role.CLIENT))
     this.entityRelatedValidator.ownership(item, super.currentUser);
     // delete the entity
     return await super.softDelete(id);

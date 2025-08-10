@@ -143,6 +143,22 @@ async getBarqSections(
     });
     return new ActionResponse<AddressResponse>(response);
   }
+    @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @Post('admin-create/:user_id')
+  async adminCreate(
+    @Param('user_id') user_id: string,
+    @Body() req: CreateAddressRequest,
+  ): Promise<ActionResponse<AddressResponse>> {
+    const data = plainToInstance(Address, { ...req, user_id: user_id });
+    const result = await this.addressService.create(data);
+    const response = plainToInstance(AddressResponse, result, {
+      excludeExtraneousValues: true,
+    });
+    return new ActionResponse<AddressResponse>(response);
+  }
+
 
   @Post('validate')
   async validateAddress(
@@ -165,6 +181,21 @@ async getBarqSections(
   @Roles(Role.CLIENT)
   @Put(Router.Addresses.Update)
   async update(
+    @Body() req: UpdateAddressRequest,
+  ): Promise<ActionResponse<AddressResponse>> {
+    const data = plainToInstance(Address, req);
+    const result = await this.addressService.update(data);
+    const response = plainToInstance(AddressResponse, result, {
+      excludeExtraneousValues: true,
+    });
+    return new ActionResponse<AddressResponse>(response);
+  }
+
+    @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @Put('admin/update')
+  async adminUpdate(
     @Body() req: UpdateAddressRequest,
   ): Promise<ActionResponse<AddressResponse>> {
     const data = plainToInstance(Address, req);
@@ -205,6 +236,16 @@ async getBarqSections(
   @Roles(Role.CLIENT)
   @Delete(Router.Addresses.Delete)
   async delete(@Param('id') id: string): Promise<ActionResponse<DeleteResult>> {
+    const result = await this.addressService.delete(id);
+    const response = plainToInstance(DeleteResult, result);
+    return new ActionResponse<DeleteResult>(response);
+  }
+
+    @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @Delete('admin-delete/:id')
+  async adminDelete(@Param('id') id: string): Promise<ActionResponse<DeleteResult>> {
     const result = await this.addressService.delete(id);
     const response = plainToInstance(DeleteResult, result);
     return new ActionResponse<DeleteResult>(response);
