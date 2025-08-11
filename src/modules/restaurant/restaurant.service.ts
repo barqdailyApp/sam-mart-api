@@ -1237,46 +1237,57 @@ async findAllNearRestaurantsGroup(query: GetNearResturantsQuery) {
     return respone;
   }
 
-  async makeOffer(req: MakeMealOfferRequest, restaurant_id: string) {
-    const restaurant = await this.restaurantRepository.findOne({
-      where: { id: restaurant_id },
-    });
-    if (!restaurant) throw new NotFoundException('no restaurant found');
-    const meal = await this.mealRepository.findOne({
-      where: {
-        id: req.meal_id,
-        restaurant_category: { restaurant_id: restaurant_id },
-      },
-    });
-    if (!meal) throw new NotFoundException('no meal found');
-    const offer = plainToInstance(MealOffer, req);
-
-    return await this.mealOfferRepository.save(offer);
-  }
-  async makeOffers(req: MakeMealOfferRequest[], restaurant_id: string) {
-  // Check restaurant
-  const restaurant = await this.restaurantRepository.findOne({ where: { id: restaurant_id } });
+async makeOffer(req: MakeMealOfferRequest, restaurant_id: string) {
+  // 1. Check restaurant
+  const restaurant = await this.restaurantRepository.findOne({
+    where: { id: restaurant_id },
+  });
   if (!restaurant) throw new NotFoundException('no restaurant found');
 
-  // Extract meal IDs
+  // 2. Check meal
+  const meal = await this.mealRepository.findOne({
+    where: {
+      id: req.meal_id,
+      restaurant_category: { restaurant_id },
+    },
+  });
+  if (!meal) throw new NotFoundException('no meal found');
+
+  // 3. Delete any old offers for this meal
+  await this.mealOfferRepository.delete({ meal_id: req.meal_id });
+
+  // 4. Create and save new offer
+  const offer = plainToInstance(MealOffer, req);
+  return await this.mealOfferRepository.save(offer);
+}
+
+async makeOffers(req: MakeMealOfferRequest[], restaurant_id: string) {
+  // 1. Check restaurant
+  const restaurant = await this.restaurantRepository.findOne({
+    where: { id: restaurant_id },
+  });
+  if (!restaurant) throw new NotFoundException('no restaurant found');
+
+  // 2. Extract meal IDs
   const mealIds = req.map(r => r.meal_id);
 
-  // Fetch all meals
+  // 3. Fetch all meals for this restaurant
   const meals = await this.mealRepository.find({
     where: { id: In(mealIds), restaurant_category: { restaurant_id } },
   });
 
-  // Validate missing meals
+  // 4. Validate missing meals
   if (meals.length !== mealIds.length) {
     const foundMealIds = new Set(meals.map(m => m.id));
     const missing = mealIds.filter(id => !foundMealIds.has(id));
     throw new NotFoundException(`Meals not found: ${missing.join(', ')}`);
   }
 
-  // Map requests to MealOffer entities
-  const offers = req.map(r => plainToInstance(MealOffer, r));
+  // 5. Delete any old offers for these meals
+  await this.mealOfferRepository.delete({ meal_id: In(mealIds) });
 
-  // Save all offers
+  // 6. Create and save new offers
+  const offers = req.map(r => plainToInstance(MealOffer, r));
   return await this.mealOfferRepository.save(offers);
 }
 
