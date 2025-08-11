@@ -1253,6 +1253,33 @@ async findAllNearRestaurantsGroup(query: GetNearResturantsQuery) {
 
     return await this.mealOfferRepository.save(offer);
   }
+  async makeOffers(req: MakeMealOfferRequest[], restaurant_id: string) {
+  // Check restaurant
+  const restaurant = await this.restaurantRepository.findOne({ where: { id: restaurant_id } });
+  if (!restaurant) throw new NotFoundException('no restaurant found');
+
+  // Extract meal IDs
+  const mealIds = req.map(r => r.meal_id);
+
+  // Fetch all meals
+  const meals = await this.mealRepository.find({
+    where: { id: In(mealIds), restaurant_category: { restaurant_id } },
+  });
+
+  // Validate missing meals
+  if (meals.length !== mealIds.length) {
+    const foundMealIds = new Set(meals.map(m => m.id));
+    const missing = mealIds.filter(id => !foundMealIds.has(id));
+    throw new NotFoundException(`Meals not found: ${missing.join(', ')}`);
+  }
+
+  // Map requests to MealOffer entities
+  const offers = req.map(r => plainToInstance(MealOffer, r));
+
+  // Save all offers
+  return await this.mealOfferRepository.save(offers);
+}
+
 
   async getMealsOffers(restaurant_id: string) {
     const meals = await this.mealRepository
