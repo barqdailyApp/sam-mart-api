@@ -78,7 +78,7 @@ export class AddressController {
     @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
-  @Get(Router.Addresses.List)
+  @Get('admin')
   async AdmingetAll(
     @Query() query?: PaginatedRequest,
   ): Promise<
