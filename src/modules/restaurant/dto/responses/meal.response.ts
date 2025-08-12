@@ -140,6 +140,9 @@ export class MealResponse {
   cart_quantity: number;
 
   @Expose()
+  cart_details: any;
+
+  @Expose()
   cart_total_price: number;
 
   @Expose()
