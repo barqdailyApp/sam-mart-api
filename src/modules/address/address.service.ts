@@ -60,6 +60,7 @@ export class AddressService extends BaseUserService<Address> {
   }
 
   override async findAll(query?: PaginatedRequest): Promise<Address[]> {
+    if(this.currentUser.roles.includes(Role.CLIENT))
     applyQueryFilters(query, `user_id=${super.currentUser.id}`);
     applyQuerySort(query, `is_favorite=desc`);
 

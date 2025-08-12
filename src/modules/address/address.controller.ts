@@ -75,6 +75,29 @@ export class AddressController {
     }
   }
 
+    @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @Get(Router.Addresses.List)
+  async AdmingetAll(
+    @Query() query?: PaginatedRequest,
+  ): Promise<
+    PaginatedResponse<AddressResponse[]> | ActionResponse<AddressResponse[]>
+  > {
+    const result = await this.addressService.findAll(query);
+    const response = plainToInstance(AddressResponse, result, {
+      excludeExtraneousValues: true,
+    });
+    if (query.page && query.limit) {
+      const total = await this.addressService.count(query);
+      return new PaginatedResponse<AddressResponse[]>(response, {
+        meta: { total, ...query },
+      });
+    } else {
+      return new ActionResponse<AddressResponse[]>(response);
+    }
+  }
+
   // @Get(Router.Addresses.ByAccount)
   // async getbyAccount(@Query() query: AddressByAccountRequest): Promise<ActionResponse<AddressResponse[]>> {
   //     const result = await this.addressService.findByAccount(query);
