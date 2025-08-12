@@ -17,7 +17,10 @@ import { CartProduct } from 'src/infrastructure/entities/cart/cart-products';
 import { ApiTags, ApiHeader, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
 import { RolesGuard } from '../authentication/guards/roles.guard';
-import { CartProductRespone, CartProductWarehouseRespone } from './dto/respone/cart-product-repspone';
+import {
+  CartProductRespone,
+  CartProductWarehouseRespone,
+} from './dto/respone/cart-product-repspone';
 import { I18nResponse } from 'src/core/helpers/i18n.helper';
 import { ActionResponse } from 'src/core/base/responses/action.response';
 import { UpdateCartProductRequest } from './dto/requests/update-cart-request';
@@ -28,7 +31,7 @@ import { Roles } from '../authentication/guards/roles.decorator';
 import { WarehouseResponse } from '../warehouse/dto/response/warehouse.response';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-
+import { TransactionService } from '../transaction/transaction.service';
 
 @ApiTags('Cart')
 @ApiHeader({
@@ -44,7 +47,8 @@ export class CartController {
   constructor(
     private readonly _i18nResponse: I18nResponse,
     private readonly cartService: CartService,
-    @Inject(CACHE_MANAGER) private readonly cacheManager:Cache
+    private readonly transactionService: TransactionService,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
   @Get()
@@ -55,13 +59,12 @@ export class CartController {
     );
 
     return new ActionResponse(
-      
       cart_products.products.map(
         (e) =>
           new CartProductRespone({
             id: e.cart.id,
             additional_services: e.cart.additions,
-            original_price:e.cart.price,
+            original_price: e.cart.price,
             price:
               Number(e.cart.product_category_price.price) +
               (e.cart.additions?.length > 0
@@ -74,28 +77,30 @@ export class CartController {
                   )
                 : 0),
             quantity: e.cart.quantity,
-            product: this._i18nResponse.entity( e.cart.product_category_price),
+            product: this._i18nResponse.entity(e.cart.product_category_price),
             warehouse_quantity: e.warehouses_product,
-            is_offer:e.cart.is_offer 
+            is_offer: e.cart.is_offer,
           }),
-      ),);}
-      
-    
-    
-  @Get("/with-warehouse")
+      ),
+    );
+  }
+
+  @Get('/with-warehouse')
   async getv2CartProducts() {
     const cart = await this.cartService.getCart();
     const cart_products = this._i18nResponse.entity(
       await this.cartService.getCartProducts(cart.id),
     );
     return new ActionResponse({
-      products:
-      cart_products.products.map(
+      wallet: await this.transactionService.getWallet(
+        this.cartService.request.user.id,
+      ),
+      products: cart_products.products.map(
         (e) =>
           new CartProductRespone({
             id: e.cart.id,
             additional_services: e.cart.additions,
-            original_price:e.cart.price,
+            original_price: e.cart.price,
             price:
               Number(e.cart.product_category_price.price) +
               (e.cart.additions?.length > 0
@@ -108,14 +113,13 @@ export class CartController {
                   )
                 : 0),
             quantity: e.cart.quantity,
-            product: this._i18nResponse.entity( e.cart.product_category_price),
+            product: this._i18nResponse.entity(e.cart.product_category_price),
             warehouse_quantity: e.warehouses_product,
-            is_offer:e.cart.is_offer 
+            is_offer: e.cart.is_offer,
           }),
       ),
-    warehouse:plainToInstance(WarehouseResponse, cart_products.warehouse),
-    }
-    );
+      warehouse: plainToInstance(WarehouseResponse, cart_products.warehouse),
+    });
   }
 
   @Post('/add')
@@ -164,18 +168,18 @@ export class CartController {
         new CartProductRespone({
           id: get_cart_product.cart.id,
           additional_services: get_cart_product.cart.additions,
-          original_price:get_cart_product.cart.price,
-          price:   
-          Number(get_cart_product.cart.product_category_price.price) +
-          (get_cart_product.cart.additions?.length > 0
-            ? Number(
-              get_cart_product.cart.product_category_price.product_additional_services.filter(
-                  (j) => {
-                    return get_cart_product.cart.additions?.includes(j.id);
-                  },
-                )[0].price,
-              )
-            : 0),
+          original_price: get_cart_product.cart.price,
+          price:
+            Number(get_cart_product.cart.product_category_price.price) +
+            (get_cart_product.cart.additions?.length > 0
+              ? Number(
+                  get_cart_product.cart.product_category_price.product_additional_services.filter(
+                    (j) => {
+                      return get_cart_product.cart.additions?.includes(j.id);
+                    },
+                  )[0].price,
+                )
+              : 0),
           quantity: get_cart_product.cart.quantity,
           product: get_cart_product.cart.product_category_price,
           Warehouse_quantity: get_cart_product.warehouse_quantity,
@@ -195,7 +199,7 @@ export class CartController {
     const response = new CartProductRespone({
       id: result.cart.id,
       additional_services: result.cart.additions,
-      original_price:result.cart.price,
+      original_price: result.cart.price,
       price:
         Number(result.cart.product_category_price.price) +
         (result.cart.additions?.length > 0
@@ -225,7 +229,7 @@ export class CartController {
     const response = new CartProductRespone({
       id: result.cart.id,
       additional_services: result.cart.additions,
-      original_price:result.cart.price,
+      original_price: result.cart.price,
       price:
         Number(result.cart.product_category_price.price) +
         (result.cart.additions?.length > 0
