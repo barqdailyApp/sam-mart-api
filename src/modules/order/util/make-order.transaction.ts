@@ -43,7 +43,7 @@ import { MakeTransactionRequest } from 'src/modules/transaction/dto/requests/mak
 import { TransactionTypes } from 'src/infrastructure/data/enums/transaction-types';
 import { Wallet } from 'src/infrastructure/entities/wallet/wallet.entity';
 import { Transaction } from 'src/infrastructure/entities/wallet/transaction.entity';
-import { encodeUUID } from 'src/core/helpers/cast.helper';
+import { encodeUUID, safeNumber } from 'src/core/helpers/cast.helper';
 import * as uuidv4 from 'uuid';
 import { DriverTypeEnum } from 'src/infrastructure/data/enums/driver-type.eum';
 @Injectable()
@@ -256,6 +256,30 @@ export class MakeOrderTransaction extends BaseTransaction<
       }
 
       let total = Number(order.products_price);
+           if (safeNumber(req?.wallet_discount, 0) > 0) {
+        const wallet = await context.findOneBy(Wallet, { user_id: user.id });
+
+        if (!wallet) {
+          throw new BadRequestException('message.wallet_not_found');
+        }
+
+        const walletDiscount = safeNumber(req.wallet_discount, 0);
+        const currentTotal = safeNumber(total, 0);
+        const walletBalance = safeNumber(wallet.balance, 0);
+
+        if (walletBalance < walletDiscount) {
+          throw new BadRequestException('message.insufficient_balance');
+        }
+
+        if (walletDiscount > currentTotal) {
+          req.wallet_discount = currentTotal;
+        }
+
+        total = currentTotal - safeNumber(req.wallet_discount, 0);
+        wallet.balance = walletBalance - walletDiscount;
+
+        await context.save(wallet);
+      }
       const devliery_fee =
         order.delivery_type == DeliveryType.WAREHOUSE_PICKUP
           ? 0
@@ -280,6 +304,8 @@ export class MakeOrderTransaction extends BaseTransaction<
           promo_code.user_ids.push(user.id);
           await context.save(promo_code);
         }
+              // Handle wallet discount
+ 
       }
       await context.save(Order, order);
 

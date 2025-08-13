@@ -1,9 +1,10 @@
 import { fa } from '@faker-js/faker';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty, IsOptional, IsString, ValidateIf } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateIf } from 'class-validator';
 import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
 import { PlatformType } from 'src/infrastructure/data/enums/order-with-type.enum';
 import { PaymentMethodEnum } from 'src/infrastructure/data/enums/payment-method';
+import { Transform } from 'class-transformer';
 
 export class PaymentMethodRequest {
   @ApiProperty()
@@ -18,6 +19,7 @@ export class PaymentMethodRequest {
   transaction_number: string;
 
 
+  
 
   @ApiProperty()
   @IsOptional()
@@ -48,7 +50,11 @@ export class MakeOrderRequest {
   @IsOptional()
   @IsString()
   promo_code: string;
-
+  @ApiProperty({required:false})
+  @IsOptional()
+  @IsNumber()
+  @Transform  (({ value }) => Number(value))
+  wallet_discount: number;
 
   @ApiProperty({required:false})
   @IsOptional()

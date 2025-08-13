@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common';
 import Decimal from 'decimal.js';
 import { number } from 'joi';
 
@@ -19,6 +20,21 @@ export function encodeUUID(uuid) {
     return reversedHexArray.join('_');
 }
 
+ export function validateNumericValues(obj: any, fields: string[]): void {
+    for (const field of fields) {
+      if (isNaN(obj[field]) || obj[field] === null || obj[field] === undefined) {
+        console.error(`Invalid numeric value for ${field}:`, obj[field]);
+        throw new BadRequestException(`Invalid calculation for ${field}`);
+      }
+    }
+  }
+ export function safeNumber(value: any, defaultValue: number = 0): number {
+    if (value === null || value === undefined || value === '') {
+      return defaultValue;
+    }
+    const num = Number(value);
+    return isNaN(num) ? defaultValue : num;
+  }
 // Decode encoded UUID
 export function decodeUUID(encodedUUID) {
     // Split the encoded UUID into an array of components using '_'

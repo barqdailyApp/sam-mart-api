@@ -15,7 +15,7 @@ import { generateOrderNumber } from 'src/modules/order/util/make-order.transacti
 import { DeliveryType } from 'src/infrastructure/data/enums/delivery-type.enum';
 import { Address } from 'src/infrastructure/entities/user/address.entity';
 import { PaymentMethodEnum } from 'src/infrastructure/data/enums/payment-method';
-import { encodeUUID } from 'src/core/helpers/cast.helper';
+import { encodeUUID, safeNumber, validateNumericValues } from 'src/core/helpers/cast.helper';
 import { TransactionTypes } from 'src/infrastructure/data/enums/transaction-types';
 import { Wallet } from 'src/infrastructure/entities/wallet/wallet.entity';
 import { PaymentMethodService } from 'src/modules/payment_method/payment_method.service';
@@ -52,24 +52,7 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
     super(dataSource);
   }
 
-  // Helper function to safely convert values to numbers
-  private safeNumber(value: any, defaultValue: number = 0): number {
-    if (value === null || value === undefined || value === '') {
-      return defaultValue;
-    }
-    const num = Number(value);
-    return isNaN(num) ? defaultValue : num;
-  }
-
-  // Helper function to validate numeric values
-  private validateNumericValues(obj: any, fields: string[]): void {
-    for (const field of fields) {
-      if (isNaN(obj[field]) || obj[field] === null || obj[field] === undefined) {
-        console.error(`Invalid numeric value for ${field}:`, obj[field]);
-        throw new BadRequestException(`Invalid calculation for ${field}`);
-      }
-    }
-  }
+ 
 
   // the important thing here is to use the manager that we've created in the base class
   protected async execute(
@@ -95,19 +78,19 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
       order.payment_method_id = req.payment_method.payment_method_id;
 
       const constants = await context.find(Constant);
-      const fixed_delivery_distance = this.safeNumber(
+      const fixed_delivery_distance = safeNumber(
         constants.find((c) => c.type == ConstantType.FREE_DELIVERY_DISTANCE)?.variable,
         0
       );
-      const delivery_price_per_km = this.safeNumber(
+      const delivery_price_per_km = safeNumber(
         constants.find((c) => c.type == ConstantType.DELIVERY_PRICE_PER_KM)?.variable,
         0
       );
-      const fixed_delivery_fee = this.safeNumber(
+      const fixed_delivery_fee = safeNumber(
         constants.find((c) => c.type == ConstantType.FIXED_DELIVERY_FEE)?.variable,
         0
       );
-      const delivery_time_per_km = this.safeNumber(
+      const delivery_time_per_km = safeNumber(
         constants.find((c) => c.type == ConstantType.DELIVERY_TIME_PER_KM)?.variable,
         0
       );
@@ -182,7 +165,7 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
         throw new BadRequestException('restaurant is closed');
       }
 
-      const distance = this.safeNumber(
+      const distance = safeNumber(
         calculateDistances(
           [restaurant.latitude, restaurant.longitude],
           [address.latitude, address.longitude],
@@ -190,7 +173,7 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
         0
       );
 
-      const delivery_time = this.safeNumber(restaurant.average_prep_time, 0) + 
+      const delivery_time = safeNumber(restaurant.average_prep_time, 0) + 
         distance * delivery_time_per_km;
 
       order.estimated_delivery_time = new Date(
@@ -200,7 +183,7 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
       const delivery_fee = fixed_delivery_fee + 
         Math.max(0, distance - fixed_delivery_distance) * delivery_price_per_km;
 
-      order.delivery_fee = this.safeNumber(delivery_fee, 0);
+      order.delivery_fee = safeNumber(delivery_fee, 0);
 
       const restaurant_order_meals: RestaurantOrderMeal[] = [];
 
@@ -223,42 +206,42 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
         let discount_percentage = 0;
 
         if (isOfferActive) {
-          discount_percentage = this.safeNumber(offer.discount_percentage, 0);
+          discount_percentage = safeNumber(offer.discount_percentage, 0);
         }
 
         const totalOptionsPrice = cart_meal.cart_meal_options.reduce(
           (acc, curr) => {
-            const originalPrice = this.safeNumber(curr.meal_option_price?.price, 0);
+            const originalPrice = safeNumber(curr.meal_option_price?.price, 0);
             const groupApplyOffer =
               curr.meal_option_price.meal_option_group?.apply_offer;
 
             if (isOfferActive && groupApplyOffer) {
               const discountedPrice =
                 originalPrice * (1 - discount_percentage / 100);
-              return acc + this.safeNumber(discountedPrice, 0);
+              return acc + safeNumber(discountedPrice, 0);
             }
             return acc + originalPrice;
           },
           0,
         );
 
-        const mealPrice = this.safeNumber(cart_meal.meal.price, 0);
+        const mealPrice = safeNumber(cart_meal.meal.price, 0);
         const discountedMealPrice = mealPrice * (1 - discount_percentage / 100);
 
-        const total_option_price = this.safeNumber(discountedMealPrice, 0) + 
-          this.safeNumber(totalOptionsPrice, 0);
+        const total_option_price = safeNumber(discountedMealPrice, 0) + 
+          safeNumber(totalOptionsPrice, 0);
 
         const order_meal = plainToInstance(RestaurantOrderMeal, {
           meal_id: cart_meal.meal_id,
           note: cart_meal.note,
           order_id: order.id,
-          quantity: this.safeNumber(cart_meal.quantity, 1),
+          quantity: safeNumber(cart_meal.quantity, 1),
           restaurant_order_id: order.id,
-          price: this.safeNumber(discountedMealPrice, 0),
-          total_price: this.safeNumber(total_option_price, 0),
+          price: safeNumber(discountedMealPrice, 0),
+          total_price: safeNumber(total_option_price, 0),
           restaurant_order_meal_options: cart_meal?.cart_meal_options?.map(
             (opt) => {
-              const originalPrice = this.safeNumber(opt?.meal_option_price?.price, 0);
+              const originalPrice = safeNumber(opt?.meal_option_price?.price, 0);
               const groupApplyOffer =
                 opt?.meal_option_price?.meal_option_group?.apply_offer;
 
@@ -269,14 +252,14 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
 
               return {
                 option: opt?.meal_option_price?.option,
-                price: this.safeNumber(finalPrice, 0),
+                price: safeNumber(finalPrice, 0),
               };
             },
           ),
         });
 
         // Validate the order meal before adding
-        this.validateNumericValues(order_meal, ['price', 'total_price', 'quantity']);
+        validateNumericValues(order_meal, ['price', 'total_price', 'quantity']);
         restaurant_order_meals.push(order_meal);
       }
 
@@ -284,23 +267,23 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
       await context.remove(cart_meals);
 
       let total = restaurant_order_meals
-        .map((order_meal) => this.safeNumber(order_meal.total_price, 0) * 
-             this.safeNumber(order_meal.quantity, 1))
+        .map((order_meal) => safeNumber(order_meal.total_price, 0) * 
+             safeNumber(order_meal.quantity, 1))
         .reduce((a, b) => a + b, 0);
 
-      order.sub_total = this.safeNumber(total, 0);
+      order.sub_total = safeNumber(total, 0);
 
       // Handle wallet discount
-      if (this.safeNumber(req?.wallet_discount, 0) > 0) {
+      if (safeNumber(req?.wallet_discount, 0) > 0) {
         const wallet = await context.findOneBy(Wallet, { user_id: user.id });
 
         if (!wallet) {
           throw new BadRequestException('message.wallet_not_found');
         }
 
-        const walletDiscount = this.safeNumber(req.wallet_discount, 0);
-        const currentTotal = this.safeNumber(total, 0);
-        const walletBalance = this.safeNumber(wallet.balance, 0);
+        const walletDiscount = safeNumber(req.wallet_discount, 0);
+        const currentTotal = safeNumber(total, 0);
+        const walletBalance = safeNumber(wallet.balance, 0);
 
         if (walletBalance < walletDiscount) {
           throw new BadRequestException('message.insufficient_balance');
@@ -310,11 +293,13 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
           req.wallet_discount = currentTotal;
         }
 
-        total = currentTotal - this.safeNumber(req.wallet_discount, 0);
+        total = currentTotal - safeNumber(req.wallet_discount, 0);
+        wallet.balance = walletBalance - safeNumber(req.wallet_discount, 0);
+        await context.save(wallet);
       }
 
-      total = this.safeNumber(total, 0) + this.safeNumber(order.delivery_fee, 0);
-      order.total_price = this.safeNumber(total, 0);
+      total = safeNumber(total, 0) + safeNumber(order.delivery_fee, 0);
+      order.total_price = safeNumber(total, 0);
 
       // Handle promo code
       if (req.promo_code) {
@@ -326,9 +311,9 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
         
         if (promo_code && promo_code.type == DriverTypeEnum.FOOD) {
           order.promo_code_id = promo_code.id;
-          const promoDiscount = this.safeNumber(promo_code.discount, 0);
+          const promoDiscount = safeNumber(promo_code.discount, 0);
           total -= promoDiscount;
-          order.total_price = this.safeNumber(total, 0);
+          order.total_price = safeNumber(total, 0);
           order.promo_code = promo_code;
           order.promo_code_discount = promoDiscount;
           promo_code.current_uses++;
@@ -339,10 +324,10 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
       }
 
       // Validate final order values before payment
-      this.validateNumericValues(order, ['total_price', 'sub_total', 'delivery_fee']);
+      validateNumericValues(order, ['total_price', 'sub_total', 'delivery_fee']);
 
       // Handle payment
-      const finalTotal = this.safeNumber(order.total_price, 0);
+      const finalTotal = safeNumber(order.total_price, 0);
 
       switch (payment_method.type) {
         case PaymentMethodEnum.JAWALI: {
@@ -364,7 +349,7 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
             throw new BadRequestException('message.wallet_not_found');
           }
 
-          const currentBalance = this.safeNumber(wallet.balance, 0);
+          const currentBalance = safeNumber(wallet.balance, 0);
           const newBalance = currentBalance - finalTotal;
           
           if (newBalance < 0) {
@@ -418,7 +403,7 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
       }
 
       // Final validation before saving
-      this.validateNumericValues(order, ['total_price', 'sub_total', 'delivery_fee']);
+      validateNumericValues(order, ['total_price', 'sub_total', 'delivery_fee']);
 
       await context.save(order);
 
