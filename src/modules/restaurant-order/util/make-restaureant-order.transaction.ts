@@ -251,16 +251,23 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
         .reduce((a, b) => a + b, 0);
 
       order.sub_total = total;
-      if (req?.wallet_discount > 0) {
-        const wallet = await context.findOneBy(Wallet, { user_id: user.id });
-        if (Number(wallet.balance) < req.wallet_discount) {
-          throw new BadRequestException('message.insufficient_balance');
-        }
-        if (req?.wallet_discount > total) {
-          req.wallet_discount = total;
-        }
-        total = total - req.wallet_discount;
-      }
+ if (req?.wallet_discount > 0) {
+  const wallet = await context.findOneBy(Wallet, { user_id: user.id });
+
+  const walletDiscount = Number(req.wallet_discount) || 0;
+  const currentTotal = Number(total) || 0;
+
+  if (Number(wallet.balance) < walletDiscount) {
+    throw new BadRequestException('message.insufficient_balance');
+  }
+
+  if (walletDiscount > currentTotal) {
+    req.wallet_discount = currentTotal;
+  }
+
+  total = currentTotal - walletDiscount;
+}
+
       total = total + delivery_fee;
       order.total_price = total;
       if (req.promo_code) {
