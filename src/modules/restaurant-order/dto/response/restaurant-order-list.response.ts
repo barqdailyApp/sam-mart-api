@@ -17,6 +17,8 @@ export class RestaurantOrderListResponse {
     payment_method?: PaymentMethod;
 
     @Expose()
+    payment_method_enum: string;
+    @Expose()
     status: string;
     @Expose()
     created_at: Date;
