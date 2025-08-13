@@ -167,6 +167,23 @@ export class AddressService extends BaseUserService<Address> {
     return await super.update(entity);
   }
 
+
+     async updateAdmin(entity: Address): Promise<Address> {
+ 
+    const item = await super.findOne(entity.id);
+    const valid_location = await this.isLocationWithinWorkingArea(
+      entity.latitude,
+      entity.longitude,
+    );
+
+    if (valid_location == false)
+      throw new BadRequestException('message.invalid_location');
+    this.entityRelatedValidator.isExist(item);
+
+
+    // update the entity
+    return await super.update(entity);
+  }
   override async delete(id: string): Promise<DeleteResult> {
     // get the entity first
     const item = await super.findOne(id);

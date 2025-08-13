@@ -222,7 +222,7 @@ async getBarqSections(
     @Body() req: UpdateAddressRequest,
   ): Promise<ActionResponse<AddressResponse>> {
     const data = plainToInstance(Address, req);
-    const result = await this.addressService.update(data);
+    const result = await this.addressService.updateAdmin(data);
     const response = plainToInstance(AddressResponse, result, {
       excludeExtraneousValues: true,
     });
