@@ -251,6 +251,7 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
         .reduce((a, b) => a + b, 0);
 
       order.sub_total = total;
+      console.log("x")
  if (req?.wallet_discount > 0) {
   const wallet = await context.findOneBy(Wallet, { user_id: user.id });
 
@@ -267,7 +268,7 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
 
   total = currentTotal - walletDiscount;
 }
-
+console.log("xx")
       total = total + delivery_fee;
       order.total_price = total;
       if (req.promo_code) {
