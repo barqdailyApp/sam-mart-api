@@ -434,6 +434,7 @@ export class AdminRestaurantController {
     const offer = await this.restaurantService.makeOffer(req, restaurant_id);
     return new ActionResponse(offer);
   }
+    @Roles(Role.RESTAURANT_ADMIN, Role.ADMIN)
   @Post('admin/make-offers/:restaurant_id')
   async createMultipleOffers(
     @Param('restaurant_id') restaurant_id: string,
