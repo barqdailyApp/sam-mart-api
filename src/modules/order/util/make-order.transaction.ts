@@ -256,7 +256,7 @@ export class MakeOrderTransaction extends BaseTransaction<
       }
 
       let total = Number(order.products_price);
-           if (safeNumber(req?.wallet_discount, 0) > 0) {
+      if (safeNumber(req?.wallet_discount, 0) > 0) {
         const wallet = await context.findOneBy(Wallet, { user_id: user.id });
 
         if (!wallet) {
@@ -277,7 +277,7 @@ export class MakeOrderTransaction extends BaseTransaction<
 
         total = currentTotal - safeNumber(req.wallet_discount, 0);
         wallet.balance = walletBalance - walletDiscount;
-
+        order.wallet_discount = walletDiscount;
         await context.save(wallet);
       }
       const devliery_fee =
@@ -304,8 +304,7 @@ export class MakeOrderTransaction extends BaseTransaction<
           promo_code.user_ids.push(user.id);
           await context.save(promo_code);
         }
-              // Handle wallet discount
- 
+        // Handle wallet discount
       }
       await context.save(Order, order);
 

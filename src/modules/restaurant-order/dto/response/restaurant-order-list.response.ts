@@ -46,5 +46,7 @@ export class RestaurantOrderListResponse {
     canceled_by: string
     
     @Expose()
+    wallet_discount: number
+    @Expose()
     delivery_fee: number
 }

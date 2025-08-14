@@ -11,6 +11,7 @@ export class OrdersResponse {
   @Expose() order_number: string;
   @Expose() delivery_type: DeliveryType;
   @Expose() delivery_fee: number;
+  @Expose() wallet_discount: number;
   @Expose() delivery_day: string;
   @Expose() slot: any;
   @Expose() estimated_delivery_time: Date;

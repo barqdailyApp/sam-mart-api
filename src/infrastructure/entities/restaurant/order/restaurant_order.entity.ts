@@ -96,6 +96,9 @@ export class RestaurantOrder extends AuditableEntity {
   @Column({ default: ShipmentStatusEnum.PENDING })
   status: ShipmentStatusEnum;
 
+   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  wallet_discount: number;
+
   @ManyToOne(() => Reason, (reason) => reason.cancelShipment, {
     onDelete: 'SET NULL',
   })

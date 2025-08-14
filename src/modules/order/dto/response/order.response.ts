@@ -37,6 +37,7 @@ export class OrderResponse {
   readonly order_products: number;
 
   @Expose() readonly total_price: number;
+  @Expose() readonly wallet_discount: number;
 
   @Expose() readonly payment_method: PaymentMethodEnum;
 

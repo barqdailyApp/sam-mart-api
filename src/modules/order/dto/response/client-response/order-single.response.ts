@@ -10,6 +10,7 @@ export class OrderSingleResponse {
   @Expose() created_at: Date;
   @Expose() order_number: string;
 
+  @Expose () wallet_discount:number
   @Expose() total_price: number;
   @Expose() delivery_fee: number;
 @Expose()  estimated_delivery_time:Date
@@ -27,6 +28,7 @@ export class OrderSingleResponse {
     this.delivery_fee = order.delivery_fee;
     this.order_number = order.number;
     this.products_price=order.products_price;
+    this.wallet_discount=order.wallet_discount;
     this.order_products = order.shipments[0].shipment_products.length;
     this.total_price = order.total_price;
     this.promo_code_discount = order.promo_code_discount;

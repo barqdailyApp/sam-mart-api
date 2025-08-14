@@ -28,6 +28,9 @@ export class RestaurantOrderDetailsResponse extends RestaurantOrderListResponse 
   order_confirmed_at: Date;
 
   @Expose()
+  wallet_discount: number;
+
+  @Expose()
   order_on_processed_at: Date;
   @Expose()
   note: string;

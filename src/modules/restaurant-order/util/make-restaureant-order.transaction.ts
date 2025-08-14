@@ -295,6 +295,7 @@ export class MakeRestaurantOrderTransaction extends BaseTransaction<
 
         total = currentTotal - safeNumber(req.wallet_discount, 0);
         wallet.balance = walletBalance - safeNumber(req.wallet_discount, 0);
+        order.wallet_discount = safeNumber(req.wallet_discount, 0);
         await context.save(wallet);
       }
 

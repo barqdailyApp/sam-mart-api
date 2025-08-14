@@ -47,6 +47,8 @@ export class Order extends OwnedEntity {
   @Column()
   address_id: string;
 
+  
+
   @ManyToOne(() => Section, (section) => section.orders)
   @JoinColumn()
   section: Section;
@@ -63,6 +65,9 @@ export class Order extends OwnedEntity {
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   products_price: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  wallet_discount: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   total_price: number;

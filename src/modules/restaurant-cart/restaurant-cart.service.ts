@@ -158,6 +158,7 @@ export class RestaurantCartService {
           price,
           meal_id: m.meal.id,
           id: m.id,
+          note: m.note,
           quantity: m.quantity,
           total_price: total_unit_price,
           options,

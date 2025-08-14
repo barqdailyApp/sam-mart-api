@@ -14,6 +14,7 @@ export class OrderSingleDashboardResponse {
   @Expose() self_note: string;
   @Expose() order_number: string;
   @Expose() transaction_number: string;
+  @Expose() wallet_discount: number;
 
   @Expose() delivery_type: DeliveryType;
 
@@ -38,6 +39,7 @@ export class OrderSingleDashboardResponse {
   constructor(order: Order) {
     this.order_id = order.id;
     this.slot_id = order.slot_id;
+    this.wallet_discount = order.wallet_discount;
     this.promo_code_discount = order.promo_code_discount;
     this.promo_code =
       order.promo_code != null

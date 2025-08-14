@@ -11,6 +11,7 @@ export class OrdersDashboardResponse {
   @Expose() section_id: string;
   @Expose() order_created_at: Date;
   @Expose() canceled_by: string;
+  @Expose() wallet_discount: number;
 
   @Expose() order_number: string;
   @Expose() transaction_number: string;
