@@ -41,12 +41,13 @@ export class RestaurantCartService {
   ) {}
 
   async addMealToCart(req: AddMealRestaurantCartRequest) {
-    return await this.addMealTransaction.run(req);
+  const response = await this.addMealTransaction.run(req);
+ return response 
   }
 
-  async getCartMeals() {
+  async getCartMeals(id?: string) {
     const cart = await this.restaurantCartRepository.findOne({
-      where: { user_id: this.request.user.id },
+      where: id? { user_id: this.request.user.id, id}: { user_id: this.request.user.id, },
       relations: {
         restaurant_cart_meals: {
           meal: { offer: true },
@@ -204,8 +205,7 @@ export class RestaurantCartService {
 
   async updateCartMeal(req: UpdateCartMealRequest) {
     const response = await this.updateMealRestaurantCartTransaction.run(req);
-    const cart_meals = await this.getCartMeals();
-    return cart_meals.meals.find((cart_meal) => cart_meal.id === response.id);
+   return response
   }
 
   async getCartMealDetails(cart_meal_id: string) {

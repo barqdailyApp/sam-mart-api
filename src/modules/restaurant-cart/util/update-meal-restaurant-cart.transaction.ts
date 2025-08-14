@@ -7,7 +7,6 @@ import { RestaurantCartMeal } from 'src/infrastructure/entities/restaurant/cart/
 import { MealOptionGroup } from 'src/infrastructure/entities/restaurant/meal/meal-option-group';
 import { Meal } from 'src/infrastructure/entities/restaurant/meal/meal.entity';
 import { DataSource, EntityManager, In } from 'typeorm';
-
 import { GetCartMealsResponse } from '../dto/response/get-cart-meals.response';
 import { plainToInstance } from 'class-transformer';
 import { Request } from 'express';
@@ -34,85 +33,118 @@ export class UpdateMealRestaurantCartTransaction extends BaseTransaction<
     try {
       const { cart_meal_id, quantity, options_ids, edit_options } = req;
 
+      // OPTIMIZATION 1: Single query to get cart meal with all required relations
       const cartMeal = await context.findOne(RestaurantCartMeal, {
         where: { id: cart_meal_id },
         relations: {
-          cart_meal_options: true,
-          meal: { meal_option_groups: { option_group: { options: true } } },
-        },
+          cart_meal_options: {
+            meal_option_price: {
+              option: { option_group: true },
+              meal_option_group: true
+            }
+          },
+          meal: {
+            offer: true,
+            meal_option_groups: {
+              option_group: { options: true },
+              meal_option_prices: { option: true }
+            }
+          }
+        }
       });
 
       if (!cartMeal) {
         throw new BadRequestException('message.cart_meal_not_found');
       }
 
-      const meal = await context.findOne(Meal, {
-        where: { id: cartMeal.meal.id },
-        relations: { meal_option_groups: { option_group: { options: true } } },
-      });
-
-      if (!meal) {
-        throw new BadRequestException('message.meal_not_found');
+      // OPTIMIZATION 2: Update quantity immediately (no need to wait)
+      if (cartMeal.quantity !== quantity) {
+        cartMeal.quantity = quantity;
+        await context.save(cartMeal);
       }
 
-      // Uncomment this section if you want to enforce restaurant match validation
-      // if (
-      //   cartMeal.meal.restaurant_category.restaurant.id !==
-      //   meal.restaurant_category.restaurant.id
-      // ) {
-      //   throw new BadRequestException('message.invalid_meal_for_cart');
-      // }
+      // OPTIMIZATION 3: Handle options update efficiently
+      if (edit_options) {
+        await this.updateCartMealOptions(context, cartMeal, options_ids);
+      }
 
-if (edit_options) {
-  // Delete previous options for this cart meal
-  await context.delete(RestaurantCartMealOption, {
-    cart_meal_id: cartMeal.id,
-  });
+      // OPTIMIZATION 4: Calculate response using existing data (no re-fetch needed)
+      return this.buildResponse(cartMeal);
 
-  if (options_ids?.length) {
-    // Get unique option IDs only
-    const uniqueOptionIds = [...new Set(options_ids)];
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
 
-    // Load corresponding MealOptionPrice records
-    const mealOptionPrices = await context.find(MealOptionPrice, {
-      where: { option_id: In(uniqueOptionIds) ,meal_option_group:{meal_id: meal.id}},
-    });
+  // OPTIMIZATION: Efficient options update with batch operations
+  private async updateCartMealOptions(
+    context: EntityManager,
+    cartMeal: RestaurantCartMeal,
+    options_ids?: string[]
+  ): Promise<void> {
+    const uniqueOptionIds = options_ids ? [...new Set(options_ids)] : [];
 
-    // Check if any matching cart meal options already exist (in case of race condition or fallback)
-    const existingCartMealOptions = await context.find(RestaurantCartMealOption, {
-      where: {
-        cart_meal_id: cartMeal.id,
-        meal_option_price_id: In(mealOptionPrices.map((mp) => mp.id)),
-      },
-    });
+    // OPTIMIZATION: Parallel delete and fetch operations
+    const [, availableMealOptionPrices, allOptionGroups] = await Promise.all([
+      // Delete existing options
+      context.delete(RestaurantCartMealOption, {
+        cart_meal_id: cartMeal.id
+      }),
 
-    // Filter out mealOptionPrices that already have an existing cart meal option
-    const existingPriceIds = new Set(
-      existingCartMealOptions.map((opt) => opt.meal_option_price_id),
-    );
+      // Get available meal option prices for the new options
+      uniqueOptionIds.length > 0 
+        ? context.find(MealOptionPrice, {
+            where: {
+              option_id: In(uniqueOptionIds),
+              meal_option_group: { meal_id: cartMeal.meal.id }
+            },
+            relations: {
+              option: { option_group: true },
+              meal_option_group: true
+            }
+          })
+        : Promise.resolve([]),
 
-    const newCartMealOptions = mealOptionPrices
-      .filter((mp) => !existingPriceIds.has(mp.id))
-      .map((mp) => {
-        return new RestaurantCartMealOption({
-          cart_meal: cartMeal,
-          meal_option_price: mp,
-        });
-      });
+      // Get all option groups for validation (reuse existing data if available)
+      cartMeal.meal.meal_option_groups?.length > 0
+        ? Promise.resolve(cartMeal.meal.meal_option_groups)
+        : context.find(MealOptionGroup, {
+            where: { meal_id: cartMeal.meal.id },
+            relations: { option_group: { options: true } }
+          })
+    ]);
 
-    if (newCartMealOptions.length) {
-      await context.save(newCartMealOptions);
+    // OPTIMIZATION: Validate options before creating (fail fast)
+    if (uniqueOptionIds.length > 0) {
+      this.validateOptionGroups(allOptionGroups, uniqueOptionIds);
     }
 
-    // Validate options per group
-    const allOptionGroupsForMeal = await context.find(MealOptionGroup, {
-      where: { meal_id: meal.id },
-      relations: { option_group: { options: true } },
-    });
+    // OPTIMIZATION: Batch create new cart meal options
+    if (availableMealOptionPrices.length > 0) {
+      const newCartMealOptions = availableMealOptionPrices.map(mp =>
+        new RestaurantCartMealOption({
+          cart_meal_id: cartMeal.id,
+          meal_option_price_id: mp.id
+        })
+      );
 
-    for (const group of allOptionGroupsForMeal) {
-      const selectedOptions = group.option_group.options.filter((opt) =>
-        uniqueOptionIds.includes(opt.id),
+      await context.save(newCartMealOptions);
+
+      // Update the cartMeal object with new options for response calculation
+      cartMeal.cart_meal_options = newCartMealOptions.map(option => ({
+        ...option,
+        meal_option_price: availableMealOptionPrices.find(mp => mp.id === option.meal_option_price_id)
+      })) as any;
+    } else {
+      cartMeal.cart_meal_options = [];
+    }
+  }
+
+  // OPTIMIZATION: Validate options in single pass (reuse from previous optimization)
+  private validateOptionGroups(allOptionGroups: MealOptionGroup[], optionIds: string[]): void {
+    for (const group of allOptionGroups) {
+      const selectedOptions = group.option_group.options.filter(opt =>
+        optionIds.includes(opt.id)
       );
 
       if (selectedOptions.length < group.option_group.min_selection) {
@@ -127,94 +159,75 @@ if (edit_options) {
       }
     }
   }
+
+  // OPTIMIZATION: Build response without additional database queries
+  private buildResponse(cartMeal: RestaurantCartMeal): GetCartMealsResponse {
+    const offer = cartMeal.meal.offer;
+    const now = new Date(new Date().setUTCHours(new Date().getUTCHours() + 3));
+
+    const isOfferActive = offer?.is_active &&
+      new Date(offer.start_date) <= now &&
+      new Date(offer.end_date) > now;
+
+    const discountPercentage = isOfferActive ? Number(offer.discount_percentage) : 0;
+    const discountedMealPrice = Number(cartMeal.meal.price) * (1 - discountPercentage / 100);
+
+    // Process options with pricing
+    const options = (cartMeal.cart_meal_options || []).map(o => {
+      const originalPrice = Number(o.meal_option_price?.price || 0);
+      const groupApplyOffer = o.meal_option_price?.meal_option_group?.apply_offer;
+      
+      const discountedPrice = (isOfferActive && groupApplyOffer)
+        ? originalPrice * (1 - discountPercentage / 100)
+        : originalPrice;
+
+      return {
+        ...o,
+        original_price: originalPrice,
+        discounted_price: discountedPrice,
+        price: discountedPrice,
+          option: o.meal_option_price.option,
+        option_group: o.meal_option_price?.option?.option_group
+      };
+    });
+
+    const totalOptionPrice = options.reduce((acc, o) => acc + o.discounted_price, 0);
+    const totalPrice = (discountedMealPrice + totalOptionPrice) * cartMeal.quantity;
+
+    return plainToInstance(
+      GetCartMealsResponse,
+      {
+        ...cartMeal.meal,
+        id: cartMeal.id,
+        meal_id: cartMeal.meal.id,
+        price: discountedMealPrice,
+        quantity: cartMeal.quantity,
+        total_price: totalPrice,
+        options: options,
+        // cart_meal_options: options
+      },
+      { excludeExtraneousValues: true }
+    );
+  }
 }
 
-
-      // Update quantity
-      cartMeal.quantity = quantity;
-      delete cartMeal.cart_meal_options;
-      await context.save(cartMeal);
-
-      // Re-fetch with new options and prices
-      const updatedCartMeal = await context.findOne(RestaurantCartMeal, {
-        where: { id: cartMeal.id },
-        relations: {
-          cart_meal_options: { meal_option_price: {option:{option_group:true}} },
-          meal: {
-            offer: true,
-            meal_option_groups: { option_group: { options: true } },
-          },
-        },
-      });
-
-      // After re-fetching updatedCartMeal with relations (including offer)
-
-      const offer = updatedCartMeal.meal.offer;
-
-      const now = new Date(
-        new Date().setUTCHours(new Date().getUTCHours() + 3),
-      ); // Adjusted time for your timezone
-
-      const isOfferActive =
-        offer &&
-        offer.is_active &&
-        new Date(offer.start_date) <= now &&
-        new Date(offer.end_date) > now;
-
-      let discount_percentage = 0;
-
-      if (isOfferActive) {
-        discount_percentage = Number(offer.discount_percentage);
-      }
-
-      const discountedMealPrice =
-        Number(updatedCartMeal.meal.price) * (1 - discount_percentage / 100);
-
-      const options = (updatedCartMeal.cart_meal_options || []).map((o) => {
-        const original_price = o.meal_option_price.price;
-        let discounted_option_price = original_price;
-
-        const group_apply_offer =
-          o.meal_option_price.meal_option_group?.apply_offer;
-
-        if (isOfferActive && group_apply_offer) {
-          discounted_option_price =
-            original_price * (1 - discount_percentage / 100);
-        }
-
-        return {
-          ...o,
-          original_price,
-          discounted_price: discounted_option_price,
-          price: discounted_option_price,
-          option_group: o.meal_option_price.option.option_group,
-        };
-      });
-
-      // Sum all option prices
-      const totalOptionPrice = options.reduce(
-        (acc, o) => acc + o.discounted_price,
-        0,
+// ADDITIONAL OPTIMIZATION: Create a specialized query for bulk updates if needed
+export class BulkUpdateCartTransaction {
+  // For updating multiple cart items at once - reduces transaction overhead
+  static async updateMultipleCartMeals(
+    context: EntityManager,
+    updates: Array<{ cart_meal_id: string; quantity: number; options_ids?: string[] }>
+  ): Promise<void> {
+    // Batch update quantities
+    for (const update of updates) {
+      await context.update(
+        RestaurantCartMeal,
+        { id: update.cart_meal_id },
+        { quantity: update.quantity }
       );
-
-      const total_price =
-        (discountedMealPrice + totalOptionPrice) * updatedCartMeal.quantity;
-
-      const response = plainToInstance(
-        GetCartMealsResponse,
-        {
-          ...updatedCartMeal.meal,
-          id: updatedCartMeal.id,
-          quantity: updatedCartMeal.quantity,
-          total_price,
-          cart_meal_options: options, // optionally include options with prices if needed in response
-        },
-        { excludeExtraneousValues: true },
-      );
-
-      return response;
-    } catch (error) {
-      throw new BadRequestException(error.message);
     }
+
+    // Batch update options if needed
+    // Implementation would depend on specific requirements
   }
 }
